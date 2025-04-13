@@ -24,18 +24,29 @@
             margin-bottom: 2rem;
         }
 
-        input[type="text"] {
-            padding: 0.5rem;
-            font-size: 1rem;
-            width: 100%;
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
             max-width: 500px;
-            border: 1px solid #d1d5db;
-            border-radius: 0.375rem;
-            margin-bottom: 0.5rem;
         }
 
-        button {
-            padding: 0.5rem 1rem;
+        .form-input {
+            padding: 0.5rem 0.75rem;
+            font-size: 1rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+        }
+
+        .form-checkbox {
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-button {
+            padding: 0.5rem 1.25rem;
             font-size: 1rem;
             background: #2563eb;
             color: white;
@@ -44,13 +55,25 @@
             cursor: pointer;
         }
 
-        button:hover {
+        .form-button:hover {
             background: #1d4ed8;
+        }
+
+        .info-message {
+            font-size: 0.95rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .info-fresh {
+            color: #047857;
+        }
+
+        .info-cached {
+            color: #6b7280;
         }
 
         .error {
             color: #dc2626;
-            margin-top: 0.5rem;
         }
 
         pre {
@@ -68,6 +91,12 @@
         .section h2 {
             font-size: 1.25rem;
             margin-bottom: 0.5rem;
+        }
+
+        .box {
+            background: #f3f4f6;
+            padding: 1rem;
+            border-radius: 0.375rem;
         }
     </style>
 

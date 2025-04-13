@@ -51,8 +51,8 @@ final readonly class BlockchainService
             hash: $block['id'],
             height: $block['height'],
             timestamp: $block['timestamp'],
+            totalTransactions: count($txsRes->json()),
             transactions: $txs,
-            totalTransactions: count($txsRes->json())
         );
     }
 
@@ -77,7 +77,7 @@ final readonly class BlockchainService
             vout: $tx['vout'],
             size: $tx['size'],
             weight: $tx['weight'],
-            fee: $tx['fee']
+            fee: $tx['fee'],
         );
     }
 }
