@@ -22,19 +22,16 @@ final readonly class DescribePromptResultAction
     {
         $type = is_numeric($input) ? 'block' : 'transaction';
 
-        // Check for cached result
         $existing = $this->repository->findByTypeAndInput($type, $input);
         if ($existing instanceof PromptResult) {
             return $existing;
         }
 
-        // Fetch blockchain data
         $data = $this->blockchain->getData($input);
         if (!$data instanceof BlockchainData) {
             return null;
         }
 
-        // Generate AI description
         $text = $this->openai->generateText($data, $type);
 
         return $this->repository->save($type, $input, $text, $data);

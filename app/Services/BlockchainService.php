@@ -14,7 +14,7 @@ final readonly class BlockchainService
     private const string BASE_URL = 'https://blockstream.info/api';
 
     public function __construct(
-        private HttpClient $http
+        private HttpClient $http,
     ) {
     }
 
