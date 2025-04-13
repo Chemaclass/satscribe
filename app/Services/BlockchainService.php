@@ -19,7 +19,7 @@ final readonly class BlockchainService
     ) {
     }
 
-    public function getData(string $input): ?BlockchainData
+    public function getBlockchainData(string $input): ?BlockchainData
     {
         return is_numeric($input)
             ? $this->getBlockTransfer((int) $input)
@@ -30,6 +30,7 @@ final readonly class BlockchainService
     {
         $hashRes = $this->http->get(self::BASE_URL."/block-height/{$height}");
         if (!$hashRes->successful()) {
+            // todo: log error
             return null;
         }
 
@@ -39,6 +40,7 @@ final readonly class BlockchainService
         $txsRes = $this->http->get(self::BASE_URL."/block/{$hash}/txs");
 
         if (!$blockRes->successful() || !$txsRes->successful()) {
+            // todo: log error
             return null;
         }
 
@@ -60,15 +62,15 @@ final readonly class BlockchainService
         $statusRes = $this->http->get(self::BASE_URL."/tx/{$txid}/status");
 
         if (!$txRes->successful() || !$statusRes->successful()) {
+            // todo: log error
             return null;
         }
 
         $tx = $txRes->json();
-        $status = $statusRes->json();
 
         return new TransactionData(
             txid: $tx['txid'],
-            status: $status,
+            status: $statusRes->json(),
             version: $tx['version'],
             locktime: $tx['locktime'],
             vin: $tx['vin'],
