@@ -9,11 +9,6 @@ use Illuminate\View\View;
 
 final class PromptResultController
 {
-    public function index(): View
-    {
-        return view('prompt-result.index');
-    }
-
     public function describe(Request $request, DescribePromptResultAction $action): View
     {
         $input = strtolower(trim($request->query('input')));
