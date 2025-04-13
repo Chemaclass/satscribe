@@ -15,6 +15,33 @@
             margin: auto;
         }
 
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #2563eb;
+            text-decoration: none;
+        }
+
+        .nav-links a {
+            margin-left: 1rem;
+            font-size: 0.95rem;
+            text-decoration: none;
+            color: #374151;
+        }
+
+        .nav-links a:hover {
+            color: #1d4ed8;
+        }
+
         h1 {
             font-size: 2rem;
             margin-bottom: 1rem;
@@ -111,6 +138,14 @@
     @stack('head')
 </head>
 <body>
+<header>
+    <a href="{{ url('/') }}" class="brand">Satscribe</a>
+    <nav class="nav-links">
+        <a href="{{ route('describe') }}">Describe</a>
+        <a href="{{ url('/history') }}">History</a>
+    </nav>
+</header>
+
 @yield('content')
 </body>
 </html>
