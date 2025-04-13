@@ -3,17 +3,18 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
+use App\Data\BlockchainData;
 use App\Models\PromptResult;
 use App\Repositories\PromptResultRepository;
 use App\Services\BlockchainService;
 use App\Services\OpenAIService;
 
-final class DescribePromptResultAction
+final readonly class DescribePromptResultAction
 {
     public function __construct(
-        private readonly BlockchainService $blockchain,
-        private readonly OpenAIService $openai,
-        private readonly PromptResultRepository $repository
+        private BlockchainService $blockchain,
+        private OpenAIService $openai,
+        private PromptResultRepository $repository
     ) {
     }
 
@@ -23,13 +24,13 @@ final class DescribePromptResultAction
 
         // Check for cached result
         $existing = $this->repository->findByTypeAndInput($type, $input);
-        if ($existing) {
+        if ($existing instanceof PromptResult) {
             return $existing;
         }
 
         // Fetch blockchain data
         $data = $this->blockchain->getData($input);
-        if (!$data) {
+        if (!$data instanceof BlockchainData) {
             return null;
         }
 

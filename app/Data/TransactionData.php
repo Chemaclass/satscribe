@@ -3,18 +3,18 @@ declare(strict_types=1);
 
 namespace App\Data;
 
-final class TransactionData implements BlockchainData
+final readonly class TransactionData implements BlockchainData
 {
     public function __construct(
-        public readonly string $txid,
-        public readonly array $status,
-        public readonly int $version,
-        public readonly int $locktime,
-        public readonly array $vin,
-        public readonly array $vout,
-        public readonly int $size,
-        public readonly int $weight,
-        public readonly int $fee
+        public string $txid,
+        public array $status,
+        public int $version,
+        public int $locktime,
+        public array $vin,
+        public array $vout,
+        public int $size,
+        public int $weight,
+        public int $fee
     ) {
     }
 

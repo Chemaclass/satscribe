@@ -9,12 +9,12 @@ use App\Data\BlockData;
 use App\Data\TransactionData;
 use Illuminate\Http\Client\Factory as HttpClient;
 
-final class BlockchainService
+final readonly class BlockchainService
 {
     private const string BASE_URL = 'https://blockstream.info/api';
 
     public function __construct(
-        private readonly HttpClient $http
+        private HttpClient $http
     ) {
     }
 

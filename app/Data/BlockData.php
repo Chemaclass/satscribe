@@ -3,13 +3,13 @@ declare(strict_types=1);
 
 namespace App\Data;
 
-final class BlockData implements BlockchainData
+final readonly class BlockData implements BlockchainData
 {
     public function __construct(
-        public readonly string $hash,
-        public readonly int $height,
-        public readonly int $timestamp,
-        public readonly array $transactions
+        public string $hash,
+        public int $height,
+        public int $timestamp,
+        public array $transactions
     ) {
     }
 

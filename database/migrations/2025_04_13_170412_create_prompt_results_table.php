@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-        Schema::create('prompt_results', function (Blueprint $table) {
+        Schema::create('prompt_results', function (Blueprint $table): void {
             $table->id();
             $table->string('type'); // 'block' or 'transaction'
             $table->string('input'); // block height or tx hash
