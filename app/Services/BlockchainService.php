@@ -4,11 +4,16 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\Http;
+use Illuminate\Http\Client\Factory as HttpClient;
 
 final class BlockchainService
 {
-    private const string  BASE_URL = 'https://blockstream.info/api';
+    private const string BASE_URL = 'https://blockstream.info/api';
+
+    public function __construct(
+        private readonly HttpClient $http,
+    ) {
+    }
 
     public function getData(string $input): ?array
     {
@@ -19,17 +24,15 @@ final class BlockchainService
 
     private function getBlockData(int $height): ?array
     {
-        $hashResponse = Http::get(self::BASE_URL."/block-height/{$height}");
-
+        $hashResponse = $this->http->get(self::BASE_URL."/block-height/{$height}");
         if (!$hashResponse->successful()) {
-            // TODO: Log this failure
             return null;
         }
 
         $hash = $hashResponse->body();
 
-        $blockResponse = Http::get(self::BASE_URL."/block/{$hash}");
-        $txResponse = Http::get(self::BASE_URL."/block/{$hash}/txs");
+        $blockResponse = $this->http->get(self::BASE_URL."/block/{$hash}");
+        $txResponse = $this->http->get(self::BASE_URL."/block/{$hash}/txs");
 
         if (!$blockResponse->successful() || !$txResponse->successful()) {
             return null;
@@ -43,8 +46,8 @@ final class BlockchainService
 
     private function getTransactionData(string $txid): ?array
     {
-        $txResponse = Http::get(self::BASE_URL."/tx/{$txid}");
-        $statusResponse = Http::get(self::BASE_URL."/tx/{$txid}/status");
+        $txResponse = $this->http->get(self::BASE_URL."/tx/{$txid}");
+        $statusResponse = $this->http->get(self::BASE_URL."/tx/{$txid}/status");
 
         if (!$txResponse->successful() || !$statusResponse->successful()) {
             return null;
