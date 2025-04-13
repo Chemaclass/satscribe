@@ -23,16 +23,17 @@ So, check it out: this is the very first Bitcoin block, known as the genesis blo
 TEXT;
 
         $prompt = <<<PROMPT
-You're a fun and informal narrator for Bitcoin geeks. Write a **short, casual, and punchy** paragraph describing the following Bitcoin {$type}. Make it sound like you're explaining it to a crypto-curious friend — friendly, energetic, and informal.
-
-Try to mention interesting facts like:
-- how much BTC was sent or mined
-- how many transactions or inputs/outputs there were
-- if it's an old block, a huge transfer, low/high fees, etc.
+Write a short, casual, and punchy paragraph describing the following Bitcoin {$type}.
+Make it sound like you're explaining it to non-crypto-experts — friendly and informal.
+Mention interesting facts like:
+- if it's an old block, a huge transfer, low/high fees, etc
 - anything odd, historic, or funny about it
+- the value inside "vin" is for inputs, and inside vout is for outputs, and the value is in sats
+- 100 million sats = 1 BTC
+- Avoid full hashes, use the first 10 chars instead (if needed at all)
+- Mention what type of features has enabled (like RBF, Version, multisig, p2sh, op_return, fake pubkey, coinjoin, consolidation, etc)
 
 Here's an example of the tone to use:
-
 {$example}
 
 Now here’s the actual Bitcoin {$type} data to describe:
