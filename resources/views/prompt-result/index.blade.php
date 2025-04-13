@@ -10,12 +10,12 @@
 
     <form method="GET" action="{{ route('describe') }}">
         <div class="form-group">
-            <label for="input" style="font-weight: 500;">Transaction ID or Block Height</label>
+            <label for="q" style="font-weight: 500;">Transaction ID or Block Height</label>
             <input
                 type="text"
-                id="input"
-                name="input"
-                value="{{ old('input', $input ?? '') }}"
+                id="q"
+                name="q"
+                value="{{ old('q', $q ?? '') }}"
                 placeholder="e.g. 4b0d... or 840000"
                 class="form-input"
                 autofocus
@@ -38,7 +38,7 @@
                 🚀 Describe It
             </button>
 
-            @error('input')
+            @error('q')
             <div class="error">{{ $message }}</div>
             @enderror
         </div>

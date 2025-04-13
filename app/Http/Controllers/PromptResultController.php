@@ -19,23 +19,23 @@ final class PromptResultController
 
     public function describe(Request $request, DescribePromptResultAction $action): View
     {
-        $input = strtolower(trim($request->query('input')));
+        $q = strtolower(trim($request->query('q')));
         $refresh = filter_var($request->query('refresh'), FILTER_VALIDATE_BOOL);
 
-        if ($input === '' || $input === '0') {
+        if ($q === '' || $q === '0') {
             return view('prompt-result.index');
         }
 
-        $response = $action->execute($input, $refresh);
+        $response = $action->execute($q, $refresh);
 
         if (!$response instanceof DescribedPrompt) {
             return view('prompt-result.index')
-                ->withErrors(['input' => 'Could not fetch blockchain data.']);
+                ->withErrors(['q' => 'Could not fetch blockchain data.']);
         }
 
         return view('prompt-result.index', [
             'result' => $response->result,
-            'input' => $input,
+            'q' => $q,
             'refreshed' => $refresh,
             'isFresh' => $response->isFresh,
         ]);
