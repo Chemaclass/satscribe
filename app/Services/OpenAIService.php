@@ -6,11 +6,13 @@ namespace App\Services;
 
 use App\Data\BlockchainData;
 use Illuminate\Http\Client\Factory as HttpClient;
+use Psr\Log\LoggerInterface;
 
 final readonly class OpenAIService
 {
     public function __construct(
-        private HttpClient $http
+        private HttpClient $http,
+        private LoggerInterface $logger,
     ) {
     }
 
@@ -18,12 +20,9 @@ final readonly class OpenAIService
     {
         $json = json_encode($data->toArray(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
 
-        $example = <<<TEXT
-So, check it out: this is the very first Bitcoin block, known as the genesis block! Mined on January 3, 2009, it has a unique hash starting with a ton of zeros, which is pretty cool. It contains a single transaction that rewards the miner with 50 BTC, marking the birth of the Bitcoin era. The miner didn’t pay any transaction fees because, well, it's the first block! It’s a significant piece of crypto history, packed into just 134 bytes.
-TEXT;
-
         $prompt = <<<PROMPT
 Write a short, casual, and punchy paragraph describing the following Bitcoin {$type}.
+Split in two paragraph if it has more than 60 words.
 Make it sound like you're explaining it to non-crypto-experts — friendly and informal.
 Mention interesting facts like:
 - if it's an old block, a huge transfer, low/high fees, etc
@@ -32,9 +31,6 @@ Mention interesting facts like:
 - 100 million sats = 1 BTC
 - Avoid full hashes, use the first 10 chars instead (if needed at all)
 - Mention what type of features has enabled (like RBF, Version, multisig, p2sh, op_return, fake pubkey, coinjoin, consolidation, etc)
-
-Here's an example of the tone to use:
-{$example}
 
 Now here’s the actual Bitcoin {$type} data to describe:
 {$json}
@@ -48,6 +44,10 @@ PROMPT;
                 ],
             ]);
 
-        return $response->json('choices.0.message.content');
+        $text = $response->json('choices.0.message.content');
+
+        $this->logger->info("OpenAI generated description:\n".$text);
+
+        return $text;
     }
 }
