@@ -13,9 +13,11 @@ final class PromptResult extends Model
         'input',
         'ai_response',
         'raw_data',
+        'force_refresh',
     ];
 
     protected $casts = [
         'raw_data' => 'array',
+        'force_refresh' => 'boolean',
     ];
 }
