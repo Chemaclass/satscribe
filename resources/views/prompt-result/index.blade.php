@@ -46,7 +46,7 @@
 
     @if(isset($isFresh))
         <div class="info-message {{ $isFresh ? 'info-fresh' : 'info-cached' }}">
-            {{ $isFresh ? '✨ Freshly generated using live blockchain data and OpenAI.' : '💾 Loaded from previous analysis stored in the database.' }}
+            {{ $isFresh ? '✨ Freshly generated using live blockchain data and AI.' : '💾 Loaded from previous analysis stored in the database.' }}
         </div>
     @endif
 

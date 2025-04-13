@@ -7,10 +7,12 @@
 ## 🚀 Features
 
 - 🔎 Input a **TXID** or **block height**
-- 🧠 AI-generated paragraph using GPT-4 or GPT-3.5
+- 🧠 AI-generated paragraph using GPT-4
 - ⛓️ Uses the [Blockstream.info API](https://github.com/Blockstream/esplora/blob/master/API.md) for Bitcoin data
 - 💾 Saves each description to the database
 - 🗂️ View and paginate all previous descriptions
+
+![Satscribe Demo](docs/demo-homepage.png)
 
 ---
 
@@ -18,8 +20,8 @@
 
 - PHP 8.3+
 - Composer
-- MySQL or SQLite
-- Laravel 10+
+- SQLite
+- Laravel 12+
 - OpenAI API Key
 
 ---
@@ -37,13 +39,10 @@ php artisan key:generate
 Then configure your .env
 
 ```dotenv
-DB_CONNECTION=mysql
-DB_DATABASE=satscribe
-DB_USERNAME=root
-DB_PASSWORD=
+DB_CONNECTION=sqlite
 
 OPENAI_API_KEY=sk-...
-OPENAI_MODEL=gpt-4
+OPENAI_MODEL=gpt-4o-mini
 ```
 And migrate the DB
 
