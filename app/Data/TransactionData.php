@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Data;
@@ -7,14 +8,17 @@ final readonly class TransactionData implements BlockchainData
 {
     public function __construct(
         public string $txid,
-        public array $status,
         public int $version,
         public int $locktime,
         public array $vin,
         public array $vout,
         public int $size,
         public int $weight,
-        public int $fee
+        public int $fee,
+        public bool $confirmed,
+        public ?int $blockHeight,
+        public ?string $blockHash,
+        public ?int $blockTime,
     ) {
     }
 
@@ -32,7 +36,6 @@ final readonly class TransactionData implements BlockchainData
     {
         return [
             'txid' => $this->txid,
-            'status' => $this->status,
             'version' => $this->version,
             'locktime' => $this->locktime,
             'vin' => $this->vin,
@@ -40,6 +43,12 @@ final readonly class TransactionData implements BlockchainData
             'size' => $this->size,
             'weight' => $this->weight,
             'fee' => $this->fee,
+            'status' => [
+                'confirmed' => $this->confirmed,
+                'block_height' => $this->blockHeight,
+                'block_hash' => $this->blockHash,
+                'block_time' => $this->blockTime,
+            ],
         ];
     }
 }

@@ -91,7 +91,6 @@ final readonly class BlockchainService
 
         return new TransactionData(
             txid: $tx['txid'],
-            status: $status,
             version: $tx['version'],
             locktime: $tx['locktime'],
             vin: $tx['vin'],
@@ -99,6 +98,10 @@ final readonly class BlockchainService
             size: $tx['size'],
             weight: $tx['weight'],
             fee: $tx['fee'],
+            confirmed: $status['confirmed'],
+            blockHeight: $status['block_height'] ?? null,
+            blockHash: $status['block_hash'] ?? null,
+            blockTime: $status['block_time'] ?? null,
         );
     }
 }
