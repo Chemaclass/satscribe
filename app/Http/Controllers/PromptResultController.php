@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\PromptResult;
@@ -8,49 +9,53 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
-final class PromptResultController extends Controller
+final class PromptResultController
 {
     public function index(): View
     {
-        return view('describe');
+        return view('promptResult.index');
     }
-
-    public function describe(Request $request, BlockchainService $btc, OpenAIService $ai): RedirectResponse|View
+    public function describe(Request $request, BlockchainService $btc, OpenAIService $ai): View
     {
-        $input = strtolower(trim($request->input('input')));
+        $input = strtolower(trim($request->query('input')));
         $type = is_numeric($input) ? 'block' : 'transaction';
 
-        // Check if an existing AI result already exists
+        if (!$input) {
+            return view('promptResult.index'); // Just render empty form
+        }
+
+        // Try cache first
         $existing = PromptResult::where('type', $type)->where('input', $input)->first();
-        if ($existing !== null) {
-            return $this->renderResultView($existing->ai_response, $existing->raw_data);
+        if ($existing) {
+            return $this->renderResultView($existing->ai_response, $existing->raw_data, $input);
         }
 
         // Fetch blockchain data
-        $blockchainData = $btc->getData($input);
-        if (empty($blockchainData)) {
-            return back()->withErrors(['input' => 'Could not fetch blockchain data.']);
+        $data = $btc->getData($input);
+        if (empty($data)) {
+            return view('promptResult.index')->withErrors(['input' => 'Could not fetch blockchain data.']);
         }
 
-        // Generate the AI text
-        $generatedText = $ai->generateDescription($blockchainData, $type);
+        // Generate response
+        $text = $ai->generateDescription($data, $type);
 
-        // Save to database
-        $result = PromptResult::create([
+        // Save
+        PromptResult::create([
             'type' => $type,
             'input' => $input,
-            'ai_response' => $generatedText,
-            'raw_data' => $blockchainData,
+            'ai_response' => $text,
+            'raw_data' => $data,
         ]);
 
-        return $this->renderResultView($result->ai_response, $result->raw_data);
+        return $this->renderResultView($text, $data, $input);
     }
 
-    private function renderResultView(string $text, array $data): View
+    private function renderResultView(string $text, array $data, string $input): View
     {
-        return view('describe', [
-            'generatedText' => $text,
+        return view('promptResult.index', [
+            'description' => $text,
             'data' => $data,
+            'input' => $input,
         ]);
     }
 }
