@@ -59,7 +59,7 @@
         <div class="section">
             <h2>🧠 AI Summary</h2>
             <div class="box">
-                {!! nl2br(e($result->ai_response)) !!}
+                {!! Str::markdown($result->ai_response) !!}
             </div>
         </div>
 

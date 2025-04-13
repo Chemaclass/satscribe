@@ -22,15 +22,17 @@ final readonly class OpenAIService
 
         $prompt = <<<PROMPT
 Write a short, casual, and punchy paragraph describing the following Bitcoin {$type}.
-Split in two paragraph if it has more than 60 words.
+Split in two paragraph if it has more than 50 words.
 Make it sound like you're explaining it to non-crypto-experts — friendly and informal.
+Avoid saying obvious or trivial information (eg "we've got a tx here with the ID...")
+
 Mention interesting facts like:
-- if it's an old block, a huge transfer, low/high fees, etc
 - anything odd, historic, or funny about it
 - the value inside "vin" is for inputs, and inside vout is for outputs, and the value is in sats
 - 100 million sats = 1 BTC
 - Avoid full hashes, use the first 10 chars instead (if needed at all)
-- Mention what type of features has enabled (like RBF, Version, multisig, p2sh, op_return, fake pubkey, coinjoin, consolidation, etc)
+- Mention what type of features has enabled (eg: RBF, Version, multisig, p2sh, OP_RETURN, coin join, consolidation, etc)
+- use Markdown format to remark the key points (style the response!)
 
 Now here’s the actual Bitcoin {$type} data to describe:
 {$json}
