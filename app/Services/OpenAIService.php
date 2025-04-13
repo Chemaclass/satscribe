@@ -3,11 +3,12 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Data\BlockchainData;
 use Illuminate\Support\Facades\Http;
 
 final class OpenAIService
 {
-    public function generateDescription(array $data, string $type): ?string
+    public function generateText(BlockchainData $data, string $type): ?string
     {
         $prompt = "Write a paragraph describing this Bitcoin $type:\n\n".json_encode($data, JSON_PRETTY_PRINT);
 

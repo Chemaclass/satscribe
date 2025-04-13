@@ -25,7 +25,10 @@ final class PromptResultController
         }
 
         // Try cache first
-        $existing = PromptResult::where('type', $type)->where('input', $input)->first();
+        $existing = PromptResult::where('type', $type)
+            ->where('input', $input)
+            ->first();
+
         if ($existing) {
             return $this->renderResultView($existing->ai_response, $existing->raw_data, $input);
         }
@@ -37,7 +40,7 @@ final class PromptResultController
         }
 
         // Generate response
-        $text = $ai->generateDescription($data, $type);
+        $text = $ai->generateText($data, $type);
 
         // Save
         PromptResult::create([
@@ -47,7 +50,7 @@ final class PromptResultController
             'raw_data' => $data,
         ]);
 
-        return $this->renderResultView($text, $data, $input);
+        return $this->renderResultView($text, $data->toArray(), $input);
     }
 
     private function renderResultView(string $text, array $data, string $input): View
