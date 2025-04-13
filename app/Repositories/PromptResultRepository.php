@@ -24,11 +24,18 @@ final class PromptResultRepository
 
     public function save(string $type, string $input, string $aiResponse, BlockchainData $data): PromptResult
     {
+        $raw = $data->toArray();
+
+        $forceRefresh = $type === 'transaction'
+            && isset($raw['status']['confirmed'])
+            && $raw['status']['confirmed'] === false;
+
         return PromptResult::create([
             'type' => $type,
             'input' => $input,
             'ai_response' => $aiResponse,
-            'raw_data' => $data->toArray(),
+            'raw_data' => $raw,
+            'force_refresh' => $forceRefresh,
         ]);
     }
 }

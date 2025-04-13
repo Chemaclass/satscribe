@@ -44,6 +44,12 @@
         </div>
     </form>
 
+    @if($result->force_refresh)
+        <p style="color: #b45309; font-size: 0.9rem;">
+            ⚠️ This transaction is unconfirmed. You might want to refresh later to get the latest status.
+        </p>
+    @endif
+
     @if(isset($isFresh))
         <div class="info-message {{ $isFresh ? 'info-fresh' : 'info-cached' }}">
             {{ $isFresh ? '✨ Freshly generated using live blockchain data and OpenAI.' : '💾 Loaded from previous analysis stored in the database.' }}

@@ -27,7 +27,7 @@ final readonly class DescribePromptResultAction
 
         if (!$refresh) {
             $cached = $this->repository->findByTypeAndInput($type, $input);
-            if ($cached instanceof PromptResult) {
+            if ($cached instanceof PromptResult && !$cached->force_refresh) {
                 return new DescribedPrompt($cached, isFresh: false);
             }
         }
