@@ -8,6 +8,7 @@ use App\Data\BlockchainData;
 use App\Data\BlockData;
 use App\Data\TransactionData;
 use Illuminate\Http\Client\Factory as HttpClient;
+use Psr\Log\LoggerInterface;
 
 final readonly class BlockchainService
 {
@@ -16,6 +17,7 @@ final readonly class BlockchainService
 
     public function __construct(
         private HttpClient $http,
+        private LoggerInterface $logger,
     ) {
     }
 
@@ -30,7 +32,10 @@ final readonly class BlockchainService
     {
         $hashRes = $this->http->get(self::BASE_URL."/block-height/{$height}");
         if (!$hashRes->successful()) {
-            // todo: log error
+            $this->logger->warning('Block height lookup failed', [
+                'height' => $height,
+                'response' => $hashRes->body(),
+            ]);
             return null;
         }
 
@@ -40,12 +45,15 @@ final readonly class BlockchainService
         $txsRes = $this->http->get(self::BASE_URL."/block/{$hash}/txs");
 
         if (!$blockRes->successful() || !$txsRes->successful()) {
-            // todo: log error
+            $this->logger->warning('Block or transactions fetch failed', ['hash' => $hash]);
             return null;
         }
 
         $block = $blockRes->json();
         $txs = array_slice($txsRes->json(), 0, self::TX_LIMIT);
+
+        $this->logger->info('Fetched block data', ['block' => $block]);
+        $this->logger->info('Fetched block transactions', ['transactions' => $txs]);
 
         return new BlockData(
             hash: $block['id'],
@@ -62,15 +70,19 @@ final readonly class BlockchainService
         $statusRes = $this->http->get(self::BASE_URL."/tx/{$txid}/status");
 
         if (!$txRes->successful() || !$statusRes->successful()) {
-            // todo: log error
+            $this->logger->warning('Transaction lookup failed', ['txid' => $txid]);
             return null;
         }
 
         $tx = $txRes->json();
+        $status = $statusRes->json();
+
+        $this->logger->info('Fetched transaction data', ['txid' => $txid, 'data' => $tx]);
+        $this->logger->info('Fetched transaction status', ['txid' => $txid, 'status' => $status]);
 
         return new TransactionData(
             txid: $tx['txid'],
-            status: $statusRes->json(),
+            status: $status,
             version: $tx['version'],
             locktime: $tx['locktime'],
             vin: $tx['vin'],

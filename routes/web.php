@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\PromptResultController;
-use App\Models\PromptResult;
 use Illuminate\Support\Facades\Route;
 
 Route::redirect('/','/describe');
