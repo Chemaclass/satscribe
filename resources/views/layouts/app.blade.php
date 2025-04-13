@@ -152,6 +152,10 @@
             padding: 1rem;
             border-radius: 0.375rem;
         }
+        .box p, .box br {
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
 
         .fa-bitcoin-sign:hover {
             color: orange;

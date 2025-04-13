@@ -59,7 +59,7 @@
         <div class="section">
             <h2>🧠 AI Summary</h2>
             <div class="box">
-                <p>{{ $result->ai_response }}</p>
+                {!! nl2br(e($result->ai_response)) !!}
             </div>
         </div>
 
