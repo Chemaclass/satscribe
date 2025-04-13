@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
   <component name="ChangeListManager">
     <list default="true" id="538f3437-2c32-4d32-9dd8-3ae88ef34c77" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
@@ -43,6 +46,10 @@
     "RunOnceActivity.git.unshallow": "true",
     "git-widget-placeholder": "main",
     "last_opened_file_path": "/Users/chema/Code/Chemaclass/satscribe",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
     "vue.rearranger.settings.migration": "true"
   }
@@ -63,7 +70,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1744560173207</updated>
-      <workItem from="1744560174478" duration="138000" />
+      <workItem from="1744560174478" duration="852000" />
     </task>
     <servers />
   </component>
