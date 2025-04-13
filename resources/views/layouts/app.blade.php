@@ -42,6 +42,25 @@
             color: #1d4ed8;
         }
 
+        footer {
+            border-top: 1px solid #e5e7eb;
+            margin-top: 3rem;
+            padding-top: 1rem;
+            font-size: 0.9rem;
+            text-align: center;
+            color: #6b7280;
+        }
+
+        footer a {
+            color: #2563eb;
+            text-decoration: none;
+            margin-left: 0.5rem;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
         h1 {
             font-size: 2rem;
             margin-bottom: 1rem;
@@ -133,7 +152,16 @@
             padding: 1rem;
             border-radius: 0.375rem;
         }
+
+        .fa-bitcoin-sign:hover {
+            color: orange;
+        }
+
+        .fa-bitcoin-sign {
+            color: darkorange;
+        }
     </style>
+    <script src="https://kit.fontawesome.com/cfd779d106.js" crossorigin="anonymous"></script>
 
     @stack('head')
 </head>
@@ -147,5 +175,10 @@
 </header>
 
 @yield('content')
+
+<footer>
+    &copy;{{ date('Y') }}<a href="https://chemaclass.com/" target="_blank">Chema</a>
+    —<a target="_blank" href="https://getalby.com/p/chemaclass" style="color: currentColor">Leave a tip <i class="fa-solid fa-bitcoin-sign"></i></a>
+</footer>
 </body>
 </html>
