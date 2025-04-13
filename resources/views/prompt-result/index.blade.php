@@ -17,7 +17,9 @@
         <button type="submit">Satscribe</button>
         @error('input') <div class="error">{{ $message }}</div> @enderror
     </form>
-
+    @if ($refreshed ?? false)
+        <p style="color: green;">ℹ️ Fresh result generated.</p>
+    @endif
     @isset($result)
         <div class="section">
             <h2>🧠 AI Description</h2>

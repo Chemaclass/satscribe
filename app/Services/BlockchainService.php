@@ -12,6 +12,7 @@ use Illuminate\Http\Client\Factory as HttpClient;
 final readonly class BlockchainService
 {
     private const string BASE_URL = 'https://blockstream.info/api';
+    private const int TX_LIMIT = 5;
 
     public function __construct(
         private HttpClient $http,
@@ -42,13 +43,14 @@ final readonly class BlockchainService
         }
 
         $block = $blockRes->json();
-        $txs = array_slice($txsRes->json(), 0, 5);
+        $txs = array_slice($txsRes->json(), 0, self::TX_LIMIT);
 
         return new BlockData(
             hash: $block['id'],
             height: $block['height'],
             timestamp: $block['timestamp'],
-            transactions: $txs
+            transactions: $txs,
+            totalTransactions: count($txsRes->json())
         );
     }
 

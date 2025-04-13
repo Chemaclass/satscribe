@@ -7,10 +7,10 @@ namespace App\Services;
 use App\Data\BlockchainData;
 use Illuminate\Http\Client\Factory as HttpClient;
 
-final class OpenAIService
+final readonly class OpenAIService
 {
     public function __construct(
-        private readonly HttpClient $http
+        private HttpClient $http
     ) {
     }
 

@@ -9,7 +9,8 @@ final readonly class BlockData implements BlockchainData
         public string $hash,
         public int $height,
         public int $timestamp,
-        public array $transactions
+        public array $transactions,
+        public int $totalTransactions,
     ) {
     }
 
@@ -30,6 +31,7 @@ final readonly class BlockData implements BlockchainData
             'height' => $this->height,
             'timestamp' => $this->timestamp,
             'transactions' => $this->transactions,
+            'totalTransactions' => $this->totalTransactions,
         ];
     }
 }

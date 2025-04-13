@@ -15,6 +15,13 @@ final class PromptResultRepository
             ->first();
     }
 
+    public function deleteByTypeAndInput(string $type, string $input): void
+    {
+        PromptResult::where('type', $type)
+            ->where('input', $input)
+            ->delete();
+    }
+
     public function save(string $type, string $input, string $aiResponse, BlockchainData $data): PromptResult
     {
         return PromptResult::create([
