@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions;
 
 use App\Data\BlockchainData;
+use App\Data\DescribedPrompt;
 use App\Models\PromptResult;
 use App\Repositories\PromptResultRepository;
 use App\Services\BlockchainService;
@@ -20,18 +21,20 @@ final readonly class DescribePromptResultAction
     ) {
     }
 
-    public function execute(string $input, bool $refresh = false): ?PromptResult
+    public function execute(string $input, bool $refresh = false): ?DescribedPrompt
     {
         $type = is_numeric($input) ? 'block' : 'transaction';
 
         if (!$refresh) {
             $cached = $this->repository->findByTypeAndInput($type, $input);
             if ($cached instanceof PromptResult) {
-                return $cached;
+                return new DescribedPrompt($cached, false);
             }
         }
 
-        return $this->getFreshResult($input, $type, $refresh);
+        $fresh = $this->getFreshResult($input, $type, $refresh);
+
+        return $fresh ? new DescribedPrompt($fresh, true) : null;
     }
 
     private function getFreshResult(string $input, string $type, bool $refresh): ?PromptResult

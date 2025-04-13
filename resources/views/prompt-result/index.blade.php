@@ -17,9 +17,13 @@
         <button type="submit">Satscribe</button>
         @error('input') <div class="error">{{ $message }}</div> @enderror
     </form>
-    @if ($refreshed ?? false)
-        <p style="color: green;">ℹ️ Fresh result generated.</p>
+
+    @if(isset($isFresh))
+        <p style="color: {{ $isFresh ? 'green' : '#6b7280' }};">
+            {{ $isFresh ? '✨ Freshly generated from the blockchain and OpenAI.' : '💾 Loaded from previous result in the database.' }}
+        </p>
     @endif
+
     @isset($result)
         <div class="section">
             <h2>🧠 AI Description</h2>

@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\PromptResult;
 use App\Actions\DescribePromptResultAction;
+use App\Data\DescribedPrompt;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 final class PromptResultController
 {
+
     public function describe(Request $request, DescribePromptResultAction $action): View
     {
         $input = strtolower(trim($request->query('input')));
@@ -18,17 +19,18 @@ final class PromptResultController
             return view('prompt-result.index');
         }
 
-        $result = $action->execute($input, $refresh);
+        $response = $action->execute($input, $refresh);
 
-        if (!$result instanceof PromptResult) {
+        if (!$response instanceof DescribedPrompt) {
             return view('prompt-result.index')
                 ->withErrors(['input' => 'Could not fetch blockchain data.']);
         }
 
         return view('prompt-result.index', [
-            'result' => $result,
+            'result' => $response->result,
             'input' => $input,
             'refreshed' => $refresh,
+            'isFresh' => $response->isFresh,
         ]);
     }
 }
