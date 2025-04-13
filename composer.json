@@ -1,9 +1,9 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "laravel/laravel",
+    "name": "chemaclass/satscribe",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
-    "keywords": ["laravel", "framework"],
+    "description": "AI-powered Bitcoin transaction and block describer.",
+    "keywords": ["laravel", "bitcoin", "openai", "blockchain", "gpt"],
     "license": "MIT",
     "require": {
         "php": "^8.3",
