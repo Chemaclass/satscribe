@@ -14,10 +14,10 @@
 
 @error('input') <p style="color:red">{{ $message }}</p> @enderror
 
-@isset($description)
+@isset($generatedText)
     <hr>
     <h2>AI Description:</h2>
-    <p>{{ $description }}</p>
+    <p>{{ $generatedText }}</p>
 
     <hr>
     <h3>Raw Blockchain Data:</h3>

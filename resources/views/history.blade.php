@@ -3,7 +3,7 @@
     @foreach($descriptions as $desc)
         <li>
             <strong>{{ ucfirst($desc->type) }}:</strong> {{ $desc->input }}<br>
-            {{ $desc->description }}<br>
+            {{ $desc->ai_response }}<br>
             <small>{{ $desc->created_at->diffForHumans() }}</small>
             <hr>
         </li>

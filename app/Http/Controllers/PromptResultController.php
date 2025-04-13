@@ -23,7 +23,7 @@ final class PromptResultController extends Controller
         // Check if an existing AI result already exists
         $existing = PromptResult::where('type', $type)->where('input', $input)->first();
         if ($existing !== null) {
-            return $this->renderResultView($existing->generated_text, $existing->raw_data);
+            return $this->renderResultView($existing->ai_response, $existing->raw_data);
         }
 
         // Fetch blockchain data
@@ -39,17 +39,17 @@ final class PromptResultController extends Controller
         $result = PromptResult::create([
             'type' => $type,
             'input' => $input,
-            'generated_text' => $generatedText,
+            'ai_response' => $generatedText,
             'raw_data' => $blockchainData,
         ]);
 
-        return $this->renderResultView($result->generated_text, $result->raw_data);
+        return $this->renderResultView($result->ai_response, $result->raw_data);
     }
 
     private function renderResultView(string $text, array $data): View
     {
         return view('describe', [
-            'description' => $text,
+            'generatedText' => $text,
             'data' => $data,
         ]);
     }

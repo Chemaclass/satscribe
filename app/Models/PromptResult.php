@@ -11,7 +11,7 @@ final class PromptResult extends Model
     protected $fillable = [
         'type',
         'input',
-        'description',
+        'ai_response',
         'raw_data',
     ];
 
