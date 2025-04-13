@@ -4,16 +4,18 @@ namespace App\Http\Controllers;
 
 use App\Services\BlockchainService;
 use App\Services\OpenAIService;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 final class DescribeController extends Controller
 {
-    public function index()
+    public function index(): View
     {
         return view('describe');
     }
 
-    public function describe(Request $request, BlockchainService $btc, OpenAIService $ai)
+    public function describe(Request $request, BlockchainService $btc, OpenAIService $ai): RedirectResponse|View
     {
         $input = trim($request->input('input'));
         $type = is_numeric($input) ? 'block' : 'transaction';
@@ -25,6 +27,9 @@ final class DescribeController extends Controller
 
         $description = $ai->generateDescription($data, $type);
 
-        return view('describe', compact('description', 'data'));
+        return view('describe', [
+            'description' => $description,
+            'data' => $data,
+        ]);
     }
 }
