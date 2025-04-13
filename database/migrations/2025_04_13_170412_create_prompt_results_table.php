@@ -9,11 +9,11 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-        Schema::create('descriptions', function (Blueprint $table) {
+        Schema::create('prompt_results', function (Blueprint $table) {
             $table->id();
             $table->string('type'); // 'block' or 'transaction'
             $table->string('input'); // block height or tx hash
-            $table->text('description'); // AI-generated paragraph
+            $table->text('ai_response'); // AI-generated paragraph
             $table->json('raw_data'); // optional, stores the raw JSON from the API
             $table->timestamps();
         });
@@ -21,6 +21,6 @@ return new class extends Migration {
 
     public function down(): void
     {
-        Schema::dropIfExists('descriptions');
+        Schema::dropIfExists('prompt_results');
     }
 };
