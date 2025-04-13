@@ -18,15 +18,15 @@
         @error('input') <div class="error">{{ $message }}</div> @enderror
     </form>
 
-    @isset($description)
+    @isset($result)
         <div class="section">
             <h2>🧠 AI Description</h2>
-            <p>{{ $description }}</p>
+            <p>{{ $result->ai_response }}</p>
         </div>
 
         <div class="section">
             <h2>🔍 Raw Blockchain Data</h2>
-            <pre>{{ json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) }}</pre>
+            <pre>{{ json_encode($result->raw_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) }}</pre>
         </div>
     @endisset
 @endsection

@@ -28,8 +28,7 @@ final class PromptResultController
         }
 
         return view('prompt-result.index', [
-            'description' => $result['description'],
-            'data' => $result['data'],
+            'result' => $result,
             'input' => $input,
         ]);
     }

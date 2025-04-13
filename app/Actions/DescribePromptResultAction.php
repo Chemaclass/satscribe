@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
+use App\Models\PromptResult;
 use App\Repositories\PromptResultRepository;
 use App\Services\BlockchainService;
 use App\Services\OpenAIService;
@@ -16,20 +17,14 @@ final class DescribePromptResultAction
     ) {
     }
 
-    /**
-     * @return array{description: string, data: array}
-     */
-    public function execute(string $input): ?array
+    public function execute(string $input): ?PromptResult
     {
         $type = is_numeric($input) ? 'block' : 'transaction';
 
         // Check for cached result
         $existing = $this->repository->findByTypeAndInput($type, $input);
         if ($existing) {
-            return [
-                'description' => $existing->ai_response,
-                'data' => $existing->raw_data,
-            ];
+            return $existing;
         }
 
         // Fetch blockchain data
@@ -41,12 +36,6 @@ final class DescribePromptResultAction
         // Generate AI description
         $text = $this->openai->generateText($data, $type);
 
-        // Save result
-        $this->repository->save($type, $input, $text, $data);
-
-        return [
-            'description' => $text,
-            'data' => $data->toArray(),
-        ];
+        return $this->repository->save($type, $input, $text, $data);
     }
 }
