@@ -2,7 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\PromptResult;
+use App\Data\BlockchainData;
+use App\Repositories\PromptResultRepository;
 use App\Services\BlockchainService;
 use App\Services\OpenAIService;
 use Illuminate\Http\Request;
@@ -10,45 +11,43 @@ use Illuminate\View\View;
 
 final class PromptResultController
 {
+    public function __construct(
+        private readonly PromptResultRepository $repository,
+        private readonly BlockchainService $btc,
+        private readonly OpenAIService $ai,
+    ) {}
+
     public function index(): View
     {
         return view('prompt-result.index');
     }
 
-    public function describe(Request $request, BlockchainService $btc, OpenAIService $ai): View
+    public function describe(Request $request): View
     {
         $input = strtolower(trim($request->query('input')));
         $type = is_numeric($input) ? 'block' : 'transaction';
 
         if (!$input) {
-            return view('prompt-result.index'); // Just render empty form
+            return view('prompt-result.index');
         }
 
-        // Try cache first
-        $existing = PromptResult::where('type', $type)
-            ->where('input', $input)
-            ->first();
-
+        // Check cached result
+        $existing = $this->repository->findByTypeAndInput($type, $input);
         if ($existing) {
             return $this->renderResultView($existing->ai_response, $existing->raw_data, $input);
         }
 
         // Fetch blockchain data
-        $data = $btc->getData($input);
-        if (empty($data)) {
+        $data = $this->btc->getData($input);
+        if (!$data) {
             return view('prompt-result.index')->withErrors(['input' => 'Could not fetch blockchain data.']);
         }
 
-        // Generate response
-        $text = $ai->generateText($data, $type);
+        // Generate AI response
+        $text = $this->ai->generateText($data, $type);
 
-        // Save
-        PromptResult::create([
-            'type' => $type,
-            'input' => $input,
-            'ai_response' => $text,
-            'raw_data' => $data,
-        ]);
+        // Save to DB
+        $this->repository->save($type, $input, $text, $data);
 
         return $this->renderResultView($text, $data->toArray(), $input);
     }
