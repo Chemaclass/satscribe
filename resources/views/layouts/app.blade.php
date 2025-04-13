@@ -24,6 +24,14 @@
             margin-bottom: 2rem;
         }
 
+        nav[role="navigation"] svg {
+            width: 1rem;
+            height: 1rem;
+            margin: 0 0.2rem;
+            vertical-align: middle;
+            fill: currentColor;
+        }
+
         .form-group {
             display: flex;
             flex-direction: column;
