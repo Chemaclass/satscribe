@@ -28,12 +28,12 @@ Consider:
 - Avoid saying repetitive information (eg "we've got a tx here with the ID...")
 - The value inside "vin" is for inputs, and inside vout is for outputs, and the value is in sats
 - 100 million sats = 1 BTC
-- use Markdown format to remark the key points (style the response!)
 - Avoid full hashes, use the first 10 chars instead (if needed at all)
 
 Mention interesting facts like:
 - anything odd, historic, or funny about it
-- Mention what type of features are enabled (eg: RBF, Version, multisig, p2sh, OP_RETURN, coin join, consolidation, etc)
+- Focus on enabled features lik RBF, multisig, p2sh, OP_RETURN, coinjoin, consolidation, etc
+- use Markdown format to remark the key points (style the response!)
 
 Now here’s the actual Bitcoin {$type} data to describe:
 {$json}
