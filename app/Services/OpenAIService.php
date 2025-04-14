@@ -23,21 +23,24 @@ final readonly class OpenAIService
         $json = json_encode($data->toArray(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
 
         $prompt = <<<PROMPT
-Write a short, casual, and punchy paragraph describing the following Bitcoin {$type}.
-Split paragraphs if they have more than 50 words.
-Consider:
-- Sound like you're explaining it to non-crypto-experts — friendly and informal.
-- Avoid saying repetitive information (eg "we've got a tx here with the ID...")
-- The value inside "vin" is for inputs, and inside vout is for outputs, and the value is in sats
-- 100 million sats = 1 BTC
-- Avoid full hashes, use the first 10 chars instead (if needed at all)
+Write a concise and accessible paragraph describing the following Bitcoin {$type}.
+Use a clear, easy-to-understand tone suitable for a general audience.
+If the response exceeds 50 words, break it into smaller paragraphs.
 
-Mention interesting facts like:
-- anything odd, historic, or funny about it
-- Focus on enabled features lik RBF, multisig, p2sh, OP_RETURN, coinjoin, consolidation, etc
-- use Markdown format to remark the key points (style the response!)
+Guidelines:
+- Explain concepts in a way that's understandable to readers without deep technical knowledge of Bitcoin.
+- Avoid redundancy or unnecessary restatements of obvious data points.
+- Treat "vin" as inputs and "vout" as outputs. Values are in satoshis (sats).
+- 100,000,000 sats equals 1 BTC.
+- Avoid including full hashes; shorten to the first 10 characters if necessary.
 
-Now here’s the actual Bitcoin {$type} data to describe:
+If relevant, highlight:
+- Unusual or noteworthy characteristics
+- Use of features like RBF, multisig, P2SH, OP_RETURN, CoinJoin, consolidation, etc.
+
+Use Markdown to emphasize key elements or structure the output.
+
+Here is the Bitcoin {$type} data to describe:
 {$json}
 PROMPT;
 
