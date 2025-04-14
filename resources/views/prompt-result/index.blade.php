@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.base')
 
 @section('title', 'Satscribe – AI Bitcoin Describer')
 
@@ -7,7 +7,8 @@
         <header class="section-header">
             <h1>🧠 Understand Any Bitcoin Transaction or Block</h1>
             <p class="subtitle">
-                Paste a <strong>Bitcoin TXID</strong> or <strong>block height</strong>, and let Satscribe explain it with AI.
+                Paste a <strong>Bitcoin TXID</strong> or <strong>block height</strong>, and let Satscribe explain it
+                with AI.
             </p>
         </header>
 
@@ -29,7 +30,8 @@
                         required
                         autofocus
                     >
-                    <small id="qHelp" class="form-help">Enter a valid TXID (64 hex chars) or block height (number).</small>
+                    <small id="qHelp" class="form-help">Enter a valid TXID (64 hex chars) or block height
+                        (number).</small>
 
                     @error('q')
                     <div class="error" role="alert">{{ $message }}</div>
@@ -53,7 +55,8 @@
                     <button type="submit" class="form-button" id="submit-button">
                         <span id="submit-icon">🚀</span>
                         <span id="submit-text">Describe It</span>
-                        <i class="fas fa-spinner fa-spin" id="submit-spinner" style="display: none; margin-left: 0.5rem;"></i>
+                        <i class="fas fa-spinner fa-spin" id="submit-spinner"
+                           style="display: none; margin-left: 0.5rem;"></i>
                     </button>
                 </div>
             </fieldset>
@@ -86,7 +89,8 @@
 
                 <div class="section">
                     <h2>📦 Raw Blockchain Data</h2>
-                    <pre class="code-block">{{ json_encode($result->raw_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) }}</pre>
+                    <pre
+                        class="code-block">{{ json_encode($result->raw_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) }}</pre>
                 </div>
             </section>
         @endisset
