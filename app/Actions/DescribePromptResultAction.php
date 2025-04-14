@@ -16,6 +16,8 @@ use function is_numeric;
 
 final readonly class DescribePromptResultAction
 {
+    private const MAX_OPENAI_ATTEMPTS_PER_DAY_PER_IP = 50;
+
     public function __construct(
         private BlockchainService $blockchain,
         private OpenAIService $openai,
@@ -35,13 +37,6 @@ final readonly class DescribePromptResultAction
             }
         }
 
-        $key = 'openai:'.$this->ip;
-        if (!RateLimiter::remaining($key, 50)) {
-            throw new ThrottleRequestsException('You have reached the daily OpenAI limit.');
-        }
-
-        RateLimiter::hit($key, 60 * 60 * 24);
-
         $fresh = $this->getFreshResult($input, $type, $refresh);
 
         return $fresh instanceof PromptResult ? new GeneratedPrompt($fresh, isFresh: true) : null;
@@ -49,6 +44,7 @@ final readonly class DescribePromptResultAction
 
     private function getFreshResult(string $input, string $type, bool $refresh): ?PromptResult
     {
+        $this->checkRateLimiter();
         if ($refresh) {
             $this->repository->deleteByTypeAndInput($type, $input);
         }
@@ -64,5 +60,15 @@ final readonly class DescribePromptResultAction
         }
 
         return $this->repository->save($type, $input, $response, $data);
+    }
+
+    private function checkRateLimiter(): void
+    {
+        $key = 'openai:'.$this->ip;
+        if (!RateLimiter::remaining($key, self::MAX_OPENAI_ATTEMPTS_PER_DAY_PER_IP)) {
+            throw new ThrottleRequestsException('You have reached the daily OpenAI limit.');
+        }
+
+        RateLimiter::hit($key, 60 * 60 * 24); // one day
     }
 }
