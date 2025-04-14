@@ -4,7 +4,10 @@
 
 @section('content')
     <section>
-        <h2>📜 Description History</h2>
+        <h2 class="text-2xl font-semibold text-gray-800 mb-6 flex items-center gap-2">
+            <span>📜</span>
+            <span>History</span>
+        </h2>
 
         @if ($descriptions->isEmpty())
             <p>No descriptions found yet.</p>
@@ -38,7 +41,8 @@
                         <div class="description-meta">
                             <small>{{ $desc->created_at->diffForHumans() }}</small>
                         </div>
-                        <hr>
+
+                        <div class="entry-divider" style="height: 1px; background: #e5e7eb; margin-top: 1.5rem;"></div>
                     </li>
                 @endforeach
             </ul>

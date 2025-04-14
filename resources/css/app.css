@@ -247,3 +247,7 @@ pre {
 .toggle-raw-button:hover {
     text-decoration: underline;
 }
+
+.description-entry {
+    margin-bottom: 2rem; /* adjust as needed */
+}
