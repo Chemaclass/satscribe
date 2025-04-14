@@ -53,8 +53,8 @@
 
                 <div class="form-actions">
                     <button type="submit" class="form-button" id="submit-button">
-                        <span id="submit-icon">🚀</span>
-                        <span id="submit-text">Describe It</span>
+                        <span id="submit-icon"><i class="fas fa-brain"></i></span>
+                        <span id="submit-text">Generate Description</span>
                         <i class="fas fa-spinner fa-spin" id="submit-spinner"
                            style="display: none; margin-left: 0.5rem;"></i>
                     </button>
@@ -114,7 +114,7 @@
                 form.addEventListener('submit', () => {
                     button.disabled = true;
                     icon.style.display = 'none';
-                    text.textContent = 'Loading...';
+                    text.textContent = 'Generating...';
                     spinner.style.display = 'inline-block';
                 });
             }
