@@ -87,17 +87,23 @@
                     </div>
                 </div>
 
-                <div class="section">
-                    <h2>📦 Raw Blockchain Data</h2>
-                    <pre
-                        class="code-block">{{ json_encode($result->raw_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) }}</pre>
-                </div>
+                    <div class="section">
+                        <h2>📦 Raw Blockchain Data</h2>
+
+                        <div class="code-block-collapsible">
+        <pre id="blockchain-data" class="code-block collapsed">
+{{ json_encode($result->raw_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) }}
+        </pre>
+                            <button type="button" id="toggle-raw" class="toggle-raw-button">Show more</button>
+                        </div>
+                    </div>
             </section>
         @endisset
     </section>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            // Submit button logic (existing)
             const form = document.querySelector('.describe-form');
             const button = document.getElementById('submit-button');
             const icon = document.getElementById('submit-icon');
@@ -110,6 +116,17 @@
                     icon.style.display = 'none';
                     text.textContent = 'Loading...';
                     spinner.style.display = 'inline-block';
+                });
+            }
+
+            // Raw blockchain toggle
+            const rawBlock = document.getElementById('blockchain-data');
+            const toggleBtn = document.getElementById('toggle-raw');
+
+            if (rawBlock && toggleBtn) {
+                toggleBtn.addEventListener('click', () => {
+                    rawBlock.classList.toggle('collapsed');
+                    toggleBtn.textContent = rawBlock.classList.contains('collapsed') ? 'Show more' : 'Show less';
                 });
             }
         });

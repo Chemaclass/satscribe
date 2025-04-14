@@ -224,3 +224,26 @@ pre {
 .fa-bitcoin-sign {
     color: darkorange;
 }
+
+.code-block-collapsible {
+    position: relative;
+}
+
+.code-block.collapsed {
+    max-height: 35em;
+    overflow: hidden;
+}
+
+.toggle-raw-button {
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+    color: #2563eb;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+}
+
+.toggle-raw-button:hover {
+    text-decoration: underline;
+}
