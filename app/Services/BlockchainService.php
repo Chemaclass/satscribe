@@ -51,8 +51,8 @@ final readonly class BlockchainService
         $block = $blockRes->json();
         $txs = $txsRes->json();
 
-        $this->logger->info("Fetched block data:\n".json_encode($block, JSON_PRETTY_PRINT));
-        $this->logger->info("Fetched block transactions:\n".json_encode($txs, JSON_PRETTY_PRINT));
+        $this->logger->info('Fetched block data', ['block' => $block]);
+        $this->logger->info('Fetched block transactions', ['transactions' => $txs]);
 
         return new BlockData(
             hash: $block['id'],
@@ -85,8 +85,8 @@ final readonly class BlockchainService
         $tx = $txRes->json();
         $status = $statusRes->json();
 
-        $this->logger->info("Fetched transaction data:\n".json_encode($tx, JSON_PRETTY_PRINT));
-        $this->logger->info("Fetched transaction status:\n".json_encode($status, JSON_PRETTY_PRINT));
+        $this->logger->info('Fetched transaction data', ['transaction' => $tx]);
+        $this->logger->info('Fetched transaction status', ['status' => $status]);
 
         return new TransactionData(
             txid: $tx['txid'],
