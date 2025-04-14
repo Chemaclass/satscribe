@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Actions\DescribePromptResultAction;
+use App\Services\OpenAIService;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\RateLimiter;
@@ -14,6 +16,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        $this->app
+            ->when(DescribePromptResultAction::class)
+            ->needs('ip')
+            ->give(request()->ip());
     }
 
     /**
@@ -25,10 +31,6 @@ class AppServiceProvider extends ServiceProvider
 
         RateLimiter::for('generate', function ($request) {
             return Limit::perDay(1000)->by($request->ip());
-        });
-
-        RateLimiter::for('openai', function ($request) {
-            return Limit::perDay(100)->by($request->ip());
         });
     }
 }

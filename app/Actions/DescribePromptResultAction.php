@@ -20,6 +20,7 @@ final readonly class DescribePromptResultAction
         private BlockchainService $blockchain,
         private OpenAIService $openai,
         private PromptResultRepository $repository,
+        private string $ip,
     ) {
     }
 
@@ -34,11 +35,12 @@ final readonly class DescribePromptResultAction
             }
         }
 
-        if (!RateLimiter::remaining('openai', 1)) {
+        $key = 'openai:'.$this->ip;
+        if (!RateLimiter::remaining($key, 50)) {
             throw new ThrottleRequestsException('You have reached the daily OpenAI limit.');
         }
 
-        RateLimiter::hit('openai');
+        RateLimiter::hit($key, 60 * 60 * 24);
 
         $fresh = $this->getFreshResult($input, $type, $refresh);
 
