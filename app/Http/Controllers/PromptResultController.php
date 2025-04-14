@@ -31,9 +31,17 @@ final class PromptResultController
         try {
             $response = $action->execute($q, $refresh);
         } catch (OpenAIError $e) {
-            Log::error($e->getMessage());
+            Log::error('Failed to describe prompt result', [
+                'query' => $q,
+                'refresh' => $refresh,
+                'message' => $e->getMessage(),
+                'exception' => $e,
+            ]);
+
             return view('prompt-result.index')
-                ->withErrors(['q' => 'Ups, something went wrong. Tell Chema, please!.']);
+                ->withErrors([
+                    'q' => 'Oops! We couldn’t process your request. Try again later, or contact Chema for support.',
+                ]);
         }
 
         if (!$response instanceof DescribedPrompt) {
