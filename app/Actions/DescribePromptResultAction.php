@@ -44,12 +44,14 @@ final readonly class DescribePromptResultAction
         }
 
         $data = $this->blockchain->getBlockchainData($input);
-
         if (!$data instanceof BlockchainData) {
             return null;
         }
 
         $response = $this->openai->generateText($data, $type);
+        if ($response === null) {
+            return null;
+        }
 
         return $this->repository->save($type, $input, $response, $data);
     }
