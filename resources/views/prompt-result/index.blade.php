@@ -3,46 +3,47 @@
 @section('title', 'Satscribe – AI Bitcoin Describer')
 
 @section('content')
-    <h1>🧠 Understand Any Bitcoin Transaction or Block</h1>
-    <p style="margin-bottom: 2rem; color: #4b5563; font-size: 0.95rem;">
-        Paste a <strong>Bitcoin TXID</strong> or <strong>block height</strong>, and let Satscribe explain it with AI.
-    </p>
+    <section>
+        <h1>🧠 Understand Any Bitcoin Transaction or Block</h1>
+        <p class="subtitle">
+            Paste a <strong>Bitcoin TXID</strong> or <strong>block height</strong>, and let Satscribe explain it with AI.
+        </p>
 
-    <form method="GET" action="{{ route('describe') }}">
-        <div class="form-group">
-            <label for="q" style="font-weight: 500;">Transaction ID or Block Height</label>
-            <input
-                type="text"
-                id="q"
-                name="q"
-                value="{{ old('q', $q ?? '') }}"
-                placeholder="e.g. 4b0d... or 840000"
-                class="form-input"
-                autofocus
-                autocomplete="off"
-                required
-            >
-
-            <label class="form-checkbox" for="refresh">
+        <form method="GET" action="{{ route('describe') }}" class="describe-form">
+            <div class="form-group">
+                <label for="q" class="form-label">Transaction ID or Block Height</label>
                 <input
-                    type="checkbox"
-                    id="refresh"
-                    name="refresh"
-                    value="true"
-                    {{ request('refresh') ? 'checked' : '' }}
+                    type="text"
+                    id="q"
+                    name="q"
+                    value="{{ old('q', $q ?? '') }}"
+                    placeholder="e.g. 4b0d... or 840000"
+                    class="form-input"
+                    autofocus
+                    autocomplete="off"
+                    required
                 >
-                <span>🔄 Force fresh result from blockchain + OpenAI</span>
-            </label>
+                @error('q')
+                <div class="error">{{ $message }}</div>
+                @enderror
+            </div>
 
-            <button type="submit" class="form-button">
-                🚀 Describe It
-            </button>
+            <div class="form-checkbox">
+                <label for="refresh">
+                    <input
+                        type="checkbox"
+                        id="refresh"
+                        name="refresh"
+                        value="true"
+                        {{ request('refresh') ? 'checked' : '' }}
+                    >
+                    🔄 Force fresh result from blockchain + OpenAI
+                </label>
+            </div>
 
-            @error('q')
-            <div class="error">{{ $message }}</div>
-            @enderror
-        </div>
-    </form>
+            <button type="submit" class="form-button">🚀 Describe It</button>
+        </form>
+    </section>
 
     @if(isset($isFresh))
         <div class="info-message {{ $isFresh ? 'info-fresh' : 'info-cached' }}">
@@ -52,20 +53,21 @@
 
     @isset($result)
         @if($result->force_refresh)
-            <p style="color: #b45309; font-size: 0.9rem;">
+            <div class="alert-warning">
                 ⚠️ This transaction is unconfirmed. You might want to refresh later to get the latest status.
-            </p>
+            </div>
         @endif
+
         <div class="section">
             <h2>🧠 AI Summary</h2>
-            <div class="box">
+            <div class="box markdown-content">
                 {!! Str::markdown($result->ai_response) !!}
             </div>
         </div>
 
         <div class="section">
             <h2>📦 Raw Blockchain Data</h2>
-            <pre>{{ json_encode($result->raw_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) }}</pre>
+            <pre class="code-block">{{ json_encode($result->raw_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) }}</pre>
         </div>
     @endisset
 @endsection

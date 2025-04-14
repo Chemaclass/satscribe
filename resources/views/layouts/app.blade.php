@@ -157,6 +157,12 @@
             line-height: 1.5;
         }
 
+        .mempool-link {
+            color: #2563eb;
+            text-decoration: underline;
+            word-break: break-all;
+        }
+
         .fa-bitcoin-sign:hover {
             color: orange;
         }
