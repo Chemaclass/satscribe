@@ -5,9 +5,11 @@
 @source '../**/*.blade.php';
 @source '../**/*.js';
 
-@theme {
+:root {
+    --btc-orange: #f7931a;
+    --btc-orange-dark: #d87c00;
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+    'Segoe UI Symbol', 'Noto Color Emoji';
 }
 
 body {
@@ -31,7 +33,7 @@ header {
 .brand {
     font-size: 1.5rem;
     font-weight: bold;
-    color: #2563eb;
+    color: var(--btc-orange);
     text-decoration: none;
 }
 
@@ -43,7 +45,7 @@ header {
 }
 
 .nav-links a:hover {
-    color: #1d4ed8;
+    color: var(--btc-orange-dark);
 }
 
 footer {
@@ -56,7 +58,7 @@ footer {
 }
 
 footer a {
-    color: #2563eb;
+    color: var(--btc-orange);
     text-decoration: none;
     margin-left: 0.5rem;
 }
@@ -110,7 +112,7 @@ nav[role="navigation"] svg {
 .form-button {
     padding: 0.5rem 1.25rem;
     font-size: 1rem;
-    background: #2563eb;
+    background: var(--btc-orange);
     color: white;
     border: none;
     border-radius: 0.375rem;
@@ -118,7 +120,7 @@ nav[role="navigation"] svg {
 }
 
 .form-button:hover {
-    background: #1d4ed8;
+    background: var(--btc-orange-dark);
 }
 
 .form-button:disabled {
@@ -173,7 +175,7 @@ pre {
 }
 
 .mempool-link {
-    color: #2563eb;
+    color: var(--btc-orange);
     text-decoration: underline;
     word-break: break-all;
 }
@@ -237,7 +239,7 @@ pre {
 .toggle-raw-button {
     margin-top: 0.5rem;
     font-size: 0.9rem;
-    color: #2563eb;
+    color: var(--btc-orange);
     background: none;
     border: none;
     cursor: pointer;
@@ -249,5 +251,5 @@ pre {
 }
 
 .description-entry {
-    margin-bottom: 2rem; /* adjust as needed */
+    margin-bottom: 2rem;
 }
