@@ -18,7 +18,7 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app
             ->when(DescribePromptResultAction::class)
-            ->needs('ip')
+            ->needs('$ip')
             ->give(request()->ip());
     }
 
