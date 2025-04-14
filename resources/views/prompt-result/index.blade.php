@@ -38,16 +38,18 @@
                     @enderror
                 </div>
 
-                <div class="form-checkbox">
-                    <label for="refresh">
-                        <input
-                            type="checkbox"
-                            id="refresh"
-                            name="refresh"
-                            value="true"
-                            {{ request('refresh') ? 'checked' : '' }}
-                        >
-                        🔄 <span>Force fresh result from blockchain + OpenAI</span>
+                <div class="form-checkbox enhanced-checkbox">
+                    <input
+                        type="checkbox"
+                        id="refresh"
+                        name="refresh"
+                        value="true"
+                        {{ request('refresh') ? 'checked' : '' }}
+                        class="checkbox-input"
+                    >
+                    <label for="refresh" class="checkbox-label">
+                        Fetch the latest data from the blockchain<br>
+                        <small class="checkbox-help">(Skips cached descriptions and requests live data from the blockchain and OpenAI)</small>
                     </label>
                 </div>
 
