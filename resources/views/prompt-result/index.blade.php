@@ -44,7 +44,6 @@
                         id="refresh"
                         name="refresh"
                         value="true"
-                        {{ request('refresh') ? 'checked' : '' }}
                         class="checkbox-input"
                     >
                     <label for="refresh" class="checkbox-label">
