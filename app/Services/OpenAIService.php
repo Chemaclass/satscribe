@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Data\BlockchainData;
+use App\Exceptions\OpenAIError;
 use Illuminate\Http\Client\Factory as HttpClient;
 use Psr\Log\LoggerInterface;
+use RuntimeException;
 
 final readonly class OpenAIService
 {
@@ -47,8 +49,11 @@ PROMPT;
                 ],
             ]);
 
-        $text = $response->json('choices.0.message.content');
+        if ($error = $response->json('error.message')) {
+            throw new OpenAIError($error);
+        }
 
+        $text = $response->json('choices.0.message.content');
         $this->logger->info("OpenAI generated description:\n".$text);
 
         return $text;

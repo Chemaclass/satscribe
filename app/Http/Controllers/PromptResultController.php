@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Actions\DescribePromptResultAction;
 use App\Data\DescribedPrompt;
+use App\Exceptions\OpenAIError;
 use App\Models\PromptResult;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 
 final class PromptResultController
@@ -26,7 +28,13 @@ final class PromptResultController
             return view('prompt-result.index');
         }
 
-        $response = $action->execute($q, $refresh);
+        try {
+            $response = $action->execute($q, $refresh);
+        } catch (OpenAIError $e) {
+            Log::error($e->getMessage());
+            return view('prompt-result.index')
+                ->withErrors(['q' => 'Ups, something went wrong. Tell Chema, please!.']);
+        }
 
         if (!$response instanceof DescribedPrompt) {
             return view('prompt-result.index')
