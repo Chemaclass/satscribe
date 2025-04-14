@@ -14,7 +14,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
     }
 
     /**
@@ -24,7 +23,11 @@ class AppServiceProvider extends ServiceProvider
     {
         Paginator::useTailwind();
 
-        RateLimiter::for('openai-limit', function ($request) {
+        RateLimiter::for('generate', function ($request) {
+            return Limit::perDay(1000)->by($request->ip());
+        });
+
+        RateLimiter::for('openai', function ($request) {
             return Limit::perDay(50)->by($request->ip());
         });
     }

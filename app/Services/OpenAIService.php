@@ -8,7 +8,6 @@ use App\Data\BlockchainData;
 use App\Exceptions\OpenAIError;
 use Illuminate\Http\Client\Factory as HttpClient;
 use Psr\Log\LoggerInterface;
-use RuntimeException;
 
 final readonly class OpenAIService
 {

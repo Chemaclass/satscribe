@@ -10,6 +10,8 @@ use App\Models\PromptResult;
 use App\Repositories\PromptResultRepository;
 use App\Services\BlockchainService;
 use App\Services\OpenAIService;
+use Illuminate\Http\Exceptions\ThrottleRequestsException;
+use Illuminate\Support\Facades\RateLimiter;
 use function is_numeric;
 
 final readonly class DescribePromptResultAction
@@ -31,6 +33,12 @@ final readonly class DescribePromptResultAction
                 return new GeneratedPrompt($cached, isFresh: false);
             }
         }
+
+        if (!RateLimiter::remaining('openai', 1)) {
+            throw new ThrottleRequestsException('You have reached the daily OpenAI limit.');
+        }
+
+        RateLimiter::hit('openai');
 
         $fresh = $this->getFreshResult($input, $type, $refresh);
 
