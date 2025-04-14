@@ -12,7 +12,7 @@
             </p>
         </header>
 
-        <form method="GET" action="{{ route('describe') }}" class="describe-form" aria-labelledby="form-heading">
+        <form method="GET" action="{{ route('generate') }}" class="describe-form" aria-labelledby="form-heading">
             <fieldset>
                 <legend id="form-heading" class="visually-hidden">Describe Bitcoin Data</legend>
 
@@ -53,7 +53,7 @@
 
                 <div class="form-actions">
                     <button type="submit" class="form-button" id="submit-button">
-                        <span id="submit-icon"><i class="fas fa-brain"></i></span>
+                        <span id="submit-icon"><i class="fas fa-vial"></i></span>
                         <span id="submit-text">Generate Description</span>
                         <i class="fas fa-spinner fa-spin" id="submit-spinner"
                            style="display: none; margin-left: 0.5rem;"></i>

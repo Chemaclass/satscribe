@@ -2,7 +2,7 @@
     "$schema": "https://getcomposer.org/schema.json",
     "name": "chemaclass/satscribe",
     "type": "project",
-    "description": "AI-powered Bitcoin transaction and block describer.",
+    "description": "Generate a description of a Bitcoin transaction and block powered by AI.",
     "keywords": ["laravel", "bitcoin", "openai", "blockchain", "gpt"],
     "license": "MIT",
     "require": {

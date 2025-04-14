@@ -6,7 +6,7 @@ namespace App\Data;
 
 use App\Models\PromptResult;
 
-final readonly class DescribedPrompt
+final readonly class GeneratedPrompt
 {
     /**
      * @param  bool  $isFresh  true if newly generated, false if loaded from DB

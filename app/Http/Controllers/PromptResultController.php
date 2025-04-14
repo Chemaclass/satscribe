@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Actions\DescribePromptResultAction;
-use App\Data\DescribedPrompt;
+use App\Data\GeneratedPrompt;
 use App\Exceptions\OpenAIError;
 use App\Models\PromptResult;
 use Illuminate\Http\Request;
@@ -19,7 +19,7 @@ final class PromptResultController
         ]);
     }
 
-    public function describe(Request $request, DescribePromptResultAction $action): View
+    public function generate(Request $request, DescribePromptResultAction $action): View
     {
         $q = strtolower(trim($request->query('q')));
         $refresh = filter_var($request->query('refresh'), FILTER_VALIDATE_BOOL);
@@ -44,7 +44,7 @@ final class PromptResultController
                 ]);
         }
 
-        if (!$response instanceof DescribedPrompt) {
+        if (!$response instanceof GeneratedPrompt) {
             return view('prompt-result.index')
                 ->withErrors(['q' => 'Could not fetch blockchain data.']);
         }

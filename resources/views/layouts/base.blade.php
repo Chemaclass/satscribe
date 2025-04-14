@@ -12,8 +12,8 @@
 <header>
     <a href="{{ url('/') }}" class="brand">Satscribe</a>
     <nav class="nav-links">
-        <a href="{{ route('describe') }}">
-            <i class="fas fa-vial"></i> Describe
+        <a href="{{ route('generate') }}">
+            <i class="fas fa-vial"></i> Generate
         </a>
         <a href="{{ url('/history') }}">
             <i class="fas fa-scroll"></i> History
