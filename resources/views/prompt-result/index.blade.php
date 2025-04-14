@@ -50,7 +50,7 @@
                 </div>
 
                 <div class="form-actions">
-                    <button type="submit" class="form-button">🚀 Describe It</button>
+                    <button type="submit" class="form-button" id="submit-button">🚀 Describe It</button>
                 </div>
             </fieldset>
         </form>
@@ -87,4 +87,19 @@
             </section>
         @endisset
     </section>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.querySelector('.describe-form');
+            const button = document.getElementById('submit-button');
+
+            if (form && button) {
+                form.addEventListener('submit', () => {
+                    button.disabled = true;
+                    button.textContent = 'Loading...';
+                    button.classList.add('loading'); // optional class if you want to style it differently
+                });
+            }
+        });
+    </script>
 @endsection

@@ -121,6 +121,11 @@ nav[role="navigation"] svg {
     background: #1d4ed8;
 }
 
+.form-button:disabled {
+    background: #9ca3af; /* gray-400 */
+    cursor: not-allowed;
+}
+
 .info-message {
     font-size: 0.95rem;
     margin-bottom: 1.5rem;
