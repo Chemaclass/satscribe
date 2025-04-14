@@ -5,7 +5,7 @@
 @section('content')
     <section class="satscribe-section">
         <header class="section-header">
-            <h1>🧠 Understand Any Bitcoin Transaction or Block</h1>
+            <h1>Understand any Bitcoin Transaction or Block</h1>
             <p class="subtitle">
                 Paste a <strong>Bitcoin TXID</strong> or <strong>block height</strong>, and let Satscribe explain it
                 with AI.

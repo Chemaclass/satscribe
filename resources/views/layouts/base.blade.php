@@ -12,8 +12,15 @@
 <header>
     <a href="{{ url('/') }}" class="brand">Satscribe</a>
     <nav class="nav-links">
-        <a href="{{ route('describe') }}">Describe</a>
-        <a href="{{ url('/history') }}">History</a>
+        <a href="{{ route('describe') }}">
+            <i class="fas fa-vial"></i> Describe
+        </a>
+        <a href="{{ url('/history') }}">
+            <i class="fas fa-scroll"></i> History
+        </a>
+        <a href="https://github.com/Chemaclass/satscribe" target="_blank" title="View on GitHub">
+            <i class="fab fa-github"></i> Code
+        </a>
     </nav>
 </header>
 
@@ -21,7 +28,9 @@
 
 <footer>
     &copy;{{ date('Y') }}<a href="https://chemaclass.com/" target="_blank">Chema</a>
-    —<a target="_blank" href="https://getalby.com/p/chemaclass" style="color: currentColor">Leave a tip <i class="fa-solid fa-bitcoin-sign"></i></a>
+    —<a target="_blank" href="https://getalby.com/p/chemaclass" style="color: currentColor">
+        Leave a tip <i class="fa-solid fa-bitcoin-sign"></i>
+    </a>
 </footer>
 </body>
 </html>
