@@ -28,7 +28,7 @@ class AppServiceProvider extends ServiceProvider
         });
 
         RateLimiter::for('openai', function ($request) {
-            return Limit::perDay(50)->by($request->ip());
+            return Limit::perDay(100)->by($request->ip());
         });
     }
 }
