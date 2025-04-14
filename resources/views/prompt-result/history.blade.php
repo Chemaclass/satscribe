@@ -56,8 +56,24 @@
                 @endforeach
             </ul>
 
-            <div class="pagination mt-8">
-                {{ $descriptions->links() }}
+            <div class="pagination mt-8 flex justify-center gap-4">
+                @if ($descriptions->onFirstPage())
+                    <span class="px-4 py-2 bg-orange-100 text-orange-400 rounded-md cursor-not-allowed">« Previous</span>
+                @else
+                    <a href="{{ $descriptions->previousPageUrl() }}"
+                       class="px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 transition">
+                        « Previous
+                    </a>
+                @endif
+
+                @if ($descriptions->hasMorePages())
+                    <a href="{{ $descriptions->nextPageUrl() }}"
+                       class="px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 transition">
+                        Next »
+                    </a>
+                @else
+                    <span class="px-4 py-2 bg-orange-100 text-orange-400 rounded-md cursor-not-allowed">Next »</span>
+                @endif
             </div>
         @endif
     </section>
