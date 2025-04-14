@@ -12,13 +12,17 @@
 - 💾 Saves each description to the database
 - 🗂️ View and paginate all previous descriptions
 
-![Satscribe Demo](docs/demo-homepage.png)
+## 🖼️ Demo
+
+![Satscribe Demo1](docs/demo-1.png)
+
+![Satscribe Demo2](docs/demo-2.png)
 
 ---
 
 ## 📦 Requirements
 
-- PHP 8.3+
+- PHP 8.2+
 - Composer
 - SQLite
 - Laravel 12+
@@ -37,17 +41,18 @@ cp .env.example .env
 php artisan key:generate
 ```
 Then configure your .env
-
 ```dotenv
 DB_CONNECTION=sqlite
 
 OPENAI_API_KEY=sk-...
 OPENAI_MODEL=gpt-4o-mini
 ```
-And migrate the DB
-
+And migrate the DB:
 ```bash
 php artisan migrate
 ```
 
-Run the app: `php artisan serve`
+Run the app:
+```bash
+php artisan serve
+```
