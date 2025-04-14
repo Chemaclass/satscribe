@@ -6,7 +6,7 @@
     "keywords": ["laravel", "bitcoin", "openai", "blockchain", "gpt"],
     "license": "MIT",
     "require": {
-        "php": "^8.3",
+        "php": "^8.2",
         "laravel/framework": "^12.0",
         "laravel/tinker": "^2.10.1"
     },

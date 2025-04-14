@@ -19,7 +19,7 @@ return RectorConfig::configure()
     ])
     ->withSkipPath(__DIR__.'/bootstrap/cache')
     ->withSkipPath(__DIR__.'/app/Providers/AppServiceProvider.php')
-    ->withPhpSets(php83: true)
+    ->withPhpSets(php82: true)
     ->withTypeCoverageLevel(0)
     ->withPreparedSets(
         deadCode: true,

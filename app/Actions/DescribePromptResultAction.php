@@ -34,7 +34,7 @@ final readonly class DescribePromptResultAction
 
         $fresh = $this->getFreshResult($input, $type, $refresh);
 
-        return $fresh ? new DescribedPrompt($fresh, isFresh: true) : null;
+        return $fresh instanceof PromptResult ? new DescribedPrompt($fresh, isFresh: true) : null;
     }
 
     private function getFreshResult(string $input, string $type, bool $refresh): ?PromptResult

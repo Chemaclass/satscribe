@@ -12,8 +12,7 @@ use Psr\Log\LoggerInterface;
 
 final readonly class BlockchainService
 {
-    private const string BASE_URL = 'https://blockstream.info/api';
-    private const int TX_LIMIT = 10;
+    private const BASE_URL = 'https://blockstream.info/api';
 
     public function __construct(
         private HttpClient $http,
