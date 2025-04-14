@@ -50,7 +50,11 @@
                 </div>
 
                 <div class="form-actions">
-                    <button type="submit" class="form-button" id="submit-button">🚀 Describe It</button>
+                    <button type="submit" class="form-button" id="submit-button">
+                        <span id="submit-icon">🚀</span>
+                        <span id="submit-text">Describe It</span>
+                        <i class="fas fa-spinner fa-spin" id="submit-spinner" style="display: none; margin-left: 0.5rem;"></i>
+                    </button>
                 </div>
             </fieldset>
         </form>
@@ -92,12 +96,16 @@
         document.addEventListener('DOMContentLoaded', function () {
             const form = document.querySelector('.describe-form');
             const button = document.getElementById('submit-button');
+            const icon = document.getElementById('submit-icon');
+            const text = document.getElementById('submit-text');
+            const spinner = document.getElementById('submit-spinner');
 
             if (form && button) {
                 form.addEventListener('submit', () => {
                     button.disabled = true;
-                    button.textContent = 'Loading...';
-                    button.classList.add('loading'); // optional class if you want to style it differently
+                    icon.style.display = 'none';
+                    text.textContent = 'Loading...';
+                    spinner.style.display = 'inline-block';
                 });
             }
         });
