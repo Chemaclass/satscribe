@@ -22,23 +22,14 @@ final readonly class BlockchainService
 
     public function getBlockchainData(string $input): ?BlockchainData
     {
-        return is_numeric($input)
-            ? $this->getBlockData((int) $input)
+        return $this->isBlock($input)
+            ? $this->getBlockData($input)
             : $this->getTransactionData($input);
     }
 
-    private function getBlockData(int $height): ?BlockData
+    private function getBlockData(string $input): ?BlockData
     {
-        $hashRes = $this->http->get(self::BASE_URL."/block-height/{$height}");
-        if (!$hashRes->successful()) {
-            $this->logger->warning('Block height lookup failed', [
-                'height' => $height,
-                'response' => $hashRes->body(),
-            ]);
-            return null;
-        }
-
-        $hash = $hashRes->body();
+        $hash = $this->getBlockHash($input);
 
         $blockRes = $this->http->get(self::BASE_URL."/block/{$hash}");
         $txsRes = $this->http->get(self::BASE_URL."/block/{$hash}/txs");
@@ -102,5 +93,29 @@ final readonly class BlockchainService
             blockHash: $status['block_hash'] ?? null,
             blockTime: $status['block_time'] ?? null,
         );
+    }
+
+    private function isBlock(string $input): bool
+    {
+        return is_numeric($input)
+            || preg_match('/^0{8,}[a-f0-9]{56}$/i', $input);
+    }
+
+    private function getBlockHash(string $input): ?string
+    {
+        if (!is_numeric($input)) {
+            return $input;
+        }
+
+        $hashRes = $this->http->get(self::BASE_URL."/block-height/{$input}");
+        if (!$hashRes->successful()) {
+            $this->logger->warning('Block height lookup failed', [
+                'height' => $input,
+                'response' => $hashRes->body(),
+            ]);
+            return null;
+        }
+
+        return $hashRes->body();
     }
 }

@@ -35,7 +35,7 @@ final class PromptResultController
             Log::error('Failed to describe prompt result', [
                 'query' => $q,
                 'refresh' => $refresh,
-                'prompt' => $question,
+                'question' => $question,
                 'message' => $e->getMessage(),
                 'exception' => $e,
             ]);
