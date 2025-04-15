@@ -3,6 +3,7 @@ import './bootstrap';
 document.addEventListener('DOMContentLoaded', () => {
     setupFormSubmissionUI();
     setupBlockchainToggle();
+    setupDescriptionToggle();
     linkBitcoinEntities('.description-result .markdown-content');
 });
 
@@ -35,6 +36,20 @@ function setupBlockchainToggle() {
     });
 }
 
+function setupDescriptionToggle() {
+    document.querySelectorAll('.description-body').forEach(body => {
+        const collapsible = body.querySelector('.collapsed-response');
+        if (!collapsible) return;
+
+        body.classList.add('cursor-pointer');
+
+        body.addEventListener('click', () => {
+            const isCollapsed = !collapsible.classList.toggle('collapsed');
+            collapsible.classList.toggle('max-h-[6.5rem]', isCollapsed);
+        });
+    });
+}
+
 function linkBitcoinEntities(containerSelector) {
     const container = document.querySelector(containerSelector);
     if (!container) return;
@@ -57,7 +72,6 @@ function linkBitcoinEntities(containerSelector) {
 
         for (const { regex, link, display, type } of patterns) {
             updatedText = updatedText.replace(regex, (match, ...groups) => {
-                // Track block hashes to prevent relinking as tx
                 if (type === 'block-hash') {
                     if (match.length === 64) {
                         detectedBlockHashes.add(match);

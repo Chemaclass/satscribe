@@ -44,12 +44,6 @@
                             <div id="{{ $entryId }}" class="collapsed-response overflow-hidden max-h-[6.5rem] transition-all duration-300">
                                 {!! Str::markdown($desc->ai_response) !!}
                             </div>
-
-                            <button type="button"
-                                    data-target="{{ $entryId }}"
-                                    class="toggle-response-button mt-2 text-sm text-orange-600 hover:underline cursor-pointer">
-                                Show more
-                            </button>
                         </div>
                         <div class="description-meta mt-2 flex justify-between items-center text-sm text-gray-500">
                             <span>{{ $desc->created_at->diffForHumans() }}</span>
