@@ -1,37 +1,91 @@
 import './bootstrap';
 
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', () => {
+    setupFormSubmissionUI();
+    setupBlockchainToggle();
+    linkBitcoinEntities('.description-result .markdown-content');
+});
+
+function setupFormSubmissionUI() {
     const form = document.querySelector('.describe-form');
     const button = document.getElementById('submit-button');
     const icon = document.getElementById('submit-icon');
     const text = document.getElementById('submit-text');
     const spinner = document.getElementById('submit-spinner');
 
-    if (form && button) {
-        form.addEventListener('submit', () => {
-            button.disabled = true;
-            icon.style.display = 'none';
-            text.textContent = 'Generating...';
-            spinner.style.display = 'inline-block';
-        });
-    }
+    if (!form || !button) return;
 
+    form.addEventListener('submit', () => {
+        button.disabled = true;
+        icon.style.display = 'none';
+        text.textContent = 'Generating...';
+        spinner.style.display = 'inline-block';
+    });
+}
+
+function setupBlockchainToggle() {
     const rawBlock = document.getElementById('blockchain-data');
     const toggleBtn = document.getElementById('toggle-raw');
 
-    if (rawBlock && toggleBtn) {
-        toggleBtn.addEventListener('click', () => {
-            rawBlock.classList.toggle('collapsed');
-            toggleBtn.textContent = rawBlock.classList.contains('collapsed') ? 'Show more' : 'Show less';
-        });
-    }
-});
+    if (!rawBlock || !toggleBtn) return;
+
+    toggleBtn.addEventListener('click', () => {
+        const isCollapsed = rawBlock.classList.toggle('collapsed');
+        toggleBtn.textContent = isCollapsed ? 'Show more' : 'Show less';
+    });
+}
 
 function linkBitcoinEntities(containerSelector) {
     const container = document.querySelector(containerSelector);
     if (!container) return;
 
-    const patterns = [
+    const patterns = getBitcoinPatterns();
+    const detectedBlockHashes = new Set();
+
+    const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, null);
+    const textNodes = [];
+
+    while (walker.nextNode()) {
+        const node = walker.currentNode;
+        if (!node.parentElement.closest('a')) {
+            textNodes.push(node);
+        }
+    }
+
+    for (const node of textNodes) {
+        let updatedText = node.nodeValue;
+
+        for (const { regex, link, display, type } of patterns) {
+            updatedText = updatedText.replace(regex, (match, ...groups) => {
+                // Track block hashes to prevent relinking as tx
+                if (type === 'block-hash') {
+                    if (match.length === 64) {
+                        detectedBlockHashes.add(match);
+                    } else {
+                        return match;
+                    }
+                }
+
+                if (type === 'tx' && detectedBlockHashes.has(match)) {
+                    return match;
+                }
+
+                const label = display ? display(match, groups[0]) : match;
+                const url = link(match);
+                return `<a href="${url}" target="_blank" rel="noopener" class="btc-link">${label}</a>`;
+            });
+        }
+
+        if (updatedText !== node.nodeValue) {
+            const span = document.createElement('span');
+            span.innerHTML = updatedText;
+            node.replaceWith(span);
+        }
+    }
+}
+
+function getBitcoinPatterns() {
+    return [
         {
             type: 'block-hash',
             regex: /\b0{8}[a-f0-9]{56}\b/g,
@@ -69,51 +123,4 @@ function linkBitcoinEntities(containerSelector) {
             link: (addr) => `https://mempool.space/address/${addr}`,
         }
     ];
-
-    // To track block hashes so tx doesn't re-link them
-    const detectedBlockHashes = new Set();
-
-    // Parse DOM safely and preserve tags
-    const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, null);
-    const textNodes = [];
-
-    while (walker.nextNode()) {
-        const node = walker.currentNode;
-        if (!node.parentElement.closest('a')) {
-            textNodes.push(node);
-        }
-    }
-
-    for (const node of textNodes) {
-        let replaced = node.nodeValue;
-
-        for (const { regex, link, display, type } of patterns) {
-            replaced = replaced.replace(regex, (match, ...groups) => {
-                // Block hash validation
-                if (type === 'block-hash') {
-                    if (match.length === 64) {
-                        detectedBlockHashes.add(match);
-                    } else {
-                        return match;
-                    }
-                }
-
-                // Skip linking block hashes again as tx
-                if (type === 'tx' && detectedBlockHashes.has(match)) {
-                    return match;
-                }
-
-                const label = display ? display(match, groups[0]) : match;
-                return `<a href="${link(match)}" target="_blank" rel="noopener" class="btc-link">${label}</a>`;
-            });
-        }
-
-        if (replaced !== node.nodeValue) {
-            const span = document.createElement('span');
-            span.innerHTML = replaced;
-            node.replaceWith(span);
-        }
-    }
 }
-
-linkBitcoinEntities('.description-result .markdown-content');
