@@ -51,11 +51,18 @@
                                 Show more
                             </button>
                         </div>
-
-                        <div class="description-meta text-sm text-gray-500 mt-2">
-                            {{ $desc->created_at->diffForHumans() }}
+                        <div class="description-meta mt-2 flex justify-between items-center text-sm text-gray-500">
+                            <span>{{ $desc->created_at->diffForHumans() }}</span>
+                            <button type="button"
+                                    class="toggle-raw-button text-blue-600 hover:underline"
+                                    data-target="raw-{{ $desc->id }}">
+                                Show raw data
+                            </button>
                         </div>
-
+                        <pre id="raw-{{ $desc->id }}"
+                             class="mt-2 bg-gray-100 text-xs p-3 rounded overflow-auto max-h-64 hidden">
+{{ json_encode($desc->raw_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) }}
+                        </pre>
                         <div class="entry-divider h-px bg-gray-200 mt-6"></div>
                     </li>
                 @endforeach
@@ -85,6 +92,7 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // Toggle AI response collapse
             document.querySelectorAll('.toggle-response-button').forEach(button => {
                 button.addEventListener('click', () => {
                     const targetId = button.dataset.target;
@@ -99,6 +107,18 @@
                         target.classList.add('max-h-[6.5rem]');
                         button.textContent = 'Show more';
                     }
+                });
+            });
+
+            // Toggle raw JSON display
+            document.querySelectorAll('.toggle-raw-button').forEach(button => {
+                button.addEventListener('click', () => {
+                    const targetId = button.dataset.target;
+                    const rawBlock = document.getElementById(targetId);
+                    const isHidden = rawBlock.classList.contains('hidden');
+
+                    rawBlock.classList.toggle('hidden');
+                    button.textContent = isHidden ? 'Hide raw data' : 'Show raw data';
                 });
             });
         });
