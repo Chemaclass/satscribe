@@ -12,6 +12,7 @@ use Psr\Log\LoggerInterface;
 final readonly class OpenAIService
 {
     private const LIMIT_TOKENS_PER_REQUEST = 50_000;
+    private const TRIMMED_IO_LIMIT = 5;
 
     public function __construct(
         private HttpClient $http,
@@ -21,16 +22,18 @@ final readonly class OpenAIService
 
     public function generateText(BlockchainData $data, string $type, string $question = ''): ?string
     {
-        $response = $this->http->withToken(config('services.openai.key'))
-            ->post('https://api.openai.com/v1/chat/completions', [
-                'model' => config('services.openai.model'),
-                'messages' => [
-                    [
-                        'role' => 'user',
-                        'content' => $this->preparePrompt($data, $type, $question),
-                    ],
+        $payload = [
+            'model' => config('services.openai.model'),
+            'messages' => [
+                [
+                    'role' => 'user',
+                    'content' => $this->preparePrompt($data, $type, $question),
                 ],
-            ]);
+            ],
+        ];
+
+        $response = $this->http->withToken(config('services.openai.key'))
+            ->post('https://api.openai.com/v1/chat/completions', $payload);
 
         if ($error = $response->json('error.message')) {
             throw new OpenAIError($error);
@@ -44,53 +47,51 @@ final readonly class OpenAIService
 
     private function preparePrompt(BlockchainData $data, string $type, string $question): string
     {
-        $json = json_encode($this->compactBlockchainData($data->toArray()), JSON_UNESCAPED_SLASHES);
+        $condensedData = $this->compactBlockchainData($data->toArray());
+        $json = json_encode($condensedData, JSON_UNESCAPED_SLASHES);
 
-        $defaultQuestion = <<<EOT
+        $questionPart = $question ?: <<<TEXT
 Categorize wallet types and features: multisig, P2SH, OP_RETURN, RBF, CoinJoin, etc.
 Mention anything unusual (batching, dust, consolidation) in a separate paragraph.
-EOT;
+TEXT;
 
-        $questionPart = $question ?: $defaultQuestion;
-
-        $prompt = <<<EOT
+        $prompt = <<<PROMPT
 Use **Markdown** to highlight key info.
-Write a concise and accessible paragraph describing the following Bitcoin {$type}.
+Write a concise, accessible description of this Bitcoin {$type}.
 
 {$questionPart}
 
 Guidelines:
 - Inputs ("vin") = senders, Outputs ("vout") = recipients. Values are in sats (100,000,000 sats = 1 BTC)
-- Keep it short. Use multiple paragraphs if needed. If the response exceeds 40 words, break it into smaller paragraphs.
-- Max answered to 100 tokens.
+- Keep it short. Use multiple paragraphs if needed.
+- If the response exceeds 40 words, break it into smaller paragraphs.
+- Your response should not exceed 200 tokens.
 
 Here's a condensed view of the Bitcoin {$type} data:
 {$json}
-EOT;
+PROMPT;
 
         return $this->truncateByApproxTokens($prompt, self::LIMIT_TOKENS_PER_REQUEST);
     }
 
     private function compactBlockchainData(array $data): array
     {
-        // For transactions
         if (isset($data['vin']) || isset($data['vout'])) {
             return [
                 'txid' => $data['txid'] ?? null,
-                'inputs' => array_map(fn($vin) => [
+                'inputs' => $this->limitItems($data['vin'] ?? [], self::TRIMMED_IO_LIMIT, fn($vin) => [
                     'addr' => $vin['prevout']['scriptpubkey_address'] ?? null,
                     'val' => $vin['prevout']['value'] ?? null,
-                ], $data['vin'] ?? []),
-                'outputs' => array_map(fn($vout) => [
+                ]),
+                'outputs' => $this->limitItems($data['vout'] ?? [], self::TRIMMED_IO_LIMIT, fn($vout) => [
                     'addr' => $vout['scriptpubkey_address'] ?? null,
                     'val' => $vout['value'] ?? null,
-                ], $data['vout'] ?? []),
+                ]),
                 'fee' => $data['fee'] ?? null,
                 'size' => $data['size'] ?? null,
             ];
         }
 
-        // For blocks
         return [
             'height' => $data['height'] ?? null,
             'tx_count' => $data['tx_count'] ?? null,
@@ -102,17 +103,32 @@ EOT;
         ];
     }
 
+    /**
+     * Limit list size and summarize if trimmed.
+     */
+    private function limitItems(array $items, int $limit, callable $map): array
+    {
+        $sliced = array_slice($items, 0, $limit);
+        $mapped = array_map($map, $sliced);
+
+        if (count($items) > $limit) {
+            $mapped[] = ['_summary' => sprintf('+%d more omitted', count($items) - $limit)];
+        }
+
+        return $mapped;
+    }
+
+    /**
+     * Token estimation via simple heuristic (approximation only).
+     */
     private function truncateByApproxTokens(string $text, int $maxTokens): string
     {
-        // Rough tokenizer: splits by words and punctuation
         $words = preg_split('/(?=\b)|(?<=\b)/u', $text, -1, PREG_SPLIT_NO_EMPTY);
-
         $tokens = 0;
         $output = '';
 
         foreach ($words as $word) {
-            // Heuristic: assume 1.3 tokens per word/punctuation
-            $estimated = ceil(strlen($word) / 4); // rough OpenAI token estimate
+            $estimated = ceil(strlen($word) / 4); // very rough estimate
             if ($tokens + $estimated > $maxTokens) {
                 break;
             }
