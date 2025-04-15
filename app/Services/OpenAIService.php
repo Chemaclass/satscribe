@@ -20,26 +20,20 @@ final readonly class OpenAIService
     public function generateText(BlockchainData $data, string $type): ?string
     {
         $json = json_encode($data->toArray(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
-
         $prompt = <<<PROMPT
+Use **Markdown** to highlight key info.
+
 Write a concise and accessible paragraph describing the following Bitcoin {$type}.
 Use a clear, easy-to-understand tone suitable for a general audience.
-If the response exceeds 50 words, break it into smaller paragraphs.
+
+Categorize by which wallet type or enabled features like multisig, P2SH, OP_RETURN, RBF, CoinJoin, etc
 
 Guidelines:
-- Explain concepts in a way that's understandable to readers without deep technical knowledge of Bitcoin.
-- Avoid redundancy or unnecessary restatements of obvious data points.
-- Treat "vin" as inputs and "vout" as outputs. Values are in satoshis (sats).
-- 100,000,000 sats equals 1 BTC.
-- Avoid including full hashes; shorten to the first 10 characters if necessary.
+- Inputs ("vin") = senders, Outputs ("vout") = recipients. Values are in sats (100,000,000 sats = 1 BTC)
+- Keep it short. Use multiple paragraphs if needed. If the response exceeds 50 words, break it into smaller paragraphs.
+- Note anything unusual: batching, dust, consolidation, etc, remark it at the end in an extra paragraph
 
-If relevant, highlight:
-- Unusual or noteworthy characteristics
-- Use of features like RBF, multisig, P2SH, OP_RETURN, CoinJoin, consolidation, etc.
-
-Use Markdown to emphasize key elements or structure the output.
-
-Here is the Bitcoin {$type} data to describe:
+Here's the Bitcoin {$type}:
 {$json}
 PROMPT;
 

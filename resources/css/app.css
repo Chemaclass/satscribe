@@ -37,6 +37,10 @@ header {
     text-decoration: none;
 }
 
+.description-result .markdown-content a {
+    color: var(--btc-orange);
+}
+
 .nav-links a {
     margin-left: 1rem;
     font-size: 0.95rem;
