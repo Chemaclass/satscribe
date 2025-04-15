@@ -23,8 +23,13 @@ final class PromptResultRepository
             ->delete();
     }
 
-    public function save(string $type, string $input, string $aiResponse, BlockchainData $data,?string $question = null): PromptResult
-    {
+    public function save(
+        string $type,
+        string $input,
+        string $aiResponse,
+        BlockchainData $data,
+        ?string $question = null
+    ): PromptResult {
         $raw = $data->toArray();
 
         $forceRefresh = $type === 'transaction'

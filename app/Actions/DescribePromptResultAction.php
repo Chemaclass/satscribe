@@ -30,7 +30,8 @@ final readonly class DescribePromptResultAction
         $type = is_numeric($input) ? 'block' : 'transaction';
 
         if (!$refresh) {
-            $cached = $this->repository->findByTypeAndInput($type, $input);
+            $cached = $this->repository->findByTypeAndInput($type, $input, $question);
+
             if ($cached instanceof PromptResult && !$cached->force_refresh) {
                 return new GeneratedPrompt($cached, isFresh: false);
             }
