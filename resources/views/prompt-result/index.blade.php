@@ -96,7 +96,7 @@
         @endif
 
         @isset($result)
-            <section class="description-result">
+            <section class="description-body">
                 @if($result->force_refresh)
                     <div class="alert-warning" role="alert">
                         ⚠️ This transaction is unconfirmed. You might want to refresh later to get the latest status.

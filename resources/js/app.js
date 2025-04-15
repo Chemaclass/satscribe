@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setupFormSubmissionUI();
     setupBlockchainToggle();
     setupDescriptionToggle();
-    linkBitcoinEntities('.description-result .markdown-content');
+    linkBitcoinEntities('.markdown-content');
 });
 
 function setupFormSubmissionUI() {
@@ -51,51 +51,51 @@ function setupDescriptionToggle() {
 }
 
 function linkBitcoinEntities(containerSelector) {
-    const container = document.querySelector(containerSelector);
-    if (!container) return;
+    const containers = document.querySelectorAll(containerSelector);
+    if (!containers.length) return;
 
     const patterns = getBitcoinPatterns();
     const detectedBlockHashes = new Set();
+    containers.forEach(container => {
+        const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, null);
+        const textNodes = [];
 
-    const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, null);
-    const textNodes = [];
-
-    while (walker.nextNode()) {
-        const node = walker.currentNode;
-        if (!node.parentElement.closest('a')) {
-            textNodes.push(node);
+        while (walker.nextNode()) {
+            const node = walker.currentNode;
+            if (!node.parentElement.closest('a')) {
+                textNodes.push(node);
+            }
         }
-    }
 
-    for (const node of textNodes) {
-        let updatedText = node.nodeValue;
+        for (const node of textNodes) {
+            let updatedText = node.nodeValue;
 
-        for (const { regex, link, display, type } of patterns) {
-            updatedText = updatedText.replace(regex, (match, ...groups) => {
-                if (type === 'block-hash') {
-                    if (match.length === 64) {
-                        detectedBlockHashes.add(match);
-                    } else {
+            for (const { regex, link, display, type } of patterns) {
+                updatedText = updatedText.replace(regex, (match, ...groups) => {
+                    if (type === 'block-hash') {
+                        if (match.length === 64) {
+                            detectedBlockHashes.add(match);
+                        } else {
+                            return match;
+                        }
+                    }
+
+                    if (type === 'tx' && detectedBlockHashes.has(match)) {
                         return match;
                     }
-                }
 
-                if (type === 'tx' && detectedBlockHashes.has(match)) {
-                    return match;
-                }
+                    const label = display ? display(match, groups[0]) : match;
+                    return `<a href="${link(match)}" target="_blank" rel="noopener" class="btc-link">${label}</a>`;
+                });
+            }
 
-                const label = display ? display(match, groups[0]) : match;
-                const url = link(match);
-                return `<a href="${url}" target="_blank" rel="noopener" class="btc-link">${label}</a>`;
-            });
+            if (updatedText !== node.nodeValue) {
+                const span = document.createElement('span');
+                span.innerHTML = updatedText;
+                node.replaceWith(span);
+            }
         }
-
-        if (updatedText !== node.nodeValue) {
-            const span = document.createElement('span');
-            span.innerHTML = updatedText;
-            node.replaceWith(span);
-        }
-    }
+    });
 }
 
 function getBitcoinPatterns() {

@@ -37,7 +37,7 @@ header {
     text-decoration: none;
 }
 
-.description-result .markdown-content a {
+.markdown-content a {
     color: var(--btc-orange);
 }
 

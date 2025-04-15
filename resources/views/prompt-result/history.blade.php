@@ -41,7 +41,7 @@
                             </div>
                         @endif
                         <div class="description-body relative">
-                            <div id="{{ $entryId }}" class="collapsed-response overflow-hidden max-h-[6.5rem] transition-all duration-300">
+                            <div id="{{ $entryId }}" class="markdown-content collapsed-response overflow-hidden max-h-[6.5rem] transition-all duration-300">
                                 {!! Str::markdown($desc->ai_response) !!}
                             </div>
                         </div>
