@@ -81,19 +81,20 @@
                         <span id="submit-icon"><i class="fas fa-vial"></i></span>
                         <span id="submit-text">Generate Description</span>
                     </button>
+                @if(isset($isFresh))
+                    <span
+                        id="submit-btn-info-status"
+                        class="info-message {{ $isFresh ? 'info-fresh' : 'info-cached' }}"
+                        role="status"
+                        aria-live="polite"
+                    >
+                        {{ $isFresh ? '✨ Freshly generated using live blockchain data and AI.' : '💾 Loaded from previous analysis stored in the database.' }}
+                    </span>
+                @endif
                 </div>
             </fieldset>
         </form>
 
-        @if(isset($isFresh))
-            <div
-                class="info-message {{ $isFresh ? 'info-fresh' : 'info-cached' }}"
-                role="status"
-                aria-live="polite"
-            >
-                {{ $isFresh ? '✨ Freshly generated using live blockchain data and AI.' : '💾 Loaded from previous analysis stored in the database.' }}
-            </div>
-        @endif
 
         @isset($result)
             <section class="description-body">
@@ -103,9 +104,9 @@
                     </div>
                 @endif
 
-                <div class="section">
-                    <h2>🧠 AI Summary</h2>
-                    <div class="box markdown-content">
+                <div class="section bg-orange-50 border border-orange-100 rounded p-4 shadow-sm">
+                    <h2 class="text-lg font-semibold mb-2">🧠 AI Summary</h2>
+                    <div class="box markdown-content text-gray-800 leading-relaxed">
                         {!! Str::markdown($result->ai_response) !!}
                     </div>
                 </div>

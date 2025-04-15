@@ -11,6 +11,7 @@ function setupFormSubmissionUI() {
     const form = document.querySelector('.describe-form');
     const button = document.getElementById('submit-button');
     const icon = document.getElementById('submit-icon');
+    const submitBtnInfoStatus = document.getElementById('submit-btn-info-status');
     const text = document.getElementById('submit-text');
     const spinner = document.getElementById('submit-spinner');
 
@@ -20,6 +21,7 @@ function setupFormSubmissionUI() {
         button.disabled = true;
         icon.style.display = 'none';
         text.textContent = 'Generating...';
+        submitBtnInfoStatus.textContent = '';
         spinner.style.display = 'inline-block';
     });
 }
