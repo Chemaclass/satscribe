@@ -123,33 +123,4 @@
             </section>
         @endisset
     </section>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const form = document.querySelector('.describe-form');
-            const button = document.getElementById('submit-button');
-            const icon = document.getElementById('submit-icon');
-            const text = document.getElementById('submit-text');
-            const spinner = document.getElementById('submit-spinner');
-
-            if (form && button) {
-                form.addEventListener('submit', () => {
-                    button.disabled = true;
-                    icon.style.display = 'none';
-                    text.textContent = 'Generating...';
-                    spinner.style.display = 'inline-block';
-                });
-            }
-
-            const rawBlock = document.getElementById('blockchain-data');
-            const toggleBtn = document.getElementById('toggle-raw');
-
-            if (rawBlock && toggleBtn) {
-                toggleBtn.addEventListener('click', () => {
-                    rawBlock.classList.toggle('collapsed');
-                    toggleBtn.textContent = rawBlock.classList.contains('collapsed') ? 'Show more' : 'Show less';
-                });
-            }
-        });
-    </script>
 @endsection
