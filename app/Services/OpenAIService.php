@@ -11,6 +11,8 @@ use Psr\Log\LoggerInterface;
 
 final readonly class OpenAIService
 {
+    private const LIMIT_TOKENS_PER_REQUEST = 10_000;
+
     public function __construct(
         private HttpClient $http,
         private LoggerInterface $logger,
@@ -19,36 +21,13 @@ final readonly class OpenAIService
 
     public function generateText(BlockchainData $data, string $type, string $question = ''): ?string
     {
-        $json = json_encode($data->toArray(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
-
-        $promptTemplate = <<<PROMPT
-Use **Markdown** to highlight key info.
-
-Use a clear, easy-to-understand tone suitable for a general audience.
-Write a concise and accessible paragraph describing the following Bitcoin {$type}.
-
-%s
-
-Guidelines:
-- Inputs ("vin") = senders, Outputs ("vout") = recipients. Values are in sats (100,000,000 sats = 1 BTC)
-- Keep it short. Use multiple paragraphs if needed. If the response exceeds 40 words, break it into smaller paragraphs.
-
-Here's the Bitcoin {$type}:
-{$json}
-PROMPT;
-
-        $defaultQuestion = <<<PROMPT
-Categorize by which wallet type or enabled features like multisig, P2SH, OP_RETURN, RBF, CoinJoin, etc
-Note anything unusual: batching, dust, consolidation, etc, remark it at the end in an extra paragraph
-PROMPT;
-
         $response = $this->http->withToken(config('services.openai.key'))
             ->post('https://api.openai.com/v1/chat/completions', [
                 'model' => config('services.openai.model'),
                 'messages' => [
                     [
                         'role' => 'user',
-                        'content' => sprintf($promptTemplate, $question ?: $defaultQuestion),
+                        'content' => $this->preparePrompt($data, $type, $question),
                     ],
                 ],
             ]);
@@ -61,5 +40,56 @@ PROMPT;
         $this->logger->info("OpenAI generated description:\n".$text);
 
         return $text;
+    }
+
+    private function preparePrompt(BlockchainData $data, string $type, string $question): string
+    {
+        $json = json_encode($data->toArray(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+
+        $defaultQuestion = <<<EOT
+Categorize wallet types and features: multisig, P2SH, OP_RETURN, RBF, CoinJoin, etc.
+Mention anything unusual (batching, dust, consolidation) in a separate paragraph.
+EOT;
+
+        $questionPart = $question ?: $defaultQuestion;
+
+        $prompt = <<<EOT
+Use **Markdown** to highlight key info.
+Write a concise and accessible paragraph describing the following Bitcoin {$type}.
+
+{$questionPart}
+
+Guidelines:
+- Inputs ("vin") = senders, Outputs ("vout") = recipients. Values are in sats (100,000,000 sats = 1 BTC)
+- Keep it short. Use multiple paragraphs if needed. If the response exceeds 40 words, break it into smaller paragraphs.
+- Max answered to 100 tokens.
+
+Here's the Bitcoin {$type}:
+{$json}
+EOT;
+
+        return $this->truncateByApproxTokens($prompt, self::LIMIT_TOKENS_PER_REQUEST);
+    }
+
+    private function truncateByApproxTokens(string $text, int $maxTokens): string
+    {
+        // Rough tokenizer: splits by words and punctuation
+        $words = preg_split('/(?=\b)|(?<=\b)/u', $text, -1, PREG_SPLIT_NO_EMPTY);
+
+        $tokens = 0;
+        $output = '';
+
+        foreach ($words as $word) {
+            // Heuristic: assume 1.3 tokens per word/punctuation
+            $estimated = ceil(strlen($word) / 4); // rough OpenAI token estimate
+            if ($tokens + $estimated > $maxTokens) {
+                break;
+            }
+
+            $tokens += $estimated;
+            $output .= $word;
+        }
+
+        return $output;
     }
 }
