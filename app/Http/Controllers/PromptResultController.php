@@ -23,19 +23,19 @@ final class PromptResultController
     {
         $q = strtolower(trim($request->query('q')));
         $refresh = filter_var($request->query('refresh'), FILTER_VALIDATE_BOOL);
-        $prompt = trim($request->query('prompt', ''));
+        $question = trim($request->query('question', ''));
 
         if ($q === '' || $q === '0') {
             return view('prompt-result.index');
         }
 
         try {
-            $response = $action->execute($q, $refresh, $prompt);
+            $response = $action->execute($q, $refresh, $question);
         } catch (OpenAIError $e) {
             Log::error('Failed to describe prompt result', [
                 'query' => $q,
                 'refresh' => $refresh,
-                'prompt' => $prompt,
+                'prompt' => $question,
                 'message' => $e->getMessage(),
                 'exception' => $e,
             ]);
@@ -56,7 +56,7 @@ final class PromptResultController
         return view('prompt-result.index', [
             'result' => $response->result,
             'q' => $q,
-            'prompt' => $prompt,
+            'prompt' => $question,
             'refreshed' => $refresh,
             'isFresh' => $response->isFresh,
         ]);

@@ -39,22 +39,22 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="prompt" class="form-label">Custom Question (optional)</label>
+                    <label for="question" class="form-label">Custom Question (optional)</label>
                     <input
                         type="text"
-                        id="prompt"
-                        name="prompt"
-                        value="{{ old('prompt', $prompt ?? '') }}"
+                        id="question"
+                        name="question"
+                        value="{{ old('question', $question ?? '') }}"
                         placeholder="e.g. What is the total input value?"
                         class="form-input"
-                        aria-describedby="promptHelp"
+                        aria-describedby="questionHelp"
                         autocomplete="off"
                     >
-                    <small id="promptHelp" class="form-help">
+                    <small id="questionHelp" class="form-help">
                         Ask the AI a specific question about this transaction or block.
                     </small>
 
-                    @error('prompt')
+                    @error('question')
                     <div class="error" role="alert">{{ $message }}</div>
                     @enderror
                 </div>

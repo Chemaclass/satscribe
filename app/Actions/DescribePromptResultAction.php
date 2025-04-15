@@ -26,7 +26,7 @@ final readonly class DescribePromptResultAction
     ) {
     }
 
-    public function execute(string $input, bool $refresh = false, string $prompt = ''): ?GeneratedPrompt
+    public function execute(string $input, bool $refresh = false, string $question = ''): ?GeneratedPrompt
     {
         $type = is_numeric($input) ? 'block' : 'transaction';
 
@@ -37,12 +37,12 @@ final readonly class DescribePromptResultAction
             }
         }
 
-        $fresh = $this->getFreshResult($input, $type, $refresh, $prompt);
+        $fresh = $this->getFreshResult($input, $type, $refresh, $question);
 
         return $fresh instanceof PromptResult ? new GeneratedPrompt($fresh, isFresh: true) : null;
     }
 
-    private function getFreshResult(string $input, string $type, bool $refresh, string $prompt = ''): ?PromptResult
+    private function getFreshResult(string $input, string $type, bool $refresh, string $question = ''): ?PromptResult
     {
         $this->checkRateLimiter();
         if ($refresh) {
@@ -54,7 +54,7 @@ final readonly class DescribePromptResultAction
             return null;
         }
 
-        $response = $this->openai->generateText($data, $type, $prompt);
+        $response = $this->openai->generateText($data, $type, $question);
         if ($response === null) {
             return null;
         }

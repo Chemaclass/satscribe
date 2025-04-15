@@ -17,7 +17,7 @@ final readonly class OpenAIService
     ) {
     }
 
-    public function generateText(BlockchainData $data, string $type, string $prompt = ''): ?string
+    public function generateText(BlockchainData $data, string $type, string $question = ''): ?string
     {
         $json = json_encode($data->toArray(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
 
@@ -38,15 +38,16 @@ Here's the Bitcoin {$type}:
 {$json}
 PROMPT;
 
-        $defaultPrompt = 'Categorize by which wallet type or enabled features like multisig, P2SH, OP_RETURN, RBF, CoinJoin, etc';
-
-        $content = sprintf($promptTemplate, $prompt ?: $defaultPrompt);
+        $defaultQuestion = 'Categorize by which wallet type or enabled features like multisig, P2SH, OP_RETURN, RBF, CoinJoin, etc';
 
         $response = $this->http->withToken(config('services.openai.key'))
             ->post('https://api.openai.com/v1/chat/completions', [
                 'model' => config('services.openai.model'),
                 'messages' => [
-                    ['role' => 'user', 'content' => $content],
+                    [
+                        'role' => 'user',
+                        'content' => sprintf($promptTemplate, $question ?: $defaultQuestion),
+                    ],
                 ],
             ]);
 
