@@ -35,6 +35,11 @@
                             @endif
                         </div>
 
+                        @if (!empty($desc->question))
+                            <div class="mb-2 text-sm italic text-orange-700 bg-orange-50 px-3 py-2 rounded">
+                                <strong>Question:</strong> {{ $desc->question }}
+                            </div>
+                        @endif
                         <div class="description-body relative">
                             <div id="{{ $entryId }}" class="collapsed-response overflow-hidden max-h-[6.5rem] transition-all duration-300">
                                 {!! Str::markdown($desc->ai_response) !!}

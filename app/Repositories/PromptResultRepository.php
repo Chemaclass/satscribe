@@ -8,10 +8,11 @@ use App\Models\PromptResult;
 
 final class PromptResultRepository
 {
-    public function findByTypeAndInput(string $type, string $input): ?PromptResult
+    public function findByTypeAndInput(string $type, string $input, ?string $question = null): ?PromptResult
     {
         return PromptResult::where('type', $type)
             ->where('input', $input)
+            ->when($question, fn ($q) => $q->where('question', $question))
             ->first();
     }
 
@@ -22,7 +23,7 @@ final class PromptResultRepository
             ->delete();
     }
 
-    public function save(string $type, string $input, string $aiResponse, BlockchainData $data): PromptResult
+    public function save(string $type, string $input, string $aiResponse, BlockchainData $data,?string $question = null): PromptResult
     {
         $raw = $data->toArray();
 
@@ -33,6 +34,7 @@ final class PromptResultRepository
         return PromptResult::create([
             'type' => $type,
             'input' => $input,
+            'question' => $question,
             'ai_response' => $aiResponse,
             'raw_data' => $raw,
             'force_refresh' => $forceRefresh,

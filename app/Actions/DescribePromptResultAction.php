@@ -59,7 +59,7 @@ final readonly class DescribePromptResultAction
             return null;
         }
 
-        return $this->repository->save($type, $input, $response, $data);
+        return $this->repository->save($type, $input, $response, $data, $question);
     }
 
     private function checkRateLimiter(): void
