@@ -23,17 +23,19 @@ final class PromptResultController
     {
         $q = strtolower(trim($request->query('q')));
         $refresh = filter_var($request->query('refresh'), FILTER_VALIDATE_BOOL);
+        $prompt = trim($request->query('prompt', ''));
 
         if ($q === '' || $q === '0') {
             return view('prompt-result.index');
         }
 
         try {
-            $response = $action->execute($q, $refresh);
+            $response = $action->execute($q, $refresh, $prompt);
         } catch (OpenAIError $e) {
             Log::error('Failed to describe prompt result', [
                 'query' => $q,
                 'refresh' => $refresh,
+                'prompt' => $prompt,
                 'message' => $e->getMessage(),
                 'exception' => $e,
             ]);
@@ -41,17 +43,20 @@ final class PromptResultController
             return view('prompt-result.index')
                 ->withErrors([
                     'q' => 'Oops! We couldn’t process your request. Try again later, or contact Chema for support.',
-                ]);
+                ])
+                ->withInput();
         }
 
         if (!$response instanceof GeneratedPrompt) {
             return view('prompt-result.index')
-                ->withErrors(['q' => 'Could not fetch blockchain data.']);
+                ->withErrors(['q' => 'Could not fetch blockchain data.'])
+                ->withInput();
         }
 
         return view('prompt-result.index', [
             'result' => $response->result,
             'q' => $q,
+            'prompt' => $prompt,
             'refreshed' => $refresh,
             'isFresh' => $response->isFresh,
         ]);

@@ -16,7 +16,7 @@ use function is_numeric;
 
 final readonly class DescribePromptResultAction
 {
-    private const MAX_OPENAI_ATTEMPTS_PER_DAY_PER_IP = 50;
+    private const MAX_OPENAI_ATTEMPTS_PER_DAY_PER_IP = 100;
 
     public function __construct(
         private BlockchainService $blockchain,
@@ -26,7 +26,7 @@ final readonly class DescribePromptResultAction
     ) {
     }
 
-    public function execute(string $input, bool $refresh = false): ?GeneratedPrompt
+    public function execute(string $input, bool $refresh = false, string $prompt = ''): ?GeneratedPrompt
     {
         $type = is_numeric($input) ? 'block' : 'transaction';
 
@@ -37,12 +37,12 @@ final readonly class DescribePromptResultAction
             }
         }
 
-        $fresh = $this->getFreshResult($input, $type, $refresh);
+        $fresh = $this->getFreshResult($input, $type, $refresh, $prompt);
 
         return $fresh instanceof PromptResult ? new GeneratedPrompt($fresh, isFresh: true) : null;
     }
 
-    private function getFreshResult(string $input, string $type, bool $refresh): ?PromptResult
+    private function getFreshResult(string $input, string $type, bool $refresh, string $prompt = ''): ?PromptResult
     {
         $this->checkRateLimiter();
         if ($refresh) {
@@ -54,7 +54,7 @@ final readonly class DescribePromptResultAction
             return null;
         }
 
-        $response = $this->openai->generateText($data, $type);
+        $response = $this->openai->generateText($data, $type, $prompt);
         if ($response === null) {
             return null;
         }

@@ -38,6 +38,27 @@
                     @enderror
                 </div>
 
+                <div class="form-group">
+                    <label for="prompt" class="form-label">Custom Question (optional)</label>
+                    <input
+                        type="text"
+                        id="prompt"
+                        name="prompt"
+                        value="{{ old('prompt', $prompt ?? '') }}"
+                        placeholder="e.g. What is the total input value?"
+                        class="form-input"
+                        aria-describedby="promptHelp"
+                        autocomplete="off"
+                    >
+                    <small id="promptHelp" class="form-help">
+                        Ask the AI a specific question about this transaction or block.
+                    </small>
+
+                    @error('prompt')
+                    <div class="error" role="alert">{{ $message }}</div>
+                    @enderror
+                </div>
+
                 <div class="form-checkbox enhanced-checkbox">
                     <input
                         type="checkbox"
@@ -45,6 +66,7 @@
                         name="refresh"
                         value="true"
                         class="checkbox-input"
+                        {{ old('refresh', $refreshed ?? false) ? 'checked' : '' }}
                     >
                     <label for="refresh" class="checkbox-label">
                         Fetch the latest data from the blockchain<br>
@@ -88,23 +110,22 @@
                     </div>
                 </div>
 
-                    <div class="section">
-                        <h2>📦 Raw Blockchain Data</h2>
+                <div class="section">
+                    <h2>📦 Raw Blockchain Data</h2>
 
-                        <div class="code-block-collapsible">
-        <pre id="blockchain-data" class="code-block collapsed">
+                    <div class="code-block-collapsible">
+                        <pre id="blockchain-data" class="code-block collapsed">
 {{ json_encode($result->raw_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) }}
-        </pre>
-                            <button type="button" id="toggle-raw" class="toggle-raw-button">Show more</button>
-                        </div>
+                        </pre>
+                        <button type="button" id="toggle-raw" class="toggle-raw-button">Show more</button>
                     </div>
+                </div>
             </section>
         @endisset
     </section>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            // Submit button logic (existing)
             const form = document.querySelector('.describe-form');
             const button = document.getElementById('submit-button');
             const icon = document.getElementById('submit-icon');
@@ -120,7 +141,6 @@
                 });
             }
 
-            // Raw blockchain toggle
             const rawBlock = document.getElementById('blockchain-data');
             const toggleBtn = document.getElementById('toggle-raw');
 

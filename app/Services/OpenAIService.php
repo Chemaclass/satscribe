@@ -17,16 +17,17 @@ final readonly class OpenAIService
     ) {
     }
 
-    public function generateText(BlockchainData $data, string $type): ?string
+    public function generateText(BlockchainData $data, string $type, string $prompt = ''): ?string
     {
         $json = json_encode($data->toArray(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
-        $prompt = <<<PROMPT
+
+        $promptTemplate = <<<PROMPT
 Use **Markdown** to highlight key info.
 
 Write a concise and accessible paragraph describing the following Bitcoin {$type}.
 Use a clear, easy-to-understand tone suitable for a general audience.
 
-Categorize by which wallet type or enabled features like multisig, P2SH, OP_RETURN, RBF, CoinJoin, etc
+%s
 
 Guidelines:
 - Inputs ("vin") = senders, Outputs ("vout") = recipients. Values are in sats (100,000,000 sats = 1 BTC)
@@ -37,11 +38,15 @@ Here's the Bitcoin {$type}:
 {$json}
 PROMPT;
 
+        $defaultPrompt = 'Categorize by which wallet type or enabled features like multisig, P2SH, OP_RETURN, RBF, CoinJoin, etc';
+
+        $content = sprintf($promptTemplate, $prompt ?: $defaultPrompt);
+
         $response = $this->http->withToken(config('services.openai.key'))
             ->post('https://api.openai.com/v1/chat/completions', [
                 'model' => config('services.openai.model'),
                 'messages' => [
-                    ['role' => 'user', 'content' => $prompt],
+                    ['role' => 'user', 'content' => $content],
                 ],
             ]);
 
