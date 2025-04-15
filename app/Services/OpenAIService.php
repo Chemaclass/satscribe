@@ -11,7 +11,7 @@ use Psr\Log\LoggerInterface;
 
 final readonly class OpenAIService
 {
-    private const LIMIT_TOKENS_PER_REQUEST = 10_000;
+    private const LIMIT_TOKENS_PER_REQUEST = 50_000;
 
     public function __construct(
         private HttpClient $http,
@@ -44,7 +44,7 @@ final readonly class OpenAIService
 
     private function preparePrompt(BlockchainData $data, string $type, string $question): string
     {
-        $json = json_encode($data->toArray(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+        $json = json_encode($this->compactBlockchainData($data->toArray()), JSON_UNESCAPED_SLASHES);
 
         $defaultQuestion = <<<EOT
 Categorize wallet types and features: multisig, P2SH, OP_RETURN, RBF, CoinJoin, etc.
@@ -64,11 +64,42 @@ Guidelines:
 - Keep it short. Use multiple paragraphs if needed. If the response exceeds 40 words, break it into smaller paragraphs.
 - Max answered to 100 tokens.
 
-Here's the Bitcoin {$type}:
+Here's a condensed view of the Bitcoin {$type} data:
 {$json}
 EOT;
 
         return $this->truncateByApproxTokens($prompt, self::LIMIT_TOKENS_PER_REQUEST);
+    }
+
+    private function compactBlockchainData(array $data): array
+    {
+        // For transactions
+        if (isset($data['vin']) || isset($data['vout'])) {
+            return [
+                'txid' => $data['txid'] ?? null,
+                'inputs' => array_map(fn($vin) => [
+                    'addr' => $vin['prevout']['scriptpubkey_address'] ?? null,
+                    'val' => $vin['prevout']['value'] ?? null,
+                ], $data['vin'] ?? []),
+                'outputs' => array_map(fn($vout) => [
+                    'addr' => $vout['scriptpubkey_address'] ?? null,
+                    'val' => $vout['value'] ?? null,
+                ], $data['vout'] ?? []),
+                'fee' => $data['fee'] ?? null,
+                'size' => $data['size'] ?? null,
+            ];
+        }
+
+        // For blocks
+        return [
+            'height' => $data['height'] ?? null,
+            'tx_count' => $data['tx_count'] ?? null,
+            'miner' => $data['extras']['miner'] ?? null,
+            'reward' => $data['extras']['reward'] ?? null,
+            'size' => $data['size'] ?? null,
+            'weight' => $data['weight'] ?? null,
+            'timestamp' => $data['timestamp'] ?? null,
+        ];
     }
 
     private function truncateByApproxTokens(string $text, int $maxTokens): string
