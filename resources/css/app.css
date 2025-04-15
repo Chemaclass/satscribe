@@ -12,6 +12,23 @@
     'Segoe UI Symbol', 'Noto Color Emoji';
 }
 
+@layer utilities {
+    @keyframes bounce-wave {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-12px); }
+    }
+
+    .animate-bounce-wave {
+        animation: bounce-wave 1.5s ease-in-out infinite;
+    }
+
+    .delay-\[0ms\] { animation-delay: 0ms; }
+    .delay-\[150ms\] { animation-delay: 150ms; }
+    .delay-\[300ms\] { animation-delay: 300ms; }
+    .delay-\[450ms\] { animation-delay: 450ms; }
+    .delay-\[600ms\] { animation-delay: 600ms; }
+}
+
 body {
     font-family: system-ui, sans-serif;
     background: #f9fafb;

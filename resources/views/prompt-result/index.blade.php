@@ -12,6 +12,7 @@
             </p>
         </header>
 
+        <div class="flex flex-col lg:flex-row items-start">
         <form method="GET" action="{{ route('generate') }}" class="describe-form" aria-labelledby="form-heading">
             <fieldset>
                 <legend id="form-heading" class="visually-hidden">Describe Bitcoin Data</legend>
@@ -39,7 +40,6 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="question" class="form-label">Custom Question (optional)</label>
                     <input
                         type="text"
                         id="question"
@@ -88,13 +88,22 @@
                         role="status"
                         aria-live="polite"
                     >
-                        {{ $isFresh ? '✨ Freshly generated using live blockchain data and AI.' : '💾 Loaded from previous analysis stored in the database.' }}
+                        {{ $isFresh ? ' ✨ Freshly generated using live data and AI.' : 'Loaded from previous analysis.' }}
                     </span>
                 @endif
                 </div>
             </fieldset>
         </form>
-
+            <div class="hidden lg:block w-1/3 h-32 relative select-none" aria-hidden="true">
+                <div class="absolute bottom-0 right-0 flex justify-end items-end gap-1 pr-4">
+                    <span class="text-3xl animate-bounce-wave delay-[0ms]"><i class="fa-solid fa-bitcoin-sign text-orange-500"></i></span>
+                    <span class="text-3xl animate-bounce-wave delay-[150ms]"><i class="fa-solid fa-bitcoin-sign text-orange-500"></i></span>
+                    <span class="text-3xl animate-bounce-wave delay-[300ms]"><i class="fa-solid fa-bitcoin-sign text-orange-500"></i></span>
+                    <span class="text-3xl animate-bounce-wave delay-[450ms]"><i class="fa-solid fa-bitcoin-sign text-orange-500"></i></span>
+                    <span class="text-3xl animate-bounce-wave delay-[600ms]"><i class="fa-solid fa-bitcoin-sign text-orange-500"></i></span>
+                </div>
+            </div>
+        </div>
 
         @isset($result)
             <section class="description-body">
