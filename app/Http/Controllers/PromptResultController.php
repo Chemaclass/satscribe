@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Actions\DescribePromptResultAction;
 use App\Data\GeneratedPrompt;
+use App\Data\Question;
 use App\Exceptions\OpenAIError;
 use App\Models\PromptResult;
 use Illuminate\Http\Request;
@@ -26,7 +27,9 @@ final class PromptResultController
         $question = trim($request->query('question', ''));
 
         if ($q === '' || $q === '0') {
-            return view('prompt-result.index');
+            return view('prompt-result.index', [
+                'questionPlaceholder' => $this->questionPlaceholder(),
+            ]);
         }
 
         try {
@@ -56,9 +59,15 @@ final class PromptResultController
         return view('prompt-result.index', [
             'result' => $response->result,
             'q' => $q,
-            'prompt' => $question,
+            'question' => $question,
             'refreshed' => $refresh,
             'isFresh' => $response->isFresh,
+            'questionPlaceholder' => $this->questionPlaceholder(),
         ]);
+    }
+
+    private function questionPlaceholder(): string
+    {
+        return Question::SAMPLE_QUESTIONS[array_rand(Question::SAMPLE_QUESTIONS)];
     }
 }

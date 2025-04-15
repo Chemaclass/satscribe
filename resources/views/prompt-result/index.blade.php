@@ -45,7 +45,7 @@
                         id="question"
                         name="question"
                         value="{{ old('question', $question ?? '') }}"
-                        placeholder="e.g. What is the total input value?"
+                        placeholder="{{$questionPlaceholder ?? "What is the total input value?"}}"
                         class="form-input"
                         aria-describedby="questionHelp"
                         autocomplete="off"
