@@ -123,4 +123,5 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    'max_open_ai_attempts' => env('MAX_OPEN_AI_ATTEMPTS', 50),
 ];

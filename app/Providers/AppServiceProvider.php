@@ -20,6 +20,11 @@ class AppServiceProvider extends ServiceProvider
             ->when(DescribePromptResultAction::class)
             ->needs('$ip')
             ->give(request()->ip());
+
+        $this->app
+            ->when(DescribePromptResultAction::class)
+            ->needs('$maxOpenAIAttempts')
+            ->giveConfig('app.max_open_ai_attempts');
     }
 
     /**

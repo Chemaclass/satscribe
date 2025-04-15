@@ -16,13 +16,12 @@ use function is_numeric;
 
 final readonly class DescribePromptResultAction
 {
-    private const MAX_OPENAI_ATTEMPTS_PER_DAY_PER_IP = 100;
-
     public function __construct(
         private BlockchainService $blockchain,
         private OpenAIService $openai,
         private PromptResultRepository $repository,
         private string $ip,
+        private int $maxOpenAIAttempts,
     ) {
     }
 
@@ -65,7 +64,7 @@ final readonly class DescribePromptResultAction
     private function checkRateLimiter(): void
     {
         $key = 'openai:'.$this->ip;
-        if (!RateLimiter::remaining($key, self::MAX_OPENAI_ATTEMPTS_PER_DAY_PER_IP)) {
+        if (!RateLimiter::remaining($key, $this->maxOpenAIAttempts)) {
             throw new ThrottleRequestsException('You have reached the daily OpenAI limit.');
         }
 
