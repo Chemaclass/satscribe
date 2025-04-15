@@ -24,21 +24,23 @@ final readonly class OpenAIService
         $promptTemplate = <<<PROMPT
 Use **Markdown** to highlight key info.
 
-Write a concise and accessible paragraph describing the following Bitcoin {$type}.
 Use a clear, easy-to-understand tone suitable for a general audience.
+Write a concise and accessible paragraph describing the following Bitcoin {$type}.
 
 %s
 
 Guidelines:
 - Inputs ("vin") = senders, Outputs ("vout") = recipients. Values are in sats (100,000,000 sats = 1 BTC)
-- Keep it short. Use multiple paragraphs if needed. If the response exceeds 50 words, break it into smaller paragraphs.
-- Note anything unusual: batching, dust, consolidation, etc, remark it at the end in an extra paragraph
+- Keep it short. Use multiple paragraphs if needed. If the response exceeds 40 words, break it into smaller paragraphs.
 
 Here's the Bitcoin {$type}:
 {$json}
 PROMPT;
 
-        $defaultQuestion = 'Categorize by which wallet type or enabled features like multisig, P2SH, OP_RETURN, RBF, CoinJoin, etc';
+        $defaultQuestion = <<<PROMPT
+Categorize by which wallet type or enabled features like multisig, P2SH, OP_RETURN, RBF, CoinJoin, etc
+Note anything unusual: batching, dust, consolidation, etc, remark it at the end in an extra paragraph
+PROMPT;
 
         $response = $this->http->withToken(config('services.openai.key'))
             ->post('https://api.openai.com/v1/chat/completions', [
