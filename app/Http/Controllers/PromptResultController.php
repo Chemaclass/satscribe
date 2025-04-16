@@ -23,11 +23,13 @@ final class PromptResultController
     public function generate(Request $request, DescribePromptResultAction $action): View
     {
         $validated = $request->validate([
-            'search' => ['nullable', 'string', function ($attribute, $value, $fail) {
-                if (!preg_match('/^[a-f0-9]{64}$/i', $value) && !ctype_digit($value)) {
-                    $fail('The '.$attribute.' must be a valid Bitcoin TXID or block height.');
+            'search' => [
+                'nullable', 'string', function ($attribute, $value, $fail) {
+                    if (!preg_match('/^[a-f0-9]{64}$/i', $value) && !ctype_digit($value)) {
+                        $fail('The '.$attribute.' must be a valid Bitcoin TXID or block height.');
+                    }
                 }
-            }],
+            ],
             'question' => ['nullable', 'string', 'max:200'],
         ]);
 
@@ -60,9 +62,14 @@ final class PromptResultController
         }
 
         if (!$response instanceof GeneratedPrompt) {
-            return view('prompt-result.index')
-                ->withErrors(['search' => 'Could not fetch blockchain data.'])
-                ->withInput();
+            $view = view('prompt-result.index')
+                ->withErrors(['search' => 'Could not fetch blockchain data.']);
+
+            if (app()->isLocal()) {
+                $view->withInput();
+            }
+
+            return $view;
         }
 
         return view('prompt-result.index', [
