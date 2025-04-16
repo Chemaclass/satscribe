@@ -26,13 +26,14 @@
                         value="{{ old('search', $search ?? '') }}"
                         placeholder="e.g. 4b0d... or 840000"
                         class="form-input"
-                        aria-describedby="qHelp"
+                        aria-describedby="searchHelp"
                         autocomplete="off"
                         required
                         autofocus
                     >
-                    <small id="qHelp" class="form-help">Enter a valid TXID (64 hex chars) or block height
-                        (number).</small>
+                    <small id="searchHelp" class="form-help">
+                        Enter a valid TXID (64 hex chars) or block height (number).
+                    </small>
 
                     @error('search')
                     <div class="error" role="alert">{{ $message }}</div>
@@ -49,6 +50,7 @@
                         class="form-input"
                         aria-describedby="questionHelp"
                         autocomplete="off"
+                        maxlength="200"
                     >
                     <small id="questionHelp" class="form-help">
                         Ask the AI a specific question about this transaction or block.

@@ -22,9 +22,18 @@ final class PromptResultController
 
     public function generate(Request $request, DescribePromptResultAction $action): View
     {
-        $search = strtolower(trim($request->query('search')));
+        $validated = $request->validate([
+            'search' => ['required', 'string', function ($attribute, $value, $fail) {
+                if (!preg_match('/^[a-f0-9]{64}$/i', $value) && !ctype_digit($value)) {
+                    $fail('The '.$attribute.' must be a valid Bitcoin TXID or block height.');
+                }
+            }],
+            'question' => ['nullable', 'string', 'max:200'],
+        ]);
+
+        $search = strtolower(trim($validated['search']));
+        $question = trim($validated['question']);
         $refresh = filter_var($request->query('refresh'), FILTER_VALIDATE_BOOL);
-        $question = trim($request->query('question', ''));
 
         if ($search === '' || $search === '0') {
             return view('prompt-result.index', [
