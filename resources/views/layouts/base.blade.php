@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>@yield('title', 'Satscribe – Bitcoin Describer')</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     @vite('resources/css/app.css')
     @vite('resources/js/app.js')
     <script src="https://kit.fontawesome.com/cfd779d106.js" crossorigin="anonymous"></script>

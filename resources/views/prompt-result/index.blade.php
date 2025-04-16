@@ -3,7 +3,7 @@
 @section('title', 'Satscribe – AI Bitcoin Describer')
 
 @section('content')
-    <section class="satscribe-section">
+    <section class="satscribe-section px-4 sm:px-6 lg:px-8 py-6">
         <header class="section-header">
             <h1>Understand any Bitcoin Transaction or Block</h1>
             <p class="subtitle">
@@ -13,7 +13,7 @@
         </header>
 
         <div class="flex flex-col lg:flex-row items-start">
-        <form method="GET" action="{{ route('generate') }}" class="describe-form" aria-labelledby="form-heading">
+            <form method="GET" action="{{ route('generate') }}" class="describe-form w-full max-w-2xl" aria-labelledby="form-heading">
             <fieldset>
                 <legend id="form-heading" class="visually-hidden">Describe Bitcoin Data</legend>
 
@@ -76,8 +76,8 @@
                     </label>
                 </div>
 
-                <div class="form-actions">
-                    <button type="submit" class="form-button" id="submit-button">
+                <div class="form-actions mt-4 flex flex-col sm:flex-row sm:items-center gap-2">
+                    <button type="submit" class="form-button w-full sm:w-auto" id="submit-button">
                         <i class="fas fa-spinner fa-spin" id="submit-spinner"
                            style="display: none; margin-left: 0.5rem;"></i>
                         <span id="submit-icon"><i class="fas fa-vial"></i></span>
@@ -108,7 +108,7 @@
         </div>
 
         @isset($result)
-            <section class="description-body">
+            <section class="description-body mt-6 w-full max-w-3xl">
                 @if($result->force_refresh)
                     <div class="alert-warning" role="alert">
                         ⚠️ This transaction is unconfirmed. You might want to refresh later to get the latest status.
@@ -126,7 +126,7 @@
                     <h2>📦 Raw Blockchain Data</h2>
 
                     <div class="code-block-collapsible">
-                        <pre id="blockchain-data" class="code-block collapsed">
+                        <pre id="blockchain-data" class="code-block collapsed overflow-x-auto text-sm sm:text-base">
 {{ json_encode($result->raw_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) }}
                         </pre>
                         <button type="button" id="toggle-raw" class="toggle-raw-button">Show more</button>
