@@ -22,21 +22,21 @@ final class PromptResultController
 
     public function generate(Request $request, DescribePromptResultAction $action): View
     {
-        $q = strtolower(trim($request->query('q')));
+        $search = strtolower(trim($request->query('search')));
         $refresh = filter_var($request->query('refresh'), FILTER_VALIDATE_BOOL);
         $question = trim($request->query('question', ''));
 
-        if ($q === '' || $q === '0') {
+        if ($search === '' || $search === '0') {
             return view('prompt-result.index', [
                 'questionPlaceholder' => $this->questionPlaceholder(),
             ]);
         }
 
         try {
-            $response = $action->execute($q, $refresh, $question);
+            $response = $action->execute($search, $refresh, $question);
         } catch (OpenAIError $e) {
             Log::error('Failed to describe prompt result', [
-                'query' => $q,
+                'query' => $search,
                 'refresh' => $refresh,
                 'question' => $question,
                 'message' => $e->getMessage(),
@@ -45,20 +45,20 @@ final class PromptResultController
 
             return view('prompt-result.index')
                 ->withErrors([
-                    'q' => 'Oops! We couldn’t process your request. Try again later, or contact Chema for support.',
+                    'search' => 'Oops! We couldn’t process your request. Try again later, or contact Chema for support.',
                 ])
                 ->withInput();
         }
 
         if (!$response instanceof GeneratedPrompt) {
             return view('prompt-result.index')
-                ->withErrors(['q' => 'Could not fetch blockchain data.'])
+                ->withErrors(['search' => 'Could not fetch blockchain data.'])
                 ->withInput();
         }
 
         return view('prompt-result.index', [
             'result' => $response->result,
-            'q' => $q,
+            'search' => $search,
             'question' => $question,
             'refreshed' => $refresh,
             'isFresh' => $response->isFresh,

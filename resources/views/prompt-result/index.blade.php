@@ -18,12 +18,12 @@
                 <legend id="form-heading" class="visually-hidden">Describe Bitcoin Data</legend>
 
                 <div class="form-group">
-                    <label for="q" class="form-label">Transaction ID or Block Height</label>
+                    <label for="search" class="form-label">Transaction ID or Block Height</label>
                     <input
                         type="text"
-                        id="q"
-                        name="q"
-                        value="{{ old('q', $q ?? '') }}"
+                        id="search"
+                        name="search"
+                        value="{{ old('search', $search ?? '') }}"
                         placeholder="e.g. 4b0d... or 840000"
                         class="form-input"
                         aria-describedby="qHelp"
@@ -34,7 +34,7 @@
                     <small id="qHelp" class="form-help">Enter a valid TXID (64 hex chars) or block height
                         (number).</small>
 
-                    @error('q')
+                    @error('search')
                     <div class="error" role="alert">{{ $message }}</div>
                     @enderror
                 </div>
