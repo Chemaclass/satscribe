@@ -54,5 +54,8 @@ php artisan migrate
 
 Run the app:
 ```bash
+# The Backend
 php artisan serve
+# The Frontend
+npm run dev
 ```
