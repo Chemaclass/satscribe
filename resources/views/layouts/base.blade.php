@@ -10,17 +10,18 @@
     @stack('head')
 </head>
 <body>
-<header>
+
+<header class="site-header">
     <a href="{{ url('/') }}" class="brand">Satscribe</a>
     <nav class="nav-links">
         <a href="{{ route('generate') }}">
-            <i class="fas fa-vial"></i> Generate
+            <i class="fas fa-vial"></i> <span class="link-text">Generate</span>
         </a>
         <a href="{{ url('/history') }}">
-            <i class="fas fa-scroll"></i> History
+            <i class="fas fa-scroll"></i> <span class="link-text">History</span>
         </a>
         <a href="https://github.com/Chemaclass/satscribe" target="_blank" title="View on GitHub">
-            <i class="fab fa-github"></i> Code
+            <i class="fab fa-github"></i> <span class="link-text">Code</span>
         </a>
     </nav>
 </header>

@@ -301,3 +301,38 @@ pre {
     font-size: 0.85rem;
     margin-top: 0.25rem;
 }
+
+.nav-links {
+    display: flex;
+    gap: 1rem;
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: #333;
+    display: flex;
+    align-items: center;
+    font-size: 1rem;
+}
+
+.nav-links * {
+    font-size: 1.1rem;
+}
+
+.nav-links .link-text {
+    margin-left: 6px;
+}
+
+@media (max-width: 500px) {
+    .nav-links {
+        gap: 2rem;
+    }
+
+    .nav-links .link-text {
+        display: none;
+    }
+
+    .nav-links i {
+        font-size: 1.5rem;
+    }
+}
