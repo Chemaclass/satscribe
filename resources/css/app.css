@@ -127,7 +127,6 @@ nav[role="navigation"] svg {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    margin-top: 1rem;
 }
 
 .form-button {
@@ -278,7 +277,6 @@ pre {
     display: flex;
     align-items: flex-start;
     gap: 0.75rem;
-    margin-top: 1.25rem;
     line-height: 1.4;
 }
 

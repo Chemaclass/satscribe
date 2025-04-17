@@ -68,22 +68,6 @@
                         @enderror
                     </div>
 
-                    {{-- Refresh Checkbox --}}
-                    <div class="form-checkbox enhanced-checkbox mb-4">
-                        <input
-                            type="checkbox"
-                            id="refresh"
-                            name="refresh"
-                            value="true"
-                            class="checkbox-input"
-                            {{ old('refresh', $refreshed ?? false) ? 'checked' : '' }}
-                        >
-                        <label for="refresh" class="checkbox-label">
-                            Fetch the latest data from the blockchain<br>
-                            <small class="checkbox-help">(Skips cached descriptions and requests live data from the blockchain and OpenAI)</small>
-                        </label>
-                    </div>
-
                     {{-- Submit Button + Info --}}
                     <div class="form-actions mt-4 flex flex-col sm:flex-row sm:items-center gap-2">
                         <button type="submit" class="form-button w-full sm:w-auto" id="submit-button">
@@ -102,6 +86,41 @@
                             {{ $isFresh ? '✨ Freshly generated using live data and AI.' : 'Loaded from previous analysis.' }}
                         </span>
                         @endisset
+                    </div>
+                    {{-- Advanced Fields Toggle --}}
+                    <div x-data="{ showAdvanced: false }" class="form-group mb-4">
+                        <button
+                            type="button"
+                            class="text-sm font-medium text-orange-600 hover:text-orange-700 flex items-center gap-2 mt-4"
+                            @click="showAdvanced = !showAdvanced"
+                        >
+                            <i class="fas fa-sliders-h text-orange-500"></i>
+                            <span x-show="!showAdvanced">Show advanced fields ▾</span>
+                            <span x-show="showAdvanced">Hide advanced fields ▴</span>
+                        </button>
+
+                        <div
+                            x-show="showAdvanced"
+                            x-cloak
+                            x-transition
+                            class="mt-1 bg-orange-50 border border-orange-200 rounded-lg px-4 py-3 space-y-2 shadow-sm"
+                        >
+                            {{-- Refresh Checkbox --}}
+                            <div class="form-checkbox enhanced-checkbox">
+                                <input
+                                    type="checkbox"
+                                    id="refresh"
+                                    name="refresh"
+                                    value="true"
+                                    class="checkbox-input"
+                                    {{ old('refresh', $refreshed ?? false) ? 'checked' : '' }}
+                                >
+                                <label for="refresh" class="checkbox-label">
+                                    Fetch the latest data from the blockchain<br>
+                                    <small class="checkbox-help text-gray-600">(Skips cached descriptions and requests live data from the blockchain and OpenAI)</small>
+                                </label>
+                            </div>
+                        </div>
                     </div>
                 </fieldset>
             </form>
