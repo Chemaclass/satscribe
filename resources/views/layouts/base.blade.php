@@ -10,7 +10,7 @@
     <script src="//unpkg.com/alpinejs" defer></script>
     @stack('head')
 </head>
-<body>
+<body class="min-h-screen flex flex-col">
 
 <header class="site-header">
     <a href="{{ url('/') }}" class="brand">Satscribe</a>
@@ -24,7 +24,9 @@
     </nav>
 </header>
 
-@yield('content')
+<main class="flex-grow">
+    @yield('content')
+</main>
 
 <footer>
     &copy;{{ date('Y') }}<a href="https://chemaclass.com/" target="_blank">Chema</a>
