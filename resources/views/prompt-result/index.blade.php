@@ -24,47 +24,52 @@
                 <fieldset>
                     <legend id="form-heading" class="sr-only">Describe Bitcoin Data</legend>
 
-                    {{-- TXID / Block Height Field --}}
-                    <div class="form-group mb-4">
-                        <label for="search" class="form-label">Transaction ID or Block Height</label>
+                    {{-- TXID / Block Height Group --}}
+                    <div class="form-section mb-6">
+                        <label for="search" class="block text-sm font-medium text-gray-900 mb-1">
+                            Transaction ID or Block Height
+                        </label>
                         <input
                             type="text"
                             id="search"
                             name="search"
                             value="{{ old('search', $search ?? '') }}"
                             placeholder="e.g. 4b0d... or 840000"
-                            class="form-input"
+                            class="form-input w-full"
                             aria-describedby="searchHelp"
                             autocomplete="off"
                             required
                             autofocus
                         >
-                        <small id="searchHelp" class="form-help">
+                        <small id="searchHelp" class="text-gray-600 text-sm mt-1 block">
                             Enter a valid TXID (64 hex chars) or block height (number).
                         </small>
                         @error('search')
-                        <div class="error" role="alert">{{ $message }}</div>
+                        <div class="error mt-1 text-red-500 text-sm" role="alert">{{ $message }}</div>
                         @enderror
                     </div>
 
-                    {{-- AI Question Field --}}
-                    <div class="form-group mb-4">
+                    {{-- AI Question Group --}}
+                    <div class="form-section mb-6">
+                        <label for="question" class="block text-sm font-medium text-gray-900 mb-1">
+                            Ask a Question (optional)
+                        </label>
                         <input
                             type="text"
                             id="question"
                             name="question"
                             value="{{ old('question', $question ?? '') }}"
                             placeholder="{{ $questionPlaceholder ?? 'What is the total input value?' }}"
-                            class="form-input"
+                            class="form-input w-full"
                             aria-describedby="questionHelp"
                             autocomplete="off"
                             maxlength="200"
                         >
-                        <small id="questionHelp" class="form-help">
+                        <small id="questionHelp" class="text-gray-600 text-sm mt-1 block">
                             Ask the AI a specific question about this transaction or block.
                         </small>
                         @error('question')
-                        <div class="error" role="alert">{{ $message }}</div>
+                        <div class="error mt-1 text-red-500 text-sm" role="alert">{{ $message }}</div>
                         @enderror
                     </div>
 
