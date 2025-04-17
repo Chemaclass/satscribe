@@ -71,11 +71,11 @@ header {
 
 footer {
     border-top: 1px solid #e5e7eb;
-    margin-top: 3rem;
-    padding-top: 1rem;
     font-size: 0.9rem;
     text-align: center;
     color: #6b7280;
+    margin-top: auto;
+    padding-top: 2rem;
 }
 
 footer a {
@@ -137,8 +137,9 @@ nav[role="navigation"] svg {
 
 .form-button:hover {
     background: var(--btc-orange-dark);
+    background-color: #ea580c; /* darken slightly */
+    box-shadow: 0 2px 6px rgba(234, 88, 12, 0.3);
 }
-
 .form-button:disabled {
     background: #9ca3af; /* gray-400 */
     cursor: not-allowed;

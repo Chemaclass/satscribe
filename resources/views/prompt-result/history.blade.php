@@ -1,6 +1,6 @@
 @extends('layouts.base')
 
-@section('title', 'Satscribe History – AI Bitcoin Describer')
+@section('title', 'Satscribe History')
 
 @section('content')
     <section>

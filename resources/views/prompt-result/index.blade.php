@@ -1,7 +1,5 @@
 @extends('layouts.base')
 
-@section('title', 'Satscribe – AI Bitcoin Describer')
-
 @section('content')
     <section class="satscribe-section px-4 sm:px-6 lg:px-8 py-6">
 
@@ -77,8 +75,8 @@
                     <div class="form-actions mt-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
                         <button type="submit" class="form-button w-full sm:w-auto" id="submit-button">
                             <i class="fas fa-spinner fa-spin" id="submit-spinner" style="display: none; margin-left: 0.5rem;"></i>
-                            <span id="submit-icon"><i class="fas fa-bolt"></i></span>
                             <span id="submit-text">Satscribe</span>
+                            <span id="submit-icon"><i class="fas fa-bolt"></i></span>
                         </button>
 
                         {{-- Status badge, right next to button --}}
@@ -136,7 +134,7 @@
             </form>
 
             {{-- Animated Bitcoin Icons --}}
-            <div class="hidden lg:block w-1/3 h-48 relative select-none" aria-hidden="true">
+            <div class="hidden lg:flex w-1/3 h-48 relative select-none" aria-hidden="true">
                 <div class="absolute bottom-6 right-0 flex justify-end items-end gap-2 pr-4">
                     @foreach([0, 150, 300, 450, 600] as $delay)
                         <span class="text-4xl animate-bounce-wave delay-[{{ $delay }}ms]">
