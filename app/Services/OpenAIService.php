@@ -48,7 +48,7 @@ final readonly class OpenAIService
     private function preparePrompt(BlockchainData $data, string $type, string $question): string
     {
         $condensedData = $this->compactBlockchainData($data->toArray());
-        $json = json_encode($condensedData, JSON_UNESCAPED_SLASHES);
+        $json = (string) json_encode($condensedData, JSON_UNESCAPED_SLASHES);
 
         $questionPart = $question ?: <<<TEXT
 Categorize wallet types and features: multisig, P2SH, OP_RETURN, RBF, CoinJoin, etc.
@@ -56,18 +56,18 @@ Mention anything unusual (batching, dust, consolidation) in a separate paragraph
 TEXT;
 
         $prompt = <<<PROMPT
-Use **Markdown** to highlight key info.
-Write a concise, accessible description of this Bitcoin {$type}.
-
 {$questionPart}
-
 Guidelines:
-- Inputs ("vin") = senders, Outputs ("vout") = recipients. Values are in sats (100,000,000 sats = 1 BTC)
+- Use **Markdown** to highlight key info.
 - Keep it short. Use multiple paragraphs if needed.
-- If the response exceeds 40 words, break it into smaller paragraphs.
 - Your response should not exceed 200 tokens.
+- Avoid redundancy.
 
-Here's a condensed view of the Bitcoin {$type} data:
+Technical context:
+- Inputs ("vin") = senders, Outputs ("vout") = recipients
+- Values are in sats (100,000,000 sats = 1 BTC)
+
+Here's a condensed view of the Bitcoin {$type}:
 {$json}
 PROMPT;
 

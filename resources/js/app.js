@@ -20,7 +20,7 @@ function setupFormSubmissionUI() {
     form.addEventListener('submit', () => {
         button.disabled = true;
         icon.style.display = 'none';
-        text.textContent = 'Generating...';
+        text.textContent = 'Satscribing...';
         submitBtnInfoStatus.textContent = '';
         spinner.style.display = 'inline-block';
     });

@@ -124,7 +124,6 @@
                                     name="refresh"
                                     value="true"
                                     class="checkbox-input"
-                                    {{ old('refresh', $refreshed ?? false) ? 'checked' : '' }}
                                 >
                                 <label for="refresh" class="checkbox-label">
                                     Fetch the latest data from the blockchain<br>
@@ -150,7 +149,7 @@
 
         {{-- AI + Blockchain Result --}}
         @isset($result)
-            <section class="description-body mt-10 w-full max-w-3xl mx-auto space-y-6">
+            <section class="description-body mt-6 w-full max-w-3xl mx-auto space-y-6">
                 @if($result->force_refresh)
                     <div class="alert-warning" role="alert">
                         ⚠️ This transaction is unconfirmed. You might want to refresh later to get the latest status.
