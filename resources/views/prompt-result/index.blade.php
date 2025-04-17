@@ -77,15 +77,15 @@
                     <div class="form-actions mt-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
                         <button type="submit" class="form-button w-full sm:w-auto" id="submit-button">
                             <i class="fas fa-spinner fa-spin" id="submit-spinner" style="display: none; margin-left: 0.5rem;"></i>
-                            <span id="submit-icon"><i class="fas fa-vial"></i></span>
-                            <span id="submit-text">Generate Description</span>
+                            <span id="submit-icon"><i class="fas fa-bolt"></i></span>
+                            <span id="submit-text">Satscribe</span>
                         </button>
 
                         {{-- Status badge, right next to button --}}
                         @isset($isFresh)
                             @if ($isFresh)
                                 <div class="inline-flex items-center text-sm text-green-800 bg-green-100 border border-green-200 px-3 py-2 rounded-md shadow-sm">
-                                    <i class="fa-solid fa-bolt text-green-500 mr-1"></i>
+                                    <i class="fa-solid fa-vial text-green-500 mr-1"></i>
                                     <strong class="mr-1">Fresh!</strong>
                                     <span>Generated using live blockchain data and AI ✨</span>
                                 </div>
