@@ -14,7 +14,7 @@
         </header>
 
         {{-- Search & Filter --}}
-        <div class="flex flex-col sm:flex-row gap-4 mb-6">
+        <div class="flex flex-col sm:flex-row gap-4 mb-1">
             <input
                 type="text"
                 placeholder="Search FAQs..."
@@ -30,7 +30,7 @@
         </div>
 
         {{-- Answer Type Tabs --}}
-        <div class="sticky top-0 z-10 bg-gray-50 mb-6 pt-3 pb-2">
+        <div class="answer-type-tabs sticky top-0 z-10 pt-3 pb-3 bg-gray-50">
             <div class="flex gap-4 text-sm font-medium pb-2">
                 <button
                     class="px-3 py-1 rounded border"
@@ -61,13 +61,24 @@
         {{-- FAQ List --}}
         <div class="space-y-6">
             <template x-for="faq in filteredFaqs()" :key="faq.id">
-                <div class="border rounded-lg p-4 shadow-sm">
-                    <h2 class="text-lg font-semibold mb-2">
-                        <span x-text="faq.question"></span>
-                        <template x-if="faq.highlight">
-                            <span class="ml-2 text-sm text-orange-600 font-bold uppercase">★ Highlighted</span>
+                <div class="rounded-lg p-4 shadow-sm">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
+                        <h2 class="text-lg font-semibold">
+                            <span x-text="faq.question"></span>
+                            <template x-if="faq.highlight">
+                                <span class="ml-2 text-sm text-orange-600 font-bold uppercase">★ Highlight</span>
+                            </template>
+                        </h2>
+                        <template x-if="faq.categories">
+                            <div class="text-sm text-gray-500 sm:text-right">
+                                <template x-for="cat in faq.categories.split(',')">
+                <span class="inline-block bg-gray-100 text-gray-700 px-2 py-0.5 rounded mr-1 mb-1">
+                    <span x-text="cat.trim()"></span>
+                </span>
+                                </template>
+                            </div>
                         </template>
-                    </h2>
+                    </div>
 
                     <p class="text-gray-700 mb-2" x-show="answerLevel === 'tldr'" x-text="faq.answer_tldr"></p>
                     <p class="text-gray-700 mb-2" x-show="answerLevel === 'beginner'" x-text="faq.answer_beginner"></p>

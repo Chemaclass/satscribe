@@ -297,6 +297,11 @@ pre {
     margin-top: 0.25rem;
 }
 
+.answer-type-tabs {
+    mask-image: linear-gradient(to bottom, black 80%, transparent);
+    -webkit-mask-image: linear-gradient(to bottom, black 80%, transparent);
+}
+
 .nav-links {
     display: flex;
     gap: 1rem;
