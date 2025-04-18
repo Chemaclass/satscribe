@@ -29,10 +29,47 @@
             </select>
         </div>
 
+        {{-- Global Answer Type Tabs --}}
+        <div class="flex gap-2 mb-4 text-sm items-center">
+            <span class="text-gray-500 text-xs">Answer style:</span>
+            <button
+                class="px-2.5 py-0.5 rounded-full text-xs border transition-colors duration-150"
+                :class="globalAnswerLevel === 'tldr'
+            ? 'bg-orange-100 text-orange-800 border-orange-300'
+            : 'bg-transparent text-gray-600 border-gray-300 hover:bg-gray-100'"
+                @click="setGlobalAnswerLevel('tldr')"
+            >TL;DR</button>
+
+            <button
+                class="px-2.5 py-0.5 rounded-full text-xs border transition-colors duration-150"
+                :class="globalAnswerLevel === 'beginner'
+            ? 'bg-orange-100 text-orange-800 border-orange-300'
+            : 'bg-transparent text-gray-600 border-gray-300 hover:bg-gray-100'"
+                @click="setGlobalAnswerLevel('beginner')"
+            >Beginner</button>
+
+            <button
+                class="px-2.5 py-0.5 rounded-full text-xs border transition-colors duration-150"
+                :class="globalAnswerLevel === 'advance'
+            ? 'bg-orange-100 text-orange-800 border-orange-300'
+            : 'bg-transparent text-gray-600 border-gray-300 hover:bg-gray-100'"
+                @click="setGlobalAnswerLevel('advance')"
+            >Advanced</button>
+        </div>
+
         {{-- FAQ List --}}
         <div class="space-y-6">
             <template x-for="faq in filteredFaqs()" :key="faq.id">
-                <div class="rounded-lg p-4 shadow-sm" x-data="{ answerLevel: 'beginner' }">
+                <div class="rounded-lg p-4 shadow-sm"
+                     x-data="{
+             answerLevel: 'beginner',
+             init() {
+                 window.addEventListener('answer-level-change', (e) => {
+                     this.answerLevel = e.detail;
+                 });
+             }
+         }"
+                >
                     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
                         <h2 class="text-lg font-semibold">
                             <span x-text="faq.question"></span>
@@ -104,7 +141,12 @@
             Alpine.data('faqSection', () => ({
                 search: '',
                 category: '',
+                globalAnswerLevel: 'beginner',
                 faqs: @json($faqs),
+                setGlobalAnswerLevel(level) {
+                    this.globalAnswerLevel = level;
+                    window.dispatchEvent(new CustomEvent('answer-level-change', { detail: level }));
+                },
                 filteredFaqs() {
                     return this.faqs.filter(faq => {
                         const inCategory = this.category === '' || faq.categories.toLowerCase().includes(this.category.toLowerCase());
