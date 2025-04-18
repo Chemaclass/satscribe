@@ -52,12 +52,11 @@ final readonly class OpenAIService
 
         $questionPart = $question ?: <<<TEXT
 If relevant, also include:
-- Any notable wallet features (e.g. multisig, P2SH, OP_RETURN, RBF, CoinJoin).
+- Any notable wallet features (e.g. Multi-signature, P2PK, P2PKH, P2SH, P2MS, P2WPKH, P2WSH, P2TR, OP_RETURN, RBF, CoinJoin).
 - Unusual behavior (e.g. batching, dust outputs, consolidation) in a separate paragraph.
 TEXT;
-
-        // todo: consider adding a persona to the AI, like: "You are an expert Bitcoin educator and technical writer."
         $prompt = <<<PROMPT
+You are an expert Bitcoin educator and technical writer.
 Provide a clear, beginner-friendly description of this Bitcoin {$type}.
 
 {$questionPart}

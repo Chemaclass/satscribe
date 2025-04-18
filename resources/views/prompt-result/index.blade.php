@@ -204,13 +204,20 @@
                 valid: false,
                 isHex64: false,
                 isBlockHeight: false,
+
                 validate() {
                     const trimmed = this.input.trim();
+
+                    // Validate 64-character hex
                     this.isHex64 = /^[a-fA-F0-9]{64}$/.test(trimmed);
-                    this.isBlockHeight = /^\d+$/.test(trimmed);
+
+                    // Validate numeric and check it's <= maxBlockHeight
+                    const height = parseInt(trimmed, 10);
+                    this.isBlockHeight = /^\d+$/.test(trimmed) && height <= {{$maxBitcoinBlockHeight??1_000_000}};
+
                     this.valid = this.isHex64 || this.isBlockHeight;
                 }
-            }
+            };
         }
     </script>
 @endpush

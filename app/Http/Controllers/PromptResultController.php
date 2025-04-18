@@ -7,6 +7,8 @@ use App\Data\Question;
 use App\Exceptions\BlockchainException;
 use App\Exceptions\OpenAIError;
 use App\Models\PromptResult;
+use DateTimeImmutable;
+use DateTimeZone;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
@@ -40,6 +42,7 @@ final class PromptResultController
         if (!$request->has('search') || empty($request->get('search'))) {
             return view('prompt-result.index', [
                 'questionPlaceholder' => $this->questionPlaceholder(),
+                'maxBitcoinBlockHeight' => $this->getMaxBitcoinBlockHeight(),
             ]);
         }
 
@@ -64,11 +67,30 @@ final class PromptResultController
             'refreshed' => $refresh,
             'isFresh' => $response->isFresh,
             'questionPlaceholder' => $this->questionPlaceholder(),
+            'maxBitcoinBlockHeight' => $this->getMaxBitcoinBlockHeight(),
         ]);
     }
 
     private function questionPlaceholder(): string
     {
         return Question::SAMPLE_QUESTIONS[array_rand(Question::SAMPLE_QUESTIONS)];
+    }
+
+    private function getMaxBitcoinBlockHeight(): int
+    {
+        $genesisTimestamp = (new DateTimeImmutable('2009-01-03 19:15:05', new DateTimeZone('UTC')))->getTimestamp();
+        $currentTimestamp = now()->setTimezone('UTC')->getTimestamp();
+
+        $elapsedSeconds = $currentTimestamp - $genesisTimestamp;
+        $estimatedHeight = (int) floor($elapsedSeconds / 600); // 600 seconds = 10 minutes per block
+
+        /**
+         * Add a buffer (~6%) to account for future blocks beyond the estimated height.
+         * This helps prevent edge cases where a valid height might be slightly ahead
+         * of the computed value due to network variability or caching delays.
+         */
+        $buffer = (int) ceil($estimatedHeight * 0.06);
+
+        return $estimatedHeight + $buffer;
     }
 }

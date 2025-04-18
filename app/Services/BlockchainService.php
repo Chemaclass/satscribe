@@ -102,7 +102,7 @@ final readonly class BlockchainService
             || preg_match('/^0{8,}[a-f0-9]{56}$/i', $input);
     }
 
-    private function getBlockHash(string $input): ?string
+    private function getBlockHash(string $input): string
     {
         if (!is_numeric($input)) {
             return $input;
@@ -114,7 +114,7 @@ final readonly class BlockchainService
                 'height' => $input,
                 'response' => $hashRes->body(),
             ]);
-            return null;
+            return $input;
         }
 
         return $hashRes->body();
