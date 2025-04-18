@@ -74,7 +74,7 @@
                         <h2 class="text-lg font-semibold">
                             <span x-text="faq.question"></span>
                             <template x-if="faq.highlight">
-                                <span class="ml-2 text-sm text-orange-600 font-bold uppercase">★ Highlight</span>
+                                <span class="block sm:inline text-sm text-orange-600 font-bold uppercase mt-1 sm:mt-0">★ Highlight</span>
                             </template>
                         </h2>
                         <template x-if="faq.categories">
