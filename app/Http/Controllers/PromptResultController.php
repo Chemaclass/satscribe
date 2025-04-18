@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Actions\DescribePromptResultAction;
-use App\Data\GeneratedPrompt;
 use App\Data\Question;
+use App\Exceptions\BlockchainException;
 use App\Exceptions\OpenAIError;
 use App\Models\PromptResult;
 use Illuminate\Http\Request;
@@ -45,25 +45,16 @@ final class PromptResultController
 
         try {
             $response = $action->execute($search, $refresh, $question);
-        } catch (OpenAIError $e) {
+        } catch (BlockchainException|OpenAIError $e) {
             Log::error('Failed to describe prompt result', [
-                'query' => $search,
+                'search' => $search,
                 'refresh' => $refresh,
                 'question' => $question,
-                'message' => $e->getMessage(),
-                'exception' => $e,
+                'error' => $e->getMessage(),
             ]);
 
-            return view('prompt-result.index')
-                ->withErrors([
-                    'search' => 'Oops! We couldn’t process your request. Try again later, or contact Chema for support.',
-                ])
-                ->withInput();
-        }
-
-        if (!$response instanceof GeneratedPrompt) {
             $view = view('prompt-result.index')
-                ->withErrors(['search' => 'Could not fetch blockchain data.']);
+                ->withErrors(['search' => $e->getMessage()]);
 
             if (app()->isLocal()) {
                 $view->withInput();

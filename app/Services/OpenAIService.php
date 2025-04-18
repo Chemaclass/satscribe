@@ -20,7 +20,7 @@ final readonly class OpenAIService
     ) {
     }
 
-    public function generateText(BlockchainData $data, string $type, string $question = ''): ?string
+    public function generateText(BlockchainData $data, string $type, string $question = ''): string
     {
         $payload = [
             'model' => config('services.openai.model'),

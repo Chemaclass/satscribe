@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
-use App\Data\BlockchainData;
 use App\Data\GeneratedPrompt;
 use App\Models\PromptResult;
 use App\Repositories\PromptResultRepository;
@@ -39,10 +38,10 @@ final readonly class DescribePromptResultAction
 
         $fresh = $this->getFreshResult($input, $type, $refresh, $question);
 
-        return $fresh instanceof PromptResult ? new GeneratedPrompt($fresh, isFresh: true) : null;
+        return new GeneratedPrompt($fresh, isFresh: true);
     }
 
-    private function getFreshResult(string $input, string $type, bool $refresh, string $question = ''): ?PromptResult
+    private function getFreshResult(string $input, string $type, bool $refresh, string $question = ''): PromptResult
     {
         $this->checkRateLimiter();
         if ($refresh) {
@@ -50,14 +49,7 @@ final readonly class DescribePromptResultAction
         }
 
         $data = $this->blockchain->getBlockchainData($input);
-        if (!$data instanceof BlockchainData) {
-            return null;
-        }
-
         $response = $this->openai->generateText($data, $type, $question);
-        if ($response === null) {
-            return null;
-        }
 
         return $this->repository->save($type, $input, $response, $data, $question);
     }

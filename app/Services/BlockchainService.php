@@ -7,6 +7,7 @@ namespace App\Services;
 use App\Data\BlockchainData;
 use App\Data\BlockData;
 use App\Data\TransactionData;
+use App\Exceptions\BlockchainException;
 use Illuminate\Http\Client\Factory as HttpClient;
 use Psr\Log\LoggerInterface;
 
@@ -20,14 +21,14 @@ final readonly class BlockchainService
     ) {
     }
 
-    public function getBlockchainData(string $input): ?BlockchainData
+    public function getBlockchainData(string $input): BlockchainData
     {
         return $this->isBlock($input)
             ? $this->getBlockData($input)
             : $this->getTransactionData($input);
     }
 
-    private function getBlockData(string $input): ?BlockData
+    private function getBlockData(string $input): BlockData
     {
         $hash = $this->getBlockHash($input);
 
@@ -36,7 +37,7 @@ final readonly class BlockchainService
 
         if (!$blockRes->successful() || !$txsRes->successful()) {
             $this->logger->warning('Block or transactions fetch failed', ['hash' => $hash]);
-            return null;
+            throw BlockchainException::blockOrTxFetchFailed($hash);
         }
 
         $block = $blockRes->json();
@@ -63,14 +64,14 @@ final readonly class BlockchainService
         );
     }
 
-    private function getTransactionData(string $txid): ?TransactionData
+    private function getTransactionData(string $txid): TransactionData
     {
         $txRes = $this->http->get(self::BASE_URL."/tx/{$txid}");
         $statusRes = $this->http->get(self::BASE_URL."/tx/{$txid}/status");
 
         if (!$txRes->successful() || !$statusRes->successful()) {
             $this->logger->warning('Transaction lookup failed', ['txid' => $txid]);
-            return null;
+            throw BlockchainException::txLookupFailed($txid);
         }
 
         $tx = $txRes->json();
