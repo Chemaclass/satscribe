@@ -34,5 +34,6 @@
         Leave a tip <i class="fa-solid fa-bitcoin-sign"></i>
     </a>
 </footer>
+@stack('scripts')
 </body>
 </html>
