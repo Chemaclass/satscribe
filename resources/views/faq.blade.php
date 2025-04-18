@@ -2,12 +2,19 @@
 
 @section('content')
     <section
-        class="faq-section px-4 sm:px-6 lg:px-8 py-10 max-w-4xl mx-auto"
+        class="faq-section px-4 sm:px-6 lg:px-8 py-6"
         x-data="faqSection()"
     >
-        <header class="mb-10">
-            <h1 class="text-3xl font-bold mb-2">Frequently Asked Questions</h1>
-            <p class="text-gray-700">Browse or search by topic to learn more.</p>
+        {{-- Header Section --}}
+        <header class="section-header mb-6">
+            <div class="flex flex-col max-w-2xl">
+                <h1 class="text-2xl sm:text-3xl font-bold leading-tight">
+                    Frequently Asked Questions
+                </h1>
+                <p class="subtitle text-base sm:text-lg text-gray-700">
+                    Browse or search by topic to learn more.
+                </p>
+            </div>
         </header>
 
         {{-- Search and Filters --}}
