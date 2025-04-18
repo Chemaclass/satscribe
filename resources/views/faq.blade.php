@@ -21,7 +21,7 @@
                 class="form-input w-full sm:w-2/3"
                 x-model="search"
             >
-            <select class="form-select sm:w-1/3" x-model="category">
+            <select class="form-select sm:w-1/3 cursor-pointer" x-model="category">
                 <option value="">All Categories</option>
                 @foreach ($categories as $cat)
                     <option value="{{ $cat }}">{{ ucfirst(trim($cat)) }}</option>
@@ -33,34 +33,34 @@
         <div class="flex gap-2 mb-4 text-sm items-center">
             <span class="text-gray-500 text-xs">Answer style:</span>
             <button
-                class="px-2.5 py-0.5 rounded-full text-xs border transition-colors duration-150"
+                class="px-2.5 py-0.5 rounded-full text-xs border transition-colors duration-150 cursor-pointer"
                 :class="globalAnswerLevel === 'tldr'
             ? 'bg-orange-100 text-orange-800 border-orange-300'
             : 'bg-transparent text-gray-600 border-gray-300 hover:bg-gray-100'"
                 @click="setGlobalAnswerLevel('tldr')"
-            >TL;DR</button>
+            ><i class="fas fa-scissors text-[11px]"></i> TL;DR</button>
 
             <button
-                class="px-2.5 py-0.5 rounded-full text-xs border transition-colors duration-150"
+                class="px-2.5 py-0.5 rounded-full text-xs border transition-colors duration-150 cursor-pointer"
                 :class="globalAnswerLevel === 'beginner'
             ? 'bg-orange-100 text-orange-800 border-orange-300'
             : 'bg-transparent text-gray-600 border-gray-300 hover:bg-gray-100'"
                 @click="setGlobalAnswerLevel('beginner')"
-            >Beginner</button>
+            ><i class="fas fa-book text-[11px]"></i> Beginner</button>
 
             <button
-                class="px-2.5 py-0.5 rounded-full text-xs border transition-colors duration-150"
+                class="px-2.5 py-0.5 rounded-full text-xs border transition-colors duration-150 cursor-pointer"
                 :class="globalAnswerLevel === 'advance'
             ? 'bg-orange-100 text-orange-800 border-orange-300'
             : 'bg-transparent text-gray-600 border-gray-300 hover:bg-gray-100'"
                 @click="setGlobalAnswerLevel('advance')"
-            >Advanced</button>
+            ><i class="fas fa-laptop-code text-[11px]"></i> Advanced</button>
         </div>
 
         {{-- FAQ List --}}
         <div class="space-y-6">
             <template x-for="faq in filteredFaqs()" :key="faq.id">
-                <div class="rounded-lg p-4 shadow-sm"
+                <div class="rounded-lg p-4 shadow-sm transition-colors duration-150 hover:bg-orange-50"
                      x-data="{
              answerLevel: 'beginner',
              init() {
@@ -77,42 +77,44 @@
                                 <span class="block sm:inline text-sm text-orange-600 font-bold uppercase mt-1 sm:mt-0">★ Highlight</span>
                             </template>
                         </h2>
+
                         <template x-if="faq.categories">
-                            <div class="text-sm text-gray-500 sm:text-right">
+                            <div class="flex flex-wrap items-center gap-1 text-sm text-gray-500 sm:text-right">
                                 <template x-for="cat in faq.categories.split(',')">
-                        <span class="inline-block bg-gray-100 text-gray-700 px-2 py-0.5 rounded mr-1 mb-1">
-                            <span x-text="cat.trim()"></span>
-                        </span>
+                                    <span class="inline-block bg-gray-100 text-gray-700 px-2 py-0.5 rounded mr-1 mb-1">
+                                        <span x-text="cat.trim()"></span>
+                                    </span>
                                 </template>
+                                <div class="relative ml-1">
+                                    <!-- Desktop dropdown using Alpine -->
+                                    <div x-data="{ open: false }" class="hidden sm:block relative">
+                                        <button @click="open = !open"
+                                                class="text-xs font-semibold rounded-full px-2 py-0.5 shadow-sm flex items-center gap-1 cursor-pointer">
+                                            <template x-if="answerLevel === 'tldr'"><span><i class="fas fa-scissors text-[11px]"></i></span></template>
+                                            <template x-if="answerLevel === 'beginner'"><span><i class="fas fa-book text-[11px]"></i></span></template>
+                                            <template x-if="answerLevel === 'advance'"><span><i class="fas fa-laptop-code text-[11px]"></i></span></template>
+                                        </button>
+                                        <div x-show="open" class="absolute right-0 z-10 mt-2 w-36 bg-white border border-gray-200 rounded-md shadow-lg text-sm text-gray-700" @click.away="open = false">
+                                            <ul class="py-1">
+                                                <li class="px-3 py-1.5 hover:bg-orange-50 cursor-pointer flex items-center gap-2" @click="answerLevel = 'tldr'; open = false"><i class="fas fa-scissors text-[11px]"></i> <span>TL;DR</span></li>
+                                                <li class="px-3 py-1.5 hover:bg-orange-50 cursor-pointer flex items-center gap-2" @click="answerLevel = 'beginner'; open = false"><i class="fas fa-book text-[11px]"></i> <span>Beginner</span></li>
+                                                <li class="px-3 py-1.5 hover:bg-orange-50 cursor-pointer flex items-center gap-2" @click="answerLevel = 'advance'; open = false"><i class="fas fa-laptop-code text-[11px]"></i> <span>Advanced</span></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+
+                                    <!-- Mobile dropdown -->
+                                    <div class="block sm:hidden">
+                                        <select x-model="answerLevel"
+                                                class="text-xs font-semibold rounded-full px-2 py-0.5 shadow-sm cursor-pointer">
+                                            <option value="tldr">✂️ TL;DR</option>
+                                            <option value="beginner">📖 Beginner</option>
+                                            <option value="advance">💻 Advanced</option>
+                                        </select>
+                                    </div>
+                                </div>
                             </div>
                         </template>
-                    </div>
-
-                    <!-- Local Answer Type Tabs -->
-                    <div class="flex gap-2 mb-2">
-                        <button
-                            class="px-2.5 py-0.5 rounded-full text-xs border transition-colors duration-150"
-                            :class="answerLevel === 'tldr'
-            ? 'bg-orange-100 text-orange-800 border-orange-300'
-            : 'bg-transparent text-gray-600 border-gray-300 hover:bg-gray-100'"
-                            @click="answerLevel = 'tldr'"
-                        >TL;DR</button>
-
-                        <button
-                            class="px-2.5 py-0.5 rounded-full text-xs border transition-colors duration-150"
-                            :class="answerLevel === 'beginner'
-            ? 'bg-orange-100 text-orange-800 border-orange-300'
-            : 'bg-transparent text-gray-600 border-gray-300 hover:bg-gray-100'"
-                            @click="answerLevel = 'beginner'"
-                        >Beginner</button>
-
-                        <button
-                            class="px-2.5 py-0.5 rounded-full text-xs border transition-colors duration-150"
-                            :class="answerLevel === 'advance'
-            ? 'bg-orange-100 text-orange-800 border-orange-300'
-            : 'bg-transparent text-gray-600 border-gray-300 hover:bg-gray-100'"
-                            @click="answerLevel = 'advance'"
-                        >Advanced</button>
                     </div>
 
                     <!-- Answers -->
