@@ -9,7 +9,9 @@ final class Faq extends Model
 {
     protected $fillable = [
         'question',
-        'answer',
+        'answer_beginner',
+        'answer_advance',
+        'answer_tldr',
         'categories',
         'highlight',
         'priority',
