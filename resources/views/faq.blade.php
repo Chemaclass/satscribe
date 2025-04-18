@@ -29,39 +29,10 @@
             </select>
         </div>
 
-        {{-- Answer Type Tabs --}}
-        <div class="answer-type-tabs sticky top-0 z-10 pt-3 pb-3 bg-gray-50">
-            <div class="flex gap-4 text-sm font-medium pb-2">
-                <button
-                    class="px-3 py-1 rounded border"
-                    :class="answerLevel === 'tldr'
-                ? 'bg-[color:var(--btc-orange)] text-white'
-                : 'bg-white text-gray-700 border-gray-300'"
-                    @click="answerLevel = 'tldr'"
-                >TL;DR</button>
-
-                <button
-                    class="px-3 py-1 rounded border"
-                    :class="answerLevel === 'beginner'
-                ? 'bg-[color:var(--btc-orange)] text-white'
-                : 'bg-white text-gray-700 border-gray-300'"
-                    @click="answerLevel = 'beginner'"
-                >Beginner</button>
-
-                <button
-                    class="px-3 py-1 rounded border"
-                    :class="answerLevel === 'advance'
-                ? 'bg-[color:var(--btc-orange)] text-white'
-                : 'bg-white text-gray-700 border-gray-300'"
-                    @click="answerLevel = 'advance'"
-                >Advanced</button>
-            </div>
-        </div>
-
         {{-- FAQ List --}}
         <div class="space-y-6">
             <template x-for="faq in filteredFaqs()" :key="faq.id">
-                <div class="rounded-lg p-4 shadow-sm">
+                <div class="rounded-lg p-4 shadow-sm" x-data="{ answerLevel: 'beginner' }">
                     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
                         <h2 class="text-lg font-semibold">
                             <span x-text="faq.question"></span>
@@ -72,14 +43,42 @@
                         <template x-if="faq.categories">
                             <div class="text-sm text-gray-500 sm:text-right">
                                 <template x-for="cat in faq.categories.split(',')">
-                <span class="inline-block bg-gray-100 text-gray-700 px-2 py-0.5 rounded mr-1 mb-1">
-                    <span x-text="cat.trim()"></span>
-                </span>
+                        <span class="inline-block bg-gray-100 text-gray-700 px-2 py-0.5 rounded mr-1 mb-1">
+                            <span x-text="cat.trim()"></span>
+                        </span>
                                 </template>
                             </div>
                         </template>
                     </div>
 
+                    <!-- Local Answer Type Tabs -->
+                    <div class="flex gap-2 mb-2">
+                        <button
+                            class="px-2.5 py-0.5 rounded-full text-xs border transition-colors duration-150"
+                            :class="answerLevel === 'tldr'
+            ? 'bg-orange-100 text-orange-800 border-orange-300'
+            : 'bg-transparent text-gray-600 border-gray-300 hover:bg-gray-100'"
+                            @click="answerLevel = 'tldr'"
+                        >TL;DR</button>
+
+                        <button
+                            class="px-2.5 py-0.5 rounded-full text-xs border transition-colors duration-150"
+                            :class="answerLevel === 'beginner'
+            ? 'bg-orange-100 text-orange-800 border-orange-300'
+            : 'bg-transparent text-gray-600 border-gray-300 hover:bg-gray-100'"
+                            @click="answerLevel = 'beginner'"
+                        >Beginner</button>
+
+                        <button
+                            class="px-2.5 py-0.5 rounded-full text-xs border transition-colors duration-150"
+                            :class="answerLevel === 'advance'
+            ? 'bg-orange-100 text-orange-800 border-orange-300'
+            : 'bg-transparent text-gray-600 border-gray-300 hover:bg-gray-100'"
+                            @click="answerLevel = 'advance'"
+                        >Advanced</button>
+                    </div>
+
+                    <!-- Answers -->
                     <p class="text-gray-700 mb-2" x-show="answerLevel === 'tldr'" x-text="faq.answer_tldr"></p>
                     <p class="text-gray-700 mb-2" x-show="answerLevel === 'beginner'" x-text="faq.answer_beginner"></p>
                     <p class="text-gray-700 mb-2" x-show="answerLevel === 'advance'" x-text="faq.answer_advance"></p>
@@ -105,7 +104,6 @@
             Alpine.data('faqSection', () => ({
                 search: '',
                 category: '',
-                answerLevel: 'beginner', // 'tldr' | 'beginner' | 'advance'
                 faqs: @json($faqs),
                 filteredFaqs() {
                     return this.faqs.filter(faq => {
