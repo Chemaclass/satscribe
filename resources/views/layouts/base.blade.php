@@ -15,6 +15,9 @@
 <header class="site-header">
     <a href="{{ url('/') }}" class="brand">Satscribe</a>
     <nav class="nav-links">
+        <a href="{{ route('faq') }}" class="nav-link">
+            <i class="fas fa-lightbulb"></i> <span class="link-text">FAQ</span>
+        </a>
         <a href="{{ url('/history') }}">
             <i class="fas fa-scroll"></i> <span class="link-text">History</span>
         </a>
