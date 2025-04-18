@@ -30,8 +30,8 @@
         </div>
 
         {{-- Answer Type Tabs --}}
-        <div class="mb-6">
-            <div class="flex gap-4 text-sm font-medium">
+        <div class="sticky top-0 z-10 bg-gray-50 mb-6 pt-3 pb-2">
+            <div class="flex gap-4 text-sm font-medium pb-2">
                 <button
                     class="px-3 py-1 rounded border"
                     :class="answerLevel === 'tldr'
@@ -74,7 +74,7 @@
                     <p class="text-gray-700 mb-2" x-show="answerLevel === 'advance'" x-text="faq.answer_advance"></p>
 
                     <template x-if="faq.link">
-                        <a :href="faq.link" target="_blank" class="text-sm text-blue-600 hover:underline inline-block mt-2">
+                        <a :href="faq.link" target="_blank" class="text-sm text-orange-600 hover:underline inline-block mt-2">
                             Learn more
                         </a>
                     </template>
