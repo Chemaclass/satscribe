@@ -158,15 +158,9 @@
                 </fieldset>
             </form>
 
-            {{-- Animated Bitcoin Icons --}}
-            <div class="hidden lg:flex w-1/3 h-48 relative select-none" aria-hidden="true">
-                <div class="absolute bottom-6 right-0 flex justify-end items-end gap-2 pr-4">
-                    @foreach([0, 150, 300, 450, 600] as $delay)
-                        <span class="text-4xl animate-bounce-wave delay-[{{ $delay }}ms]">
-                <i class="fa-solid fa-bitcoin-sign text-orange-500"></i>
-            </span>
-                    @endforeach
-                </div>
+            {{-- Animated Bitcoin Icon --}}
+            <div class="hidden lg:flex w-1/3 h-48 items-center justify-center select-none" aria-hidden="true">
+                <i class="fa-brands fa-bitcoin text-[120px] opacity-100 animate-bounce-wave" style="color: var(--btc-orange);"></i>
             </div>
         </div>
 

@@ -53,14 +53,8 @@ final class PromptResultController
                 'error' => $e->getMessage(),
             ]);
 
-            $view = view('prompt-result.index')
+            return view('prompt-result.index')
                 ->withErrors(['search' => $e->getMessage()]);
-
-            if (app()->isLocal()) {
-                $view->withInput();
-            }
-
-            return $view;
         }
 
         return view('prompt-result.index', [
