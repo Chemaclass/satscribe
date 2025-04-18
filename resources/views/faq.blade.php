@@ -34,17 +34,25 @@
             <div class="flex gap-4 text-sm font-medium">
                 <button
                     class="px-3 py-1 rounded border"
-                    :class="answerLevel === 'tldr' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700'"
+                    :class="answerLevel === 'tldr'
+                ? 'bg-[color:var(--btc-orange)] text-white'
+                : 'bg-white text-gray-700 border-gray-300'"
                     @click="answerLevel = 'tldr'"
                 >TL;DR</button>
+
                 <button
                     class="px-3 py-1 rounded border"
-                    :class="answerLevel === 'beginner' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700'"
+                    :class="answerLevel === 'beginner'
+                ? 'bg-[color:var(--btc-orange)] text-white'
+                : 'bg-white text-gray-700 border-gray-300'"
                     @click="answerLevel = 'beginner'"
                 >Beginner</button>
+
                 <button
                     class="px-3 py-1 rounded border"
-                    :class="answerLevel === 'advance' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700'"
+                    :class="answerLevel === 'advance'
+                ? 'bg-[color:var(--btc-orange)] text-white'
+                : 'bg-white text-gray-700 border-gray-300'"
                     @click="answerLevel = 'advance'"
                 >Advanced</button>
             </div>
