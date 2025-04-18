@@ -19,7 +19,7 @@
     }
 
     .animate-bounce-wave {
-        animation: bounce-wave 6s ease-in-out infinite;
+        animation: bounce-wave 4s ease-in-out infinite;
     }
 
     .delay-\[0ms\] { animation-delay: 0ms; }
