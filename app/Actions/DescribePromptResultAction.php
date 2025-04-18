@@ -9,6 +9,7 @@ use App\Models\PromptResult;
 use App\Repositories\PromptResultRepository;
 use App\Services\BlockchainService;
 use App\Services\OpenAIService;
+use App\Services\UserInputSanitizer;
 use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Support\Facades\RateLimiter;
 use function is_numeric;
@@ -19,6 +20,7 @@ final readonly class DescribePromptResultAction
         private BlockchainService $blockchain,
         private OpenAIService $openai,
         private PromptResultRepository $repository,
+        private UserInputSanitizer $userInputSanitizer,
         private string $ip,
         private int $maxOpenAIAttempts,
     ) {
@@ -49,6 +51,8 @@ final readonly class DescribePromptResultAction
         }
 
         $data = $this->blockchain->getBlockchainData($input);
+
+        $question = $this->userInputSanitizer->sanitize($question);
         $response = $this->openai->generateText($data, $type, $question);
 
         return $this->repository->save($type, $input, $response, $data, $question);
