@@ -16,7 +16,7 @@ final class PromptResultController
     public function history(): View
     {
         return view('prompt-result/history', [
-            'descriptions' => PromptResult::latest()->simplePaginate(10),
+            'descriptions' => PromptResult::latest()->simplePaginate(5),
         ]);
     }
 
