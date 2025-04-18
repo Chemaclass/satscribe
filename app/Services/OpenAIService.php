@@ -51,23 +51,28 @@ final readonly class OpenAIService
         $json = (string) json_encode($condensedData, JSON_UNESCAPED_SLASHES);
 
         $questionPart = $question ?: <<<TEXT
-Categorize wallet types and features: multisig, P2SH, OP_RETURN, RBF, CoinJoin, etc.
-Mention anything unusual (batching, dust, consolidation) in a separate paragraph.
+If relevant, also include:
+- Any notable wallet features (e.g. multisig, P2SH, OP_RETURN, RBF, CoinJoin).
+- Unusual behavior (e.g. batching, dust outputs, consolidation) in a separate paragraph.
 TEXT;
 
+        // todo: consider adding a persona to the AI, like: "You are an expert Bitcoin educator and technical writer."
         $prompt = <<<PROMPT
+Provide a clear, beginner-friendly description of this Bitcoin {$type}.
+
 {$questionPart}
-Guidelines:
-- Use **Markdown** to highlight key info.
-- Keep it short. Use multiple paragraphs if needed.
-- Your response should not exceed 200 tokens.
-- Avoid redundancy.
 
-Technical context:
-- Inputs ("vin") = senders, Outputs ("vout") = recipients
-- Values are in sats (100,000,000 sats = 1 BTC)
+Formatting and rules:
+- Use **Markdown** for formatting.
+- Be concise. Use short paragraphs when necessary.
+- Stay under 200 tokens.
+- Do not repeat information.
 
-Here's a condensed view of the Bitcoin {$type}:
+Technical notes:
+- Inputs (`vin`) = senders; Outputs (`vout`) = recipients.
+- Values are in sats. 100,000,000 sats = 1 BTC.
+
+Blockchain data:
 {$json}
 PROMPT;
 
