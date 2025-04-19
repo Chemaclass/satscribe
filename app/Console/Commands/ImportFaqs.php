@@ -24,53 +24,76 @@ final class ImportFaqs extends Command
             return Command::FAILURE;
         }
 
-        LazyCollection::make(function () use ($filePath) {
-            $handle = fopen($filePath, 'r');
-            while (($line = fgetcsv($handle)) !== false) {
-                yield $line;
-            }
-            fclose($handle);
-        })
-            ->skip(1) // Skip header
-            ->chunk(100)
-            ->each(function ($chunk) {
-                $now = Carbon::now();
-                $rows = [];
-
-                foreach ($chunk as $row) {
-                    [
-                        $question,
-                        $answer_beginner,
-                        $answer_advance,
-                        $answer_tldr,
-                        $categories,
-                        $highlight,
-                        $priority,
-                        $link
-                    ] = $row;
-
-                    if (DB::table('faqs')->where('question', $question)->exists()) {
-                        continue; // skip duplicate
-                    }
-
-                    $rows[] = [
-                        'question' => $question,
-                        'answer_beginner' => $answer_beginner,
-                        'answer_advance' => $answer_advance,
-                        'answer_tldr' => $answer_tldr,
-                        'categories' => $categories,
-                        'highlight' => filter_var($highlight, FILTER_VALIDATE_BOOLEAN),
-                        'priority' => (int) $priority,
-                        'link' => $link ?: null,
-                        'created_at' => $now,
-                        'updated_at' => $now,
-                    ];
-                }
-
-                DB::table('faqs')->insert($rows);
-            });
+        LazyCollection::make(fn() => $this->readCsvLines($filePath))
+            ->skip(1)
+            ->chunk(50)
+            ->each(fn($chunk) => $this->processChunk($chunk, Carbon::now()));
 
         $this->info('FAQs imported successfully.');
         return Command::SUCCESS;
+    }
+
+    private function readCsvLines(string $filePath): \Generator
+    {
+        $handle = fopen($filePath, 'r');
+        while (($line = fgetcsv($handle)) !== false) {
+            yield $line;
+        }
+        fclose($handle);
+    }
+
+    private function processChunk($chunk, Carbon $now): void
+    {
+        $rows = [];
+        foreach ($chunk as $row) {
+            $this->processRow($row, $now, $rows);
+        }
+        DB::table('faqs')->insert($rows);
+    }
+
+    /**
+     * @param  array<int, string|null>  $row
+     * @param  array<int, array<string, mixed>>  $rows
+     */
+    private function processRow(array $row, Carbon $now, array &$rows): void
+    {
+        [
+            $question,
+            $answer_beginner,
+            $answer_advance,
+            $answer_tldr,
+            $categories,
+            $highlight,
+            $priority,
+            $link
+        ] = $row;
+
+        $existing = DB::table('faqs')->where('question', $question)->first();
+
+        if ($existing) {
+            DB::table('faqs')->where('id', $existing->id)->update([
+                'answer_beginner' => $answer_beginner,
+                'answer_advance' => $answer_advance,
+                'answer_tldr' => $answer_tldr,
+                'categories' => $categories,
+                'highlight' => filter_var($highlight, FILTER_VALIDATE_BOOLEAN),
+                'priority' => (int) $priority,
+                'link' => $link ?: null,
+                'updated_at' => $now,
+            ]);
+        } else {
+            $rows[] = [
+                'question' => $question,
+                'answer_beginner' => $answer_beginner,
+                'answer_advance' => $answer_advance,
+                'answer_tldr' => $answer_tldr,
+                'categories' => $categories,
+                'highlight' => filter_var($highlight, FILTER_VALIDATE_BOOLEAN),
+                'priority' => (int) $priority,
+                'link' => $link ?: null,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ];
+        }
     }
 }
