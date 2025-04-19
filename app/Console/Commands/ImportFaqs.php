@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
+use App\Repositories\FaqRepository;
 use Illuminate\Console\Command;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\LazyCollection;
 
 final class ImportFaqs extends Command
@@ -14,6 +14,12 @@ final class ImportFaqs extends Command
     protected $signature = 'faqs:import {file : Path to the CSV file}';
 
     protected $description = 'Import FAQ entries from a CSV file into the faqs table';
+
+    public function __construct(
+        private FaqRepository $faqRepository,
+    ) {
+        parent::__construct();
+    }
 
     public function handle(): int
     {
@@ -50,7 +56,7 @@ final class ImportFaqs extends Command
         foreach ($chunk as $row) {
             $this->processRow($row, $now, $rows);
         }
-        DB::table('faqs')->insert($rows);
+        $this->faqRepository->insertMany($rows);
     }
 
     /**
@@ -60,9 +66,7 @@ final class ImportFaqs extends Command
     private function processRow(array $row, Carbon $now, array &$rows): void
     {
         $question = $row['question'] ?? '';
-        $existing = DB::table('faqs')
-            ->where('question', $question)
-            ->first();
+        $existing = $this->faqRepository->findByQuestion($question);
 
         $data = [
             'answer_beginner' => $row['answer_beginner'] ?? '',
@@ -76,9 +80,7 @@ final class ImportFaqs extends Command
         ];
 
         if ($existing) {
-            DB::table('faqs')
-                ->where('id', $existing->id)
-                ->update($data);
+            $this->faqRepository->update($existing->id, $data);
         } else {
             $data['question'] = $question;
             $data['created_at'] = $now;
