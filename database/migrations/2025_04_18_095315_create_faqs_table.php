@@ -460,7 +460,7 @@ return new class extends Migration {
             [
                 'question' => 'What is a hardware wallet?',
                 'answer_beginner' => 'It’s a small device that keeps your Bitcoin safe, even if your phone gets hacked.',
-                'answer_advance' => 'A hardware wallet stores your private keys in a secure, offline environment. It allows signing transactions safely even on compromised devices. Popular options include Trezor and Ledger.',
+                'answer_advance' => 'A hardware wallet stores your private keys in a secure, offline environment. It allows signing transactions safely even on compromised devices. Popular options include Coldcard(mk4/Q), Foundation Passport, SeedSigner or BitBox02.',
                 'answer_tldr' => 'A secure device that protects your Bitcoin offline.',
                 'categories' => 'wallets,security,hardware',
                 'highlight' => false,
