@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
-use Generator;
 use Illuminate\Console\Command;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -36,14 +35,12 @@ final class ImportFaqs extends Command
         return Command::SUCCESS;
     }
 
-    private function readCsvLines(string $filePath): Generator
+    private function readCsvLines(string $filePath): \Generator
     {
         $handle = fopen($filePath, 'r');
+        $header = fgetcsv($handle);
         while (($line = fgetcsv($handle)) !== false) {
-            if (empty($line)) {
-                continue;
-            }
-            yield $line;
+            yield array_combine($header, $line);
         }
         fclose($handle);
     }
@@ -58,52 +55,31 @@ final class ImportFaqs extends Command
     }
 
     /**
-     * @param  array<int, string|null>  $row
+     * @param  array<string, string|null>  $row
      * @param  array<int, array<string, mixed>>  $rows
      */
     private function processRow(array $row, Carbon $now, array &$rows): void
     {
-        if (count($row) < 8) {
-            return;
-        }
-
-        [
-            $question,
-            $answer_beginner,
-            $answer_advance,
-            $answer_tldr,
-            $categories,
-            $highlight,
-            $priority,
-            $link
-        ] = $row;
-
+        $question = $row['question'] ?? '';
         $existing = DB::table('faqs')->where('question', $question)->first();
 
+        $data = [
+            'answer_beginner' => $row['answer_beginner'] ?? '',
+            'answer_advance' => $row['answer_advance'] ?? '',
+            'answer_tldr' => $row['answer_tldr'] ?? '',
+            'categories' => $row['categories'] ?? '',
+            'highlight' => filter_var($row['highlight'] ?? false, FILTER_VALIDATE_BOOLEAN),
+            'priority' => (int) ($row['priority'] ?? 0),
+            'link' => $row['link'] ?: null,
+            'updated_at' => $now,
+        ];
+
         if ($existing) {
-            DB::table('faqs')->where('id', $existing->id)->update([
-                'answer_beginner' => $answer_beginner,
-                'answer_advance' => $answer_advance,
-                'answer_tldr' => $answer_tldr,
-                'categories' => $categories,
-                'highlight' => filter_var($highlight, FILTER_VALIDATE_BOOLEAN),
-                'priority' => (int) $priority,
-                'link' => $link ?: null,
-                'updated_at' => $now,
-            ]);
+            DB::table('faqs')->where('id', $existing->id)->update($data);
         } else {
-            $rows[] = [
-                'question' => $question,
-                'answer_beginner' => $answer_beginner,
-                'answer_advance' => $answer_advance,
-                'answer_tldr' => $answer_tldr,
-                'categories' => $categories,
-                'highlight' => filter_var($highlight, FILTER_VALIDATE_BOOLEAN),
-                'priority' => (int) $priority,
-                'link' => $link ?: null,
-                'created_at' => $now,
-                'updated_at' => $now,
-            ];
+            $data['question'] = $question;
+            $data['created_at'] = $now;
+            $rows[] = $data;
         }
     }
 }
