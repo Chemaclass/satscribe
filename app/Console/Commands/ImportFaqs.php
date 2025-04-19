@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
+use Generator;
 use Illuminate\Console\Command;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -25,18 +26,23 @@ final class ImportFaqs extends Command
         }
 
         LazyCollection::make(fn() => $this->readCsvLines($filePath))
-            ->skip(1)
+            ->skip(1) // header
             ->chunk(50)
-            ->each(fn($chunk) => $this->processChunk($chunk, Carbon::now()));
+            ->each(function (LazyCollection $chunk) {
+                $this->processChunk($chunk->all(), Carbon::now());
+            });
 
         $this->info('FAQs imported successfully.');
         return Command::SUCCESS;
     }
 
-    private function readCsvLines(string $filePath): \Generator
+    private function readCsvLines(string $filePath): Generator
     {
         $handle = fopen($filePath, 'r');
         while (($line = fgetcsv($handle)) !== false) {
+            if (empty($line)) {
+                continue;
+            }
             yield $line;
         }
         fclose($handle);
@@ -57,6 +63,10 @@ final class ImportFaqs extends Command
      */
     private function processRow(array $row, Carbon $now, array &$rows): void
     {
+        if (count($row) < 8) {
+            return;
+        }
+
         [
             $question,
             $answer_beginner,
