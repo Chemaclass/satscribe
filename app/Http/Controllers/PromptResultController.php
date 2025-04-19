@@ -26,7 +26,7 @@ final class PromptResultController
     {
         $validated = $request->validate([
             'search' => [
-                'nullable', 'string', function ($attribute, $value, $fail) {
+                'nullable', 'string', function ($attribute, $value, $fail): void {
                     if (!preg_match('/^[a-f0-9]{64}$/i', $value) && !ctype_digit($value)) {
                         $fail('The '.$attribute.' must be a valid Bitcoin TXID or block height.');
                     }

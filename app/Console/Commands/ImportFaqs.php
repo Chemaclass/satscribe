@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
+use Generator;
 use App\Repositories\FaqRepository;
 use Illuminate\Console\Command;
 use Illuminate\Support\Carbon;
@@ -16,7 +17,7 @@ final class ImportFaqs extends Command
     protected $description = 'Import FAQ entries from a CSV file into the faqs table';
 
     public function __construct(
-        private FaqRepository $faqRepository,
+        private readonly FaqRepository $faqRepository,
     ) {
         parent::__construct();
     }
@@ -32,7 +33,7 @@ final class ImportFaqs extends Command
 
         LazyCollection::make(fn() => $this->readCsvLines($filePath))
             ->chunk(50)
-            ->each(function (LazyCollection $chunk) {
+            ->each(function (LazyCollection $chunk): void {
                 $this->processChunk($chunk->all(), Carbon::now());
             });
 
@@ -40,7 +41,7 @@ final class ImportFaqs extends Command
         return Command::SUCCESS;
     }
 
-    private function readCsvLines(string $filePath): \Generator
+    private function readCsvLines(string $filePath): Generator
     {
         $handle = fopen($filePath, 'r');
         $header = fgetcsv($handle);

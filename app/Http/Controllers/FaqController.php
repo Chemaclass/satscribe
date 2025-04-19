@@ -14,7 +14,7 @@ final class FaqController
         $query = Faq::query();
 
         if (!empty($search)) {
-            $query->where(function ($q) use ($search) {
+            $query->where(function ($q) use ($search): void {
                 $q->where('title', 'like', "%{$search}%")
                     ->orWhere('description', 'like', "%{$search}%");
             });
@@ -22,9 +22,7 @@ final class FaqController
 
         $faqs = $query->orderByDesc('highlight')->orderBy('priority')->get();
 
-        $categories = collect($faqs)->flatMap(function ($faq) {
-            return explode(',', $faq->categories);
-        })->map(fn($c) => trim($c))->unique()->sort()->values();
+        $categories = collect($faqs)->flatMap(fn($faq) => explode(',', (string) $faq->categories))->map(fn($c) => trim($c))->unique()->sort()->values();
 
         return view('faq', [
             'faqs' => $faqs,

@@ -7,14 +7,14 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('prompt_results', function (Blueprint $table) {
+        Schema::table('prompt_results', function (Blueprint $table): void {
             $table->text('question')->nullable()->after('input');
         });
     }
 
     public function down(): void
     {
-        Schema::table('prompt_results', function (Blueprint $table) {
+        Schema::table('prompt_results', function (Blueprint $table): void {
             $table->dropColumn('question');
         });
     }

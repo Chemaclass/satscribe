@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-        Schema::create('flagged_words', function (Blueprint $table) {
+        Schema::create('flagged_words', function (Blueprint $table): void {
             $table->id();
             $table->string('word')->unique();
             $table->enum('severity', ['low', 'medium', 'high'])->default('medium');
