@@ -25,7 +25,6 @@ final class ImportFaqs extends Command
         }
 
         LazyCollection::make(fn() => $this->readCsvLines($filePath))
-            ->skip(1) // header
             ->chunk(50)
             ->each(function (LazyCollection $chunk) {
                 $this->processChunk($chunk->all(), Carbon::now());
@@ -61,7 +60,9 @@ final class ImportFaqs extends Command
     private function processRow(array $row, Carbon $now, array &$rows): void
     {
         $question = $row['question'] ?? '';
-        $existing = DB::table('faqs')->where('question', $question)->first();
+        $existing = DB::table('faqs')
+            ->where('question', $question)
+            ->first();
 
         $data = [
             'answer_beginner' => $row['answer_beginner'] ?? '',
@@ -75,7 +76,9 @@ final class ImportFaqs extends Command
         ];
 
         if ($existing) {
-            DB::table('faqs')->where('id', $existing->id)->update($data);
+            DB::table('faqs')
+                ->where('id', $existing->id)
+                ->update($data);
         } else {
             $data['question'] = $question;
             $data['created_at'] = $now;
