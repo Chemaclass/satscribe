@@ -11,7 +11,7 @@ use Illuminate\Support\LazyCollection;
 
 final class ImportFaqs extends Command
 {
-    protected $signature = 'faqs:import {file : Path to the CSV file}';
+    protected $signature = 'import:faqs {file : Path to the CSV file}';
 
     protected $description = 'Import FAQ entries from a CSV file into the faqs table';
 

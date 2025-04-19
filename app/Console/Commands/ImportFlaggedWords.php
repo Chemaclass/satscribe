@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\File;
 
 final class ImportFlaggedWords extends Command
 {
-    protected $signature = 'flagged-words:import {path : Path to the CSV file}';
+    protected $signature = 'import:flagged-words {path : Path to the CSV file}';
 
     protected $description = 'Import a list of flagged words from a CSV file';
 
