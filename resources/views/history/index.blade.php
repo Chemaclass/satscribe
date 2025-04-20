@@ -67,7 +67,7 @@
                 @endforeach
             </ul>
 
-            <div class="pagination m-8 flex justify-center gap-4">
+            <div class="pagination flex justify-center gap-4">
                 @if ($descriptions->onFirstPage())
                     <span class="px-4 py-2 bg-orange-100 text-orange-400 rounded-md cursor-not-allowed">« Previous</span>
                 @else
