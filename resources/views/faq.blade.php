@@ -1,4 +1,3 @@
-{{-- resources/views/faq/index.blade.php --}}
 @extends('layouts.base')
 
 @section('content')

@@ -19,7 +19,7 @@ final class SatscribeController
     public function index(SatscribeIndexRequest $request, SatscribeAction $action): View
     {
         if (!$request->hasSearchInput()) {
-            return view('satscribe.index', [
+            return view('satscribe', [
                 'questionPlaceholder' => Question::rand(),
                 'maxBitcoinBlockHeight' => $this->getMaxBitcoinBlockHeight(),
             ]);
