@@ -1,7 +1,5 @@
 @import 'tailwindcss';
 
-@import '@fortawesome/fontawesome-free/css/all.min.css';
-
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 @source '../**/*.blade.php';
@@ -307,4 +305,21 @@ button i[data-lucide] {
         cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2
         dark:focus:ring-orange-100
     ;
+}
+
+.form-button {
+    @apply inline-flex items-center justify-center gap-1;
+}
+
+[data-lucide="loader-2"] {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
 }
