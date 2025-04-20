@@ -8,6 +8,13 @@
     @vite('resources/js/app.js')
     <script src="https://kit.fontawesome.com/cfd779d106.js" crossorigin="anonymous"></script>
     <script src="//unpkg.com/alpinejs" defer></script>
+    @if(isset($cronitorClientKey))
+    <script async src="https://rum.cronitor.io/script.js"></script>
+    <script>
+        window.cronitor = window.cronitor || function() { (window.cronitor.q = window.cronitor.q || []).push(arguments); };
+        cronitor('config', { clientKey: '{{$cronitorClientKey}}' });
+    </script>
+    @endif
     @stack('head')
 </head>
 <body class="min-h-screen flex flex-col">

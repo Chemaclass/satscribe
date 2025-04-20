@@ -13,11 +13,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 
-final class PromptResultController
+final class PromptResultController extends AbstractController
 {
     public function history(): View
     {
-        return view('prompt-result/history', [
+        return $this->render('prompt-result/history', [
             'descriptions' => PromptResult::latest()->simplePaginate(5),
         ]);
     }
@@ -40,7 +40,7 @@ final class PromptResultController
         $refresh = filter_var($request->query('refresh'), FILTER_VALIDATE_BOOL);
 
         if (!$request->has('search') || empty($request->get('search'))) {
-            return view('prompt-result.index', [
+            return $this->render('prompt-result.index', [
                 'questionPlaceholder' => $this->questionPlaceholder(),
                 'maxBitcoinBlockHeight' => $this->getMaxBitcoinBlockHeight(),
             ]);
@@ -56,11 +56,11 @@ final class PromptResultController
                 'error' => $e->getMessage(),
             ]);
 
-            return view('prompt-result.index')
+            return $this->render('prompt-result.index')
                 ->withErrors(['search' => $e->getMessage()]);
         }
 
-        return view('prompt-result.index', [
+        return $this->render('prompt-result.index', [
             'result' => $response->result,
             'search' => $search,
             'question' => $question,
