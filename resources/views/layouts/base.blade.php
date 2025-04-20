@@ -18,8 +18,6 @@
     </script>
     @vite('resources/css/app.css')
     @vite('resources/js/app.js')
-    <script src="//unpkg.com/alpinejs" defer></script>
-
     @if(isset($cronitorClientKey))
     <script async src="https://rum.cronitor.io/script.js"></script>
     <script>
