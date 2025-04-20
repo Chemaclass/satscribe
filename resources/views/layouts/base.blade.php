@@ -30,7 +30,7 @@
 <header class="flex justify-between items-center px-4 py-3 border-gray-200 dark:border-gray-700">
     <a href="{{ url('/') }}" class="brand text-xl font-bold">Satscribe</a>
 
-    <nav class="nav-links flex items-center space-x-4">
+    <nav class="nav-links flex items-center">
         <a href="{{ route('faq') }}" class="nav-link flex items-center gap-1">
             <svg data-lucide="lightbulb" class="w-5 h-5"></svg>
             <span class="link-text">FAQ</span>

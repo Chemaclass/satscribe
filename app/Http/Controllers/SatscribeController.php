@@ -38,11 +38,11 @@ final class SatscribeController
                 'question' => $question,
                 'error' => $e->getMessage(),
             ]);
-            return view('satscribe.index')
+            return view('satscribe')
                 ->withErrors(['search' => $e->getMessage()]);
         }
 
-        return view('satscribe.index', [
+        return view('satscribe', [
             'result' => $response->result,
             'search' => $search,
             'question' => $question,

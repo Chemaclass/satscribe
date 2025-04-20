@@ -3,7 +3,7 @@
 @section('title', 'Satscribe History')
 
 @section('content')
-    <section class=" px-4 sm:px-6 lg:px-8 py-6">
+    <section class="sm:px-6 lg:px-8 px-4 py-6">
         {{-- Header --}}
         <header class="section-header">
             <div class="flex flex-col max-w-2xl">
@@ -28,16 +28,21 @@
                         $entryId = 'entry-' . $desc->id;
                     @endphp
 
-                    <li class="description-entry mb-8">
-                        <div class="description-header font-medium mb-1">
-                            <strong>{{ ucfirst($desc->type) }}:</strong>
-                            @if ($mempoolUrl)
-                                <a href="{{ $mempoolUrl }}" target="_blank" rel="noopener" class="mempool-link">
-                                    {{ $desc->input }}
-                                </a>
-                            @else
-                                {{ $desc->input }}
-                            @endif
+                <li class="p-5 hover:bg-orange-50 rounded-lg shadow-sm transition hover:shadow-md mb-4">
+                    <div class="description-header font-medium mb-1">
+                            <div class="w-full">
+                                <strong>{{ ucfirst($desc->type) }}:</strong>
+                                <p class="truncate max-w-full overflow-hidden text-ellipsis">
+                                    @if ($mempoolUrl)
+                                        <a href="{{ $mempoolUrl }}" target="_blank" rel="noopener" class="mempool-link">
+                                            {{ $desc->input }}
+                                        </a>
+                                    @else
+                                        {{ $desc->input }}
+                                    @endif
+                                </p>
+                            </div>
+
                         </div>
 
                         @if (!empty($desc->question))
@@ -62,7 +67,6 @@
                              class="mt-2 bg-gray-100 text-xs p-3 rounded overflow-auto max-h-64 hidden">
 {{ json_encode($desc->raw_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) }}
                         </pre>
-                        <div class="entry-divider h-px bg-gray-200 mt-6"></div>
                     </li>
                 @endforeach
             </ul>
