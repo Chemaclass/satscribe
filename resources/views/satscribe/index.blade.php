@@ -15,7 +15,6 @@
             </div>
         </header>
 
-
         {{-- Form + Animated Icons --}}
         <div class="flex flex-col sm:flex-row items-start gap-6">
             <form method="GET" action="{{ route('home') }}" class="describe-form w-full max-w-2xl" aria-labelledby="form-heading">

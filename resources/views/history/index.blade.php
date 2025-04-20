@@ -3,11 +3,16 @@
 @section('title', 'Satscribe History')
 
 @section('content')
-    <section>
-        <h2 class="text-2xl font-semibold text-gray-800 mb-6 flex items-center gap-2">
-            <span>📜</span>
-            <span>History</span>
-        </h2>
+    <section class=" px-4 sm:px-6 lg:px-8 py-6">
+        {{-- Header --}}
+        <header class="section-header">
+            <div class="flex flex-col max-w-2xl">
+                <h1 class="text-2xl sm:text-3xl font-bold leading-tight">History</h1>
+                <p class="subtitle text-base sm:text-lg text-gray-700 dark:text-gray-300">
+                    Browse your past Bitcoin transaction or block analyses.
+                </p>
+            </div>
+        </header>
 
         @if ($descriptions->isEmpty())
             <p>No descriptions found yet.</p>
