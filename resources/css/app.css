@@ -82,14 +82,16 @@ footer a,
     color: var(--btc-orange-dark);
 }
 
-.nav-links a {
-    margin-left: .5rem;
-    font-size: 0.95rem;
-    text-decoration: none;
+.nav-links {
     color: #374151;
 }
-.dark .nav-links a {
+.dark .nav-links {
     color: var(--btc-muted);
+}
+
+.nav-links a {
+    margin-left: .5rem;
+    text-decoration: none;
 }
 
 footer {

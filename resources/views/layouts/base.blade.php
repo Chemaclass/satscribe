@@ -50,9 +50,13 @@
         </button>
 
         @if(!empty($btcPriceUsd))
-            <div class="px-3 py-1 text-sm rounded-full shadow-sm whitespace-nowrap">
-                BTC: ${{ number_format($btcPriceUsd, 0) }}
-            </div>
+            <a href="https://coinmarketcap.com/currencies/bitcoin/"
+               target="_blank"
+               rel="noopener"
+               class="nav-link hidden sm:inline-flex items-center gap-1 px-3 py-1 text-sm whitespace-nowrap"
+            >
+                <span>${{ number_format($btcPriceUsd, 0) }}</span>
+            </a>
         @endif
     </nav>
 </header>
@@ -66,8 +70,7 @@
     — <a target="_blank" href="https://getalby.com/p/chemaclass" style="color: currentColor">
         Leave a tip <i data-lucide="bitcoin"
                        class="inline w-5 h-5 dark:text-[--btc-orange-dark]"
-                       style="color: var(--btc-orange);"
-        ></i>
+                       style="color: var(--btc-orange);"></i>
     </a>
 </footer>
 
