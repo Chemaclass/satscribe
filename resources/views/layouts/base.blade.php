@@ -16,8 +16,7 @@
         document.documentElement.classList.add('dark');
     }
     </script>
-    @vite('resources/css/app.css')
-    @vite('resources/js/app.js')
+    <x-preload-assets />
     @if(isset($cronitorClientKey))
     <script async src="https://rum.cronitor.io/script.js"></script>
     <script>
