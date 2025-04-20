@@ -106,7 +106,7 @@
                                 <div class="inline-flex items-center text-sm text-green-800 bg-green-100 border border-green-200 px-3 py-2 rounded-md shadow-sm">
                                     <i data-lucide="flask" class="text-green-500 mr-1"></i>
                                     <strong class="mr-1">Fresh!</strong>
-                                    <span>Generated using live blockchain data and AI ✨</span>
+                                    <span>Generation using live blockchain data ✨</span>
                                 </div>
                             @else
                                 <div class="inline-flex items-center text-sm text-yellow-800 bg-yellow-100 border border-yellow-200 px-3 py-2 rounded-md shadow-sm">
@@ -133,20 +133,22 @@
                             x-show="showAdvanced"
                             x-cloak
                             x-transition
-                            class="mt-1 bg-orange-50 border border-orange-200 rounded-lg px-4 py-3 space-y-2 shadow-sm"
+                            class="mt-4 advanced-fields mt-1 rounded-lg px-4 py-3 space-y-2 shadow-sm"
                         >
                             {{-- Refresh Checkbox --}}
-                            <div class="form-checkbox enhanced-checkbox">
+                            <div class="flex items-start gap-3">
                                 <input
                                     type="checkbox"
                                     id="refresh"
                                     name="refresh"
                                     value="true"
-                                    class="checkbox-input"
+                                    class="checkbox-input mt-1 accent-orange-500 dark:accent-orange-400"
                                 >
-                                <label for="refresh" class="checkbox-label">
-                                    Fetch the latest data from the blockchain<br>
-                                    <small class="checkbox-help text-gray-600">(Skips cached descriptions and requests live data from the blockchain and OpenAI)</small>
+                                <label for="refresh" class="checkbox-label text-sm text-gray-800 dark:text-orange-200">
+                                    <strong class="text-orange-700 dark:text-orange-400">Fetch the latest data from the blockchain</strong><br>
+                                    <small class="checkbox-help text-gray-600 dark:text-gray-400">
+                                        (Skips cached descriptions and requests live data from the blockchain and OpenAI)
+                                    </small>
                                 </label>
                             </div>
                         </div>
