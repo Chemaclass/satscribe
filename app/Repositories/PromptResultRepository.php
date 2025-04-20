@@ -4,42 +4,41 @@ declare(strict_types=1);
 namespace App\Repositories;
 
 use App\Data\BlockchainData;
-use App\Enums\PromptType;
+use App\Data\PromptInput;
 use App\Models\PromptResult;
 
 final class PromptResultRepository
 {
-    public function findByTypeAndInput(PromptType $type, string $input, ?string $question = null): ?PromptResult
+    public function findByTypeAndInput(PromptInput $input, ?string $question = null): ?PromptResult
     {
-        return PromptResult::where('type', $type->value)
-            ->where('input', $input)
-            ->when($question, fn ($q) => $q->where('question', $question))
+        return PromptResult::where('type', $input->type->value)
+            ->where('input', $input->text)
+            ->when($question, fn($q) => $q->where('question', $question))
             ->first();
     }
 
-    public function deleteByTypeAndInput(PromptType $type, string $input): void
+    public function deleteByTypeAndInput(PromptInput $input): void
     {
-        PromptResult::where('type', $type->value)
-            ->where('input', $input)
+        PromptResult::where('type', $input->type->value)
+            ->where('input', $input->text)
             ->delete();
     }
 
     public function save(
-        string $type,
-        string $input,
+        PromptInput $input,
         string $aiResponse,
         BlockchainData $data,
         ?string $question = null
     ): PromptResult {
         $raw = $data->toArray();
 
-        $forceRefresh = $type === 'transaction'
+        $forceRefresh = $input->type->value === 'transaction'
             && isset($raw['status']['confirmed'])
             && $raw['status']['confirmed'] === false;
 
         return PromptResult::create([
-            'type' => $type,
-            'input' => $input,
+            'type' => $input->type->value,
+            'input' => $input->text,
             'question' => $question,
             'ai_response' => $aiResponse,
             'raw_data' => $raw,

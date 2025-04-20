@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Data\BlockchainData;
+use App\Data\PromptInput;
 use App\Enums\PromptType;
 use App\Exceptions\OpenAIError;
 use Illuminate\Http\Client\Factory as HttpClient;
@@ -21,14 +22,14 @@ final readonly class OpenAIService
     ) {
     }
 
-    public function generateText(BlockchainData $data, PromptType $type, string $question = ''): string
+    public function generateText(BlockchainData $data, PromptInput $input, string $question = ''): string
     {
         $payload = [
             'model' => config('services.openai.model'),
             'messages' => [
                 [
                     'role' => 'user',
-                    'content' => $this->preparePrompt($data, $type, $question),
+                    'content' => $this->preparePrompt($data, $input->type, $question),
                 ],
             ],
         ];

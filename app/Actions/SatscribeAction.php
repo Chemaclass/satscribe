@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Actions;
 
 use App\Data\GeneratedPrompt;
-use App\Enums\PromptType;
+use App\Data\PromptInput;
 use App\Models\PromptResult;
 use App\Repositories\PromptResultRepository;
 use App\Services\BlockchainService;
@@ -13,7 +13,6 @@ use App\Services\OpenAIService;
 use App\Services\UserInputSanitizer;
 use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Support\Facades\RateLimiter;
-use function is_numeric;
 
 final readonly class SatscribeAction
 {
@@ -27,37 +26,37 @@ final readonly class SatscribeAction
     ) {
     }
 
-    public function execute(string $input, bool $refresh = false, string $question = ''): GeneratedPrompt
+    public function execute(string $rawInput, bool $refresh = false, string $question = ''): GeneratedPrompt
     {
-        $type = PromptType::fromInput($input);
+        $input = PromptInput::fromString($rawInput);
 
         if (!$refresh) {
-            $cached = $this->repository->findByTypeAndInput($type, $input, $question);
+            $cached = $this->repository->findByTypeAndInput($input, $question);
 
             if ($cached instanceof PromptResult && !$cached->force_refresh) {
                 return new GeneratedPrompt($cached, isFresh: false);
             }
         }
 
-        $fresh = $this->getFreshResult($input, $type, $refresh, $question);
+        $fresh = $this->getFreshResult($input, $refresh, $question);
 
         return new GeneratedPrompt($fresh, isFresh: true);
     }
 
-    private function getFreshResult(string $input, PromptType $type, bool $refresh, string $question = ''): PromptResult
+    private function getFreshResult(PromptInput $input, bool $refresh, string $question = ''): PromptResult
     {
         $this->checkRateLimiter();
 
         if ($refresh) {
-            $this->repository->deleteByTypeAndInput($type, $input);
+            $this->repository->deleteByTypeAndInput($input);
         }
 
         $data = $this->blockchain->getBlockchainData($input);
 
         $question = $this->userInputSanitizer->sanitize($question);
-        $response = $this->openai->generateText($data, $type, $question);
+        $response = $this->openai->generateText($data, $input, $question);
 
-        return $this->repository->save($type->value, $input, $response, $data, $question);
+        return $this->repository->save($input, $response, $data, $question);
     }
 
     private function checkRateLimiter(): void

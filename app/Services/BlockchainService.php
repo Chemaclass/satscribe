@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Data\BlockchainData;
 use App\Data\BlockData;
+use App\Data\PromptInput;
 use App\Data\TransactionData;
 use App\Exceptions\BlockchainException;
 use Illuminate\Http\Client\Factory as HttpClient;
@@ -21,11 +22,11 @@ final readonly class BlockchainService
     ) {
     }
 
-    public function getBlockchainData(string $input): BlockchainData
+    public function getBlockchainData(PromptInput $input): BlockchainData
     {
-        return $this->isBlock($input)
-            ? $this->getBlockData($input)
-            : $this->getTransactionData($input);
+        return $input->isBlock()
+            ? $this->getBlockData($input->text)
+            : $this->getTransactionData($input->text);
     }
 
     private function getBlockData(string $input): BlockData
@@ -94,12 +95,6 @@ final readonly class BlockchainService
             blockHash: $status['block_hash'] ?? null,
             blockTime: $status['block_time'] ?? null,
         );
-    }
-
-    private function isBlock(string $input): bool
-    {
-        return is_numeric($input)
-            || preg_match('/^0{8,}[a-f0-9]{56}$/i', $input);
     }
 
     private function getBlockHash(string $input): string
