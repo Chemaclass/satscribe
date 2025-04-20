@@ -17,7 +17,7 @@
 
 
         {{-- Form + Animated Icons --}}
-        <div class="flex flex-col lg:flex-row items-start gap-6">
+        <div class="flex flex-col md:flex-row items-start gap-6">
             <form method="GET" action="{{ route('home') }}" class="describe-form w-full max-w-2xl" aria-labelledby="form-heading">
                 <fieldset>
                     <legend id="form-heading" class="sr-only">Describe Bitcoin Data</legend>
@@ -44,27 +44,24 @@
                             :class="input.length === 0 ? 'text-gray-600' : (valid ? 'text-gray-600' : 'text-red-600')"
                         >
                             <template x-if="input.length === 0">
-        <span>
-            Enter a valid TXID (64 hex chars) or block height (number).
-        </span>
+                                <span>
+                                    Enter a valid TXID (64 hex chars) or block height (number).
+                                </span>
                             </template>
-
                             <template x-if="input.length > 0 && !valid">
-        <span class="text-red-600">
-            Enter a valid TXID (64 hex chars) or block height (number).
-        </span>
+                                <span class="text-red-600">
+                                    Enter a valid TXID (64 hex chars) or block height (number).
+                                </span>
                             </template>
-
                             <template x-if="valid && isHex64">
-        <span>
-            Valid <span class="text-green-600 font-medium">TXID (64 hex chars) found</span>.
-        </span>
+                                <span>
+                                    Valid <span class="text-green-600 font-medium">TXID (64 hex chars) found</span>.
+                                </span>
                             </template>
-
                             <template x-if="valid && isBlockHeight && !isHex64">
-        <span>
-            Valid <span class="text-green-600 font-medium">block height (number) found</span>.
-        </span>
+                                <span>
+                                    Valid <span class="text-green-600 font-medium">block height (number) found</span>.
+                                </span>
                             </template>
                         </small>
                         @error('search')
@@ -159,7 +156,7 @@
             </form>
 
             {{-- Animated Bitcoin Icon --}}
-            <div class="hidden lg:flex w-1/3 h-48 items-center justify-center select-none" aria-hidden="true">
+            <div class="hidden md:flex w-1/3 h-48 items-center justify-center select-none" aria-hidden="true">
                 <i class="fa-brands fa-bitcoin text-[120px] opacity-100 animate-bounce-wave" style="color: var(--btc-orange);"></i>
             </div>
         </div>
