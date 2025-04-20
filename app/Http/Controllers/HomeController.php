@@ -67,7 +67,7 @@ final class HomeController
 
     private function renderInitialPromptView(): View
     {
-        return view('prompt-result.index', [
+        return view('satscribe.index', [
             'questionPlaceholder' => Question::rand(),
             'maxBitcoinBlockHeight' => $this->getMaxBitcoinBlockHeight(),
         ]);
@@ -80,7 +80,7 @@ final class HomeController
         bool $refresh,
         bool $isFresh
     ): View {
-        return view('prompt-result.index', [
+        return view('satscribe.index', [
             'result' => $result,
             'search' => $search,
             'question' => $question,
@@ -93,7 +93,7 @@ final class HomeController
 
     private function renderErrorView(Throwable $e): View
     {
-        return view('prompt-result.index')
+        return view('satscribe.index')
             ->withErrors(['search' => $e->getMessage()]);
     }
 

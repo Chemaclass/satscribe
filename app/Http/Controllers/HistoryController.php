@@ -10,7 +10,7 @@ final class HistoryController extends AbstractController
 {
     public function __invoke(): View
     {
-        return $this->render('prompt-result/history', [
+        return $this->render('history.index', [
             'descriptions' => PromptResult::latest()->simplePaginate(5),
         ]);
     }
