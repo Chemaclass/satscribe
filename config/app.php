@@ -125,4 +125,5 @@ return [
 
     'max_open_ai_attempts' => env('MAX_OPEN_AI_ATTEMPTS', 50),
     'cronitorClientKey' => env('CRONITOR_CLIENT_KEY'),
+    'rate_limit_generate' => env('RATE_LIMIT_GENERATE', 50),
 ];

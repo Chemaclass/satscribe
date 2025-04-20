@@ -3,7 +3,6 @@
 namespace App\Providers;
 
 use App\Actions\DescribePromptResultAction;
-use App\Services\OpenAIService;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\RateLimiter;
@@ -35,7 +34,7 @@ class AppServiceProvider extends ServiceProvider
         Paginator::useTailwind();
 
         RateLimiter::for('generate', function ($request) {
-            return Limit::perDay(1000)->by($request->ip());
+            return Limit::perDay(config('app.rate_limit_generate'))->by($request->ip());
         });
     }
 }
