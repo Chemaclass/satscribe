@@ -16,9 +16,9 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 use Throwable;
 
-final class HomeController
+final class SatscribeController
 {
-    public function __invoke(Request $request, SatscribeAction $action): View
+    public function index(Request $request, SatscribeAction $action): View
     {
         if (!$this->hasSearchInput($request)) {
             return $this->renderInitialPromptView();

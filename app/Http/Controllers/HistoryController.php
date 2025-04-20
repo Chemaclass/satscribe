@@ -6,11 +6,11 @@ namespace App\Http\Controllers;
 use App\Models\PromptResult;
 use Illuminate\View\View;
 
-final class HistoryController extends AbstractController
+final class HistoryController
 {
-    public function __invoke(): View
+    public function index(): View
     {
-        return $this->render('history.index', [
+        return view('history.index', [
             'descriptions' => PromptResult::latest()->simplePaginate(5),
         ]);
     }

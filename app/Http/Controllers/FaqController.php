@@ -6,11 +6,11 @@ use App\Models\Faq;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
-final class FaqController extends AbstractController
+final class FaqController
 {
-    public function __invoke(Request $request): View
+    public function index(Request $request): View
     {
-        $search = $request->input('search', ''); // ⬅️ Default to empty string
+        $search = $request->input('search', '');
 
         $query = Faq::query();
 
@@ -21,11 +21,18 @@ final class FaqController extends AbstractController
             });
         }
 
-        $faqs = $query->orderByDesc('highlight')->orderBy('priority')->get();
+        $faqs = $query->orderByDesc('highlight')
+            ->orderBy('priority')
+            ->get();
 
-        $categories = collect($faqs)->flatMap(fn($faq) => explode(',', (string) $faq->categories))->map(fn($c) => trim($c))->unique()->sort()->values();
+        $categories = collect($faqs)
+            ->flatMap(fn($faq) => explode(',', (string) $faq->categories))
+            ->map(fn($c) => trim($c))
+            ->unique()
+            ->sort()
+            ->values();
 
-        return $this->render('faq', [
+        return view('faq', [
             'faqs' => $faqs,
             'categories' => $categories,
             'search' => $search,
