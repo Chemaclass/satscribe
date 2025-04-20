@@ -4,21 +4,22 @@ declare(strict_types=1);
 namespace App\Repositories;
 
 use App\Data\BlockchainData;
+use App\Enums\PromptType;
 use App\Models\PromptResult;
 
 final class PromptResultRepository
 {
-    public function findByTypeAndInput(string $type, string $input, ?string $question = null): ?PromptResult
+    public function findByTypeAndInput(PromptType $type, string $input, ?string $question = null): ?PromptResult
     {
-        return PromptResult::where('type', $type)
+        return PromptResult::where('type', $type->value)
             ->where('input', $input)
             ->when($question, fn ($q) => $q->where('question', $question))
             ->first();
     }
 
-    public function deleteByTypeAndInput(string $type, string $input): void
+    public function deleteByTypeAndInput(PromptType $type, string $input): void
     {
-        PromptResult::where('type', $type)
+        PromptResult::where('type', $type->value)
             ->where('input', $input)
             ->delete();
     }

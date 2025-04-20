@@ -22,7 +22,7 @@ final readonly class UserInputSanitizer
             $sanitized = preg_replace(
                 $pattern,
                 str_repeat('*', strlen($word)),
-                $sanitized
+                (string) $sanitized
             );
         }
 

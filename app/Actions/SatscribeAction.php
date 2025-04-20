@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions;
 
 use App\Data\GeneratedPrompt;
+use App\Enums\PromptType;
 use App\Models\PromptResult;
 use App\Repositories\PromptResultRepository;
 use App\Services\BlockchainService;
@@ -28,7 +29,7 @@ final readonly class SatscribeAction
 
     public function execute(string $input, bool $refresh = false, string $question = ''): GeneratedPrompt
     {
-        $type = is_numeric($input) ? 'block' : 'transaction';
+        $type = PromptType::fromInput($input);
 
         if (!$refresh) {
             $cached = $this->repository->findByTypeAndInput($type, $input, $question);
@@ -43,9 +44,10 @@ final readonly class SatscribeAction
         return new GeneratedPrompt($fresh, isFresh: true);
     }
 
-    private function getFreshResult(string $input, string $type, bool $refresh, string $question = ''): PromptResult
+    private function getFreshResult(string $input, PromptType $type, bool $refresh, string $question = ''): PromptResult
     {
         $this->checkRateLimiter();
+
         if ($refresh) {
             $this->repository->deleteByTypeAndInput($type, $input);
         }
@@ -55,7 +57,7 @@ final readonly class SatscribeAction
         $question = $this->userInputSanitizer->sanitize($question);
         $response = $this->openai->generateText($data, $type, $question);
 
-        return $this->repository->save($type, $input, $response, $data, $question);
+        return $this->repository->save($type->value, $input, $response, $data, $question);
     }
 
     private function checkRateLimiter(): void

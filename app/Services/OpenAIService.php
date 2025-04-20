@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Data\BlockchainData;
+use App\Enums\PromptType;
 use App\Exceptions\OpenAIError;
 use Illuminate\Http\Client\Factory as HttpClient;
 use Psr\Log\LoggerInterface;
@@ -20,7 +21,7 @@ final readonly class OpenAIService
     ) {
     }
 
-    public function generateText(BlockchainData $data, string $type, string $question = ''): string
+    public function generateText(BlockchainData $data, PromptType $type, string $question = ''): string
     {
         $payload = [
             'model' => config('services.openai.model'),
@@ -45,7 +46,7 @@ final readonly class OpenAIService
         return $text;
     }
 
-    private function preparePrompt(BlockchainData $data, string $type, string $question): string
+    private function preparePrompt(BlockchainData $data, PromptType $type, string $question): string
     {
         $condensedData = $this->compactBlockchainData($data->toArray());
         $json = (string) json_encode($condensedData, JSON_UNESCAPED_SLASHES);
@@ -57,7 +58,7 @@ If relevant, also include:
 TEXT;
         $prompt = <<<PROMPT
 You are an expert Bitcoin educator and technical writer.
-Provide a clear, beginner-friendly description of this Bitcoin {$type}.
+Provide a clear, beginner-friendly description of this Bitcoin {$type->value}.
 
 {$questionPart}
 
