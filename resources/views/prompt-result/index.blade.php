@@ -18,7 +18,7 @@
 
         {{-- Form + Animated Icons --}}
         <div class="flex flex-col lg:flex-row items-start gap-6">
-            <form method="GET" action="{{ route('generate') }}" class="describe-form w-full max-w-2xl" aria-labelledby="form-heading">
+            <form method="GET" action="{{ route('home') }}" class="describe-form w-full max-w-2xl" aria-labelledby="form-heading">
                 <fieldset>
                     <legend id="form-heading" class="sr-only">Describe Bitcoin Data</legend>
                     <div class="form-section mb-6" x-data="txidValidator()">
