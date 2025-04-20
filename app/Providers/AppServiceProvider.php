@@ -1,14 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Providers;
 
 use App\Actions\DescribePromptResultAction;
-use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Pagination\Paginator;
-use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
-class AppServiceProvider extends ServiceProvider
+final class AppServiceProvider extends ServiceProvider
 {
     /**
      * Register any application services.
@@ -33,8 +34,6 @@ class AppServiceProvider extends ServiceProvider
     {
         Paginator::useTailwind();
 
-        RateLimiter::for('generate', function ($request) {
-            return Limit::perDay(config('app.rate_limit_generate'))->by($request->ip());
-        });
+        View::share('cronitorClientKey', config('app.cronitorClientKey'));
     }
 }

@@ -8,8 +8,6 @@ use Illuminate\Support\Facades\Route;
 Route::redirect('/generate', '/');
 Route::redirect('describe', '/');
 
-Route::get('/', HomeController::class)->name('generate')
-    ->middleware('throttle:generate');
-
+Route::get('/', HomeController::class)->name('generate');
 Route::get('/history', HistoryController::class)->name('history');
 Route::get('/faq', FaqController::class)->name('faq');

@@ -14,7 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 
-final class HomeController extends AbstractController
+final class HomeController
 {
     public function __invoke(Request $request, DescribePromptResultAction $action): View
     {
@@ -34,7 +34,7 @@ final class HomeController extends AbstractController
         $refresh = filter_var($request->query('refresh'), FILTER_VALIDATE_BOOL);
 
         if (!$request->has('search') || empty($request->get('search'))) {
-            return $this->render('prompt-result.index', [
+            return view('prompt-result.index', [
                 'questionPlaceholder' => $this->questionPlaceholder(),
                 'maxBitcoinBlockHeight' => $this->getMaxBitcoinBlockHeight(),
             ]);
@@ -50,11 +50,11 @@ final class HomeController extends AbstractController
                 'error' => $e->getMessage(),
             ]);
 
-            return $this->render('prompt-result.index')
+            return view('prompt-result.index')
                 ->withErrors(['search' => $e->getMessage()]);
         }
 
-        return $this->render('prompt-result.index', [
+        return view('prompt-result.index', [
             'result' => $response->result,
             'search' => $search,
             'question' => $question,
