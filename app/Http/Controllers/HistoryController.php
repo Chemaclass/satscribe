@@ -12,7 +12,7 @@ final class HistoryController
     public function index(): View
     {
         return view('history.index', [
-            'descriptions' => PromptResult::latest()->simplePaginate(5),
+            'descriptions' => PromptResult::latest()->simplePaginate(3),
         ]);
     }
 }
