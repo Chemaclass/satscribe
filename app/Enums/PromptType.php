@@ -11,6 +11,12 @@ enum PromptType: string
 
     public static function fromInput(string $input): self
     {
-        return is_numeric($input) ? self::Block : self::Transaction;
+        if (is_numeric($input)
+            || preg_match('/^0{8,}[a-f0-9]{56}$/i', $input)
+        ) {
+            return self::Block;
+        }
+
+        return self::Transaction;
     }
 }
