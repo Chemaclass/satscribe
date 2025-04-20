@@ -14,7 +14,7 @@ use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Support\Facades\RateLimiter;
 use function is_numeric;
 
-final readonly class DescribePromptResultAction
+final readonly class SatscribeAction
 {
     public function __construct(
         private BlockchainService $blockchain,
@@ -26,7 +26,7 @@ final readonly class DescribePromptResultAction
     ) {
     }
 
-    public function execute(string $input, bool $refresh = false, string $question = ''): ?GeneratedPrompt
+    public function execute(string $input, bool $refresh = false, string $question = ''): GeneratedPrompt
     {
         $type = is_numeric($input) ? 'block' : 'transaction';
 

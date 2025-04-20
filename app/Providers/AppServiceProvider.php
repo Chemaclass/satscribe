@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
-use App\Actions\DescribePromptResultAction;
+use App\Actions\SatscribeAction;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -17,12 +17,12 @@ final class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app
-            ->when(DescribePromptResultAction::class)
+            ->when(SatscribeAction::class)
             ->needs('$ip')
             ->give(request()->ip());
 
         $this->app
-            ->when(DescribePromptResultAction::class)
+            ->when(SatscribeAction::class)
             ->needs('$maxOpenAIAttempts')
             ->giveConfig('app.max_open_ai_attempts');
     }

@@ -48,4 +48,9 @@ final class Question
         'Could this transaction be related to an exchange?',
         'Is this a common pattern seen in Bitcoin usage?',
     ];
+
+    public static function rand(): string
+    {
+        return self::SAMPLE_QUESTIONS[array_rand(self::SAMPLE_QUESTIONS)];
+    }
 }

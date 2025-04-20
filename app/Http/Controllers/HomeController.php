@@ -4,21 +4,45 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Actions\DescribePromptResultAction;
+use App\Actions\SatscribeAction;
 use App\Data\Question;
 use App\Exceptions\BlockchainException;
 use App\Exceptions\OpenAIError;
+use App\Models\PromptResult;
 use DateTimeImmutable;
 use DateTimeZone;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
+use Throwable;
 
 final class HomeController
 {
-    public function __invoke(Request $request, DescribePromptResultAction $action): View
+    public function __invoke(Request $request, SatscribeAction $action): View
     {
-        $validated = $request->validate([
+        if (!$this->hasSearchInput($request)) {
+            return $this->renderInitialPromptView();
+        }
+
+        $validated = $this->validateRequest($request);
+        $search = strtolower(trim($validated['search'] ?? ''));
+        $question = trim($validated['question'] ?? '');
+
+        $refresh = $this->shouldRefresh($request);
+
+        try {
+            $response = $action->execute($search, $refresh, $question);
+        } catch (BlockchainException|OpenAIError $e) {
+            $this->logPromptError($e, $search, $refresh, $question);
+            return $this->renderErrorView($e);
+        }
+
+        return $this->renderResultView($response->result, $search, $question, $refresh, $response->isFresh);
+    }
+
+    private function validateRequest(Request $request): array
+    {
+        return $request->validate([
             'search' => [
                 'nullable', 'string', function ($attribute, $value, $fail): void {
                     if (!preg_match('/^[a-f0-9]{64}$/i', $value) && !ctype_digit($value)) {
@@ -28,46 +52,59 @@ final class HomeController
             ],
             'question' => ['nullable', 'string', 'max:200'],
         ]);
+    }
 
-        $search = strtolower(trim($validated['search'] ?? ''));
-        $question = trim($validated['question'] ?? '');
-        $refresh = filter_var($request->query('refresh'), FILTER_VALIDATE_BOOL);
+    private function shouldRefresh(Request $request): bool
+    {
+        return filter_var($request->query('refresh'), FILTER_VALIDATE_BOOL);
+    }
 
-        if (!$request->has('search') || empty($request->get('search'))) {
-            return view('prompt-result.index', [
-                'questionPlaceholder' => $this->questionPlaceholder(),
-                'maxBitcoinBlockHeight' => $this->getMaxBitcoinBlockHeight(),
-            ]);
-        }
+    private function hasSearchInput(Request $request): bool
+    {
+        return $request->has('search')
+            && !empty($request->get('search'));
+    }
 
-        try {
-            $response = $action->execute($search, $refresh, $question);
-        } catch (BlockchainException|OpenAIError $e) {
-            Log::error('Failed to describe prompt result', [
-                'search' => $search,
-                'refresh' => $refresh,
-                'question' => $question,
-                'error' => $e->getMessage(),
-            ]);
-
-            return view('prompt-result.index')
-                ->withErrors(['search' => $e->getMessage()]);
-        }
-
+    private function renderInitialPromptView(): View
+    {
         return view('prompt-result.index', [
-            'result' => $response->result,
-            'search' => $search,
-            'question' => $question,
-            'refreshed' => $refresh,
-            'isFresh' => $response->isFresh,
-            'questionPlaceholder' => $this->questionPlaceholder(),
+            'questionPlaceholder' => Question::rand(),
             'maxBitcoinBlockHeight' => $this->getMaxBitcoinBlockHeight(),
         ]);
     }
 
-    private function questionPlaceholder(): string
+    private function renderResultView(
+        PromptResult $result,
+        string $search,
+        string $question,
+        bool $refresh,
+        bool $isFresh
+    ): View {
+        return view('prompt-result.index', [
+            'result' => $result,
+            'search' => $search,
+            'question' => $question,
+            'refreshed' => $refresh,
+            'isFresh' => $isFresh,
+            'questionPlaceholder' => Question::rand(),
+            'maxBitcoinBlockHeight' => $this->getMaxBitcoinBlockHeight(),
+        ]);
+    }
+
+    private function renderErrorView(Throwable $e): View
     {
-        return Question::SAMPLE_QUESTIONS[array_rand(Question::SAMPLE_QUESTIONS)];
+        return view('prompt-result.index')
+            ->withErrors(['search' => $e->getMessage()]);
+    }
+
+    private function logPromptError(Throwable $e, string $search, bool $refresh, string $question): void
+    {
+        Log::error('Failed to describe prompt result', [
+            'search' => $search,
+            'refresh' => $refresh,
+            'question' => $question,
+            'error' => $e->getMessage(),
+        ]);
     }
 
     private function getMaxBitcoinBlockHeight(): int
@@ -76,13 +113,7 @@ final class HomeController
         $currentTimestamp = now()->setTimezone('UTC')->getTimestamp();
 
         $elapsedSeconds = $currentTimestamp - $genesisTimestamp;
-        $estimatedHeight = (int) floor($elapsedSeconds / 600); // 600 seconds = 10 minutes per block
-
-        /**
-         * Add a buffer (~6%) to account for future blocks beyond the estimated height.
-         * This helps prevent edge cases where a valid height might be slightly ahead
-         * of the computed value due to network variability or caching delays.
-         */
+        $estimatedHeight = (int) floor($elapsedSeconds / 600);
         $buffer = (int) ceil($estimatedHeight * 0.06);
 
         return $estimatedHeight + $buffer;
