@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace App\Http\Requests;
 
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 final class SatscribeIndexRequest extends FormRequest
 {
     /**
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
@@ -23,5 +24,25 @@ final class SatscribeIndexRequest extends FormRequest
             ],
             'question' => ['nullable', 'string', 'max:200'],
         ];
+    }
+
+    public function hasSearchInput(): bool
+    {
+        return $this->filled('search');
+    }
+
+    public function getSearchInput(): string
+    {
+        return strtolower(trim((string) $this->string('search')));
+    }
+
+    public function getQuestionInput(): string
+    {
+        return trim((string) $this->string('question'));
+    }
+
+    public function isRefreshEnabled(): bool
+    {
+        return $this->boolean('refresh');
     }
 }
