@@ -19,11 +19,16 @@ final readonly class PriceService
         private HttpClient $http,
         private LoggerInterface $logger,
         private Cache $cache,
+        private bool $enabled,
     ) {
     }
 
     public function getCurrentBtcPriceUsd(): float
     {
+        if (!$this->enabled) {
+            return 0.0;
+        }
+
         return $this->cache->remember(self::CACHE_KEY, now()->addMinutes(self::CACHE_TTL_MINUTES), function () {
             $response = $this->http->get(self::BASE_URL.'/v3/simple/price', [
                 'ids' => 'bitcoin',

@@ -44,14 +44,12 @@
             <span class="link-text">Code</span>
         </a>
 
-        {{-- 🌗 Dark Mode Toggle --}}
         <button class="nav-link flex items-center gap-1" @click="dark = !dark">
             <svg :data-lucide="dark ? 'sun' : 'moon'" class="w-5 h-5"></svg>
             <span class="link-text" x-text="dark ? 'Light' : 'Dark'"></span>
         </button>
 
-        {{-- 💰 BTC Price Ticket --}}
-        @if(isset($btcPriceUsd))
+        @if(!empty($btcPriceUsd))
             <div class="px-3 py-1 text-sm rounded-full shadow-sm whitespace-nowrap">
                 BTC: ${{ number_format($btcPriceUsd, 0) }}
             </div>
