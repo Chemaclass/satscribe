@@ -1,28 +1,22 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Actions\DescribePromptResultAction;
 use App\Data\Question;
 use App\Exceptions\BlockchainException;
 use App\Exceptions\OpenAIError;
-use App\Models\PromptResult;
 use DateTimeImmutable;
 use DateTimeZone;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 
-final class PromptResultController extends AbstractController
+final class HomeController extends AbstractController
 {
-    public function history(): View
-    {
-        return $this->render('prompt-result/history', [
-            'descriptions' => PromptResult::latest()->simplePaginate(5),
-        ]);
-    }
-
-    public function generate(Request $request, DescribePromptResultAction $action): View
+    public function __invoke(Request $request, DescribePromptResultAction $action): View
     {
         $validated = $request->validate([
             'search' => [

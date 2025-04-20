@@ -4,10 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Faq;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 
-final class FaqController
+final class FaqController extends AbstractController
 {
-    public function index(Request $request)
+    public function __invoke(Request $request): View
     {
         $search = $request->input('search', ''); // ⬅️ Default to empty string
 
@@ -24,7 +25,7 @@ final class FaqController
 
         $categories = collect($faqs)->flatMap(fn($faq) => explode(',', (string) $faq->categories))->map(fn($c) => trim($c))->unique()->sort()->values();
 
-        return view('faq', [
+        return $this->render('faq', [
             'faqs' => $faqs,
             'categories' => $categories,
             'search' => $search,
