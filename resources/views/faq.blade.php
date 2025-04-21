@@ -6,7 +6,15 @@
         <header class="section-header mb-6">
             <div class="flex flex-col max-w-2xl">
                 <h1 class="text-2xl sm:text-3xl font-bold leading-tight">Frequently Asked Questions</h1>
-                <p class="subtitle text-base sm:text-lg text-gray-700 dark:text-gray-400">
+
+                <p class="mt-3 text-base sm:text-lg subtitle leading-relaxed">
+                    <strong>Satscribe</strong> is a tool designed to make the Bitcoin blockchain easier to understand—whether you're just getting started or you're knee-deep in block analysis. By entering a transaction ID or block height, you can instantly get an AI-generated explanation in plain English.
+                </p>
+
+                <p class="mt-3 text-base sm:text-lg subtitle leading-relaxed">
+                    From technical summaries to beginner-friendly overviews, Satscribe bridges the gap between raw blockchain data and human understanding.
+                </p>
+                <p class="subtitle text-base sm:text-lg text-gray-700 dark:text-gray-400 mt-4">
                     Browse or search by topic to learn more.
                 </p>
             </div>
