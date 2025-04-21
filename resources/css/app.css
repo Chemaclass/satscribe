@@ -366,3 +366,11 @@ button i[data-lucide] {
 .dark .description-question {
     @apply bg-gray-700 text-orange-100 ring-1 ring-gray-700;
 }
+
+.persona-label {
+    color: #1f2937; /* Tailwind's gray-800 */
+}
+
+.dark .persona-label {
+    color: var(--btc-orange-light); /* or orange-100 */
+}

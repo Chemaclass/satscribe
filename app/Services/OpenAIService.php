@@ -60,37 +60,69 @@ final readonly class OpenAIService
         string $question,
         ?PromptPersona $persona = null,
     ): string {
-        // @todo: use persona to customize prompt
-
         $condensedData = $this->compactBlockchainData($data->toArray());
         $json = (string) json_encode($condensedData, JSON_UNESCAPED_SLASHES);
 
         $questionPart = $question ?: <<<TEXT
-If relevant, also include:
-- Any notable wallet features (e.g. Multi-signature, P2PK, P2PKH, P2SH, P2MS, P2WPKH, P2WSH, P2TR, OP_RETURN, RBF, CoinJoin).
-- Unusual behavior (e.g. batching, dust outputs, consolidation) in a separate paragraph.
+Use markdown formatting.
+If there would be any, then include wallet features, for example:
+- Multi-signature
+- P2PK
+- P2PKH
+- P2SH
+- P2MS
+- P2WPKH
+- P2WSH
+- P2TR
+- OP_RETURN
+- RBF
+- CoinJoin
+- Segwit
+- Taproot
+- Or if it is an important historical {$type->value}, mention it explicitly.
 TEXT;
-        $prompt = <<<PROMPT
-You are an expert Bitcoin educator and technical writer.
-Provide a clear, beginner-friendly description of this Bitcoin {$type->value}.
 
+        $corePrompt = <<<PROMPT
+Describe this Bitcoin {$type->value} using the following blockchain data:
+
+{$json}
+
+Instructions:
 {$questionPart}
 
-Formatting and rules:
-- Use **Markdown** for formatting.
-- Be concise. Use short paragraphs when necessary.
-- Stay under 200 tokens.
-- Do not repeat information.
-
-Technical notes:
-- Inputs (`vin`) = senders; Outputs (`vout`) = recipients.
-- Values are in sats. 100,000,000 sats = 1 BTC.
-
-Blockchain data:
-{$json}
+Max output 300 words.
 PROMPT;
 
-        return $this->truncateByApproxTokens($prompt, self::LIMIT_TOKENS_PER_REQUEST);
+        $finalPrompt = $this->wrapPromptWithPersona($corePrompt, $persona);
+
+        return $this->truncateByApproxTokens($finalPrompt, self::LIMIT_TOKENS_PER_REQUEST);
+    }
+
+    private function wrapPromptWithPersona(string $prompt, ?PromptPersona $persona): string
+    {
+        return match ($persona) {
+            PromptPersona::Educator => <<<TEXT
+You are an experienced Bitcoin educator. Break things down in simple terms, as if explaining to someone new to Bitcoin. Use analogies or examples when helpful.
+
+{$prompt}
+TEXT,
+            PromptPersona::Developer => <<<TEXT
+You are a Bitcoin developer and technical analyst. Focus on technical accuracy, relevant scripts, and protocol-level behavior. Mention transaction types and byte-level detail where appropriate.
+
+{$prompt}
+TEXT,
+            PromptPersona::Storyteller => <<<TEXT
+You are a storyteller who explains Bitcoin history and behavior in engaging narratives. Weave context and insights into a short story or real-world metaphor.
+
+{$prompt}
+TEXT,
+            default => <<<TEXT
+You are an expert Bitcoin educator and technical writer.
+Provide a clear, beginner-friendly description of this Bitcoin transaction or block.
+
+{$prompt}
+TEXT,
+        };
     }
 
     private function compactBlockchainData(array $data): array

@@ -172,19 +172,24 @@
 
                                 {{-- Persona Selector --}}
                                 <div>
-                                    <label for="persona" class="block text-sm font-medium text-gray-900 dark:text-orange-100 mb-1">
-                                        AI Persona (optional)
+                                    <label for="persona" class="persona-label block text-sm font-medium mb-1">
+                                        AI Persona <span class="text-xs text-gray-500 dark:text-orange-300">(optional)</span>
                                     </label>
-                                    <select
-                                        name="persona"
-                                        id="persona"
-                                        class="form-select w-full"
-                                    >
-                                        <option value="">Default style</option>
-                                        <option value="educator" {{ old('persona', $persona ?? '') === 'educator' ? 'selected' : '' }}>Educator – Explain it like I'm new</option>
-                                        <option value="developer" {{ old('persona', $persona ?? '') === 'developer' ? 'selected' : '' }}>Developer – Focus on scripts & code</option>
-                                        <option value="storyteller" {{ old('persona', $persona ?? '') === 'storyteller' ? 'selected' : '' }}>Storyteller – Add narrative and context</option>
-                                    </select>
+
+                                    <div class="relative">
+                                        <select
+                                            name="persona" id="persona"
+                                            class="form-select persona-select w-full bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-sm text-gray-800 dark:text-gray-100 rounded-md shadow-sm focus:ring-orange-400 focus:border-orange-400"
+                                        >
+                                            <option value="">Default style</option>
+                                            @foreach (\App\Enums\PromptPersona::cases() as $persona)
+                                                <option value="{{ $persona->value }}" {{ old('persona', $selected ?? '') === $persona->value ? 'selected' : '' }}>
+                                                    {{ $persona->label() }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+
                                     <small class="checkbox-help text-gray-600 dark:text-gray-400 mt-1 block">
                                         Choose how you'd like the AI to explain things.
                                     </small>
