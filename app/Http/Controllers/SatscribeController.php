@@ -31,15 +31,17 @@ final readonly class SatscribeController
 
         $search = $request->getSearchInput();
         $question = $request->getQuestionInput();
+        $persona = $request->getPersonaInput();
         $refresh = $request->isRefreshEnabled();
 
         try {
-            $generatedPrompt = $action->execute($search, $refresh, $question);
+            $generatedPrompt = $action->execute($search, $refresh, $question, $persona);
         } catch (BlockchainException|OpenAIError $e) {
             Log::error('Failed to describe prompt result', [
-                'search' => $search,
+                'search' => $search->text,
                 'refresh' => $refresh,
                 'question' => $question,
+                'persona' => $persona->value,
                 'error' => $e->getMessage(),
             ]);
             return view('satscribe')
@@ -48,10 +50,11 @@ final readonly class SatscribeController
 
         return view('satscribe', [
             'result' => $generatedPrompt->result,
-            'search' => $search,
-            'question' => $question,
-            'refreshed' => $refresh,
             'isFresh' => $generatedPrompt->isFresh,
+            'search' => $search->text,
+            'question' => $question,
+            'persona' => $persona,
+            'refreshed' => $refresh,
             'questionPlaceholder' => QuestionPlaceholder::rand(),
             'maxBitcoinBlockHeight' => $this->heightProvider->getMaxPossibleBlockHeight(),
         ]);

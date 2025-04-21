@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Requests;
 
+use App\Data\PromptInput;
+use App\Enums\PromptPersona;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -31,14 +33,21 @@ final class SatscribeIndexRequest extends FormRequest
         return $this->filled('search');
     }
 
-    public function getSearchInput(): string
+    public function getSearchInput(): PromptInput
     {
-        return strtolower(trim((string) $this->string('search')));
+        return PromptInput::fromString(
+            strtolower(trim((string) $this->string('search')))
+        );
     }
 
     public function getQuestionInput(): string
     {
         return trim((string) $this->string('question'));
+    }
+
+    public function getPersonaInput(): ?PromptPersona
+    {
+        return PromptPersona::tryFrom($this->input('persona') ?? '');
     }
 
     public function isRefreshEnabled(): bool

@@ -6,7 +6,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-final class PromptResult extends Model
+final class SatscribeDescription extends Model
 {
     protected $fillable = [
         'type',

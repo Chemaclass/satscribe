@@ -6,8 +6,9 @@ namespace App\Actions;
 
 use App\Data\GeneratedPrompt;
 use App\Data\PromptInput;
-use App\Models\PromptResult;
-use App\Repositories\PromptResultRepository;
+use App\Enums\PromptPersona;
+use App\Models\SatscribeDescription;
+use App\Repositories\SatscribeDescriptionRepository;
 use App\Services\BlockchainService;
 use App\Services\OpenAIService;
 use App\Services\UserInputSanitizer;
@@ -19,42 +20,49 @@ final readonly class SatscribeAction
     public function __construct(
         private BlockchainService $blockchain,
         private OpenAIService $openai,
-        private PromptResultRepository $repository,
+        private SatscribeDescriptionRepository $repository,
         private UserInputSanitizer $userInputSanitizer,
         private string $ip,
         private int $maxOpenAIAttempts,
     ) {
     }
 
-    public function execute(string $rawInput, bool $refresh = false, string $question = ''): GeneratedPrompt
-    {
-        $input = PromptInput::fromString($rawInput);
-
+    public function execute(
+        PromptInput $input,
+        bool $refresh = false,
+        ?string $question = '',
+        ?PromptPersona $persona = null,
+    ): GeneratedPrompt {
         if (!$refresh) {
-            $cached = $this->repository->findByTypeAndInput($input, $question);
+            $cached = $this->repository->findByCriteria($input, $question, $persona);
 
-            if ($cached instanceof PromptResult && !$cached->force_refresh) {
+            if ($cached instanceof SatscribeDescription && !$cached->force_refresh) {
                 return new GeneratedPrompt($cached, isFresh: false);
             }
         }
 
-        $fresh = $this->getFreshResult($input, $refresh, $question);
+        $fresh = $this->getFreshResult($input, $refresh, $question, $persona);
 
         return new GeneratedPrompt($fresh, isFresh: true);
     }
 
-    private function getFreshResult(PromptInput $input, bool $refresh, string $question = ''): PromptResult
-    {
+    private function getFreshResult(
+        PromptInput $input,
+        bool $refresh,
+        string $question = '',
+        ?PromptPersona $persona = null,
+    ): SatscribeDescription {
         $this->checkRateLimiter();
 
         if ($refresh) {
+            // @todo: do not delete; instead save a new item, and when looking for the cached one, always fetch latest
             $this->repository->deleteByTypeAndInput($input);
         }
 
         $data = $this->blockchain->getBlockchainData($input);
 
         $question = $this->userInputSanitizer->sanitize($question);
-        $response = $this->openai->generateText($data, $input, $question);
+        $response = $this->openai->generateText($data, $input, $question, $persona);
 
         return $this->repository->save($input, $response, $data, $question);
     }

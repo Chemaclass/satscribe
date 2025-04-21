@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Data\BlockchainData;
 use App\Data\PromptInput;
+use App\Enums\PromptPersona;
 use App\Enums\PromptType;
 use App\Exceptions\OpenAIError;
 use Illuminate\Http\Client\Factory as HttpClient;
@@ -24,14 +25,18 @@ final readonly class OpenAIService
     ) {
     }
 
-    public function generateText(BlockchainData $data, PromptInput $input, string $question = ''): string
-    {
+    public function generateText(
+        BlockchainData $data,
+        PromptInput $input,
+        string $question = '',
+        ?PromptPersona $persona = null,
+    ): string {
         $payload = [
             'model' => $this->openAiModel,
             'messages' => [
                 [
                     'role' => 'user',
-                    'content' => $this->preparePrompt($data, $input->type, $question),
+                    'content' => $this->preparePrompt($data, $input->type, $question, $persona),
                 ],
             ],
         ];
@@ -49,8 +54,14 @@ final readonly class OpenAIService
         return $text;
     }
 
-    private function preparePrompt(BlockchainData $data, PromptType $type, string $question): string
-    {
+    private function preparePrompt(
+        BlockchainData $data,
+        PromptType $type,
+        string $question,
+        ?PromptPersona $persona = null,
+    ): string {
+        // @todo: use persona to customize prompt
+
         $condensedData = $this->compactBlockchainData($data->toArray());
         $json = (string) json_encode($condensedData, JSON_UNESCAPED_SLASHES);
 

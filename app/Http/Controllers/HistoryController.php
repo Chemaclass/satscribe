@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Models\PromptResult;
+use App\Models\SatscribeDescription;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
@@ -13,7 +13,7 @@ final class HistoryController
     {
         $perPage = config('app.pagination.per_page');
 
-        $promptResults = PromptResult::latest()->simplePaginate($perPage);
+        $promptResults = SatscribeDescription::latest()->simplePaginate($perPage);
 
         return view('history', [
             'promptResults' => $promptResults,
@@ -22,7 +22,7 @@ final class HistoryController
 
     public function getRaw(int $id): JsonResponse
     {
-        $result = PromptResult::findOrFail($id);
+        $result = SatscribeDescription::findOrFail($id);
 
         return response()->json($result->raw_data);
     }

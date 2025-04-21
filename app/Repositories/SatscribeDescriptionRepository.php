@@ -5,21 +5,26 @@ namespace App\Repositories;
 
 use App\Data\BlockchainData;
 use App\Data\PromptInput;
-use App\Models\PromptResult;
+use App\Enums\PromptType;
+use App\Models\SatscribeDescription;
 
-final class PromptResultRepository
+final class SatscribeDescriptionRepository
 {
-    public function findByTypeAndInput(PromptInput $input, ?string $question = null): ?PromptResult
-    {
-        return PromptResult::where('type', $input->type->value)
+    public function findByCriteria(
+        PromptInput $input,
+        ?string $question = null,
+        ?string $persona = null
+    ): ?SatscribeDescription {
+        return SatscribeDescription::where('type', $input->type->value)
             ->where('input', $input->text)
             ->when($question, fn($q) => $q->where('question', $question))
+            ->when($persona, fn($q) => $q->where('persona', $persona))
             ->first();
     }
 
     public function deleteByTypeAndInput(PromptInput $input): void
     {
-        PromptResult::where('type', $input->type->value)
+        SatscribeDescription::where('type', $input->type->value)
             ->where('input', $input->text)
             ->delete();
     }
@@ -29,14 +34,14 @@ final class PromptResultRepository
         string $aiResponse,
         BlockchainData $data,
         ?string $question = null
-    ): PromptResult {
+    ): SatscribeDescription {
         $raw = $data->toArray();
 
-        $forceRefresh = $input->type->value === 'transaction'
+        $forceRefresh = $input->type->value === PromptType::Transaction->value
             && isset($raw['status']['confirmed'])
             && $raw['status']['confirmed'] === false;
 
-        return PromptResult::create([
+        return SatscribeDescription::create([
             'type' => $input->type->value,
             'input' => $input->text,
             'question' => $question,

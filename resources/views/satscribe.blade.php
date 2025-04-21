@@ -135,6 +135,7 @@
                         </div>
 
                         {{-- Advanced Toggle --}}
+                        {{-- Advanced Toggle --}}
                         <div x-data="{ showAdvanced: false }" class="form-group mb-4">
                             <button
                                 type="button"
@@ -150,8 +151,9 @@
                                 x-show="showAdvanced"
                                 x-cloak
                                 x-transition
-                                class="mt-4 advanced-fields mt-1 rounded-lg px-4 py-3 space-y-2 shadow-sm"
+                                class="mt-4 advanced-fields mt-1 rounded-lg px-4 py-3 space-y-4 shadow-sm"
                             >
+                                {{-- Refresh Checkbox --}}
                                 <div class="flex items-start gap-3">
                                     <input
                                         type="checkbox"
@@ -166,6 +168,26 @@
                                             (Skips cached descriptions and requests live data from the blockchain and OpenAI)
                                         </small>
                                     </label>
+                                </div>
+
+                                {{-- Persona Selector --}}
+                                <div>
+                                    <label for="persona" class="block text-sm font-medium text-gray-900 dark:text-orange-100 mb-1">
+                                        AI Persona (optional)
+                                    </label>
+                                    <select
+                                        name="persona"
+                                        id="persona"
+                                        class="form-select w-full"
+                                    >
+                                        <option value="">Default style</option>
+                                        <option value="educator" {{ old('persona', $persona ?? '') === 'educator' ? 'selected' : '' }}>Educator – Explain it like I'm new</option>
+                                        <option value="developer" {{ old('persona', $persona ?? '') === 'developer' ? 'selected' : '' }}>Developer – Focus on scripts & code</option>
+                                        <option value="storyteller" {{ old('persona', $persona ?? '') === 'storyteller' ? 'selected' : '' }}>Storyteller – Add narrative and context</option>
+                                    </select>
+                                    <small class="checkbox-help text-gray-600 dark:text-gray-400 mt-1 block">
+                                        Choose how you'd like the AI to explain things.
+                                    </small>
                                 </div>
                             </div>
                         </div>
