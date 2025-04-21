@@ -99,10 +99,10 @@
                         name="persona" id="persona"
                         class="form-select persona-select w-full bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-sm text-gray-800 dark:text-gray-100 rounded-md shadow-sm focus:ring-orange-400 focus:border-orange-400"
                     >
-                        @foreach (\App\Enums\PromptPersona::cases() as $persona)
-                            <option value="{{ $persona->value }}"
-                                {{ old('persona', $selected ?? 'educator') === $persona->value ? 'selected' : '' }}>
-                                {{ $persona->label() }}
+                        @foreach (\App\Enums\PromptPersona::cases() as $p)
+                            <option value="{{ $p->value }}"
+                                {{ old('persona', $persona ?? 'educator') === $p->value ? 'selected' : '' }}>
+                                {{ $p->label() }}
                             </option>
                         @endforeach
                     </select>

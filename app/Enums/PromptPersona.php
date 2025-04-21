@@ -15,7 +15,7 @@ enum PromptPersona: string
     public function label(): string
     {
         return match ($this) {
-            self::Educator => "Educator – Explain it like I'm new",
+            self::Educator => "Educator – Explain it like I'm new into Bitcoin",
             self::Developer => 'Developer – Focus on scripts & code',
             self::Storyteller => 'Storyteller – Add narrative and context',
         };
