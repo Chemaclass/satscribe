@@ -64,7 +64,7 @@ final readonly class SatscribeAction
         $question = $this->userInputSanitizer->sanitize($question);
         $response = $this->openai->generateText($data, $input, $persona, $question);
 
-        return $this->repository->save($input, $response, $data, $question);
+        return $this->repository->save($input, $response, $data, $persona, $question);
     }
 
     private function checkRateLimiter(): void

@@ -35,6 +35,7 @@ final class SatscribeDescriptionRepository
         PromptInput $input,
         string $aiResponse,
         BlockchainData $data,
+        PromptPersona $persona,
         ?string $question = null
     ): SatscribeDescription {
         $raw = $data->toArray();
@@ -50,6 +51,7 @@ final class SatscribeDescriptionRepository
             'ai_response' => $aiResponse,
             'raw_data' => $raw,
             'force_refresh' => $forceRefresh,
+            'persona' => $persona->value,
         ]);
     }
 }

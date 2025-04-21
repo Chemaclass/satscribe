@@ -35,7 +35,7 @@ final readonly class OpenAIService
             'messages' => [
                 [
                     'role' => 'user',
-                    'content' => $this->preparePrompt($data, $input->type, $question, $persona),
+                    'content' => $this->preparePrompt($data, $input->type, $persona, $question),
                 ],
             ],
             'max_tokens' => $persona->maxTokens(),
@@ -49,6 +49,7 @@ final readonly class OpenAIService
         }
 
         $text = $response->json('choices.0.message.content');
+        $text = $this->trimToLastFullSentence($text);
         $this->logger->info("OpenAI generated description:\n".$text);
 
         return $text;
@@ -57,8 +58,8 @@ final readonly class OpenAIService
     private function preparePrompt(
         BlockchainData $data,
         PromptType $type,
-        string $question,
         PromptPersona $persona,
+        string $question,
     ): string {
         $condensedData = $this->compactBlockchainData($data->toArray());
         $json = (string) json_encode($condensedData, JSON_UNESCAPED_SLASHES);
@@ -91,7 +92,21 @@ TEXT;
 
     private function wrapPromptWithPersona(string $prompt, PromptPersona $persona): string
     {
-        return "{$persona->systemPrompt()}\n\n{$prompt}";
+        return "{$persona->systemPrompt()}. End your response naturally, without cutting off mid-sentence. \n\n{$prompt}";
+    }
+
+    private function trimToLastFullSentence(string $text): string
+    {
+        // Match all ending sentence punctuation
+        $matches = [];
+        preg_match_all('/[.?!](?=\s|$)/u', $text, $matches, PREG_OFFSET_CAPTURE);
+
+        if (isset($matches[0]) && $matches[0] !== []) {
+            $last = end($matches[0]);
+            return mb_substr($text, 0, $last[1] + 1);
+        }
+
+        return $text; // fallback
     }
 
     private function compactBlockchainData(array $data): array
