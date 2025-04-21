@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Data;
 
-final class Question
+final class QuestionPlaceholder
 {
     public const SAMPLE_QUESTIONS = [
         // Transaction-focused
