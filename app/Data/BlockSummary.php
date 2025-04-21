@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Data;
 
 use App\Services\MinerIdentifier;
+use Illuminate\Support\Collection;
 
 final class BlockSummary
 {
@@ -18,13 +19,13 @@ final class BlockSummary
         public int $coinbaseValue,
         public bool $hasOpReturnInCoinbase,
         public array $topTransactionsByFee,
+        public array $walletTypesBreakdown,
     ) {
     }
 
     public static function from(BlockData $data): self
     {
         $coinbaseTx = $data->transactions[0] ?? [];
-
         $scriptsig = $coinbaseTx['vin'][0]['scriptsig'] ?? '';
         $miner = MinerIdentifier::extractFromCoinbaseHex($scriptsig);
         $coinbaseOutputs = $coinbaseTx['vout'] ?? [];
@@ -45,6 +46,13 @@ final class BlockSummary
             ->values()
             ->all();
 
+        $walletTypes = collect($data->transactions)
+            ->flatMap(fn($tx) => $tx['vout'] ?? [])
+            ->groupBy('scriptpubkey_type')
+            ->map(fn(Collection $items) => $items->count())
+            ->sortKeys()
+            ->toArray();
+
         return new self(
             height: $data->height,
             txCount: $data->txCount,
@@ -55,40 +63,32 @@ final class BlockSummary
             coinbaseValue: $coinbaseValue,
             hasOpReturnInCoinbase: $hasOpReturn,
             topTransactionsByFee: $topFees,
+            walletTypesBreakdown: $walletTypes,
         );
-    }
-
-    private static function extractMinerFromCoinbaseHex(string $scriptsig): ?string
-    {
-        $ascii = preg_replace('/[^[:print:]]/', '', hex2bin($scriptsig));
-
-        $knownPools = [
-            'MARA' => 'MARA Pool',
-            'Foundry' => 'Foundry USA',
-            'AntPool' => 'AntPool',
-            'Binance' => 'Binance Pool',
-            'F2Pool' => 'F2Pool',
-            'ViaBTC' => 'ViaBTC',
-            'Luxor' => 'Luxor',
-        ];
-
-        foreach ($knownPools as $key => $label) {
-            if (stripos($ascii, $key) !== false) {
-                return $label;
-            }
-        }
-
-        return null;
     }
 
     public function toPrompt(): string
     {
-        dump($this);
         $opReturnText = $this->hasOpReturnInCoinbase ? 'Yes' : 'No';
         $minerText = $this->miner ?? 'Unknown miner';
 
-        $topTxs = collect($this->topTransactionsByFee)->map(fn($tx, $i) => sprintf("%d. %s (Fee: %s sats)", $i + 1,
-            $tx['txid'] ?? 'N/A', number_format($tx['fee']))
+        $topTxs = collect($this->topTransactionsByFee)->map(
+            fn($tx, $i) => sprintf("%d. %s (Fee: %s sats)", $i + 1, $tx['txid'] ?? 'N/A', number_format($tx['fee']))
+        )->implode("\n");
+
+        $walletTypeDescriptions = [
+            'p2pk' => 'P2PK: Full public keys directly',
+            'p2pkh' => 'P2PKH: Legacy (starts with 1)',
+            'p2sh' => 'P2SH: Script (starts with 3)',
+            'p2wpkh' => 'P2WPKH: Native SegWit (starts with bc1)',
+            'p2wsh' => 'P2WSH: SegWit complex scripts',
+            'p2tr' => 'P2TR: Taproot (starts with bc1p)',
+            'p2ms' => 'P2MS: Multisig scripts',
+            'op_return' => 'OP_RETURN: Data-carrying txs',
+        ];
+
+        $walletSummary = collect($this->walletTypesBreakdown)->map(
+            fn($count, $type) => sprintf('- %s: %d', $walletTypeDescriptions[$type] ?? strtoupper($type), $count)
         )->implode("\n");
 
         return <<<TEXT
@@ -106,6 +106,9 @@ Block Summary
 
 Top transactions by fee:
 {$topTxs}
+
+Wallet Types Breakdown:
+{$walletSummary}
 TEXT;
     }
 }
