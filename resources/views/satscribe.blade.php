@@ -25,6 +25,7 @@
                     aria-labelledby="form-heading"
                     x-data="searchInputValidator('{{ old('search', $search ?? '') }}')"
                     x-init="validate()"
+                    @submit="isSubmitting = true"
                 >
                     <fieldset>
                         <legend id="form-heading" class="sr-only">Describe Bitcoin Data</legend>
@@ -93,27 +94,11 @@
                                 type="submit"
                                 class="form-button w-full sm:w-auto"
                                 id="submit-button"
-                                @click="isSubmitting = true"
+                                :disabled="isSubmitting"
                             >
-                                <i
-                                    data-lucide="loader-2"
-                                    class="animate-spin mr-2"
-                                    x-show="isSubmitting"
-                                    x-cloak
-                                ></i>
-
-                                <span
-                                    x-show="!isSubmitting"
-                                    x-cloak
-                                    id="submit-text"
-                                >Satscribe</span>
-
-                                <span
-                                    x-show="!isSubmitting"
-                                    x-cloak
-                                    id="submit-icon"
-                                    class="sm-2"
-                                >
+                                <i data-lucide="loader-2" class="animate-spin mr-2" x-show="isSubmitting" x-cloak></i>
+                                <span x-show="!isSubmitting" x-cloak id="submit-text">Satscribe</span>
+                                <span x-show="!isSubmitting" x-cloak id="submit-icon" class="sm-2">
         <i data-lucide="zap" class="w-4 h-4"></i>
     </span>
                             </button>
