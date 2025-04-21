@@ -33,17 +33,17 @@
 
         {{-- Answer Type Tabs --}}
         <div class="flex mt-4 gap-2 mb-4 text-sm items-center">
-            <span class="text-gray-500 text-xs dark:text-gray-400">Answer style:</span>
+            <span class="text-xs">Answer style:</span>
             @foreach ([
                 'tldr' => ['icon' => 'scissors', 'label' => 'TL;DR'],
                 'beginner' => ['icon' => 'book', 'label' => 'Beginner'],
                 'advance' => ['icon' => 'laptop', 'label' => 'Advanced'],
             ] as $level => $meta)
                 <button
-                    class="answer-level-btn"
+                    class="answer-level-btn font-medium"
                     :class="globalAnswerLevel === '{{ $level }}'
-                    ? 'bg-orange-100 text-orange-800 border-orange-300 dark:bg-orange-200 dark:text-orange-900 dark:border-orange-100'
-                    : 'bg-transparent text-gray-600 border-gray-300 hover:bg-gray-100 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700'"
+                        ? 'bg-orange-200 text-orange-900 border-orange-400 dark:bg-orange-200 dark:text-orange-900 dark:border-orange-100'
+                        : 'bg-white border-gray-300 hover:bg-gray-100 dark:bg-transparent dark:text-gray-500 dark:border-gray-600 dark:hover:bg-gray-300'"
                     @click="setGlobalAnswerLevel('{{ $level }}')"
                 >
                     <i data-lucide="{{ $meta['icon'] }}" class="w-4 h-4"></i>
