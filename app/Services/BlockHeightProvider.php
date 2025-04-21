@@ -49,16 +49,20 @@ final readonly class BlockHeightProvider
     {
         $url = self::API_BASE_URL.self::BLOCKS_TIP_PATH;
         $response = $this->http->get($url);
-
         if ($response->failed()) {
             throw new RuntimeException("Blockstream API request failed for [$url]. Status: {$response->status()}");
         }
 
         $height = (int) $response->body();
-
         if ($height <= 0) {
             throw new RuntimeException("Blockstream API returned invalid block height: {$response->body()}");
         }
+
+        $this->cache->put(
+            self::CACHE_KEY,
+            $height + self::BUFFER_HEIGHT,
+            Carbon::now()->addMinutes(self::CACHE_TTL_MINUTES)
+        );
 
         return $height;
     }
