@@ -20,10 +20,14 @@
             <form method="GET" action="{{ route('home') }}" class="describe-form w-full max-w-2xl" aria-labelledby="form-heading">
                 <fieldset>
                     <legend id="form-heading" class="sr-only">Describe Bitcoin Data</legend>
-                    <div class="form-section mb-6" x-data="searchInputValidator('{{ old('search', $search ?? '') }}')" x-init="validate()">
+                    <div class="form-section mb-6"
+                         x-data="searchInputValidator('{{ old('search', $search ?? '') }}')"
+                         x-init="validate()"
+                    >
                         <label for="search" class="block text-sm font-medium text-gray-900 mb-1">
                             Transaction ID or Block Height
                         </label>
+
                         <input
                             type="text"
                             id="search"
@@ -37,14 +41,16 @@
                             @input="validate()"
                             aria-describedby="searchHelp"
                         >
+
                         <small id="searchHelp" class="text-sm mt-1 block">
-                          <span
-                              x-text="helperText"
-                              :class="helperClass"
-                              x-cloak
-                              x-transition
-                          ></span>
+                        <span
+                            x-text="helperText"
+                            :class="helperClass"
+                            x-cloak
+                            class="transition-colors duration-200 ease-in-out"
+                        ></span>
                         </small>
+
                         @error('search')
                         <div class="error mt-1 text-red-500 text-sm" role="alert">{{ $message }}</div>
                         @enderror
@@ -190,25 +196,16 @@
                 isBlockHeight: false,
 
                 get helperText() {
-                    if (this.input.length === 0) {
-                        return 'Enter a valid TXID (64 hex chars) or block height (number).';
-                    }
-                    if (!this.valid) {
-                        return 'Enter a valid TXID (64 hex chars) or block height (number).';
-                    }
-                    if (this.isHex64) {
-                        return 'Valid TXID (64 hex chars) found.';
-                    }
-                    if (this.isBlockHeight) {
-                        return 'Valid block height (number) found.';
-                    }
+                    if (!this.input.trim()) return 'Enter a valid TXID (64 hex chars) or block height (number).';
+                    if (!this.valid) return 'Invalid format. Must be a TXID or block height.';
+                    if (this.isHex64) return 'Valid TXID (64 hex chars) found.';
+                    if (this.isBlockHeight) return 'Valid block height (number) found.';
                     return '';
                 },
 
                 get helperClass() {
-                    if (this.input.length === 0) return 'text-gray-600';
-                    if (!this.valid) return 'text-red-600';
-                    return 'text-green-600 font-medium';
+                    if (!this.input.trim()) return 'text-gray-600';
+                    return this.valid ? 'text-green-600 font-medium' : 'text-red-600';
                 },
 
                 validate() {
