@@ -63,30 +63,6 @@
                             @enderror
                         </div>
 
-                        {{-- Question --}}
-                        <div class="form-section mb-6">
-                            <label for="question" class="block text-sm font-medium text-gray-900 mb-1">
-                                Ask a Question
-                            </label>
-                            <input
-                                type="text"
-                                id="question"
-                                name="question"
-                                value="{{ old('question', $question ?? '') }}"
-                                placeholder="{{ $questionPlaceholder ?? 'What is the total input value?' }}"
-                                class="form-input w-full"
-                                aria-describedby="questionHelp"
-                                autocomplete="off"
-                                maxlength="200"
-                            >
-                            <small id="questionHelp" class="text-gray-600 text-sm mt-1 block">
-                                Ask the AI a specific question about this transaction or block.
-                            </small>
-                            @error('question')
-                            <div class="error mt-1 text-red-500 text-sm" role="alert">{{ $message }}</div>
-                            @enderror
-                        </div>
-
                         {{-- Submit --}}
                         <input type="hidden" name="submitted" value="1">
                         <div class="form-actions mt-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
@@ -161,6 +137,30 @@
                                     <small class="checkbox-help text-gray-600 dark:text-gray-400 mt-1 block">
                                         Choose how you'd like the AI to explain things.
                                     </small>
+                                </div>
+
+                                {{-- Question --}}
+                                <div class="form-section mb-6">
+                                    <label for="question" class="block text-sm font-medium text-gray-900 mb-1">
+                                        Ask a Question
+                                    </label>
+                                    <input
+                                        type="text"
+                                        id="question"
+                                        name="question"
+                                        value="{{ old('question', $question ?? '') }}"
+                                        placeholder="{{ $questionPlaceholder ?? 'What is the total input value?' }}"
+                                        class="form-input w-full"
+                                        aria-describedby="questionHelp"
+                                        autocomplete="off"
+                                        maxlength="200"
+                                    >
+                                    <small id="questionHelp" class="text-gray-600 text-sm mt-1 block">
+                                        Ask the AI a specific question about this transaction or block.
+                                    </small>
+                                    @error('question')
+                                    <div class="error mt-1 text-red-500 text-sm" role="alert">{{ $message }}</div>
+                                    @enderror
                                 </div>
 
                                 {{-- Refresh Checkbox --}}
