@@ -14,57 +14,61 @@
             </div>
         </header>
 
-        @if ($promptResults->isEmpty())
+        @if ($descriptions->isEmpty())
             <p>No descriptions found yet.</p>
         @else
             <ul class="description-list">
-                @foreach($promptResults as $promptResult)
+                @foreach($descriptions as $desc)
                     @php
-                        $mempoolUrl = match ($promptResult->type) {
-                            'transaction' => "https://mempool.space/tx/{$promptResult->input}",
-                            'block' => "https://mempool.space/block/{$promptResult->input}",
+                        $mempoolUrl = match ($desc->type) {
+                            'transaction' => "https://mempool.space/tx/{$desc->input}",
+                            'block' => "https://mempool.space/block/{$desc->input}",
                             default => null,
                         };
-                        $entryId = 'entry-' . $promptResult->id;
+                        $entryId = 'entry-' . $desc->id;
                     @endphp
 
-                <li class="description-item">
-                    <div class="description-header font-medium mb-1">
+                    <li class="description-item">
+                        <div class="description-header font-medium mb-1">
                             <div class="w-full">
-                                <strong>{{ ucfirst($promptResult->type) }}:</strong>
-                                <p class="truncate max-w-full overflow-hidden text-ellipsis">
+                                <strong>{{ ucfirst($desc->type) }}:</strong>
+                                <p class="truncate overflow-hidden text-ellipsis">
                                     @if ($mempoolUrl)
                                         <a href="{{ $mempoolUrl }}" target="_blank" rel="noopener" class="mempool-link">
-                                            {{ $promptResult->input }}
+                                            {{ $desc->input }}
                                         </a>
                                     @else
-                                        {{ $promptResult->input }}
+                                        {{ $desc->input }}
                                     @endif
                                 </p>
                             </div>
-
                         </div>
-
-                        @if (!empty($promptResult->question))
+                        {{-- Show Persona --}}
+                        @if ($desc->persona)
+                            <div class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                                {{ $desc->persona->label() }}
+                            </div>
+                        @endif
+                        @if (!empty($desc->question))
                         <div class="description-question">
-                            <strong>Question:</strong> {{ $promptResult->question }}
+                            <strong>Question:</strong> {{ $desc->question }}
                         </div>
                         @endif
                         <div class="description-body relative">
                             <div id="{{ $entryId }}" class="markdown-content collapsed-response overflow-hidden max-h-[6.5rem] transition-all duration-300">
-                                {!! Str::markdown($promptResult->ai_response) !!}
+                                {!! Str::markdown($desc->ai_response) !!}
                             </div>
                         </div>
                         <div class="description-meta mt-2 flex justify-between items-center text-sm text-gray-500">
-                            <span>{{ $promptResult->created_at->diffForHumans() }}</span>
+                            <span>{{ $desc->created_at->diffForHumans() }}</span>
                             <button type="button"
                                     class="toggle-history-raw-btn text-blue-600 hover:underline"
-                                    data-target="raw-{{ $promptResult->id }}"
-                                    data-id="{{ $promptResult->id }}">
+                                    data-target="raw-{{ $desc->id }}"
+                                    data-id="{{ $desc->id }}">
                                 Show raw data
                             </button>
                         </div>
-                    <pre id="raw-{{ $promptResult->id }}"
+                    <pre id="raw-{{ $desc->id }}"
                          class="hidden bg-gray-100 text-xs p-3 rounded overflow-auto max-h-64 whitespace-pre-wrap"
                          data-loaded="false">
     <span class="loading">Loading...</span>
@@ -74,17 +78,17 @@
             </ul>
 
             <div class="pagination flex justify-center gap-4">
-                @if ($promptResults->onFirstPage())
+                @if ($descriptions->onFirstPage())
                     <span class="px-4 py-2 bg-orange-100 text-orange-400 rounded-md cursor-not-allowed">« Previous</span>
                 @else
-                    <a href="{{ $promptResults->previousPageUrl() }}"
+                    <a href="{{ $descriptions->previousPageUrl() }}"
                        class="px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 transition">
                         « Previous
                     </a>
                 @endif
 
-                @if ($promptResults->hasMorePages())
-                    <a href="{{ $promptResults->nextPageUrl() }}"
+                @if ($descriptions->hasMorePages())
+                    <a href="{{ $descriptions->nextPageUrl() }}"
                        class="px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 transition">
                         Next »
                     </a>

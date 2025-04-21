@@ -13,10 +13,10 @@ final class HistoryController
     {
         $perPage = config('app.pagination.per_page');
 
-        $promptResults = SatscribeDescription::latest()->simplePaginate($perPage);
+        $descriptions = SatscribeDescription::latest()->simplePaginate($perPage);
 
         return view('history', [
-            'promptResults' => $promptResults,
+            'descriptions' => $descriptions,
         ]);
     }
 

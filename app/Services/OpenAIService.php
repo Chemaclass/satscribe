@@ -83,6 +83,7 @@ PROMPT;
     {
         return <<<TEXT
 Use markdown formatting.
+A paragraph should not be larger than 75 words.
 If applicable, include wallet features like:
 - Multi-signature, P2PK, P2PKH, P2SH, etc.
 - CoinJoin, Segwit, Taproot

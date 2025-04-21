@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setupFormSubmissionUI();
     setupBlockchainToggle();
     setupDescriptionToggle();
-    linkBitcoinEntities('.markdown-content');
+    // linkBitcoinEntities('.markdown-content'); // todo: consider improve or remove
 });
 
 function setupFormSubmissionUI() {
