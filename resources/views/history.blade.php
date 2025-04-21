@@ -67,8 +67,8 @@
                     <pre id="raw-{{ $promptResult->id }}"
                          class="hidden bg-gray-100 text-xs p-3 rounded overflow-auto max-h-64 whitespace-pre-wrap"
                          data-loaded="false">
-                        <span class="loading"></span>
-                    </pre>
+    <span class="loading">Loading...</span>
+</pre>
                 </li>
                 @endforeach
             </ul>
