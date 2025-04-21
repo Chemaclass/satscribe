@@ -1,34 +1,65 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Services;
 
-use DateTimeImmutable;
-use DateTimeZone;
 use Illuminate\Contracts\Cache\Repository as Cache;
+use Illuminate\Http\Client\Factory as HttpClient;
+use Illuminate\Support\Carbon;
+use Psr\Log\LoggerInterface;
+use RuntimeException;
 
-final class BlockHeightProvider
+final readonly class BlockHeightProvider
 {
+    private const API_BASE_URL = 'https://blockstream.info/api';
+    private const BLOCKS_TIP_PATH = '/blocks/tip/height';
     private const CACHE_KEY = 'max_possible_block_height';
-    private const CACHE_TTL_MINUTES = 60;
-    private const GENESIS_DATETIME = '2009-01-03 19:15:05';
+    private const CACHE_TTL_MINUTES = 10;
+    private const FALLBACK_HEIGHT = 100_000_000;
+    private const BUFFER_HEIGHT = 1;
 
     public function __construct(
         private Cache $cache,
+        private HttpClient $http,
+        private LoggerInterface $logger,
     ) {
     }
 
     public function getMaxPossibleBlockHeight(): int
     {
-        return $this->cache->remember(self::CACHE_KEY, now()->addMinutes(self::CACHE_TTL_MINUTES), function () {
-            $genesisTimestamp = (new DateTimeImmutable(self::GENESIS_DATETIME, new DateTimeZone('UTC')))->getTimestamp();
-            $currentTimestamp = now()->setTimezone('UTC')->getTimestamp();
+        return $this->cache->remember(
+            self::CACHE_KEY,
+            Carbon::now()->addMinutes(self::CACHE_TTL_MINUTES),
+            fn() => $this->fetchHeightWithFallback()
+        );
+    }
 
-            $elapsedSeconds = $currentTimestamp - $genesisTimestamp;
-            $estimatedHeight = (int) floor($elapsedSeconds / 600);
-            $buffer = (int) ceil($estimatedHeight * 0.06);
+    private function fetchHeightWithFallback(): int
+    {
+        try {
+            return $this->getCurrentBlockHeight() + self::BUFFER_HEIGHT;
+        } catch (RuntimeException $e) {
+            $this->logger->warning('[BlockHeightProvider] '.$e->getMessage());
+            return self::FALLBACK_HEIGHT;
+        }
+    }
 
-            return $estimatedHeight + $buffer;
-        });
+    public function getCurrentBlockHeight(): int
+    {
+        $url = self::API_BASE_URL.self::BLOCKS_TIP_PATH;
+        $response = $this->http->get($url);
+
+        if ($response->failed()) {
+            throw new RuntimeException("Blockstream API request failed for [$url]. Status: {$response->status()}");
+        }
+
+        $height = (int) $response->body();
+
+        if ($height <= 0) {
+            throw new RuntimeException("Blockstream API returned invalid block height: {$response->body()}");
+        }
+
+        return $height;
     }
 }

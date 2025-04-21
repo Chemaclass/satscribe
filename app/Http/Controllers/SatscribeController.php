@@ -13,10 +13,10 @@ use App\Services\BlockHeightProvider;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 
-final class SatscribeController
+final readonly class SatscribeController
 {
     public function __construct(
-        private readonly BlockHeightProvider $heightProvider,
+        private BlockHeightProvider $heightProvider,
     ) {
     }
 
