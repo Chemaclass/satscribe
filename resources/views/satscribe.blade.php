@@ -20,7 +20,7 @@
             <form method="GET" action="{{ route('home') }}" class="describe-form w-full max-w-2xl" aria-labelledby="form-heading">
                 <fieldset>
                     <legend id="form-heading" class="sr-only">Describe Bitcoin Data</legend>
-                    <div class="form-section mb-6" x-data="txidValidator()">
+                    <div class="form-section mb-6" x-data="searchInputValidator('{{ old('search', $search ?? '') }}')" x-init="validate()">
                         <label for="search" class="block text-sm font-medium text-gray-900 mb-1">
                             Transaction ID or Block Height
                         </label>
@@ -37,31 +37,13 @@
                             @input="validate()"
                             aria-describedby="searchHelp"
                         >
-                        <small
-                            id="searchHelp"
-                            class="text-sm mt-1 block"
-                            :class="input.length === 0 ? 'text-gray-600' : (valid ? 'text-gray-600' : 'text-red-600')"
-                        >
-                            <template x-if="input.length === 0">
-                                <span>
-                                    Enter a valid TXID (64 hex chars) or block height (number).
-                                </span>
-                            </template>
-                            <template x-if="input.length > 0 && !valid">
-                                <span class="text-red-600">
-                                    Enter a valid TXID (64 hex chars) or block height (number).
-                                </span>
-                            </template>
-                            <template x-if="valid && isHex64">
-                                <span>
-                                    Valid <span class="text-green-600 font-medium">TXID (64 hex chars) found</span>.
-                                </span>
-                            </template>
-                            <template x-if="valid && isBlockHeight && !isHex64">
-                                <span>
-                                    Valid <span class="text-green-600 font-medium">block height (number) found</span>.
-                                </span>
-                            </template>
+                        <small id="searchHelp" class="text-sm mt-1 block">
+                          <span
+                              x-text="helperText"
+                              :class="helperClass"
+                              x-cloak
+                              x-transition
+                          ></span>
                         </small>
                         @error('search')
                         <div class="error mt-1 text-red-500 text-sm" role="alert">{{ $message }}</div>
@@ -200,23 +182,40 @@
 
 @push('scripts')
     <script>
-        function txidValidator() {
+        function searchInputValidator(initial = '') {
             return {
-                input: '',
+                input: initial,
                 valid: false,
                 isHex64: false,
                 isBlockHeight: false,
 
+                get helperText() {
+                    if (this.input.length === 0) {
+                        return 'Enter a valid TXID (64 hex chars) or block height (number).';
+                    }
+                    if (!this.valid) {
+                        return 'Enter a valid TXID (64 hex chars) or block height (number).';
+                    }
+                    if (this.isHex64) {
+                        return 'Valid TXID (64 hex chars) found.';
+                    }
+                    if (this.isBlockHeight) {
+                        return 'Valid block height (number) found.';
+                    }
+                    return '';
+                },
+
+                get helperClass() {
+                    if (this.input.length === 0) return 'text-gray-600';
+                    if (!this.valid) return 'text-red-600';
+                    return 'text-green-600 font-medium';
+                },
+
                 validate() {
                     const trimmed = this.input.trim();
-
-                    // Validate 64-character hex
                     this.isHex64 = /^[a-fA-F0-9]{64}$/.test(trimmed);
-
-                    // Validate numeric and check it's <= maxBlockHeight
                     const height = parseInt(trimmed, 10);
-                    this.isBlockHeight = /^\d+$/.test(trimmed) && height <= {{$maxBitcoinBlockHeight??1_000_000}};
-
+                    this.isBlockHeight = /^\d+$/.test(trimmed) && height <= {{ $maxBitcoinBlockHeight ?? 100_000_000 }};
                     this.valid = this.isHex64 || this.isBlockHeight;
                 }
             };
