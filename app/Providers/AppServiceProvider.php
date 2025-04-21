@@ -5,11 +5,9 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Actions\SatscribeAction;
+use App\Services\OpenAIService;
 use App\Services\PriceService;
-use Illuminate\Http\Client\Factory;
 use Illuminate\Pagination\Paginator;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -30,14 +28,20 @@ final class AppServiceProvider extends ServiceProvider
             ->needs('$maxOpenAIAttempts')
             ->giveConfig('app.max_open_ai_attempts');
 
-        $this->app->singleton(PriceService::class, function () {
-            return new PriceService(
-                app(Factory::class),
-                Log::getLogger(),
-                Cache::store(),
-                config('features.btc_price', false),
-            );
-        });
+        $this->app
+            ->when(OpenAIService::class)
+            ->needs('$openAiApiKey')
+            ->giveConfig('services.openai.key');
+
+        $this->app
+            ->when(OpenAIService::class)
+            ->needs('$openAiModel')
+            ->giveConfig('services.openai.model');
+
+        $this->app
+            ->when(PriceService::class)
+            ->needs('$enabled')
+            ->giveConfig('features.btc_price');
     }
 
     /**

@@ -19,13 +19,15 @@ final readonly class OpenAIService
     public function __construct(
         private HttpClient $http,
         private LoggerInterface $logger,
+        private string $openAiApiKey,
+        private string $openAiModel,
     ) {
     }
 
     public function generateText(BlockchainData $data, PromptInput $input, string $question = ''): string
     {
         $payload = [
-            'model' => config('services.openai.model'),
+            'model' => $this->openAiModel,
             'messages' => [
                 [
                     'role' => 'user',
@@ -34,7 +36,7 @@ final readonly class OpenAIService
             ],
         ];
 
-        $response = $this->http->withToken(config('services.openai.key'))
+        $response = $this->http->withToken($this->openAiApiKey)
             ->post('https://api.openai.com/v1/chat/completions', $payload);
 
         if ($error = $response->json('error.message')) {
