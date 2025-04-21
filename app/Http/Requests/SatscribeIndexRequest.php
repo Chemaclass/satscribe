@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\Http\Requests;
 
-use App\Data\PromptInput;
-use App\Enums\PromptPersona;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -28,6 +26,11 @@ final class SatscribeIndexRequest extends FormRequest
         ];
     }
 
+    public function isSubmitted(): bool
+    {
+        return $this->boolean('submitted');
+    }
+
     public function hasSearchInput(): bool
     {
         return $this->filled('search');
@@ -43,9 +46,9 @@ final class SatscribeIndexRequest extends FormRequest
         return trim((string) $this->string('question'));
     }
 
-    public function getPersonaInput(): ?PromptPersona
+    public function getPersonaInput(): string
     {
-        return PromptPersona::tryFrom($this->input('persona') ?? '');
+        return $this->input('persona', '');
     }
 
     public function isRefreshEnabled(): bool

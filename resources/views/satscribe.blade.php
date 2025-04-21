@@ -87,6 +87,7 @@
                         </div>
 
                         {{-- Submit --}}
+                        <input type="hidden" name="submitted" value="1">
                         <div class="form-actions mt-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
                             <button
                                 type="submit"
@@ -135,7 +136,6 @@
                         </div>
 
                         {{-- Advanced Toggle --}}
-                        {{-- Advanced Toggle --}}
                         <div x-data="{ showAdvanced: false }" class="form-group mb-4">
                             <button
                                 type="button"
@@ -153,6 +153,31 @@
                                 x-transition
                                 class="mt-4 advanced-fields mt-1 rounded-lg px-4 py-3 space-y-4 shadow-sm"
                             >
+                                {{-- Persona Selector --}}
+                                <div>
+                                    <label for="persona" class="persona-label block text-sm font-medium mb-1">
+                                        AI Persona
+                                    </label>
+
+                                    <div class="relative">
+                                        <select
+                                            name="persona" id="persona"
+                                            class="form-select persona-select w-full bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-sm text-gray-800 dark:text-gray-100 rounded-md shadow-sm focus:ring-orange-400 focus:border-orange-400"
+                                        >
+                                            @foreach (\App\Enums\PromptPersona::cases() as $persona)
+                                                <option value="{{ $persona->value }}"
+                                                    {{ old('persona', $selected ?? 'educator') === $persona->value ? 'selected' : '' }}>
+                                                    {{ $persona->label() }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+
+                                    <small class="checkbox-help text-gray-600 dark:text-gray-400 mt-1 block">
+                                        Choose how you'd like the AI to explain things.
+                                    </small>
+                                </div>
+
                                 {{-- Refresh Checkbox --}}
                                 <div class="flex items-start gap-3">
                                     <input
@@ -168,31 +193,6 @@
                                             (Skips cached descriptions and requests live data from the blockchain and OpenAI)
                                         </small>
                                     </label>
-                                </div>
-
-                                {{-- Persona Selector --}}
-                                <div>
-                                    <label for="persona" class="persona-label block text-sm font-medium mb-1">
-                                        AI Persona
-                                    </label>
-
-                                    <div class="relative">
-                                        <select
-                                            name="persona" id="persona"
-                                            class="form-select persona-select w-full bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-sm text-gray-800 dark:text-gray-100 rounded-md shadow-sm focus:ring-orange-400 focus:border-orange-400"
-                                        >
-                                            <option value="">Default style</option>
-                                            @foreach (\App\Enums\PromptPersona::cases() as $persona)
-                                                <option value="{{ $persona->value }}" {{ old('persona', $selected ?? '') === $persona->value ? 'selected' : '' }}>
-                                                    {{ $persona->label() }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-
-                                    <small class="checkbox-help text-gray-600 dark:text-gray-400 mt-1 block">
-                                        Choose how you'd like the AI to explain things.
-                                    </small>
                                 </div>
                             </div>
                         </div>

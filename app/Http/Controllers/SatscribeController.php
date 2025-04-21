@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 use App\Actions\SatscribeAction;
 use App\Data\PromptInput;
 use App\Data\QuestionPlaceholder;
+use App\Enums\PromptPersona;
 use App\Exceptions\BlockchainException;
 use App\Exceptions\OpenAIError;
 use App\Http\Requests\SatscribeIndexRequest;
@@ -21,25 +22,22 @@ final readonly class SatscribeController
     ) {
     }
 
-    public function index(
-        SatscribeIndexRequest $request,
-        SatscribeAction $action,
-        BlockHeightProvider $heightProvider
-    ): View {
-        // @todo: refactor, do not use BlockHeightProvider in the controller
-        if ($request->hasSearchInput()) {
-            $search = $request->getSearchInput();
-        } else {
-            $search = $heightProvider->getCurrentBlockHeight();
+    public function index(SatscribeIndexRequest $request, SatscribeAction $action): View
+    {
+        if (!$request->isSubmitted()) {
+            return view('satscribe', [
+                'questionPlaceholder' => QuestionPlaceholder::rand(),
+                'maxBitcoinBlockHeight' => $this->heightProvider->getMaxPossibleBlockHeight(),
+            ]);
         }
 
-        $search = PromptInput::fromRaw($search);
+        $search = $this->getPromptInput($request);
+        $persona = $this->getPromptPersona($request);
         $question = $request->getQuestionInput();
         $refresh = $request->isRefreshEnabled();
-        $persona = $request->getPersonaInput();
 
         try {
-            $generatedPrompt = $action->execute($search, $refresh, $question, $persona);
+            $generatedPrompt = $action->execute($search, $persona, $refresh, $question);
         } catch (BlockchainException|OpenAIError $e) {
             Log::error('Failed to describe prompt result', [
                 'search' => $search->text,
@@ -57,11 +55,25 @@ final readonly class SatscribeController
             'isFresh' => $generatedPrompt->isFresh,
             'search' => $search->text,
             'question' => $question,
-            'persona' => $persona,
+            'persona' => $persona->value,
             'refreshed' => $refresh,
             'questionPlaceholder' => QuestionPlaceholder::rand(),
             'maxBitcoinBlockHeight' => $this->heightProvider->getMaxPossibleBlockHeight(),
         ]);
     }
 
+    private function getPromptInput(SatscribeIndexRequest $request): PromptInput
+    {
+        if ($request->hasSearchInput()) {
+            return PromptInput::fromRaw($request->getSearchInput());
+        }
+
+        return PromptInput::fromRaw($this->heightProvider->getCurrentBlockHeight());
+    }
+
+    private function getPromptPersona(SatscribeIndexRequest $request): PromptPersona
+    {
+        return PromptPersona::tryFrom($request->getPersonaInput())
+            ?? PromptPersona::from(PromptPersona::DEFAULT);
+    }
 }

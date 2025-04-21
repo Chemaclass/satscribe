@@ -28,8 +28,8 @@ final readonly class OpenAIService
     public function generateText(
         BlockchainData $data,
         PromptInput $input,
+        PromptPersona $persona,
         string $question = '',
-        ?PromptPersona $persona = null,
     ): string {
         $payload = [
             'model' => $this->openAiModel,
@@ -58,7 +58,7 @@ final readonly class OpenAIService
         BlockchainData $data,
         PromptType $type,
         string $question,
-        ?PromptPersona $persona = null,
+        PromptPersona $persona,
     ): string {
         $condensedData = $this->compactBlockchainData($data->toArray());
         $json = (string) json_encode($condensedData, JSON_UNESCAPED_SLASHES);
@@ -98,7 +98,7 @@ PROMPT;
         return $this->truncateByApproxTokens($finalPrompt, self::LIMIT_TOKENS_PER_REQUEST);
     }
 
-    private function wrapPromptWithPersona(string $prompt, ?PromptPersona $persona): string
+    private function wrapPromptWithPersona(string $prompt, PromptPersona $persona): string
     {
         return match ($persona) {
             PromptPersona::Educator => <<<TEXT
@@ -113,12 +113,6 @@ You are a Bitcoin developer and technical analyst. Focus on technical accuracy, 
 TEXT,
             PromptPersona::Storyteller => <<<TEXT
 You are a storyteller who explains Bitcoin history and behavior in engaging narratives. Weave context and insights into a short story or real-world metaphor.
-
-{$prompt}
-TEXT,
-            default => <<<TEXT
-You are an expert Bitcoin educator and technical writer.
-Provide a clear, beginner-friendly description of this Bitcoin transaction or block.
 
 {$prompt}
 TEXT,

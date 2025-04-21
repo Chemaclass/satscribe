@@ -29,9 +29,9 @@ final readonly class SatscribeAction
 
     public function execute(
         PromptInput $input,
+        PromptPersona $persona,
         bool $refresh = false,
         ?string $question = '',
-        ?PromptPersona $persona = null,
     ): GeneratedPrompt {
         if (!$refresh) {
             $cached = $this->repository->findByCriteria($input, $question, $persona);
@@ -41,16 +41,16 @@ final readonly class SatscribeAction
             }
         }
 
-        $fresh = $this->getFreshResult($input, $refresh, $question, $persona);
+        $fresh = $this->getFreshResult($input, $persona, $refresh, $question);
 
         return new GeneratedPrompt($fresh, isFresh: true);
     }
 
     private function getFreshResult(
         PromptInput $input,
+        PromptPersona $persona,
         bool $refresh,
         string $question = '',
-        ?PromptPersona $persona = null,
     ): SatscribeDescription {
         $this->checkRateLimiter();
 
@@ -62,7 +62,7 @@ final readonly class SatscribeAction
         $data = $this->blockchain->getBlockchainData($input);
 
         $question = $this->userInputSanitizer->sanitize($question);
-        $response = $this->openai->generateText($data, $input, $question, $persona);
+        $response = $this->openai->generateText($data, $input, $persona, $question);
 
         return $this->repository->save($input, $response, $data, $question);
     }

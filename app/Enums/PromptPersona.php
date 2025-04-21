@@ -10,6 +10,8 @@ enum PromptPersona: string
     case Developer = 'developer';
     case Storyteller = 'storyteller';
 
+    const DEFAULT = self::Educator->value;
+
     public function label(): string
     {
         return match ($this) {
@@ -22,7 +24,11 @@ enum PromptPersona: string
     public static function options(): array
     {
         return array_map(
-            fn(self $persona) => ['value' => $persona->value, 'label' => $persona->label()],
+            fn(self $persona) => [
+                'value' => $persona->value,
+                'label' => $persona->label(),
+                'enabled' => $persona->value === self::DEFAULT,
+            ],
             self::cases()
         );
     }
