@@ -50,7 +50,12 @@ final readonly class BlockData implements BlockchainData
             'nonce' => $this->nonce,
             'bits' => $this->bits,
             'difficulty' => $this->difficulty,
-            'transactions' => array_slice($this->transactions, 0, 5),
+            'transactions' => $this->transactions,
         ];
+    }
+
+    public function toPrompt(): string
+    {
+        return BlockSummary::from($this)->toPrompt();
     }
 }

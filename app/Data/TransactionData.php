@@ -51,4 +51,9 @@ final readonly class TransactionData implements BlockchainData
             ],
         ];
     }
+
+    public function toPrompt(): string
+    {
+        return TransactionSummary::from($this)->toPrompt();
+    }
 }

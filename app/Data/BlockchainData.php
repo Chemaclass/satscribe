@@ -9,4 +9,6 @@ interface BlockchainData
     public function getInput(): string;
 
     public function toArray(): array;
+
+    public function toPrompt(): string;
 }
