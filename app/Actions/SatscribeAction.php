@@ -34,7 +34,7 @@ final readonly class SatscribeAction
         ?string $question = '',
     ): GeneratedPrompt {
         if (!$refresh) {
-            $cached = $this->repository->findByCriteria($input, $question, $persona);
+            $cached = $this->repository->findByCriteria($input, $persona, $question);
 
             if ($cached instanceof SatscribeDescription && !$cached->force_refresh) {
                 return new GeneratedPrompt($cached, isFresh: false);
@@ -59,12 +59,11 @@ final readonly class SatscribeAction
             $this->repository->deleteByTypeAndInput($input);
         }
 
-        $data = $this->blockchain->getBlockchainData($input);
-
+        $blockchainData = $this->blockchain->getBlockchainData($input);
         $question = $this->userInputSanitizer->sanitize($question);
-        $response = $this->openai->generateText($data, $input, $persona, $question);
+        $aiResponse = $this->openai->generateText($blockchainData, $input, $persona, $question);
 
-        return $this->repository->save($input, $response, $data, $persona, $question);
+        return $this->repository->save($input, $aiResponse, $blockchainData, $persona, $question);
     }
 
     private function checkRateLimiter(): void

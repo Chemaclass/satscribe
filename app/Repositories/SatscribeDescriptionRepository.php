@@ -13,14 +13,14 @@ final class SatscribeDescriptionRepository
 {
     public function findByCriteria(
         PromptInput $input,
+        PromptPersona $persona,
         ?string $question = null,
-        ?PromptPersona $persona = null
     ): ?SatscribeDescription {
         return SatscribeDescription::query()
             ->where('type', $input->type->value)
             ->where('input', $input->text)
+            ->where('persona', $persona->value)
             ->when($question, fn($q) => $q->where('question', $question))
-            ->when($persona, fn($q) => $q->where('persona', $persona))
             ->first();
     }
 
@@ -34,11 +34,11 @@ final class SatscribeDescriptionRepository
     public function save(
         PromptInput $input,
         string $aiResponse,
-        BlockchainData $data,
+        BlockchainData $blockchainData,
         PromptPersona $persona,
         ?string $question = null
     ): SatscribeDescription {
-        $raw = $data->toArray();
+        $raw = $blockchainData->toArray();
 
         $forceRefresh = $input->type->value === PromptType::Transaction->value
             && isset($raw['status']['confirmed'])
@@ -51,7 +51,7 @@ final class SatscribeDescriptionRepository
             'ai_response' => $aiResponse,
             'raw_data' => $raw,
             'force_refresh' => $forceRefresh,
-            'persona' => $persona->value,
+            'persona' => $persona,
         ]);
     }
 }
