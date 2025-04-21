@@ -59,14 +59,14 @@
                             <span>{{ $desc->created_at->diffForHumans() }}</span>
                             <button type="button"
                                     class="toggle-raw-button text-blue-600 hover:underline"
-                                    data-target="raw-{{ $desc->id }}">
+                                    data-target="raw-{{ $desc->id }}"
+                                    data-id="{{ $desc->id }}">
                                 Show raw data
                             </button>
                         </div>
-                        <pre id="raw-{{ $desc->id }}"
-                             class="mt-2 bg-gray-100 text-xs p-3 rounded overflow-auto max-h-64 hidden">
-{{ json_encode($desc->raw_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) }}
-                        </pre>
+                        <pre id="raw-{{ $desc->id }}" class="mt-2 bg-gray-100 text-xs p-3 rounded overflow-auto max-h-64 hidden">
+<span class="loading">Loading...</span>
+</pre>
                     </li>
                 @endforeach
             </ul>

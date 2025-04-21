@@ -146,3 +146,26 @@ function getBitcoinPatterns() {
         }
     ];
 }
+document.querySelectorAll('.toggle-raw-button').forEach(button => {
+    button.addEventListener('click', async () => {
+        const targetId = button.dataset.target;
+        const entryId = button.dataset.id;
+        const rawBlock = document.getElementById(targetId);
+        const isHidden = rawBlock.classList.contains('hidden');
+
+        if (isHidden && rawBlock.dataset.loaded !== "true") {
+            try {
+                const response = await fetch(`/history/${entryId}/raw`);
+                const data = await response.json();
+
+                rawBlock.textContent = JSON.stringify(data, null, 2);
+                rawBlock.dataset.loaded = "true";
+            } catch (err) {
+                rawBlock.textContent = "Failed to load data.";
+            }
+        }
+
+        rawBlock.classList.toggle('hidden');
+        button.textContent = isHidden ? 'Hide raw data' : 'Show raw data';
+    });
+});
