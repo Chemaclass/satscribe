@@ -9,7 +9,7 @@ final class BlockchainException extends RuntimeException
 {
     public static function blockOrTxFetchFailed(string $hash): self
     {
-        return new self('Block or transactions fetch failed:'.$hash);
+        return new self('Block or transactions fetch failed: '.$hash);
     }
 
     public static function txLookupFailed(string $txid): self

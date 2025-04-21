@@ -14,7 +14,6 @@ use Psr\Log\LoggerInterface;
 
 final readonly class OpenAIService
 {
-    private const LIMIT_TOKENS_PER_REQUEST = 50_000;
     private const TRIMMED_IO_LIMIT = 5;
 
     public function __construct(
@@ -39,6 +38,7 @@ final readonly class OpenAIService
                     'content' => $this->preparePrompt($data, $input->type, $question, $persona),
                 ],
             ],
+            'max_tokens' => $persona->maxTokens(),
         ];
 
         $response = $this->http->withToken($this->openAiApiKey)
@@ -63,24 +63,7 @@ final readonly class OpenAIService
         $condensedData = $this->compactBlockchainData($data->toArray());
         $json = (string) json_encode($condensedData, JSON_UNESCAPED_SLASHES);
 
-        $questionPart = $question ?: <<<TEXT
-Use markdown formatting.
-If there would be any, then include wallet features, for example:
-- Multi-signature
-- P2PK
-- P2PKH
-- P2SH
-- P2MS
-- P2WPKH
-- P2WSH
-- P2TR
-- OP_RETURN
-- RBF
-- CoinJoin
-- Segwit
-- Taproot
-- Or if it is an important historical {$type->value}, mention it explicitly.
-TEXT;
+        $questionPart = $question ?: $this->defaultQuestionInstructions($type);
 
         $corePrompt = <<<PROMPT
 Describe this Bitcoin {$type->value} using the following blockchain data:
@@ -90,61 +73,53 @@ Describe this Bitcoin {$type->value} using the following blockchain data:
 Instructions:
 {$questionPart}
 
-Max output 300 words.
 PROMPT;
 
-        $finalPrompt = $this->wrapPromptWithPersona($corePrompt, $persona);
+        return $this->wrapPromptWithPersona($corePrompt, $persona);
+    }
 
-        return $this->truncateByApproxTokens($finalPrompt, self::LIMIT_TOKENS_PER_REQUEST);
+    private function defaultQuestionInstructions(PromptType $type): string
+    {
+        return <<<TEXT
+Use markdown formatting.
+If applicable, include wallet features like:
+- Multi-signature, P2PK, P2PKH, P2SH, etc.
+- CoinJoin, Segwit, Taproot
+If it's a historically important {$type->value}, mention it explicitly.
+TEXT;
     }
 
     private function wrapPromptWithPersona(string $prompt, PromptPersona $persona): string
     {
-        return match ($persona) {
-            PromptPersona::Educator => <<<TEXT
-You are an experienced Bitcoin educator. Break things down in simple terms, as if explaining to someone new to Bitcoin. Use analogies or examples when helpful.
-
-{$prompt}
-TEXT,
-            PromptPersona::Developer => <<<TEXT
-You are a Bitcoin developer and technical analyst. Focus on technical accuracy, relevant scripts, and protocol-level behavior. Mention transaction types and byte-level detail where appropriate.
-
-{$prompt}
-TEXT,
-            PromptPersona::Storyteller => <<<TEXT
-You are a storyteller who explains Bitcoin history and behavior in engaging narratives. Weave context and insights into a short story or real-world metaphor.
-
-{$prompt}
-TEXT,
-        };
+        return "{$persona->systemPrompt()}\n\n{$prompt}";
     }
 
     private function compactBlockchainData(array $data): array
     {
-        if (isset($data['vin']) || isset($data['vout'])) {
+        if (!isset($data['vin']) && !isset($data['vout'])) {
             return [
-                'txid' => $data['txid'] ?? null,
-                'inputs' => $this->limitItems($data['vin'] ?? [], self::TRIMMED_IO_LIMIT, fn($vin) => [
-                    'addr' => $vin['prevout']['scriptpubkey_address'] ?? null,
-                    'val' => $vin['prevout']['value'] ?? null,
-                ]),
-                'outputs' => $this->limitItems($data['vout'] ?? [], self::TRIMMED_IO_LIMIT, fn($vout) => [
-                    'addr' => $vout['scriptpubkey_address'] ?? null,
-                    'val' => $vout['value'] ?? null,
-                ]),
-                'fee' => $data['fee'] ?? null,
+                'height' => $data['height'] ?? null,
+                'tx_count' => $data['tx_count'] ?? null,
+                'miner' => $data['extras']['miner'] ?? null,
+                'reward' => $data['extras']['reward'] ?? null,
                 'size' => $data['size'] ?? null,
+                'weight' => $data['weight'] ?? null,
+                'timestamp' => $data['timestamp'] ?? null,
             ];
         }
 
         return [
-            'height' => $data['height'] ?? null,
-            'tx_count' => $data['tx_count'] ?? null,
-            'miner' => $data['extras']['miner'] ?? null,
-            'reward' => $data['extras']['reward'] ?? null,
+            'txid' => $data['txid'] ?? null,
+            'inputs' => $this->limitItems($data['vin'] ?? [], self::TRIMMED_IO_LIMIT, fn($vin) => [
+                'addr' => $vin['prevout']['scriptpubkey_address'] ?? null,
+                'val' => $vin['prevout']['value'] ?? null,
+            ]),
+            'outputs' => $this->limitItems($data['vout'] ?? [], self::TRIMMED_IO_LIMIT, fn($vout) => [
+                'addr' => $vout['scriptpubkey_address'] ?? null,
+                'val' => $vout['value'] ?? null,
+            ]),
+            'fee' => $data['fee'] ?? null,
             'size' => $data['size'] ?? null,
-            'weight' => $data['weight'] ?? null,
-            'timestamp' => $data['timestamp'] ?? null,
         ];
     }
 
@@ -161,27 +136,5 @@ TEXT,
         }
 
         return $mapped;
-    }
-
-    /**
-     * Token estimation via simple heuristic (approximation only).
-     */
-    private function truncateByApproxTokens(string $text, int $maxTokens): string
-    {
-        $words = preg_split('/(?=\b)|(?<=\b)/u', $text, -1, PREG_SPLIT_NO_EMPTY);
-        $tokens = 0;
-        $output = '';
-
-        foreach ($words as $word) {
-            $estimated = ceil(strlen($word) / 4); // very rough estimate
-            if ($tokens + $estimated > $maxTokens) {
-                break;
-            }
-
-            $tokens += $estimated;
-            $output .= $word;
-        }
-
-        return $output;
     }
 }

@@ -9,14 +9,14 @@ return new class extends Migration {
     {
         Schema::rename('prompt_results', 'satscribe_descriptions');
 
-        Schema::table('satscribe_descriptions', function (Blueprint $table) {
+        Schema::table('satscribe_descriptions', function (Blueprint $table): void {
             $table->string('persona')->nullable()->after('question');
         });
     }
 
     public function down(): void
     {
-        Schema::table('satscribe_descriptions', function (Blueprint $table) {
+        Schema::table('satscribe_descriptions', function (Blueprint $table): void {
             $table->dropColumn('persona');
         });
 

@@ -42,7 +42,7 @@ final readonly class BlockchainService
         $txsRes = $this->http->get(self::BASE_URL."/block/{$hash}/txs");
 
         if (!$blockRes->successful() || !$txsRes->successful()) {
-            $this->logger->warning('Block or transactions fetch failed', ['hash' => $hash]);
+            $this->logger->warning('Block or transactions fetch failed: ', ['hash' => $hash]);
             throw BlockchainException::blockOrTxFetchFailed($hash);
         }
 

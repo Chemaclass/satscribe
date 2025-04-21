@@ -32,4 +32,22 @@ enum PromptPersona: string
             self::cases()
         );
     }
+
+    public function systemPrompt(): string
+    {
+        return match ($this) {
+            self::Educator => 'You are an experienced Bitcoin educator. Break things down in simple terms...',
+            self::Developer => 'You are a Bitcoin developer and technical analyst...',
+            self::Storyteller => 'You are a storyteller who explains Bitcoin history in engaging narratives...',
+        };
+    }
+
+    public function maxTokens(): int
+    {
+        return match ($this) {
+            self::Educator => 400,
+            self::Developer => 600,
+            self::Storyteller => 700,
+        };
+    }
 }
