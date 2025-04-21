@@ -72,13 +72,13 @@ header {
 .markdown-content a,
 .mempool-link,
 footer a,
-.toggle-raw-button {
+.toggle-history-raw-btn {
     color: var(--btc-orange);
 }
 .dark .markdown-content a,
 .dark .mempool-link,
 .dark footer a,
-.dark .toggle-raw-button {
+.dark .toggle-history-raw-btn {
     color: var(--btc-orange-dark);
 }
 

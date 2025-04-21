@@ -146,26 +146,44 @@ function getBitcoinPatterns() {
         }
     ];
 }
-document.querySelectorAll('.toggle-raw-button').forEach(button => {
+
+function toggleRawBlockVisibility(button, rawBlock, visible) {
+    rawBlock.style.display = visible ? 'block' : 'none';
+    rawBlock.classList.toggle('hidden', !visible);
+    button.textContent = visible ? 'Hide raw data' : 'Show raw data';
+}
+
+async function loadRawData(entryId) {
+    const response = await fetch(`/history/${entryId}/raw`);
+    if (!response.ok) {
+        throw new Error('Failed to fetch raw data');
+    }
+    return await response.json();
+}
+
+document.querySelectorAll('.toggle-history-raw-btn').forEach(button => {
     button.addEventListener('click', async () => {
         const targetId = button.dataset.target;
         const entryId = button.dataset.id;
         const rawBlock = document.getElementById(targetId);
-        const isHidden = rawBlock.classList.contains('hidden');
 
-        if (isHidden && rawBlock.dataset.loaded !== "true") {
+        const isLoaded = rawBlock.dataset.loaded === "true";
+        const isVisible = window.getComputedStyle(rawBlock).display !== 'none';
+
+        if (!isLoaded) {
             try {
-                const response = await fetch(`/history/${entryId}/raw`);
-                const data = await response.json();
-
-                rawBlock.textContent = JSON.stringify(data, null, 2);
+                const data = await loadRawData(entryId);
+                rawBlock.innerText = JSON.stringify(data, null, 2);
                 rawBlock.dataset.loaded = "true";
             } catch (err) {
-                rawBlock.textContent = "Failed to load data.";
+                rawBlock.innerText = "Failed to load data.";
+                rawBlock.dataset.loaded = "true";
             }
+
+            toggleRawBlockVisibility(button, rawBlock, true);
+            return;
         }
 
-        rawBlock.classList.toggle('hidden');
-        button.textContent = isHidden ? 'Hide raw data' : 'Show raw data';
+        toggleRawBlockVisibility(button, rawBlock, !isVisible);
     });
 });

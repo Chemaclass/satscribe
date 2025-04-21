@@ -189,7 +189,7 @@
                     <pre id="blockchain-data" class="code-block collapsed overflow-x-auto text-sm sm:text-base">
 {{ json_encode($result->raw_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) }}
                     </pre>
-                        <button type="button" id="toggle-raw" class="toggle-raw-button">Show more</button>
+                        <button type="button" id="toggle-raw" class="toggle-history-raw-btn">Show more</button>
                     </div>
                 </div>
             </section>

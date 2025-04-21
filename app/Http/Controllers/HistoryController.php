@@ -9,11 +9,10 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 
 final class HistoryController
 {
-    // todo: create a new endpoint to retrieve the "show more" content and enable fast first rendering
     public function index(): View
     {
         return view('history', [
-            'descriptions' => PromptResult::latest()->simplePaginate(3),
+            'descriptions' => PromptResult::latest()->simplePaginate(5),
         ]);
     }
 

@@ -58,16 +58,18 @@
                         <div class="description-meta mt-2 flex justify-between items-center text-sm text-gray-500">
                             <span>{{ $desc->created_at->diffForHumans() }}</span>
                             <button type="button"
-                                    class="toggle-raw-button text-blue-600 hover:underline"
+                                    class="toggle-history-raw-btn text-blue-600 hover:underline"
                                     data-target="raw-{{ $desc->id }}"
                                     data-id="{{ $desc->id }}">
                                 Show raw data
                             </button>
                         </div>
-                        <pre id="raw-{{ $desc->id }}" class="mt-2 bg-gray-100 text-xs p-3 rounded overflow-auto max-h-64 hidden">
-<span class="loading">Loading...</span>
-</pre>
-                    </li>
+                    <pre id="raw-{{ $desc->id }}"
+                         class="hidden bg-gray-100 text-xs p-3 rounded overflow-auto max-h-64 whitespace-pre-wrap"
+                         data-loaded="false">
+                        <span class="loading"></span>
+                    </pre>
+                </li>
                 @endforeach
             </ul>
 
@@ -114,7 +116,7 @@
             });
 
             // Toggle raw JSON display
-            document.querySelectorAll('.toggle-raw-button').forEach(button => {
+            document.querySelectorAll('.toggle-history-raw-btn').forEach(button => {
                 button.addEventListener('click', () => {
                     const targetId = button.dataset.target;
                     const rawBlock = document.getElementById(targetId);
