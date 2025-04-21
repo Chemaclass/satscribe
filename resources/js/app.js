@@ -18,6 +18,10 @@ document.addEventListener('DOMContentLoaded', () => {
             createIcons({ icons, attrs: { class: icon.getAttribute('class') } });
         }
     };
+
+    window.refreshLucideIcons = () => {
+        requestAnimationFrame(() => createIcons({ icons }));
+    };
 });
 
 function setupFormSubmissionUI() {

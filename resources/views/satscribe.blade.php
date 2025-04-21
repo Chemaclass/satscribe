@@ -43,12 +43,16 @@
 
             {{-- Loading State (client-only before reload) --}}
             <template x-if="isSubmitting">
-                <section class="description-body mt-6 w-full max-w-3xl mx-auto space-y-6 ">
-                    <div class="section bg-orange-50 border border-orange-100 rounded p-4 shadow-sm">
+                <section
+                    class="description-body mt-6 w-full max-w-3xl mx-auto space-y-6"
+                    x-init="$nextTick(() => window.refreshLucideIcons?.())"
+                >
+                    <div class="section rounded p-4 shadow-sm">
                         <h2 class="text-lg font-semibold mb-2 flex items-center gap-2">
                             <i data-lucide="bot" class="w-6 h-6"></i>AI Summary
                         </h2>
-                        <div class="box markdown-content text-gray-800 leading-relaxed">
+                        <div class="box text-gray-800 leading-relaxed flex items-center gap-2">
+                            <i data-lucide="loader-2" class="w-5 h-5 animate-spin text-orange-400"></i>
                             Generating response from the AI...
                         </div>
                     </div>
@@ -57,7 +61,8 @@
                         <h2 class="text-lg font-semibold mb-2 flex items-center gap-2">
                             <i data-lucide="box" class="w-6 h-6"></i> Raw Blockchain Data
                         </h2>
-                        <div class="code-block-collapsible">
+                        <div class="code-block-collapsible flex items-center gap-2">
+                            <i data-lucide="loader-2" class="w-5 h-5 animate-spin text-orange-400"></i>
                             Fetching blockchain data...
                         </div>
                     </div>
@@ -74,11 +79,11 @@
                     </div>
                 @endif
 
-                <div class="section bg-orange-50 border border-orange-100 rounded p-4 shadow-sm">
+                <div class="section rounded p-4 shadow-sm">
                     <h2 class="text-lg font-semibold mb-2 flex items-center gap-2">
                         <i data-lucide="bot" class="w-6 h-6"></i>AI Summary
                     </h2>
-                    <div class="box markdown-content text-gray-800 leading-relaxed">
+                    <div class="box text-gray-800 leading-relaxed">
                         {!! Str::markdown($result->ai_response) !!}
                     </div>
                 </div>
