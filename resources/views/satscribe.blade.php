@@ -9,8 +9,8 @@
                 <h1 class="text-2xl sm:text-3xl font-bold leading-tight">
                     Understand any Bitcoin Transaction or Block
                 </h1>
-                <p class="subtitle text-base sm:text-lg text-gray-700">
-                    Paste a <strong>Bitcoin TXID</strong> or <strong>block height</strong>, and let Satscribe explain it.
+                <p class="subtitle text-base sm:text-lg text-gray-700 leading-relaxed">
+                    <strong>Satscribe</strong> helps you make sense of the Bitcoin blockchain. Just enter a transaction ID or block height to get clear, AI-generated insights. Whether you're auditing, learning, or just exploring, Satscribe gives you the story behind the sats.
                 </p>
             </div>
         </header>
