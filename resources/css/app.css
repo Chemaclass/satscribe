@@ -346,3 +346,23 @@ button i[data-lucide] {
 .advanced-fields {
 
 }
+
+/* Description list item */
+.description-item {
+    @apply p-5 rounded-lg shadow-sm transition hover:shadow-md mb-4;
+    @apply bg-white hover:bg-orange-50 text-gray-900;
+}
+
+.dark .description-item {
+    @apply bg-gray-800 hover:bg-gray-700 text-gray-100;
+}
+
+/* Question box */
+.description-question {
+    @apply mb-2 text-sm italic px-3 py-2 rounded;
+    @apply bg-orange-50 text-orange-700;
+}
+
+.dark .description-question {
+    @apply bg-gray-700 text-orange-100 ring-1 ring-gray-700;
+}

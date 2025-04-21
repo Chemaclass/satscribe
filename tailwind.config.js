@@ -10,4 +10,8 @@ export default {
         extend: {},
     },
     plugins: [],
+    safelist: [
+        'description-item',
+        'description-question',
+    ],
 }

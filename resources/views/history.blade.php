@@ -28,7 +28,7 @@
                         $entryId = 'entry-' . $desc->id;
                     @endphp
 
-                <li class="p-5 hover:bg-orange-50 rounded-lg shadow-sm transition hover:shadow-md mb-4">
+                <li class="description-item">
                     <div class="description-header font-medium mb-1">
                             <div class="w-full">
                                 <strong>{{ ucfirst($desc->type) }}:</strong>
@@ -46,9 +46,9 @@
                         </div>
 
                         @if (!empty($desc->question))
-                            <div class="mb-2 text-sm italic text-orange-700 bg-orange-50 px-3 py-2 rounded">
-                                <strong>Question:</strong> {{ $desc->question }}
-                            </div>
+                        <div class="description-question">
+                            <strong>Question:</strong> {{ $desc->question }}
+                        </div>
                         @endif
                         <div class="description-body relative">
                             <div id="{{ $entryId }}" class="markdown-content collapsed-response overflow-hidden max-h-[6.5rem] transition-all duration-300">
