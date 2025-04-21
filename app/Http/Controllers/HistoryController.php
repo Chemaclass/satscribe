@@ -12,7 +12,8 @@ final class HistoryController
     public function index(): View
     {
         return view('history', [
-            'descriptions' => PromptResult::latest()->simplePaginate(5),
+            'promptResults' => PromptResult::latest()
+                ->simplePaginate(5),
         ]);
     }
 

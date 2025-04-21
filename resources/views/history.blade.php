@@ -14,57 +14,57 @@
             </div>
         </header>
 
-        @if ($descriptions->isEmpty())
+        @if ($promptResults->isEmpty())
             <p>No descriptions found yet.</p>
         @else
             <ul class="description-list">
-                @foreach($descriptions as $desc)
+                @foreach($promptResults as $promptResult)
                     @php
-                        $mempoolUrl = match ($desc->type) {
-                            'transaction' => "https://mempool.space/tx/{$desc->input}",
-                            'block' => "https://mempool.space/block/{$desc->input}",
+                        $mempoolUrl = match ($promptResult->type) {
+                            'transaction' => "https://mempool.space/tx/{$promptResult->input}",
+                            'block' => "https://mempool.space/block/{$promptResult->input}",
                             default => null,
                         };
-                        $entryId = 'entry-' . $desc->id;
+                        $entryId = 'entry-' . $promptResult->id;
                     @endphp
 
                 <li class="description-item">
                     <div class="description-header font-medium mb-1">
                             <div class="w-full">
-                                <strong>{{ ucfirst($desc->type) }}:</strong>
+                                <strong>{{ ucfirst($promptResult->type) }}:</strong>
                                 <p class="truncate max-w-full overflow-hidden text-ellipsis">
                                     @if ($mempoolUrl)
                                         <a href="{{ $mempoolUrl }}" target="_blank" rel="noopener" class="mempool-link">
-                                            {{ $desc->input }}
+                                            {{ $promptResult->input }}
                                         </a>
                                     @else
-                                        {{ $desc->input }}
+                                        {{ $promptResult->input }}
                                     @endif
                                 </p>
                             </div>
 
                         </div>
 
-                        @if (!empty($desc->question))
+                        @if (!empty($promptResult->question))
                         <div class="description-question">
-                            <strong>Question:</strong> {{ $desc->question }}
+                            <strong>Question:</strong> {{ $promptResult->question }}
                         </div>
                         @endif
                         <div class="description-body relative">
                             <div id="{{ $entryId }}" class="markdown-content collapsed-response overflow-hidden max-h-[6.5rem] transition-all duration-300">
-                                {!! Str::markdown($desc->ai_response) !!}
+                                {!! Str::markdown($promptResult->ai_response) !!}
                             </div>
                         </div>
                         <div class="description-meta mt-2 flex justify-between items-center text-sm text-gray-500">
-                            <span>{{ $desc->created_at->diffForHumans() }}</span>
+                            <span>{{ $promptResult->created_at->diffForHumans() }}</span>
                             <button type="button"
                                     class="toggle-history-raw-btn text-blue-600 hover:underline"
-                                    data-target="raw-{{ $desc->id }}"
-                                    data-id="{{ $desc->id }}">
+                                    data-target="raw-{{ $promptResult->id }}"
+                                    data-id="{{ $promptResult->id }}">
                                 Show raw data
                             </button>
                         </div>
-                    <pre id="raw-{{ $desc->id }}"
+                    <pre id="raw-{{ $promptResult->id }}"
                          class="hidden bg-gray-100 text-xs p-3 rounded overflow-auto max-h-64 whitespace-pre-wrap"
                          data-loaded="false">
                         <span class="loading"></span>
@@ -74,17 +74,17 @@
             </ul>
 
             <div class="pagination flex justify-center gap-4">
-                @if ($descriptions->onFirstPage())
+                @if ($promptResults->onFirstPage())
                     <span class="px-4 py-2 bg-orange-100 text-orange-400 rounded-md cursor-not-allowed">« Previous</span>
                 @else
-                    <a href="{{ $descriptions->previousPageUrl() }}"
+                    <a href="{{ $promptResults->previousPageUrl() }}"
                        class="px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 transition">
                         « Previous
                     </a>
                 @endif
 
-                @if ($descriptions->hasMorePages())
-                    <a href="{{ $descriptions->nextPageUrl() }}"
+                @if ($promptResults->hasMorePages())
+                    <a href="{{ $promptResults->nextPageUrl() }}"
                        class="px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 transition">
                         Next »
                     </a>
