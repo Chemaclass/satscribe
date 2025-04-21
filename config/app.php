@@ -125,4 +125,6 @@ return [
 
     'max_open_ai_attempts' => env('MAX_OPEN_AI_ATTEMPTS', 50),
     'cronitorClientKey' => env('CRONITOR_CLIENT_KEY'),
+
+    'pagination.per_page' => env('PAGINATION_PER_PAGE', 5),
 ];

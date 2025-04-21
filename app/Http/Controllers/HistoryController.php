@@ -11,9 +11,12 @@ final class HistoryController
 {
     public function index(): View
     {
+        $perPage = config('app.pagination.per_page');
+
+        $promptResults = PromptResult::latest()->simplePaginate($perPage);
+
         return view('history', [
-            'promptResults' => PromptResult::latest()
-                ->simplePaginate(5),
+            'promptResults' => $promptResults,
         ]);
     }
 
