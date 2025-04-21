@@ -11,6 +11,13 @@ document.addEventListener('DOMContentLoaded', () => {
     setupBlockchainToggle();
     setupDescriptionToggle();
     // linkBitcoinEntities('.markdown-content'); // todo: consider improve or remove
+
+    window.refreshThemeIcon = () => {
+        const icon = document.getElementById('theme-icon');
+        if (icon) {
+            createIcons({ icons, attrs: { class: icon.getAttribute('class') } });
+        }
+    };
 });
 
 function setupFormSubmissionUI() {

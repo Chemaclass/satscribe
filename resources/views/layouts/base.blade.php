@@ -39,8 +39,9 @@
             <svg data-lucide="scroll" class="w-5 h-5"></svg>
             <span class="link-text">History</span>
         </a>
-        <button class="nav-link flex items-center gap-1" @click="dark = !dark">
-            <svg :data-lucide="dark ? 'sun' : 'moon'" class="w-5 h-5"></svg>
+        <button class="nav-link flex items-center gap-1"
+                @click="dark = !dark; $nextTick(() => refreshThemeIcon())">
+            <svg :data-lucide="dark ? 'sun' : 'moon'" id="theme-icon" class="w-5 h-5"></svg>
             <span class="link-text" x-text="dark ? 'Light' : 'Dark'"></span>
         </button>
 
