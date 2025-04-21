@@ -39,10 +39,10 @@
                                 id="search"
                                 name="search"
                                 x-model="input"
-                                placeholder="e.g. 4b0d... or 840000"
+                                placeholder="e.g. 4b0d... or 840000 — default: latest block"
                                 class="form-input w-full"
                                 autocomplete="off"
-                                required
+                                :required="false"
                                 autofocus
                                 @input="validate()"
                                 aria-describedby="searchHelp"
@@ -65,7 +65,7 @@
                         {{-- Question --}}
                         <div class="form-section mb-6">
                             <label for="question" class="block text-sm font-medium text-gray-900 mb-1">
-                                Ask a Question (optional)
+                                Ask a Question
                             </label>
                             <input
                                 type="text"
@@ -173,7 +173,7 @@
                                 {{-- Persona Selector --}}
                                 <div>
                                     <label for="persona" class="persona-label block text-sm font-medium mb-1">
-                                        AI Persona <span class="text-xs text-gray-500 dark:text-orange-300">(optional)</span>
+                                        AI Persona
                                     </label>
 
                                     <div class="relative">

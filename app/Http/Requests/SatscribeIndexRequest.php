@@ -33,11 +33,9 @@ final class SatscribeIndexRequest extends FormRequest
         return $this->filled('search');
     }
 
-    public function getSearchInput(): PromptInput
+    public function getSearchInput(): string
     {
-        return PromptInput::fromString(
-            strtolower(trim((string) $this->string('search')))
-        );
+        return strtolower(trim((string) $this->string('search')));
     }
 
     public function getQuestionInput(): string

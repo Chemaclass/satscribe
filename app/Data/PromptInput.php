@@ -13,12 +13,12 @@ final readonly class PromptInput
     ) {
     }
 
-    public static function fromString(string $input): self
+    public static function fromRaw(string|int $input): self
     {
         if (is_numeric($input)
             || preg_match('/^0{8,}[a-f0-9]{56}$/i', $input)
         ) {
-            return new self(PromptType::Block, $input);
+            return new self(PromptType::Block, (string) $input);
         }
 
         return new self(PromptType::Transaction, $input);

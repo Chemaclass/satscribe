@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Actions\SatscribeAction;
+use App\Data\PromptInput;
 use App\Data\QuestionPlaceholder;
 use App\Exceptions\BlockchainException;
 use App\Exceptions\OpenAIError;
@@ -20,19 +21,22 @@ final readonly class SatscribeController
     ) {
     }
 
-    public function index(SatscribeIndexRequest $request, SatscribeAction $action): View
-    {
-        if (!$request->hasSearchInput()) {
-            return view('satscribe', [
-                'questionPlaceholder' => QuestionPlaceholder::rand(),
-                'maxBitcoinBlockHeight' => $this->heightProvider->getMaxPossibleBlockHeight(),
-            ]);
+    public function index(
+        SatscribeIndexRequest $request,
+        SatscribeAction $action,
+        BlockHeightProvider $heightProvider
+    ): View {
+        // @todo: refactor, do not use BlockHeightProvider in the controller
+        if ($request->hasSearchInput()) {
+            $search = $request->getSearchInput();
+        } else {
+            $search = $heightProvider->getCurrentBlockHeight();
         }
 
-        $search = $request->getSearchInput();
+        $search = PromptInput::fromRaw($search);
         $question = $request->getQuestionInput();
-        $persona = $request->getPersonaInput();
         $refresh = $request->isRefreshEnabled();
+        $persona = $request->getPersonaInput();
 
         try {
             $generatedPrompt = $action->execute($search, $refresh, $question, $persona);
