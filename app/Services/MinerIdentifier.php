@@ -68,6 +68,6 @@ final class MinerIdentifier
             }
         }
 
-        return 'Unknown Miner';
+        return $ascii;
     }
 }
