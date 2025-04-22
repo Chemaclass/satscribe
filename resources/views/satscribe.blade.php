@@ -104,36 +104,36 @@
 @endsection
 
 @push('scripts')
-    <script>
-        function searchInputValidator(initial = '') {
-            return {
-                input: initial,
-                valid: false,
-                isHex64: false,
-                isBlockHeight: false,
-                isSubmitting: false,
+<script>
+function searchInputValidator(initial = '') {
+    return {
+        input: initial,
+        valid: false,
+        isHex64: false,
+        isBlockHeight: false,
+        isSubmitting: false,
 
-                get helperText() {
-                    if (!this.input.trim()) return 'Enter a valid TXID (64 hex chars) or block height (number).';
-                    if (!this.valid) return 'Invalid format. Must be a TXID or block height.';
-                    if (this.isHex64) return 'Valid TXID (64 hex chars) found.';
-                    if (this.isBlockHeight) return 'Valid block height (number) found.';
-                    return '';
-                },
+        get helperText() {
+            if (!this.input.trim()) return 'Enter a valid TXID (64 hex chars) or block height (number).';
+            if (!this.valid) return 'Invalid format. Must be a TXID or block height.';
+            if (this.isHex64) return 'Valid TXID (64 hex chars) found.';
+            if (this.isBlockHeight) return 'Valid block height (number) found.';
+            return '';
+        },
 
-                get helperClass() {
-                    if (!this.input.trim()) return 'text-gray-600';
-                    return this.valid ? 'text-green-600 font-medium' : 'text-red-600';
-                },
+        get helperClass() {
+            if (!this.input.trim()) return 'text-gray-600';
+            return this.valid ? 'text-green-600 font-medium' : 'text-red-600';
+        },
 
-                validate() {
-                    const trimmed = this.input.trim();
-                    this.isHex64 = /^[a-fA-F0-9]{64}$/.test(trimmed);
-                    const height = parseInt(trimmed, 10);
-                    this.isBlockHeight = /^\d+$/.test(trimmed) && height <= {{ $maxBitcoinBlockHeight ?? 100_000_000 }};
-                    this.valid = this.isHex64 || this.isBlockHeight;
-                }
-            };
+        validate() {
+            const trimmed = this.input.trim();
+            this.isHex64 = /^[a-fA-F0-9]{64}$/.test(trimmed);
+            const height = parseInt(trimmed, 10);
+            this.isBlockHeight = /^\d+$/.test(trimmed) && height <= {{ $maxBitcoinBlockHeight ?? 100_000_000 }};
+            this.valid = this.isHex64 || this.isBlockHeight;
         }
-    </script>
+    };
+}
+</script>
 @endpush
