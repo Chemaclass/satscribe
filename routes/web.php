@@ -9,6 +9,7 @@ Route::redirect('/generate', '/');
 Route::redirect('describe', '/');
 
 Route::get('/', [SatscribeController::class, 'index'])->name('home');
+Route::post('/submit', [SatscribeController::class, 'submit'])->name('submit');
 Route::get('/history', [HistoryController::class, 'index'])->name('history');
 Route::get('/history/{id}/raw', [HistoryController::class, 'getRaw'])->name('history.get-raw');
 Route::get('/faq', [FaqController::class, 'index'])->name('faq');

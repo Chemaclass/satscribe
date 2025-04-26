@@ -62,6 +62,38 @@ final readonly class SatscribeController
         ]);
     }
 
+    public function submit(SatscribeIndexRequest $request, SatscribeAction $action)
+    {
+        $search = $this->getPromptInput($request);
+        $persona = $this->getPromptPersona($request);
+        $question = $request->getQuestionInput();
+        $refresh = $request->isRefreshEnabled();
+
+        try {
+            $generatedPrompt = $action->execute($search, $persona, $refresh, $question);
+        } catch (BlockchainException|OpenAIError $e) {
+            Log::error('Failed to describe prompt result', [
+                'search' => $search->text,
+                'refresh' => $refresh,
+                'question' => $question,
+                'persona' => $persona->value,
+                'error' => $e->getMessage(),
+            ]);
+            return response()->json(['error' => $e->getMessage()], 422);
+        }
+
+        return response()->json([
+            'html' => view('partials.description-result', [
+                'result' => $generatedPrompt->result,
+                'isFresh' => $generatedPrompt->isFresh,
+                'search' => $search->text,
+                'question' => $question,
+                'persona' => $persona->value,
+                'refreshed' => $refresh,
+            ])->render()
+        ]);
+    }
+
     private function getPromptInput(SatscribeIndexRequest $request): PromptInput
     {
         if ($request->hasSearchInput()) {
