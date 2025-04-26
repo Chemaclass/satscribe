@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Actions\AlbySettleWebhookAction;
 use App\Actions\SatscribeAction;
 use App\Http\Middleware\IpRateLimiter;
 use App\Services\Alby\AlbyClient;
@@ -69,6 +70,10 @@ final class AppServiceProvider extends ServiceProvider
             ->when(AlbyClient::class)
             ->needs('$accessToken')
             ->giveConfig('services.alby.api_key');
+        $this->app
+            ->when(AlbySettleWebhookAction::class)
+            ->needs('$webhookSecret')
+            ->giveConfig('services.alby.webhook_secret');
     }
 
     /**
