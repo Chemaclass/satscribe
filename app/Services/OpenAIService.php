@@ -67,6 +67,8 @@ Describe this Bitcoin {$type->value} using the following blockchain data:
 
 Instructions:
 - The values are in satoshis (1 satoshi = 0.00000001 BTC).
+- Skip "Unknown" or anything that you are not certain about, avoid repeating information.
+- If I asked you a question, you should answer it first, followed by a tldr of whatever you consider best.
 {$questionInstructions}
 PROMPT;
 
@@ -77,7 +79,7 @@ PROMPT;
     {
         return <<<TEXT
 Use markdown formatting.
-A paragraph should not be larger than 75 words.
+A paragraph should not be larger than 80 words.
 If it's a historically important {$type->value}, mention it explicitly.
 TEXT;
     }

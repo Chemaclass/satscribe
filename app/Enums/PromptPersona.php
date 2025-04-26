@@ -15,7 +15,7 @@ enum PromptPersona: string
     public function label(): string
     {
         return match ($this) {
-            self::Educator => "Educator – Explain it like I'm new into Bitcoin",
+            self::Educator => "Educator – Explain like I'm new into Bitcoin",
             self::Developer => 'Developer – Focus on scripts & code',
             self::Storyteller => 'Storyteller – Add narrative and context',
         };
@@ -36,17 +36,17 @@ enum PromptPersona: string
     public function systemPrompt(): string
     {
         return match ($this) {
-            self::Educator => 'You are an experienced Bitcoin educator. Break things down in simple terms...',
-            self::Developer => 'You are a Bitcoin developer and technical analyst...',
-            self::Storyteller => 'You are a storyteller who explains Bitcoin history in engaging narratives...',
+            self::Educator => 'You are an experienced Bitcoin educator. Break things down in simple terms.',
+            self::Developer => 'You are a Bitcoin developer and technical analyst.',
+            self::Storyteller => 'You are a storyteller who explains Bitcoin history in engaging narratives.',
         };
     }
 
     public function maxTokens(): int
     {
         return match ($this) {
-            self::Educator => 400,
-            self::Developer => 600,
+            self::Educator,
+            self::Developer,
             self::Storyteller => 700,
         };
     }
