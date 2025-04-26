@@ -7,10 +7,10 @@ namespace App\Http\Controllers\Api;
 use App\Services\Alby\AlbyClientInterface;
 use Illuminate\Http\JsonResponse;
 
-final class InvoiceController
+final readonly class InvoiceController
 {
     public function __construct(
-        private readonly AlbyClientInterface $albyClient
+        private AlbyClientInterface $albyClient
     ) {
     }
 
