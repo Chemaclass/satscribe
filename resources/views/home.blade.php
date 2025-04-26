@@ -13,6 +13,12 @@
                 ID or block height to get clear, AI-generated insights. Whether you're auditing, learning, or just
                 exploring, Satscribe gives you the story behind the sats.
             </p>
+            <p class="subtitle text-sm text-gray-600 leading-relaxed">
+                Want to browse real-time Bitcoin blocks and transactions?
+                <a href="https://mempool.space" target="_blank" rel="noopener" class="text-orange-500 hover:underline dark:text-orange-400">
+                    Visit Mempool.space →
+                </a>
+            </p>
         </div>
     </header>
 

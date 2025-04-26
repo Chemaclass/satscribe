@@ -61,7 +61,7 @@
     @yield('content')
 </main>
 
-<footer class="text-center py-4 border-t border-gray-200 dark:border-gray-700 text-sm text-gray-600 dark:text-gray-400">
+<footer class="text-center py-2 border-t border-gray-200 dark:border-gray-700 text-sm text-gray-600 dark:text-gray-400">
     <div class="flex justify-center items-center gap-2 flex-wrap">
         <span>&copy;{{ date('Y') }} Built by <a href="https://chemaclass.com/" target="_blank" class="hover:underline">Chema</a></span>
         <span class="hidden sm:inline">•</span>
