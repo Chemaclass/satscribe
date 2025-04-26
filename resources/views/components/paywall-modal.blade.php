@@ -1,27 +1,7 @@
 <div
-    x-data="{
-        show: false,
-        invoice: {},
-        maxAttempts: 0,
-        showToast: false,
-        copyInvoice() {
-            navigator.clipboard.writeText(this.invoice.payment_request).then(() => {
-                this.showToast = true;
-                setTimeout(() => this.showToast = false, 2000);
-            });
-        }
-    }"
+    x-data="invoiceModal()"
+    x-init="init()"
     x-show="show"
-    x-on:rate-limit-reached.window="
-        show = true;
-        invoice = $event.detail.invoice;
-        maxAttempts = $event.detail.maxAttempts;
-        window.isInvoiceModalOpen = true;
-    "
-    x-on:invoice-paid.window="
-        show = false;
-        window.isInvoiceModalOpen = false;
-    "
     class="fixed inset-0 z-50 overflow-y-auto"
     style="display: none;"
 >
@@ -32,12 +12,7 @@
             <!-- Toast Notification -->
             <div
                 x-show="showToast"
-                x-transition:enter="transition ease-out duration-300"
-                x-transition:enter-start="opacity-0 translate-y-2"
-                x-transition:enter-end="opacity-100 translate-y-0"
-                x-transition:leave="transition ease-in duration-200"
-                x-transition:leave-start="opacity-100 translate-y-0"
-                x-transition:leave-end="opacity-0 translate-y-2"
+                x-transition
                 class="fixed top-6 right-6 bg-orange-300 text-white text-sm px-4 py-2 rounded shadow-md"
                 style="display: none;"
             >
@@ -46,17 +21,12 @@
 
             <div class="text-center space-y-6">
                 <div>
-                    <h3 class="text-2xl font-bold text-gray-800 mb-2">
-                        <span x-transition x-text="`You’ve used ${maxAttempts} free requests`"></span>
-                    </h3>
-
-                    <div class="text-sm text-gray-700 leading-relaxed">
-                        <p x-transition class="mt-2" x-text="`Consider tipping ${invoice.amount} sats to support its development!`"></p>
-                    </div>
+                    <h3 class="text-2xl font-bold text-gray-800 mb-2" x-text="`You’ve used ${maxAttempts} free requests`"></h3>
+                    <p class="text-sm text-gray-700 mt-2" x-text="`Consider tipping ${invoice.amount} sats to support its development!`"></p>
                 </div>
 
                 <!-- QR Code -->
-                <div x-show="invoice && invoice.qr_code_svg" x-transition>
+                <div x-show="invoice?.qr_code_svg" x-transition>
                     <img
                         :src="invoice.qr_code_svg"
                         alt="Lightning Invoice QR"
@@ -80,7 +50,7 @@
 
                 <!-- Zap Memo -->
                 <div class="text-xs text-gray-500" x-show="invoice.memo">
-                    <p x-transition x-text="`Memo: ${invoice.memo}`"></p>
+                    <p x-text="`Memo: ${invoice.memo}`"></p>
                 </div>
 
                 <!-- Extra Tip Option -->
@@ -96,11 +66,7 @@
                 <!-- Close Button -->
                 <div class="pt-2">
                     <button
-                        @click="
-        show = false;
-        window.isInvoiceModalOpen = false;
-        window.dispatchEvent(new CustomEvent('paywall-modal-closed'));
-    "
+                        @click="closeModal"
                         class="w-full bg-gray-400 text-white px-4 py-2 rounded-md hover:bg-orange-400 transition cursor-pointer"
                     >
                         Close
@@ -110,83 +76,105 @@
         </div>
     </div>
 </div>
+
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
 <script>
-    function checkInvoiceStatus(identifier) {
-        stopInvoiceChecking(); // 🛑 Stop previous check first
+    function invoiceModal() {
+        return {
+            show: false,
+            invoice: {},
+            maxAttempts: 0,
+            showToast: false,
+            controller: null,
+            interval: null,
+            attempts: 0,
+            maxPollAttempts: 180,
 
-        let attempts = 0;
-        const maxAttempts = 180;
-
-        const controller = new AbortController();
-        window.currentAbortController = controller;
-        window.currentCheckingIdentifier = identifier;
-
-        const checkInterval = setInterval(async () => {
-            if (!window.isInvoiceModalOpen) {
-                console.log('Modal closed, stop polling');
-                stopInvoiceChecking();
-                return;
-            }
-
-            if (attempts >= maxAttempts) {
-                stopInvoiceChecking();
-                console.log('Payment check timed out');
-                return;
-            }
-
-            attempts++;
-
-            try {
-                const response = await fetch(`/api/invoice/${identifier}/status`, {
-                    signal: controller.signal,
+            init() {
+                window.addEventListener('rate-limit-reached', (event) => {
+                    this.show = true;
+                    this.invoice = event.detail.invoice;
+                    this.maxAttempts = event.detail.maxAttempts;
+                    this.startPolling(this.invoice.identifier);
                 });
-                const data = await response.json();
 
-                if (data.paid) {
-                    stopInvoiceChecking();
+                window.addEventListener('invoice-paid', () => {
+                    this.stopPolling();
+                    this.show = false;
+                });
 
-                    confetti({
-                        particleCount: 100,
-                        spread: 70,
-                        origin: { y: 0.6 }
-                    });
+                window.addEventListener('paywall-modal-closed', () => {
+                    this.stopPolling();
+                });
+            },
 
-                    setTimeout(() => {
-                        window.dispatchEvent(new CustomEvent('invoice-paid'));
-                    }, 1500);
+            copyInvoice() {
+                navigator.clipboard.writeText(this.invoice.payment_request).then(() => {
+                    this.showToast = true;
+                    setTimeout(() => this.showToast = false, 2000);
+                });
+            },
+
+            closeModal() {
+                this.show = false;
+                window.dispatchEvent(new CustomEvent('paywall-modal-closed'));
+            },
+
+            async startPolling(identifier) {
+                this.stopPolling(); // Always clear any old polling first
+
+                this.controller = new AbortController();
+                this.attempts = 0;
+
+                this.interval = setInterval(async () => {
+                    if (!this.show) {
+                        this.stopPolling();
+                        return;
+                    }
+
+                    if (this.attempts >= this.maxPollAttempts) {
+                        console.log('Polling timed out.');
+                        this.stopPolling();
+                        return;
+                    }
+
+                    this.attempts++;
+
+                    try {
+                        const response = await fetch(`/api/invoice/${identifier}/status`, {
+                            signal: this.controller.signal,
+                        });
+                        const data = await response.json();
+
+                        if (data.paid) {
+                            this.stopPolling();
+                            confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+                            setTimeout(() => {
+                                window.dispatchEvent(new CustomEvent('invoice-paid'));
+                            }, 1500);
+                        }
+                    } catch (error) {
+                        if (error.name === 'AbortError') {
+                            console.log('Fetch aborted.');
+                        } else {
+                            console.error('Polling error:', error);
+                            this.stopPolling();
+                        }
+                    }
+                }, 1500);
+            },
+
+            stopPolling() {
+                if (this.interval) {
+                    clearInterval(this.interval);
+                    this.interval = null;
                 }
-            } catch (error) {
-                if (error.name === 'AbortError') {
-                    console.log('Fetch aborted');
-                    return;
+                if (this.controller) {
+                    this.controller.abort();
+                    this.controller = null;
                 }
-                console.error('Error checking invoice status:', error);
-                stopInvoiceChecking();
-            }
-        }, 1500);
-
-        window.currentCheckInterval = checkInterval;
+            },
+        };
     }
-
-    function stopInvoiceChecking() {
-        if (window.currentCheckInterval) {
-            clearInterval(window.currentCheckInterval);
-            window.currentCheckInterval = null;
-        }
-        if (window.currentAbortController) {
-            window.currentAbortController.abort();
-            window.currentAbortController = null;
-        }
-        window.currentCheckingIdentifier = null;
-    }
-
-    document.addEventListener('paywall-modal-closed', () => {
-        stopInvoiceChecking();
-    });
-
-    document.addEventListener('invoice-created', (event) => {
-        const identifier = event.detail.identifier;
-        checkInvoiceStatus(identifier);
-    });
 </script>
