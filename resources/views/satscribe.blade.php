@@ -1,83 +1,83 @@
 @extends('layouts.base')
 
 @section('content')
-    <section class="satscribe-section px-4 sm:px-6 lg:px-8 py-6">
-        {{-- Header --}}
-        <header class="section-header mb-6">
-            <div class="flex flex-col max-w-2xl">
-                <h1 class="text-2xl sm:text-3xl font-bold leading-tight">
-                    Understand any Bitcoin Transaction or Block
-                </h1>
-                <p class="subtitle text-base sm:text-lg text-gray-700 leading-relaxed">
-                    <strong>Satscribe</strong> helps you make sense of the Bitcoin blockchain. Just enter a transaction
-                    ID or block height to get clear, AI-generated insights. Whether you're auditing, learning, or just
-                    exploring, Satscribe gives you the story behind the sats.
-                </p>
-            </div>
-        </header>
+<section class="satscribe-home px-4 sm:px-6 lg:px-8 py-6">
+    {{-- Header --}}
+    <header class="section-header mb-6">
+        <div class="flex flex-col max-w-2xl">
+            <h1 class="text-2xl sm:text-3xl font-bold leading-tight">
+                Understand any Bitcoin Transaction or Block
+            </h1>
+            <p class="subtitle text-base sm:text-lg text-gray-700 leading-relaxed">
+                <strong>Satscribe</strong> helps you make sense of the Bitcoin blockchain. Just enter a transaction
+                ID or block height to get clear, AI-generated insights. Whether you're auditing, learning, or just
+                exploring, Satscribe gives you the story behind the sats.
+            </p>
+        </div>
+    </header>
 
-        <div x-data="searchInputValidator('{{ old('search', $search ?? '') }}')" x-init="validate()">
-            {{-- Form + Icon Side-by-Side --}}
-            <div class="flex flex-col sm:flex-row sm:justify-between items-start sm:items-start gap-6 max-w-5xl">
-                {{-- Left: Form --}}
-                <div class="w-full sm:w-2/3">
-                    <form
-                        method="POST"
-                        action="{{ route('submit') }}"
-                        aria-labelledby="form-heading"
-                        @submit.prevent="submitForm($el)"
-                    >
-                        @csrf
-                        <fieldset>
-                            <legend id="form-heading" class="sr-only">Describe Bitcoin Data</legend>
-                            @include('partials.form-fields')
-                        </fieldset>
-                    </form>
-                </div>
-
-                {{-- Right: Bitcoin Icon --}}
-                <div class="hidden sm:flex w-1/3 h-60 items-center justify-center select-none" aria-hidden="true">
-                    <i data-lucide="bitcoin" class="w-[150px] h-[150px] animate-bounce-wave text-orange-500"
-                       style="color: var(--btc-orange);"></i>
-                </div>
-            </div>
-
-            {{-- Loading State --}}
-            <template x-if="isSubmitting">
-                <section
-                    class="description-body mt-6 w-full max-w-3xl mx-auto space-y-6"
-                    x-init="$nextTick(() => window.refreshLucideIcons?.())"
+    <div x-data="searchInputValidator('{{ old('search', $search ?? '') }}')" x-init="validate()">
+        {{-- Form + Icon Side-by-Side --}}
+        <div class="flex flex-col sm:flex-row sm:justify-between items-start sm:items-start gap-6 max-w-5xl">
+            {{-- Left: Form --}}
+            <div class="w-full sm:w-2/3">
+                <form
+                    method="POST"
+                    action="{{ route('submit') }}"
+                    aria-labelledby="form-heading"
+                    @submit.prevent="submitForm($el)"
                 >
-                    <div class="section rounded p-4 shadow-sm">
-                        <h2 class="text-lg font-semibold mb-2 flex items-center gap-2">
-                            <i data-lucide="bot" class="w-6 h-6"></i>AI Summary
-                        </h2>
-                        <div class="box text-gray-800 leading-relaxed flex items-center gap-2">
-                            <i data-lucide="loader-2" class="w-5 h-5 animate-spin text-orange-400"></i>
-                            Generating response from the AI...
-                        </div>
-                    </div>
+                    @csrf
+                    <fieldset>
+                        <legend id="form-heading" class="sr-only">Describe Bitcoin Data</legend>
+                        @include('partials.form-fields')
+                    </fieldset>
+                </form>
+            </div>
 
-                    <div class="section">
-                        <h2 class="text-lg font-semibold mb-2 flex items-center gap-2">
-                            <i data-lucide="box" class="w-6 h-6"></i> Raw Blockchain Data
-                        </h2>
-                        <div class="code-block-collapsible flex items-center gap-2">
-                            <i data-lucide="loader-2" class="w-5 h-5 animate-spin text-orange-400"></i>
-                            Fetching blockchain data...
-                        </div>
-                    </div>
-                </section>
-            </template>
+            {{-- Right: Bitcoin Icon --}}
+            <div class="hidden sm:flex w-1/3 h-60 items-center justify-center select-none" aria-hidden="true">
+                <i data-lucide="bitcoin" class="w-[150px] h-[150px] animate-bounce-wave text-orange-500"
+                   style="color: var(--btc-orange);"></i>
+            </div>
         </div>
 
-        {{-- Results Container --}}
-        <div id="results-container">
-            @isset($result)
-                @include('partials.description-result')
-            @endisset
-        </div>
-    </section>
+        {{-- Loading State --}}
+        <template x-if="isSubmitting">
+            <section
+                class="description-body mt-6 w-full max-w-3xl mx-auto space-y-6"
+                x-init="$nextTick(() => window.refreshLucideIcons?.())"
+            >
+                <div class="section rounded p-4 shadow-sm">
+                    <h2 class="text-lg font-semibold mb-2 flex items-center gap-2">
+                        <i data-lucide="bot" class="w-6 h-6"></i>AI Summary
+                    </h2>
+                    <div class="leading-relaxed flex items-center gap-2">
+                        <i data-lucide="loader-2" class="w-5 h-5 animate-spin text-orange-400"></i>
+                        Generating response from the AI...
+                    </div>
+                </div>
+
+                <div class="section rounded p-4 shadow-sm">
+                    <h2 class="text-lg font-semibold mb-2 flex items-center gap-2">
+                        <i data-lucide="box" class="w-6 h-6"></i> Raw Blockchain Data
+                    </h2>
+                    <div class="code-block-collapsible flex items-center gap-2">
+                        <i data-lucide="loader-2" class="w-5 h-5 animate-spin text-orange-400"></i>
+                        Fetching blockchain data...
+                    </div>
+                </div>
+            </section>
+        </template>
+    </div>
+
+    {{-- Results Container --}}
+    <div id="results-container">
+        @isset($result)
+            @include('partials.description-result')
+        @endisset
+    </div>
+</section>
 @endsection
 
 @push('scripts')
