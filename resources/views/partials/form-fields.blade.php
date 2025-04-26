@@ -22,7 +22,7 @@
                     id="search"
                     name="search"
                     x-model="input"
-                    placeholder="e.g. 4b0d... or 840000 — default: latest block"
+                    placeholder="e.g. 4b0d... or 840000 — default: latest"
                     class="form-input w-full"
                     autocomplete="off"
                     :required="false"

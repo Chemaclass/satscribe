@@ -1,4 +1,3 @@
-<!-- resources/views/components/paywall-modal.blade.php -->
 <div
     x-data="{
         show: false,
@@ -24,7 +23,7 @@
     <div class="flex items-center justify-center min-h-screen px-4">
         <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
 
-        <div class="relative bg-white rounded-lg p-8 max-w-md w-full">
+        <div class="relative bg-white rounded-xl p-8 max-w-md w-full shadow-lg">
             <!-- Toast Notification -->
             <div
                 x-show="showToast"
@@ -34,52 +33,70 @@
                 x-transition:leave="transition ease-in duration-200"
                 x-transition:leave-start="opacity-100 translate-y-0"
                 x-transition:leave-end="opacity-0 translate-y-2"
-                class="fixed top-6 right-6 bg-orange-400 text-white text-sm px-4 py-2 rounded shadow-md"
+                class="fixed top-6 right-6 bg-orange-300 text-white text-sm px-4 py-2 rounded shadow-md"
                 style="display: none;"
             >
                 Invoice Copied!
             </div>
 
-            <div class="text-center">
-                <h3 class="text-xl font-semibold mb-4">Rate Limit Reached</h3>
+            <div class="text-center space-y-6">
+                <div>
+                    <h3 class="text-2xl font-bold text-gray-800 mb-2">
+                        <span x-transition x-text="`You’ve used ${maxAttempts} free requests`"></span>
+                    </h3>
 
-                <div class="mb-4 text-sm text-gray-700">
-                    <p x-transition x-text="`You've already done ${maxAttempts} free requests.`"></p>
-                    <p x-transition x-text="`If you find Satscribe helpful, consider tipping ${invoice.amount} sats to support its development!`"></p>
+                    <div class="text-sm text-gray-700 leading-relaxed">
+                        <p x-transition class="mt-2" x-text="`Consider tipping ${invoice.amount} sats to support its development!`"></p>
+                    </div>
                 </div>
 
                 <!-- QR Code -->
-                <div
-                    class="flex justify-center mb-6"
-                    x-show="invoice && invoice.qr_code_svg"
-                    x-transition
-                >
-                    <img :src="invoice.qr_code_svg" alt="Lightning Invoice QR" class="w-70 h-70 object-contain" />
+                <div x-show="invoice && invoice.qr_code_svg" x-transition>
+                    <img
+                        :src="invoice.qr_code_svg"
+                        alt="Lightning Invoice QR"
+                        class="w-75 h-75 object-contain mx-auto shadow rounded-lg cursor-pointer"
+                        @click="copyInvoice"
+                    />
                 </div>
 
                 <!-- Invoice with copy button -->
-                <div class="flex items-center bg-gray-100 p-3 rounded mb-6">
+                <div class="flex items-center bg-gray-100 p-3 rounded-lg shadow-sm">
                     <div class="flex-1 overflow-hidden">
                         <p class="text-xs font-mono whitespace-nowrap overflow-hidden text-ellipsis" x-text="invoice.payment_request"></p>
                     </div>
                     <button
                         @click="copyInvoice"
-                        class="ml-2 bg-orange-400 text-white text-xs px-3 py-1 rounded hover:bg-orange-500"
+                        class="ml-3 bg-orange-400 text-white text-xs font-semibold px-4 py-1.5 rounded hover:bg-orange-500 transition cursor-pointer"
                     >
                         Copy
                     </button>
                 </div>
 
-                <div class="mb-4 text-sm text-gray-700">
-                    <p x-transition x-text="`Invoice Memo: ${invoice.memo}`"></p>
+                <!-- Zap Memo -->
+                <div class="text-xs text-gray-500" x-show="invoice.memo">
+                    <p x-transition x-text="`Memo: ${invoice.memo}`"></p>
                 </div>
 
-                <button
-                    @click="show = false"
-                    class="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-500"
-                >
-                    Close
-                </button>
+                <!-- Extra Tip Option -->
+                <div class="text-xs text-gray-500 leading-relaxed">
+                    <p>
+                        Or if you prefer, you can
+                        <a href="https://getalby.com/p/chemaclass" target="_blank" class="text-orange-400 hover:underline">
+                            create a custom invoice yourself
+                        </a>
+                    </p>
+                </div>
+
+                <!-- Close Button -->
+                <div class="pt-2">
+                    <button
+                        @click="show = false"
+                        class="w-full bg-orange-400 text-white px-4 py-2 rounded-md hover:bg-orange-500 transition cursor-pointer"
+                    >
+                        Close
+                    </button>
+                </div>
             </div>
         </div>
     </div>

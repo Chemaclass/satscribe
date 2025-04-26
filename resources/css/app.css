@@ -281,6 +281,10 @@ pre,
     vertical-align: middle;
 }
 
+button i[data-lucide] {
+    cursor: pointer;
+}
+
 /* Normalize Lucide icons inside buttons */
 button i[data-lucide] {
     vertical-align: middle;
