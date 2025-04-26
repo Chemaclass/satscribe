@@ -37,7 +37,8 @@ final readonly class IpRateLimiter
                 'lnInvoice' => $this->albyClient->addInvoice(
                     new InvoiceData(
                         amount: $this->lnInvoiceAmountInSats,
-                        memo: 'Tip to unlock more Satscribe requests',
+                        // another idea: Support Satscribe and unlock more requests
+                        memo: 'Zap to keep Satscribe flowing ⚡️',
                         expiry: $this->lnInvoiceExpirySeconds,
                     )
                 ),

@@ -92,7 +92,7 @@
                 <div class="pt-2">
                     <button
                         @click="show = false"
-                        class="w-full bg-orange-400 text-white px-4 py-2 rounded-md hover:bg-orange-500 transition cursor-pointer"
+                        class="w-full bg-gray-400 text-white px-4 py-2 rounded-md hover:bg-orange-400 transition cursor-pointer"
                     >
                         Close
                     </button>
