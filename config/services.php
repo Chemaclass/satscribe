@@ -49,6 +49,6 @@ return [
     'rate_limit' => [
         'max_attempts' => env('RATE_LIMIT_MAX_ATTEMPTS', 20),
         'invoice_amount' => env('RATE_LIMIT_INVOICE_AMOUNT', 1000),
-        'invoice_expiry' => env('RATE_LIMIT_EXPIRY_SECONDS', 300)
+        'invoice_expiry' => env('RATE_LIMIT_INVOICE_EXPIRY_SECONDS', 300)
     ],
 ];
