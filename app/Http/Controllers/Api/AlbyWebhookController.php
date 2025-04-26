@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Api;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\RateLimiter;
 use Svix\Webhook;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
@@ -16,10 +17,11 @@ final class AlbyWebhookController
         $payload = $this->verifySignature($request);
 
         if ($payload === []) {
-            // todo: inject logger
             Log::warning('Invalid Alby webhook signature');
             return response()->json(['error' => 'Invalid signature'], 401);
         }
+
+        Log::info('Webhook payload', ['payload' => $payload]);
 
         if (($payload['type'] ?? '') === 'incoming' && ($payload['state'] ?? '') === 'SETTLED') {
             $this->handleInvoiceSettled($payload);
@@ -32,7 +34,7 @@ final class AlbyWebhookController
 
     private function verifySignature(Request $request): array
     {
-        // todo: inject config
+        // todo: inject config later
         $webhookSecret = config('services.alby.webhook_secret');
 
         if (empty($webhookSecret)) {
@@ -60,6 +62,37 @@ final class AlbyWebhookController
 
     private function handleInvoiceSettled(array $payload): void
     {
-       // todo: not implemented yet...
+        $invoiceHash = $payload['payment_hash'] ?? null;
+        $memo = $payload['memo'] ?? '';
+        Log::info('Invoice settled', ['$memo' => $memo]);
+
+        if (str_contains($memo, '#')) {
+            $shortHash = $this->extractShortHash($memo);
+            if ($shortHash) {
+                $ip = cache()->pull('invoice_ip_mapping_' . $shortHash); // pull = get + delete
+
+                if ($ip) {
+                    $key = 'ip_rate_limit_' . $ip;
+                    RateLimiter::clear($key);
+                    Log::info('Rate limit cleared for IP', ['ip' => $ip]);
+                } else {
+                    Log::warning('No IP found for hash', ['shortHash' => $shortHash]);
+                }
+            }
+        }
+
+        Log::info('Invoice settled', [
+            'payment_hash' => $invoiceHash,
+            'amount' => $payload['amount'] ?? 0,
+        ]);
+    }
+
+    private function extractShortHash(string $memo): ?string
+    {
+        if (preg_match('/#([a-f0-9]{8})/', $memo, $matches)) {
+            return $matches[1];
+        }
+
+        return null;
     }
 }

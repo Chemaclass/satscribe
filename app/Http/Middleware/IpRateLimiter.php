@@ -24,11 +24,13 @@ final readonly class IpRateLimiter
     public function handle(Request $request, Closure $next): Response
     {
         $ip = $request->ip();
-        $key = 'ip_rate_limit_'.$ip;
+        $key = 'ip_rate_limit_' . $ip;
+        $shortHash = substr(md5($key), 0, 8);
+
+        $memo = sprintf('Zap to keep Satscribe flowing ⚡️ #%s', $shortHash);
+        cache()->put('invoice_ip_mapping_' . $shortHash, $ip, now()->addHours(1));
 
         if (RateLimiter::tooManyAttempts($key, $this->maxAttempts)) {
-            RateLimiter::clear($key);
-
             return response()->json([
                 'status' => 'rate_limited',
                 'key' => $key,
@@ -37,8 +39,7 @@ final readonly class IpRateLimiter
                 'lnInvoice' => $this->albyClient->addInvoice(
                     new InvoiceData(
                         amount: $this->lnInvoiceAmountInSats,
-                        // another idea: Support Satscribe and unlock more requests
-                        memo: 'Zap to keep Satscribe flowing ⚡️',
+                        memo: $memo,
                         expiry: $this->lnInvoiceExpirySeconds,
                     )
                 ),
@@ -48,5 +49,12 @@ final readonly class IpRateLimiter
         RateLimiter::hit($key, 60 * 60); // Reset after 1 hour
 
         return $next($request);
+    }
+
+    private function generateRateLimitMemo(string $ip): string
+    {
+        $hash = substr(md5('ip_rate_limit_'.$ip), 0, 8);
+
+        return sprintf('Zap to keep Satscribe flowing ⚡️ #%s', $hash);
     }
 }
