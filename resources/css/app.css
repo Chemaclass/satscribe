@@ -292,6 +292,22 @@ button i[data-lucide] {
     color: currentColor;
 }
 
+/* Add to your existing CSS */
+.backdrop-blur-sm {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+/* Ensure the modal is always on top */
+.z-50 {
+    z-index: 50;
+}
+
+/* Hide scrolling on the body when modal is open */
+body.modal-open {
+    overflow: hidden;
+}
+
 .category-badge {
     padding: 0.1rem 0.5rem;
     font-size: 0.75rem;

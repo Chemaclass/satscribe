@@ -1,103 +1,179 @@
 <div
-    x-data="{
-        show: false,
-        invoice: {},
-        maxAttempts: 0,
-        showToast: false,
-        copyInvoice() {
-            navigator.clipboard.writeText(this.invoice.payment_request).then(() => {
-                this.showToast = true;
-                setTimeout(() => this.showToast = false, 2000);
-            });
-        }
-    }"
+    x-data="invoiceModal()"
+    x-init="init()"
     x-show="show"
-    x-on:rate-limit-reached.window="
-        show = true;
-        invoice = $event.detail.invoice;
-        maxAttempts = $event.detail.maxAttempts;
-    "
-    class="fixed inset-0 z-50 overflow-y-auto"
+    class="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm"
     style="display: none;"
+    x-cloak
 >
-    <div class="flex items-center justify-center min-h-screen px-4">
-        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+    <!-- Modal Content -->
+    <div
+        class="relative w-full max-w-md p-8 rounded-2xl shadow-2xl bg-gray-800 dark:bg-gray-900 border border-gray-700"
+        @click.away="closeModal"
+        x-transition:enter="transition ease-out duration-300 transform"
+        x-transition:enter-start="opacity-0 scale-95"
+        x-transition:enter-end="opacity-100 scale-100"
+        x-transition:leave="transition ease-in duration-200 transform"
+        x-transition:leave-start="opacity-100 scale-100"
+        x-transition:leave-end="opacity-0 scale-95"
+    >
 
-        <div class="relative bg-white rounded-xl p-8 max-w-md w-full shadow-lg">
-            <!-- Toast Notification -->
-            <div
-                x-show="showToast"
-                x-transition:enter="transition ease-out duration-300"
-                x-transition:enter-start="opacity-0 translate-y-2"
-                x-transition:enter-end="opacity-100 translate-y-0"
-                x-transition:leave="transition ease-in duration-200"
-                x-transition:leave-start="opacity-100 translate-y-0"
-                x-transition:leave-end="opacity-0 translate-y-2"
-                class="fixed top-6 right-6 bg-orange-300 text-white text-sm px-4 py-2 rounded shadow-md"
-                style="display: none;"
-            >
-                Invoice Copied!
+        <!-- Toast Notification -->
+        <div
+            x-show="showToast"
+            x-transition
+            class="fixed top-6 right-6 bg-orange-400 text-white text-sm px-4 py-2 rounded shadow-lg z-50"
+            style="display: none;"
+        >
+            Invoice Copied!
+        </div>
+
+        <!-- Main content -->
+        <div class="text-center space-y-6">
+            <!-- Title -->
+            <h3 class="text-3xl font-bold text-white mb-2" x-text="`You’ve used ${maxAttempts} free requests`"></h3>
+
+            <!-- Subtitle -->
+            <p class="text-sm text-gray-400" x-text="`Consider tipping ${invoice.amount} sats to support development!`"></p>
+
+            <!-- QR Code -->
+            <div x-show="invoice?.qr_code_svg" x-transition class="flex justify-center">
+                <img
+                    :src="invoice.qr_code_svg"
+                    alt="Lightning Invoice QR"
+                    class="w-64 h-64 object-contain rounded-lg shadow-lg bg-white p-2 ring-1 ring-gray-300 cursor-pointer"
+                    @click="copyInvoice"
+                />
             </div>
 
-            <div class="text-center space-y-6">
-                <div>
-                    <h3 class="text-2xl font-bold text-gray-800 mb-2">
-                        <span x-transition x-text="`You’ve used ${maxAttempts} free requests`"></span>
-                    </h3>
-
-                    <div class="text-sm text-gray-700 leading-relaxed">
-                        <p x-transition class="mt-2" x-text="`Consider tipping ${invoice.amount} sats to support its development!`"></p>
-                    </div>
+            <!-- Invoice with Copy Button -->
+            <div class="flex items-center bg-gray-700 p-3 rounded-lg shadow-inner">
+                <div class="flex-1 overflow-hidden">
+                    <p class="text-xs font-mono text-gray-300 whitespace-nowrap overflow-hidden text-ellipsis" x-text="invoice.payment_request"></p>
                 </div>
+                <button
+                    @click="copyInvoice"
+                    class="ml-3 bg-orange-500 hover:bg-orange-600 text-white text-xs font-semibold px-4 py-1.5 rounded transition"
+                >
+                    Copy
+                </button>
+            </div>
 
-                <!-- QR Code -->
-                <div x-show="invoice && invoice.qr_code_svg" x-transition>
-                    <img
-                        :src="invoice.qr_code_svg"
-                        alt="Lightning Invoice QR"
-                        class="w-75 h-75 object-contain mx-auto shadow rounded-lg cursor-pointer"
-                        @click="copyInvoice"
-                    />
-                </div>
+            <!-- Memo -->
+            <div class="text-xs text-gray-500 mt-2" x-show="invoice.memo">
+                <p x-text="`Memo: ${invoice.memo}`"></p>
+            </div>
 
-                <!-- Invoice with copy button -->
-                <div class="flex items-center bg-gray-100 p-3 rounded-lg shadow-sm">
-                    <div class="flex-1 overflow-hidden">
-                        <p class="text-xs font-mono whitespace-nowrap overflow-hidden text-ellipsis" x-text="invoice.payment_request"></p>
-                    </div>
-                    <button
-                        @click="copyInvoice"
-                        class="ml-3 bg-orange-400 text-white text-xs font-semibold px-4 py-1.5 rounded hover:bg-orange-500 transition cursor-pointer"
-                    >
-                        Copy
-                    </button>
-                </div>
-
-                <!-- Zap Memo -->
-                <div class="text-xs text-gray-500" x-show="invoice.memo">
-                    <p x-transition x-text="`Memo: ${invoice.memo}`"></p>
-                </div>
-
-                <!-- Extra Tip Option -->
-                <div class="text-xs text-gray-500 leading-relaxed">
-                    <p>
-                        Or if you prefer, you can
-                        <a href="https://getalby.com/p/chemaclass" target="_blank" class="text-orange-400 hover:underline">
-                            create a custom invoice yourself
-                        </a>
-                    </p>
-                </div>
-
-                <!-- Close Button -->
-                <div class="pt-2">
-                    <button
-                        @click="show = false"
-                        class="w-full bg-gray-400 text-white px-4 py-2 rounded-md hover:bg-orange-400 transition cursor-pointer"
-                    >
-                        Close
-                    </button>
-                </div>
+            <!-- Close Button -->
+            <div class="pt-4">
+                <button
+                    @click="closeModal"
+                    class="w-full bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded-md transition font-semibold"
+                >
+                    Close
+                </button>
             </div>
         </div>
     </div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<script>
+    function invoiceModal() {
+        return {
+            show: false,
+            invoice: {},
+            maxAttempts: 0,
+            showToast: false,
+            controller: null,
+            interval: null,
+            attempts: 0,
+            maxPollAttempts: 180,
+
+            init() {
+                window.addEventListener('rate-limit-reached', (event) => {
+                    this.show = true;
+                    this.invoice = event.detail.invoice;
+                    this.maxAttempts = event.detail.maxAttempts;
+                    document.body.classList.add('modal-open');
+                    this.startPolling(this.invoice.identifier);
+                });
+
+                window.addEventListener('invoice-paid', () => {
+                    this.stopPolling();
+                    this.show = false;
+                    document.body.classList.remove('modal-open');
+                });
+
+                window.addEventListener('paywall-modal-closed', () => {
+                    this.stopPolling();
+                    document.body.classList.remove('modal-open');
+                });
+            },
+
+            copyInvoice() {
+                navigator.clipboard.writeText(this.invoice.payment_request).then(() => {
+                    this.showToast = true;
+                    setTimeout(() => this.showToast = false, 2000);
+                });
+            },
+
+            closeModal() {
+                this.show = false;
+                window.dispatchEvent(new CustomEvent('paywall-modal-closed'));
+            },
+
+            async startPolling(identifier) {
+                this.stopPolling();
+
+                this.controller = new AbortController();
+                this.attempts = 0;
+
+                this.interval = setInterval(async () => {
+                    if (!this.show) {
+                        this.stopPolling();
+                        return;
+                    }
+
+                    if (this.attempts >= this.maxPollAttempts) {
+                        console.log('Polling timed out.');
+                        this.stopPolling();
+                        return;
+                    }
+
+                    this.attempts++;
+
+                    try {
+                        const response = await fetch(`/api/invoice/${identifier}/status`, {
+                            signal: this.controller.signal,
+                        });
+                        const data = await response.json();
+
+                        if (data.paid) {
+                            this.stopPolling();
+                            confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+                            setTimeout(() => {
+                                window.dispatchEvent(new CustomEvent('invoice-paid'));
+                            }, 1500);
+                        }
+                    } catch (error) {
+                        if (error.name !== 'AbortError') {
+                            console.error('Polling error:', error);
+                        }
+                        this.stopPolling();
+                    }
+                }, 1500);
+            },
+
+            stopPolling() {
+                if (this.interval) {
+                    clearInterval(this.interval);
+                    this.interval = null;
+                }
+                if (this.controller) {
+                    this.controller.abort();
+                    this.controller = null;
+                }
+            },
+        };
+    }
+</script>

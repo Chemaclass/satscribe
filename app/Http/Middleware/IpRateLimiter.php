@@ -7,6 +7,7 @@ namespace App\Http\Middleware;
 use App\Data\InvoiceData;
 use App\Services\Alby\AlbyClientInterface;
 use Closure;
+use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Symfony\Component\HttpFoundation\Response;
@@ -15,6 +16,7 @@ final readonly class IpRateLimiter
 {
     public function __construct(
         private AlbyClientInterface $albyClient,
+        private CacheRepository $cache,
         private int $maxAttempts,
         private int $lnInvoiceAmountInSats,
         private int $lnInvoiceExpirySeconds,
@@ -25,10 +27,12 @@ final readonly class IpRateLimiter
     {
         $ip = $request->ip();
         $key = 'ip_rate_limit_'.$ip;
+        $shortHash = substr(md5($key), 0, 8);
+        $memo = sprintf('Zap to keep Satscribe flowing ⚡️ #%s', $shortHash);
+
+        $this->cache->put('invoice_ip_mapping_'.$shortHash, $ip, now()->addHours(1));
 
         if (RateLimiter::tooManyAttempts($key, $this->maxAttempts)) {
-            RateLimiter::clear($key);
-
             return response()->json([
                 'status' => 'rate_limited',
                 'key' => $key,
@@ -37,8 +41,7 @@ final readonly class IpRateLimiter
                 'lnInvoice' => $this->albyClient->addInvoice(
                     new InvoiceData(
                         amount: $this->lnInvoiceAmountInSats,
-                        // another idea: Support Satscribe and unlock more requests
-                        memo: 'Zap to keep Satscribe flowing ⚡️',
+                        memo: $memo,
                         expiry: $this->lnInvoiceExpirySeconds,
                     )
                 ),

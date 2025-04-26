@@ -43,6 +43,7 @@ return [
 
     'alby' => [
         'api_key' => env('ALBY_API_KEY'),
+        'webhook_secret' => env('ALBY_WEBHOOK_SECRET'),
     ],
 
     'rate_limit' => [
