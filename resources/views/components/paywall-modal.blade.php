@@ -101,3 +101,59 @@
         </div>
     </div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<script>
+function checkInvoiceStatus(identifier) {
+    let attempts = 0;
+    const maxAttempts = 180; // 3 minutes max
+
+    let checkInterval = setInterval(async () => {
+        if (attempts >= maxAttempts) {
+            clearInterval(checkInterval);
+            console.log('Payment check timed out');
+            return;
+        }
+
+        attempts++;
+
+        try {
+            const response = await fetch(`/api/invoice/${identifier}/status`);
+            const data = await response.json();
+
+            if (data.paid) {
+                clearInterval(checkInterval);
+
+                confetti({
+                    particleCount: 100,
+                    spread: 70,
+                    origin: { y: 0.6 }
+                });
+
+                setTimeout(() => {
+                    // Assuming you're using Alpine.js for the modal
+                    Alpine.store('paywall').show = false;
+                }, 1500);
+            }
+        } catch (error) {
+            console.error('Error checking invoice status:', error);
+            clearInterval(checkInterval);
+        }
+    }, 1000); // Check every second
+
+    // Store the interval ID to clear it when the modal is closed
+    window.currentCheckInterval = checkInterval;
+}
+
+// Add this to your modal's x-init or where you display the invoice
+document.addEventListener('invoice-created', (event) => {
+    const identifier = event.detail.identifier;
+    checkInvoiceStatus(identifier);
+});
+
+// Clean up interval when modal is closed
+document.addEventListener('paywall-modal-closed', () => {
+    if (window.currentCheckInterval) {
+        clearInterval(window.currentCheckInterval);
+    }
+});
+</script>

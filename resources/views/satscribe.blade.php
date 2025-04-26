@@ -109,6 +109,12 @@ function searchInputValidator(initial = '') {
                         }
                     }));
 
+                    document.dispatchEvent(new CustomEvent('invoice-created', {
+                        detail: {
+                            identifier: data.lnInvoice.identifier,
+                        }
+                    }));
+
                     return;
                 }
 
