@@ -2,7 +2,14 @@
 <div
     x-data="{
         show: false,
-        invoice: null
+        invoice: null,
+        showToast: false,
+        copyInvoice() {
+            navigator.clipboard.writeText(this.invoice.payment_request).then(() => {
+                this.showToast = true;
+                setTimeout(() => this.showToast = false, 2000);
+            });
+        }
     }"
     x-show="show"
     x-on:rate-limit-reached.window="
@@ -16,23 +23,41 @@
         <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
 
         <div class="relative bg-white rounded-lg p-8 max-w-md w-full">
+            <!-- Toast Notification -->
+            <div
+                x-show="showToast"
+                x-transition
+                class="fixed top-6 right-6 bg-orange-400 text-white text-sm px-4 py-2 rounded shadow-md"
+                style="display: none;"
+            >
+                Invoice Copied!
+            </div>
+
             <div class="text-center">
                 <h3 class="text-xl font-semibold mb-4">Rate Limit Reached</h3>
                 <p class="mb-4">You've reached the limit of 5 requests per hour. Support our service by tipping some sats!</p>
 
-                <!-- Correctly render the Lightning Invoice -->
-                <div class="bg-gray-100 p-4 rounded mb-4">
-                    <template x-if="invoice && invoice.payment_request">
-                        <p class="text-sm font-mono break-all" x-text="invoice.payment_request"></p>
-                    </template>
-                    <template x-if="!invoice">
-                        <p class="text-sm text-gray-500">Loading invoice...</p>
-                    </template>
+                <!-- QR Code -->
+                <div class="flex justify-center mb-6" x-show="invoice && invoice.qr_code_svg">
+                    <img :src="invoice.qr_code_svg" alt="Lightning Invoice QR" class="w-70 h-70 object-contain" />
+                </div>
+
+                <!-- Invoice with copy button -->
+                <div class="flex items-center bg-gray-100 p-3 rounded mb-6">
+                    <div class="flex-1 overflow-hidden">
+                        <p class="text-xs font-mono whitespace-nowrap overflow-hidden text-ellipsis" x-text="invoice.payment_request"></p>
+                    </div>
+                    <button
+                        @click="copyInvoice"
+                        class="ml-2 bg-orange-400 text-white text-xs px-3 py-1 rounded hover:bg-orange-500"
+                    >
+                        Copy
+                    </button>
                 </div>
 
                 <button
                     @click="show = false"
-                    class="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600"
+                    class="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-500"
                 >
                     Close
                 </button>
