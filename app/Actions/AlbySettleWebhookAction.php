@@ -4,21 +4,22 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
+use Throwable;
 use App\Exceptions\InvalidAlbyWebhookSignatureException;
 use Illuminate\Cache\RateLimiter;
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Psr\Log\LoggerInterface;
 use Svix\Webhook;
 
-final class AlbySettleWebhookAction
+final readonly class AlbySettleWebhookAction
 {
     private Webhook $webhook;
 
     public function __construct(
-        private readonly string $webhookSecret,
-        private readonly CacheRepository $cache,
-        private readonly RateLimiter $rateLimiter,
-        private readonly LoggerInterface $logger,
+        private string $webhookSecret,
+        private CacheRepository $cache,
+        private RateLimiter $rateLimiter,
+        private LoggerInterface $logger,
     ) {
         $this->webhook = new Webhook($this->webhookSecret);
     }
@@ -51,7 +52,7 @@ final class AlbySettleWebhookAction
         string $svixTimestamp,
         string $svixSignature,
     ): array {
-        if (empty($this->webhookSecret)) {
+        if ($this->webhookSecret === '' || $this->webhookSecret === '0') {
             $this->logger->warning('Webhook secret not configured');
             throw new InvalidAlbyWebhookSignatureException();
         }
@@ -65,7 +66,7 @@ final class AlbySettleWebhookAction
 
             $this->logger->info('Webhook successfully verified');
             return json_decode($payload, true, flags: JSON_THROW_ON_ERROR);
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             $this->logger->warning('Webhook verification failed', ['error' => $e->getMessage()]);
             throw new InvalidAlbyWebhookSignatureException();
         }
