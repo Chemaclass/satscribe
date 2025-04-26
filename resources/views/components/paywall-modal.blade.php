@@ -19,6 +19,9 @@
     "
     class="fixed inset-0 z-50 overflow-y-auto"
     style="display: none;"
+    x-on:invoice-paid.window="
+        show = false;
+    "
 >
     <div class="flex items-center justify-center min-h-screen px-4">
         <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
@@ -130,8 +133,7 @@ function checkInvoiceStatus(identifier) {
                 });
 
                 setTimeout(() => {
-                    // Assuming you're using Alpine.js for the modal
-                    Alpine.store('paywall').show = false;
+                    window.dispatchEvent(new CustomEvent('invoice-paid'));
                 }, 1500);
             }
         } catch (error) {
