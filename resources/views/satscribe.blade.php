@@ -101,9 +101,11 @@ function searchInputValidator(initial = '') {
                 });
 
                 if (data.status === 'rate_limited') {
+                    console.log(data);
                     window.dispatchEvent(new CustomEvent('rate-limit-reached', {
                         detail: {
-                            invoice: data.lnInvoice ?? {}
+                            invoice: data.lnInvoice ?? {},
+                            maxAttempts: data.maxAttempts ?? 1
                         }
                     }));
 
