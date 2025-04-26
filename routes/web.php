@@ -2,15 +2,17 @@
 
 use App\Http\Controllers\FaqController;
 use App\Http\Controllers\HistoryController;
-use App\Http\Controllers\SatscribeController;
+use App\Http\Controllers\HomeController;
 use App\Http\Middleware\IpRateLimiter;
 use Illuminate\Support\Facades\Route;
 
-Route::redirect('/generate', '/');
+Route::redirect('generate', '/');
 Route::redirect('describe', '/');
 
-Route::get('/', [SatscribeController::class, 'index'])->name('home');
-Route::post('/submit', [SatscribeController::class, 'submit'])->name('submit')->middleware(IpRateLimiter::class);
-Route::get('/history', [HistoryController::class, 'index'])->name('history');
-Route::get('/history/{id}/raw', [HistoryController::class, 'getRaw'])->name('history.get-raw');
-Route::get('/faq', [FaqController::class, 'index'])->name('faq');
+Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::post('submit', [HomeController::class, 'submit'])->name('submit')->middleware(IpRateLimiter::class);
+
+Route::get('history', [HistoryController::class, 'index'])->name('history');
+Route::get('history/{id}/raw', [HistoryController::class, 'getRaw'])->name('history.get-raw');
+
+Route::get('faq', [FaqController::class, 'index'])->name('faq');

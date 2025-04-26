@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
-final readonly class SatscribeController
+final readonly class HomeController
 {
     public function __construct(
         private BlockHeightProvider $heightProvider,
