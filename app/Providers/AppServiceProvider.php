@@ -33,7 +33,7 @@ final class AppServiceProvider extends ServiceProvider
         $this->app
             ->when(SatscribeAction::class)
             ->needs('$maxOpenAIAttempts')
-            ->giveConfig('app.max_open_ai_attempts');
+            ->giveConfig('services.openai.max_attempts');
 
         $this->app
             ->when(OpenAIService::class)
@@ -53,17 +53,17 @@ final class AppServiceProvider extends ServiceProvider
         $this->app
             ->when(IpRateLimiter::class)
             ->needs('$maxAttempts')
-            ->giveConfig('app.max_ip_rate_limit_attempts');
+            ->giveConfig('services.rate_limit.max_attempts');
 
         $this->app
             ->when(IpRateLimiter::class)
             ->needs('$lnInvoiceAmountInSats')
-            ->giveConfig('app.ln_invoice_amount_in_sats');
+            ->giveConfig('services.rate_limit.invoice_amount');
 
         $this->app
             ->when(IpRateLimiter::class)
             ->needs('$lnInvoiceExpirySeconds')
-            ->giveConfig('app.ln_invoice_expiry_seconds');
+            ->giveConfig('services.rate_limit.invoice_expiry');
 
         $this->app
             ->when(AlbyClient::class)

@@ -38,9 +38,16 @@ return [
     'openai' => [
         'key' => env('OPENAI_API_KEY'),
         'model' => env('OPENAI_MODEL', 'gpt-4'),
+        'max_attempts' => env('OPENAI_MAX_ATTEMPTS', 200),
     ],
 
     'alby' => [
         'api_key' => env('ALBY_API_KEY'),
-    ]
+    ],
+
+    'rate_limit' => [
+        'max_attempts' => env('RATE_LIMIT_MAX_ATTEMPTS', 20),
+        'invoice_amount' => env('RATE_LIMIT_INVOICE_AMOUNT', 1000),
+        'invoice_expiry' => env('RATE_LIMIT_EXPIRY_SECONDS', 300)
+    ],
 ];
