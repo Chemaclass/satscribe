@@ -60,7 +60,7 @@ final class MinerIdentifier
     public static function extractFromCoinbaseHex(string $scriptsig): string
     {
         // Convert hex to printable ASCII
-        $ascii = strtoupper(preg_replace('/[^[:print:]]/', '', hex2bin($scriptsig) ?: ''));
+        $ascii = strtoupper((string) preg_replace('/[^[:print:]]/', '', hex2bin($scriptsig) ?: ''));
 
         foreach (self::POOLS as $key => $label) {
             if (str_contains($ascii, strtoupper($key))) {

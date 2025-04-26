@@ -14,6 +14,7 @@ use App\Http\Requests\SatscribeIndexRequest;
 use App\Services\BlockHeightProvider;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 final readonly class SatscribeController
 {
@@ -22,47 +23,15 @@ final readonly class SatscribeController
     ) {
     }
 
-    public function index(SatscribeIndexRequest $request, SatscribeAction $action): View
+    public function index(): View
     {
-        if (!$request->isSubmitted()) {
-            return view('satscribe', [
-                'questionPlaceholder' => QuestionPlaceholder::rand(),
-                'maxBitcoinBlockHeight' => $this->heightProvider->getMaxPossibleBlockHeight(),
-            ]);
-        }
-
-        $search = $this->getPromptInput($request);
-        $persona = $this->getPromptPersona($request);
-        $question = $request->getQuestionInput();
-        $refresh = $request->isRefreshEnabled();
-
-        try {
-            $generatedPrompt = $action->execute($search, $persona, $refresh, $question);
-        } catch (BlockchainException|OpenAIError $e) {
-            Log::error('Failed to describe prompt result', [
-                'search' => $search->text,
-                'refresh' => $refresh,
-                'question' => $question,
-                'persona' => $persona->value,
-                'error' => $e->getMessage(),
-            ]);
-            return view('satscribe')
-                ->withErrors(['search' => $e->getMessage()]);
-        }
-
         return view('satscribe', [
-            'result' => $generatedPrompt->result,
-            'isFresh' => $generatedPrompt->isFresh,
-            'search' => $search->text,
-            'question' => $question,
-            'persona' => $persona->value,
-            'refreshed' => $refresh,
             'questionPlaceholder' => QuestionPlaceholder::rand(),
             'maxBitcoinBlockHeight' => $this->heightProvider->getMaxPossibleBlockHeight(),
         ]);
     }
 
-    public function submit(SatscribeIndexRequest $request, SatscribeAction $action)
+    public function submit(SatscribeIndexRequest $request, SatscribeAction $action): JsonResponse
     {
         $search = $this->getPromptInput($request);
         $persona = $this->getPromptPersona($request);

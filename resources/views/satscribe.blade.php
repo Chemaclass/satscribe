@@ -81,78 +81,78 @@
 @endsection
 
 @push('scripts')
-    <script>
-        function searchInputValidator(initial = '') {
-            return {
-                input: initial,
-                valid: false,
-                isHex64: false,
-                isBlockHeight: false,
-                isSubmitting: false,
+<script>
+function searchInputValidator(initial = '') {
+    return {
+        input: initial,
+        valid: false,
+        isHex64: false,
+        isBlockHeight: false,
+        isSubmitting: false,
 
-                async submitForm(form) {
-                    if (this.isSubmitting) return;
+        async submitForm(form) {
+            if (this.isSubmitting) return;
 
-                    document.getElementById('description-body-results')?.style.setProperty('display', 'none');
-                    this.isSubmitting = true;
+            document.getElementById('description-body-results')?.style.setProperty('display', 'none');
+            this.isSubmitting = true;
 
-                    try {
-                        const formData = new FormData(form);
-                        const response = await fetch(form.action, {
-                            method: 'POST',
-                            body: formData,
-                            headers: {
-                                'X-Requested-With': 'XMLHttpRequest',
-                                'Accept': 'application/json',
-                            }
-                        });
-
-                        const data = await response.json();
-
-                        if (!response.ok) {
-                            throw new Error(data.error || 'An error occurred while processing your request');
-                        }
-
-                        // Update results container
-                        const resultsContainer = document.getElementById('results-container');
-                        resultsContainer.innerHTML = data.html;
-
-                        // Refresh Lucide icons
-                        window.refreshLucideIcons?.();
-
-                        // Update URL without page reload
-                        const url = new URL(window.location);
-                        url.searchParams.set('search', formData.get('search'));
-                        window.history.pushState({}, '', url);
-
-                    } catch (error) {
-                        alert(error.message);
-                    } finally {
-                        this.isSubmitting = false;
+            try {
+                const formData = new FormData(form);
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json',
                     }
-                },
+                });
 
-                get helperText() {
-                    if (!this.input.trim()) return 'Enter a valid TXID (64 hex chars) or block height (number).';
-                    if (!this.valid) return 'Invalid format. Must be a TXID or block height.';
-                    if (this.isHex64) return 'Valid TXID (64 hex chars) found.';
-                    if (this.isBlockHeight) return 'Valid block height (number) found.';
-                    return '';
-                },
+                const data = await response.json();
 
-                get helperClass() {
-                    if (!this.input.trim()) return 'text-gray-600';
-                    return this.valid ? 'text-green-600 font-medium' : 'text-red-600';
-                },
-
-                validate() {
-                    const trimmed = this.input.trim();
-                    this.isHex64 = /^[a-fA-F0-9]{64}$/.test(trimmed);
-                    const height = parseInt(trimmed, 10);
-                    this.isBlockHeight = /^\d+$/.test(trimmed) && height <= {{ $maxBitcoinBlockHeight ?? 100_000_000 }};
-                    this.valid = this.isHex64 || this.isBlockHeight;
+                if (!response.ok) {
+                    throw new Error(data.error || 'An error occurred while processing your request');
                 }
-            };
+
+                // Update results container
+                const resultsContainer = document.getElementById('results-container');
+                resultsContainer.innerHTML = data.html;
+
+                // Refresh Lucide icons
+                window.refreshLucideIcons?.();
+
+                // Update URL without page reload
+                const url = new URL(window.location);
+                url.searchParams.set('search', formData.get('search'));
+                window.history.pushState({}, '', url);
+
+            } catch (error) {
+                alert(error.message);
+            } finally {
+                this.isSubmitting = false;
+            }
+        },
+
+        get helperText() {
+            if (!this.input.trim()) return 'Enter a valid TXID (64 hex chars) or block height (number).';
+            if (!this.valid) return 'Invalid format. Must be a TXID or block height.';
+            if (this.isHex64) return 'Valid TXID (64 hex chars) found.';
+            if (this.isBlockHeight) return 'Valid block height (number) found.';
+            return '';
+        },
+
+        get helperClass() {
+            if (!this.input.trim()) return 'text-gray-600';
+            return this.valid ? 'text-green-600 font-medium' : 'text-red-600';
+        },
+
+        validate() {
+            const trimmed = this.input.trim();
+            this.isHex64 = /^[a-fA-F0-9]{64}$/.test(trimmed);
+            const height = parseInt(trimmed, 10);
+            this.isBlockHeight = /^\d+$/.test(trimmed) && height <= {{ $maxBitcoinBlockHeight ?? 100_000_000 }};
+            this.valid = this.isHex64 || this.isBlockHeight;
         }
-    </script>
+    };
+}
+</script>
 @endpush

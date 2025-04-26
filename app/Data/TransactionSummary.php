@@ -38,7 +38,7 @@ final class TransactionSummary
         $hasOpReturn = $outputs->contains(fn($out) => $out['scriptpubkey_type'] === 'op_return');
         $hasMultiSig = $outputs->contains(fn($out) => $out['scriptpubkey_type'] === 'multisig');
 
-        $isTopFeePayer = $block !== null && collect($block->topTransactionsByFee)
+        $isTopFeePayer = $block instanceof BlockSummary && collect($block->topTransactionsByFee)
                 ->pluck('txid')->contains($tx->txid);
 
         $walletTypes = collect([...$inputs, ...$outputs])
