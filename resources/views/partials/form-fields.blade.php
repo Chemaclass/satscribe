@@ -74,7 +74,7 @@
     <div x-data="{ showAdvanced: false }" class="form-group mb-4">
         <button
             type="button"
-            class="text-sm font-medium text-orange-600 hover:text-orange-700 flex items-center gap-2 mt-4"
+            class="text-sm font-medium text-orange-600 hover:text-orange-700 flex items-center cursor-pointer gap-2 mt-4"
             @click="showAdvanced = !showAdvanced"
         >
             <i data-lucide="sliders-horizontal" class="text-orange-500"></i>
@@ -138,15 +138,15 @@
             </div>
 
             {{-- Refresh checkbox --}}
-            <div class="flex items-start gap-3">
+            <div class="flex items-start gap-3 ">
                 <input
                     type="checkbox"
                     id="refresh"
                     name="refresh"
                     value="true"
-                    class="checkbox-input mt-1 accent-orange-500 dark:accent-orange-400"
+                    class="checkbox-input mt-1 accent-orange-500 dark:accent-orange-400 cursor-pointer"
                 >
-                <label for="refresh" class="checkbox-label text-sm text-gray-800 dark:text-orange-200">
+                <label for="refresh" class="checkbox-label text-sm text-gray-800 dark:text-orange-200 cursor-pointer">
                     <strong class="text-orange-700 dark:text-orange-400">Fetch the latest data from the blockchain</strong><br>
                     <small class="checkbox-help text-gray-600 dark:text-gray-400">
                         (Skips cached descriptions and requests live data from the blockchain and OpenAI)

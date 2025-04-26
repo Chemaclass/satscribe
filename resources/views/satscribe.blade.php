@@ -45,7 +45,7 @@
         {{-- Loading State --}}
         <template x-if="isSubmitting">
             <section
-                class="description-body mt-6 w-full max-w-3xl mx-auto space-y-6"
+                class="description-body w-full max-w-3xl mx-auto space-y-6"
                 x-init="$nextTick(() => window.refreshLucideIcons?.())"
             >
                 <div class="section rounded p-4 shadow-sm">

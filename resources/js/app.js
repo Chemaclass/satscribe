@@ -172,6 +172,14 @@ async function loadRawData(entryId) {
     return await response.json();
 }
 
+document.addEventListener('click', function (event) {
+    if (event.target.matches('.load-more-btn')) {
+        const preBlock = event.target.previousElementSibling;
+        preBlock.classList.remove('max-h-[200px]', 'overflow-y-auto');
+        event.target.style.display = 'none'; // Hide the button
+    }
+});
+
 document.querySelectorAll('.toggle-history-raw-btn').forEach(button => {
     button.addEventListener('click', async () => {
         const targetId = button.dataset.target;
