@@ -53,16 +53,6 @@
                     <p x-text="`Memo: ${invoice.memo}`"></p>
                 </div>
 
-                <!-- Extra Tip Option -->
-                <div class="text-xs text-gray-500 leading-relaxed">
-                    <p>
-                        Or if you prefer, you can
-                        <a href="https://getalby.com/p/chemaclass" target="_blank" class="text-orange-400 hover:underline">
-                            create a custom invoice yourself
-                        </a>
-                    </p>
-                </div>
-
                 <!-- Close Button -->
                 <div class="pt-2">
                     <button
