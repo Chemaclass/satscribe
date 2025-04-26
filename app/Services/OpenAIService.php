@@ -77,11 +77,19 @@ PROMPT;
 
     private function defaultQuestionInstructions(PromptType $type): string
     {
-        return <<<TEXT
+        $prompt = <<<TEXT
 Use markdown formatting.
 A paragraph should not be larger than 80 words.
 If it's a historically important {$type->value}, mention it explicitly.
 TEXT;
+
+        if ($type === PromptType::Block) {
+            $prompt .= <<<PROMPT
+- If the block contains just one tx or something extraordinary occurs on it, say so.
+PROMPT;
+        }
+
+        return $prompt;
     }
 
     private function wrapPromptWithPersona(string $prompt, PromptPersona $persona): string
