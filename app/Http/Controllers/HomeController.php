@@ -25,7 +25,7 @@ final readonly class HomeController
 
     public function index(): View
     {
-        return view('satscribe', [
+        return view('home', [
             'questionPlaceholder' => QuestionPlaceholder::rand(),
             'maxBitcoinBlockHeight' => $this->heightProvider->getMaxPossibleBlockHeight(),
         ]);

@@ -118,7 +118,7 @@ function searchInputValidator(initial = '') {
                 }
 
                 const resultsContainer = document.getElementById('results-container');
-                resultsContainer.innerHTML = data.html || '';
+                resultsContainer.innerHTML = data.html || data.error || '';
 
                 window.refreshLucideIcons?.();
 

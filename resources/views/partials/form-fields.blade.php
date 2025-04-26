@@ -1,6 +1,6 @@
 <form
     method="POST"
-    action="{{ route('submit') }}"
+    action="{{ route('home.submit') }}"
     aria-labelledby="form-heading"
     data-turbo="false"
     @submit.prevent="submitForm($event.target)"
