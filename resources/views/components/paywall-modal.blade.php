@@ -41,7 +41,7 @@
                 <img
                     :src="invoice.qr_code_svg"
                     alt="Lightning Invoice QR"
-                    class="w-64 h-64 object-contain rounded-lg shadow-lg bg-white p-2 cursor-pointer"
+                    class="w-64 h-64 object-contain rounded-lg shadow-lg bg-white p-2 ring-1 ring-gray-300 cursor-pointer"
                     @click="copyInvoice"
                 />
             </div>
@@ -76,6 +76,7 @@
         </div>
     </div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 <script>
     function invoiceModal() {
         return {
