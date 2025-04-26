@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Data\BlockchainData;
+use App\Data\Blockchain\BlockchainData;
 use App\Data\PromptInput;
 use App\Enums\PromptPersona;
 use App\Enums\PromptType;

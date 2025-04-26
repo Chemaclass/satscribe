@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Data\Blockchain;
 
-use App\Data\BlockchainData;
+use App\Data\BlockchainDataInterface;
 
-final readonly class BlockData implements BlockchainData
+final readonly class BlockData implements BlockchainDataInterface
 {
     public function __construct(
         public string $hash,
@@ -24,6 +24,26 @@ final readonly class BlockData implements BlockchainData
         public float $difficulty,
         public array $transactions,
     ) {
+    }
+
+    public static function fromArray(array $data, array $transactions = []): self
+    {
+        return new self(
+            hash: $data['id'],
+            height: $data['height'],
+            version: $data['version'],
+            timestamp: $data['timestamp'],
+            txCount: $data['tx_count'],
+            size: $data['size'],
+            weight: $data['weight'],
+            merkleRoot: $data['merkle_root'],
+            previousBlockHash: $data['previousblockhash'] ?? null,
+            medianTime: $data['mediantime'],
+            nonce: $data['nonce'],
+            bits: $data['bits'],
+            difficulty: $data['difficulty'],
+            transactions: $transactions,
+        );
     }
 
     public function getType(): string

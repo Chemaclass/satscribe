@@ -63,7 +63,7 @@ final readonly class SatscribeAction
         $question = $this->userInputSanitizer->sanitize($question);
         $aiResponse = $this->openai->generateText($blockchainData, $input, $persona, $question);
 
-        return $this->repository->save($input, $aiResponse, $blockchainData, $persona, $question);
+        return $this->repository->save($input, $aiResponse, $blockchainData->current(), $persona, $question);
     }
 
     private function checkRateLimiter(): void

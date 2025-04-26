@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Data\Blockchain\BlockchainData;
 use App\Data\Blockchain\BlockData;
 use App\Data\Blockchain\TransactionData;
-use App\Data\BlockchainData;
 use App\Data\PromptInput;
 use App\Exceptions\BlockchainException;
 use Illuminate\Http\Client\Factory as HttpClient;
@@ -30,76 +30,103 @@ final readonly class BlockchainService
     public function getBlockchainData(PromptInput $input): BlockchainData
     {
         return $input->isBlock()
-            ? $this->getBlockData($input->text)
-            : $this->getTransactionData($input->text);
+            ? $this->buildBlockData($input->text)
+            : $this->buildTransactionData($input->text);
     }
 
-    private function getBlockData(string $input): BlockData
+    private function buildBlockData(string $input): BlockchainData
     {
         $hash = $this->getBlockHash($input);
 
-        $blockRes = $this->http->get(self::BASE_URL."/block/{$hash}");
-        $txsRes = $this->http->get(self::BASE_URL."/block/{$hash}/txs");
+        $block = $this->fetchBlock($hash);
+        $txs = $this->fetchBlockTransactions($hash);
 
-        if (!$blockRes->successful() || !$txsRes->successful()) {
-            $this->logger->warning('Block or transactions fetch failed: ', ['hash' => $hash]);
-            throw BlockchainException::blockOrTxFetchFailed($hash);
-        }
+        $previousBlock = $block['previousblockhash'] ?? null;
+        $previousBlockData = $previousBlock ? $this->fetchBlock($previousBlock) : null;
 
-        $block = $blockRes->json();
-        $txs = $txsRes->json();
+        $nextBlockHash = $this->fetchNextBlockHash($block);
+        $nextBlockData = $nextBlockHash ? $this->fetchBlock($nextBlockHash) : null;
 
-        $this->logger->info('Fetched block data', ['block' => $block]);
-        $this->logger->info('Fetched block transactions', ['transactions' => $txs]);
-
-        return new BlockData(
-            hash: $block['id'],
-            height: $block['height'],
-            version: $block['version'],
-            timestamp: $block['timestamp'],
-            txCount: $block['tx_count'],
-            size: $block['size'],
-            weight: $block['weight'],
-            merkleRoot: $block['merkle_root'],
-            previousBlockHash: $block['previousblockhash'],
-            medianTime: $block['mediantime'],
-            nonce: $block['nonce'],
-            bits: $block['bits'],
-            difficulty: $block['difficulty'],
-            transactions: $txs,
+        return BlockchainData::forBlock(
+            BlockData::fromArray($block, $txs),
+            $previousBlockData ? BlockData::fromArray($previousBlockData) : null,
+            $nextBlockData ? BlockData::fromArray($nextBlockData) : null,
         );
     }
 
-    private function getTransactionData(string $txid): TransactionData
+    private function buildTransactionData(string $txid): BlockchainData
     {
-        $txRes = $this->http->get(self::BASE_URL."/tx/{$txid}");
-        $statusRes = $this->http->get(self::BASE_URL."/tx/{$txid}/status");
+        $tx = $this->fetchTransaction($txid);
+        $status = $this->fetchTransactionStatus($txid);
 
-        if (!$txRes->successful() || !$statusRes->successful()) {
-            $this->logger->warning('Transaction lookup failed', ['txid' => $txid]);
-            throw BlockchainException::txLookupFailed($txid);
+        $blockData = null;
+        if (!empty($status['block_hash'])) {
+            $block = $this->fetchBlock($status['block_hash']);
+            $blockData = BlockData::fromArray($block);
         }
 
-        $tx = $txRes->json();
-        $status = $statusRes->json();
-
-        $this->logger->info('Fetched transaction data', ['transaction' => $tx]);
-        $this->logger->info('Fetched transaction status', ['status' => $status]);
-
-        return new TransactionData(
-            txid: $tx['txid'],
-            version: $tx['version'],
-            locktime: $tx['locktime'],
-            vin: $tx['vin'],
-            vout: $tx['vout'],
-            size: $tx['size'],
-            weight: $tx['weight'],
-            fee: $tx['fee'],
-            confirmed: $status['confirmed'],
-            blockHeight: $status['block_height'] ?? null,
-            blockHash: $status['block_hash'] ?? null,
-            blockTime: $status['block_time'] ?? null,
+        return BlockchainData::forTransaction(
+            new TransactionData(
+                txid: $tx['txid'],
+                version: $tx['version'],
+                locktime: $tx['locktime'],
+                vin: $tx['vin'],
+                vout: $tx['vout'],
+                size: $tx['size'],
+                weight: $tx['weight'],
+                fee: $tx['fee'],
+                confirmed: $status['confirmed'],
+                blockHeight: $status['block_height'] ?? null,
+                blockHash: $status['block_hash'] ?? null,
+                blockTime: $status['block_time'] ?? null,
+            ),
+            $blockData,
         );
+    }
+
+    private function fetchBlock(string $hash): array
+    {
+        $response = $this->http->get(self::BASE_URL."/block/{$hash}");
+        if (!$response->successful()) {
+            $this->logger->warning('Block fetch failed', ['hash' => $hash]);
+            throw BlockchainException::blockOrTxFetchFailed($hash);
+        }
+        return $response->json();
+    }
+
+    private function fetchBlockTransactions(string $hash): array
+    {
+        $response = $this->http->get(self::BASE_URL."/block/{$hash}/txs");
+        if (!$response->successful()) {
+            $this->logger->warning('Block transactions fetch failed', ['hash' => $hash]);
+            throw BlockchainException::blockOrTxFetchFailed($hash);
+        }
+        return $response->json();
+    }
+
+    private function fetchNextBlockHash(array $block): ?string
+    {
+        return $this->getBlockHash((string) ($block['height'] + 1));
+    }
+
+    private function fetchTransaction(string $txid): array
+    {
+        $response = $this->http->get(self::BASE_URL."/tx/{$txid}");
+        if (!$response->successful()) {
+            $this->logger->warning('Transaction fetch failed', ['txid' => $txid]);
+            throw BlockchainException::txLookupFailed($txid);
+        }
+        return $response->json();
+    }
+
+    private function fetchTransactionStatus(string $txid): array
+    {
+        $response = $this->http->get(self::BASE_URL."/tx/{$txid}/status");
+        if (!$response->successful()) {
+            $this->logger->warning('Transaction status fetch failed', ['txid' => $txid]);
+            throw BlockchainException::txLookupFailed($txid);
+        }
+        return $response->json();
     }
 
     private function getBlockHash(string $input): string
@@ -107,16 +134,11 @@ final readonly class BlockchainService
         if (!is_numeric($input)) {
             return $input;
         }
-
-        $hashRes = $this->http->get(self::BASE_URL."/block-height/{$input}");
-        if (!$hashRes->successful()) {
-            $this->logger->warning('Block height lookup failed', [
-                'height' => $input,
-                'response' => $hashRes->body(),
-            ]);
-            return $input;
+        $response = $this->http->get(self::BASE_URL."/block-height/{$input}");
+        if (!$response->successful()) {
+            $this->logger->warning('Block height lookup failed', ['height' => $input]);
+            throw BlockchainException::blockOrTxFetchFailed($input);
         }
-
-        return $hashRes->body();
+        return $response->body();
     }
 }

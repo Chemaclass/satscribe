@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Data\Blockchain;
 
-use App\Data\BlockchainData;
+use App\Data\BlockchainDataInterface;
 
-final readonly class TransactionData implements BlockchainData
+final readonly class TransactionData implements BlockchainDataInterface
 {
     public function __construct(
         public string $txid,

@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
-use App\Data\BlockchainData;
+use App\Data\BlockchainDataInterface;
 use App\Data\PromptInput;
 use App\Enums\PromptPersona;
 use App\Enums\PromptType;
@@ -34,7 +34,7 @@ final class SatscribeDescriptionRepository
     public function save(
         PromptInput $input,
         string $aiResponse,
-        BlockchainData $blockchainData,
+        BlockchainDataInterface $blockchainData,
         PromptPersona $persona,
         ?string $question = null
     ): SatscribeDescription {

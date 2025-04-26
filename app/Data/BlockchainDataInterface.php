@@ -2,7 +2,7 @@
 
 namespace App\Data;
 
-interface BlockchainData
+interface BlockchainDataInterface
 {
     public function getType(): string;
 
