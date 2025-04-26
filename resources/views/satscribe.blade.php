@@ -21,20 +21,8 @@
         <div class="flex flex-col sm:flex-row sm:justify-between items-start sm:items-start gap-6 max-w-5xl">
             {{-- Left: Form --}}
             <div class="w-full sm:w-2/3">
-                <form
-                    method="POST"
-                    action="{{ route('submit') }}"
-                    aria-labelledby="form-heading"
-                    @submit.prevent="submitForm($el)"
-                >
-                    @csrf
-                    <fieldset>
-                        <legend id="form-heading" class="sr-only">Describe Bitcoin Data</legend>
-                        @include('partials.form-fields')
-                    </fieldset>
-                </form>
+                @include('partials.form-fields')
             </div>
-
             {{-- Right: Bitcoin Icon --}}
             <div class="hidden sm:flex w-1/3 h-60 items-center justify-center select-none" aria-hidden="true">
                 <i data-lucide="bitcoin" class="w-[150px] h-[150px] animate-bounce-wave text-orange-500"
