@@ -10,7 +10,7 @@
         <h2 class="text-lg font-semibold mb-2 flex items-center gap-2">
             <i data-lucide="bot" class="w-6 h-6"></i>AI Summary
         </h2>
-        <div class=" text-gray-800 leading-relaxed">
+        <div class=" text-gray-800 dark:text-white leading-relaxed">
             {!! Str::markdown($result->ai_response) !!}
         </div>
     </div>
