@@ -56,6 +56,16 @@ final class AppServiceProvider extends ServiceProvider
             ->giveConfig('app.max_ip_rate_limit_attempts');
 
         $this->app
+            ->when(IpRateLimiter::class)
+            ->needs('$lnInvoiceAmountInSats')
+            ->giveConfig('app.ln_invoice_amount_in_sats');
+
+        $this->app
+            ->when(IpRateLimiter::class)
+            ->needs('$lnInvoiceExpirySeconds')
+            ->giveConfig('app.ln_invoice_expiry_seconds');
+
+        $this->app
             ->when(AlbyClient::class)
             ->needs('$accessToken')
             ->giveConfig('services.alby.api_key');

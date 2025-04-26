@@ -105,7 +105,7 @@ function searchInputValidator(initial = '') {
                     window.dispatchEvent(new CustomEvent('rate-limit-reached', {
                         detail: {
                             invoice: data.lnInvoice ?? {},
-                            maxAttempts: data.maxAttempts ?? 1
+                            maxAttempts: data.maxAttempts
                         }
                     }));
 

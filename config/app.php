@@ -126,6 +126,8 @@ return [
     'max_ip_rate_limit_attempts' => env('MAX_IP_RATE_LIMIT_ATTEMPTS', 20),
     'max_open_ai_attempts' => env('MAX_OPEN_AI_ATTEMPTS', 100),
     'cronitorClientKey' => env('CRONITOR_CLIENT_KEY'),
+    'ln_invoice_amount_in_sats' => env('LN_INVOICE_AMOUNT_IN_SATS', 1000),
+    'ln_invoice_expiry_seconds' => env('LN_INVOICE_EXPIRY_SECONDS', 300),
 
     'pagination.per_page' => env('PAGINATION_PER_PAGE', 5),
 ];

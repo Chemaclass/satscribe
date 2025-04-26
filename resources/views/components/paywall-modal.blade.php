@@ -3,7 +3,7 @@
     x-data="{
         show: false,
         invoice: {},
-        maxAttempts: null,
+        maxAttempts: 0,
         showToast: false,
         copyInvoice() {
             navigator.clipboard.writeText(this.invoice.payment_request).then(() => {
@@ -43,10 +43,10 @@
             <div class="text-center">
                 <h3 class="text-xl font-semibold mb-4">Rate Limit Reached</h3>
 
-                <p class="mb-4 text-sm text-gray-700"
-                   x-transition
-                   x-text="`You've reached the limit of ${maxAttempts} free requests per hour. If you find Satscribe helpful, consider tipping some sats to support its development!`">
-                </p>
+                <div class="mb-4 text-sm text-gray-700">
+                    <p x-transition x-text="`You've already done ${maxAttempts} free requests.`"></p>
+                    <p x-transition x-text="`If you find Satscribe helpful, consider tipping ${invoice.amount} sats to support its development!`"></p>
+                </div>
 
                 <!-- QR Code -->
                 <div
@@ -68,6 +68,10 @@
                     >
                         Copy
                     </button>
+                </div>
+
+                <div class="mb-4 text-sm text-gray-700">
+                    <p x-transition x-text="`Invoice Memo: ${invoice.memo}`"></p>
                 </div>
 
                 <button

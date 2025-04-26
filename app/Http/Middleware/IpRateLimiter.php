@@ -16,6 +16,8 @@ final readonly class IpRateLimiter
     public function __construct(
         private AlbyClientInterface $albyClient,
         private int $maxAttempts,
+        private int $lnInvoiceAmountInSats,
+        private int $lnInvoiceExpirySeconds,
     ) {
     }
 
@@ -34,9 +36,9 @@ final readonly class IpRateLimiter
                 'maxAttempts' => $this->maxAttempts,
                 'lnInvoice' => $this->albyClient->addInvoice(
                     new InvoiceData(
-                        amount: 1000,
+                        amount: $this->lnInvoiceAmountInSats,
                         memo: 'Tip to unlock more Satscribe requests',
-                        expiry: 60 * 5,
+                        expiry: $this->lnInvoiceExpirySeconds,
                     )
                 ),
             ], 429);
