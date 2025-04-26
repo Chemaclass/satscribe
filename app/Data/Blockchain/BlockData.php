@@ -2,7 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Data;
+namespace App\Data\Blockchain;
+
+use App\Data\BlockchainData;
 
 final readonly class BlockData implements BlockchainData
 {

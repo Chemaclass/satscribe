@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Data\Blockchain\BlockData;
+use App\Data\Blockchain\TransactionData;
 use App\Data\BlockchainData;
-use App\Data\BlockData;
 use App\Data\PromptInput;
-use App\Data\TransactionData;
 use App\Exceptions\BlockchainException;
 use Illuminate\Http\Client\Factory as HttpClient;
 use Psr\Log\LoggerInterface;

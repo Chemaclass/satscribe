@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Data;
+namespace App\Data\Blockchain;
 
 use App\Services\MinerIdentifier;
 use Illuminate\Support\Collection;
