@@ -26,7 +26,7 @@
     @endif
     @stack('head')
 </head>
-<body class="min-h-screen flex flex-col bg-white text-gray-900 dark:bg-gray-900 dark:text-white transition-colors duration-300">
+<body class="min-h-screen flex flex-col transition-colors duration-300">
 <header class="flex justify-between items-center px-4 py-3 border-gray-200 dark:border-gray-700">
     <a href="{{ url('/') }}" class="brand text-xl font-bold">Satscribe</a>
 
