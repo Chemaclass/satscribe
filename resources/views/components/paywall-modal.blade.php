@@ -16,12 +16,14 @@
         show = true;
         invoice = $event.detail.invoice;
         maxAttempts = $event.detail.maxAttempts;
+        window.isInvoiceModalOpen = true;
+    "
+    x-on:invoice-paid.window="
+        show = false;
+        window.isInvoiceModalOpen = false;
     "
     class="fixed inset-0 z-50 overflow-y-auto"
     style="display: none;"
-    x-on:invoice-paid.window="
-        show = false;
-    "
 >
     <div class="flex items-center justify-center min-h-screen px-4">
         <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
@@ -94,7 +96,11 @@
                 <!-- Close Button -->
                 <div class="pt-2">
                     <button
-                        @click="show = false"
+                        @click="
+        show = false;
+        window.isInvoiceModalOpen = false;
+        window.dispatchEvent(new CustomEvent('paywall-modal-closed'));
+    "
                         class="w-full bg-gray-400 text-white px-4 py-2 rounded-md hover:bg-orange-400 transition cursor-pointer"
                     >
                         Close
@@ -106,56 +112,81 @@
 </div>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 <script>
-function checkInvoiceStatus(identifier) {
-    let attempts = 0;
-    const maxAttempts = 180; // 3 minutes max
+    function checkInvoiceStatus(identifier) {
+        stopInvoiceChecking(); // 🛑 Stop previous check first
 
-    let checkInterval = setInterval(async () => {
-        if (attempts >= maxAttempts) {
-            clearInterval(checkInterval);
-            console.log('Payment check timed out');
-            return;
-        }
+        let attempts = 0;
+        const maxAttempts = 180;
 
-        attempts++;
+        const controller = new AbortController();
+        window.currentAbortController = controller;
+        window.currentCheckingIdentifier = identifier;
 
-        try {
-            const response = await fetch(`/api/invoice/${identifier}/status`);
-            const data = await response.json();
-
-            if (data.paid) {
-                clearInterval(checkInterval);
-
-                confetti({
-                    particleCount: 100,
-                    spread: 70,
-                    origin: { y: 0.6 }
-                });
-
-                setTimeout(() => {
-                    window.dispatchEvent(new CustomEvent('invoice-paid'));
-                }, 1500);
+        const checkInterval = setInterval(async () => {
+            if (!window.isInvoiceModalOpen) {
+                console.log('Modal closed, stop polling');
+                stopInvoiceChecking();
+                return;
             }
-        } catch (error) {
-            console.error('Error checking invoice status:', error);
-            clearInterval(checkInterval);
-        }
-    }, 1000); // Check every second
 
-    // Store the interval ID to clear it when the modal is closed
-    window.currentCheckInterval = checkInterval;
-}
+            if (attempts >= maxAttempts) {
+                stopInvoiceChecking();
+                console.log('Payment check timed out');
+                return;
+            }
 
-// Add this to your modal's x-init or where you display the invoice
-document.addEventListener('invoice-created', (event) => {
-    const identifier = event.detail.identifier;
-    checkInvoiceStatus(identifier);
-});
+            attempts++;
 
-// Clean up interval when modal is closed
-document.addEventListener('paywall-modal-closed', () => {
-    if (window.currentCheckInterval) {
-        clearInterval(window.currentCheckInterval);
+            try {
+                const response = await fetch(`/api/invoice/${identifier}/status`, {
+                    signal: controller.signal,
+                });
+                const data = await response.json();
+
+                if (data.paid) {
+                    stopInvoiceChecking();
+
+                    confetti({
+                        particleCount: 100,
+                        spread: 70,
+                        origin: { y: 0.6 }
+                    });
+
+                    setTimeout(() => {
+                        window.dispatchEvent(new CustomEvent('invoice-paid'));
+                    }, 1500);
+                }
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    console.log('Fetch aborted');
+                    return;
+                }
+                console.error('Error checking invoice status:', error);
+                stopInvoiceChecking();
+            }
+        }, 1500);
+
+        window.currentCheckInterval = checkInterval;
     }
-});
+
+    function stopInvoiceChecking() {
+        if (window.currentCheckInterval) {
+            clearInterval(window.currentCheckInterval);
+            window.currentCheckInterval = null;
+        }
+        if (window.currentAbortController) {
+            window.currentAbortController.abort();
+            window.currentAbortController = null;
+        }
+        window.currentCheckingIdentifier = null;
+    }
+
+    document.addEventListener('paywall-modal-closed', () => {
+        stopInvoiceChecking();
+    });
+
+    document.addEventListener('invoice-created', (event) => {
+        const identifier = event.detail.identifier;
+        checkInvoiceStatus(identifier);
+    });
 </script>
