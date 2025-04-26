@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Actions\SatscribeAction;
+use App\Http\Middleware\IpRateLimiter;
 use App\Services\OpenAIService;
 use App\Services\PriceService;
 use Illuminate\Pagination\Paginator;
@@ -42,6 +43,11 @@ final class AppServiceProvider extends ServiceProvider
             ->when(PriceService::class)
             ->needs('$enabled')
             ->giveConfig('features.btc_price');
+
+        $this->app
+            ->when(IpRateLimiter::class)
+            ->needs('$maxAttempts')
+            ->giveConfig('app.max_ip_rate_limit_attempts');;
     }
 
     /**

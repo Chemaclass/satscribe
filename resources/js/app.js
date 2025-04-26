@@ -206,3 +206,20 @@ document.querySelectorAll('.toggle-history-raw-btn').forEach(button => {
         toggleRawBlockVisibility(button, rawBlock, !isVisible);
     });
 });
+
+window.addEventListener('load', () => {
+    // Intercept fetch/axios responses
+    const originalFetch = window.fetch;
+    window.fetch = async (...args) => {
+        const response = await originalFetch(...args);
+
+        if (response.status === 429) {
+            const data = await response.json();
+            window.dispatchEvent(new CustomEvent('rate-limit-reached', {
+                detail: data
+            }));
+        }
+
+        return response;
+    };
+});

@@ -123,7 +123,8 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
-    'max_open_ai_attempts' => env('MAX_OPEN_AI_ATTEMPTS', 50),
+    'max_ip_rate_limit_attempts' => env('MAX_IP_RATE_LIMIT_ATTEMPTS', 20),
+    'max_open_ai_attempts' => env('MAX_OPEN_AI_ATTEMPTS', 100),
     'cronitorClientKey' => env('CRONITOR_CLIENT_KEY'),
 
     'pagination.per_page' => env('PAGINATION_PER_PAGE', 5),

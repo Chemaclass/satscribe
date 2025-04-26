@@ -66,6 +66,9 @@
         @endisset
     </div>
 </section>
+
+<x-paywall-modal />
+
 @endsection
 
 @push('scripts')
@@ -94,6 +97,12 @@ function searchInputValidator(initial = '') {
                         'Accept': 'application/json',
                     }
                 });
+
+                // Handle rate limit response
+                if (response.status === 429) {
+                    window.dispatchEvent(new CustomEvent('rate-limit-reached'));
+                    return;
+                }
 
                 const data = await response.json();
 
