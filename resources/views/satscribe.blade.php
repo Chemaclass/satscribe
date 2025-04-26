@@ -67,7 +67,7 @@
     </div>
 </section>
 
-<x-paywall-modal />
+<x-paywall-modal/>
 
 @endsection
 
@@ -89,41 +89,38 @@ function searchInputValidator(initial = '') {
 
             try {
                 const formData = new FormData(form);
-                const response = await fetch(form.action, {
-                    method: 'POST',
-                    body: formData,
+
+                const { data } = await axios.post(form.action, formData, {
                     headers: {
                         'X-Requested-With': 'XMLHttpRequest',
                         'Accept': 'application/json',
+                    },
+                    validateStatus: function (status) {
+                        return true; // Accept all HTTP status codes
                     }
                 });
 
-                // Handle rate limit response
-                if (response.status === 429) {
-                    window.dispatchEvent(new CustomEvent('rate-limit-reached'));
+                if (data.status === 'rate_limited') {
+                    window.dispatchEvent(new CustomEvent('rate-limit-reached', {
+                        detail: {
+                            invoice: data.lnInvoice ?? {}
+                        }
+                    }));
+
                     return;
                 }
 
-                const data = await response.json();
-
-                if (!response.ok) {
-                    throw new Error(data.error || 'An error occurred while processing your request');
-                }
-
-                // Update results container
                 const resultsContainer = document.getElementById('results-container');
-                resultsContainer.innerHTML = data.html;
+                resultsContainer.innerHTML = data.html || '';
 
-                // Refresh Lucide icons
                 window.refreshLucideIcons?.();
 
-                // Update URL without page reload
                 const url = new URL(window.location);
                 url.searchParams.set('search', formData.get('search'));
                 window.history.pushState({}, '', url);
 
             } catch (error) {
-                alert(error.message);
+                console.error('submitForm error:', error.message);
             } finally {
                 this.isSubmitting = false;
             }

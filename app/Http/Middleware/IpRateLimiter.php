@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware;
 
+use App\Data\InvoiceData;
+use App\Services\Alby\AlbyClientInterface;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
@@ -12,6 +14,7 @@ use Symfony\Component\HttpFoundation\Response;
 final readonly class IpRateLimiter
 {
     public function __construct(
+        private AlbyClientInterface $albyClient,
         private int $maxAttempts,
     ) {
     }
@@ -27,7 +30,14 @@ final readonly class IpRateLimiter
             return response()->json([
                 'status' => 'rate_limited',
                 'key' => $key,
-                'retry_after' => RateLimiter::availableIn($key),
+                'retryAfter' => RateLimiter::availableIn($key),
+                'lnInvoice' => $this->albyClient->addInvoice(
+                    new InvoiceData(
+                        amount: 1000,
+                        memo: 'Tip to unlock more Satscribe requests',
+                        expiry: 60 * 5,
+                    )
+                ),
             ], 429);
         }
 

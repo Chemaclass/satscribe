@@ -6,6 +6,8 @@ namespace App\Providers;
 
 use App\Actions\SatscribeAction;
 use App\Http\Middleware\IpRateLimiter;
+use App\Services\Alby\AlbyClient;
+use App\Services\Alby\AlbyClientInterface;
 use App\Services\OpenAIService;
 use App\Services\PriceService;
 use Illuminate\Pagination\Paginator;
@@ -14,6 +16,10 @@ use Illuminate\Support\ServiceProvider;
 
 final class AppServiceProvider extends ServiceProvider
 {
+    public $singletons = [
+        AlbyClientInterface::class => AlbyClient::class,
+    ];
+
     /**
      * Register any application services.
      */
@@ -47,7 +53,12 @@ final class AppServiceProvider extends ServiceProvider
         $this->app
             ->when(IpRateLimiter::class)
             ->needs('$maxAttempts')
-            ->giveConfig('app.max_ip_rate_limit_attempts');;
+            ->giveConfig('app.max_ip_rate_limit_attempts');
+
+        $this->app
+            ->when(AlbyClient::class)
+            ->needs('$accessToken')
+            ->giveConfig('services.alby.api_key');
     }
 
     /**

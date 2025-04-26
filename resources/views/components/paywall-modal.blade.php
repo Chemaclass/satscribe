@@ -1,8 +1,14 @@
 <!-- resources/views/components/paywall-modal.blade.php -->
 <div
-    x-data="{ show: false }"
+    x-data="{
+        show: false,
+        invoice: null
+    }"
     x-show="show"
-    x-on:rate-limit-reached.window="show = true"
+    x-on:rate-limit-reached.window="
+        show = true;
+        invoice = $event.detail.invoice;
+    "
     class="fixed inset-0 z-50 overflow-y-auto"
     style="display: none;"
 >
@@ -14,9 +20,14 @@
                 <h3 class="text-xl font-semibold mb-4">Rate Limit Reached</h3>
                 <p class="mb-4">You've reached the limit of 5 requests per hour. Support our service by tipping some sats!</p>
 
-                <!-- Add your Bitcoin address or Lightning Invoice here -->
+                <!-- Correctly render the Lightning Invoice -->
                 <div class="bg-gray-100 p-4 rounded mb-4">
-                    <p class="text-sm font-mono break-all">https://getalby.com/p/chemaclass</p>
+                    <template x-if="invoice && invoice.payment_request">
+                        <p class="text-sm font-mono break-all" x-text="invoice.payment_request"></p>
+                    </template>
+                    <template x-if="!invoice">
+                        <p class="text-sm text-gray-500">Loading invoice...</p>
+                    </template>
                 </div>
 
                 <button

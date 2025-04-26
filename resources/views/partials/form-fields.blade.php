@@ -2,7 +2,8 @@
     method="POST"
     action="{{ route('submit') }}"
     aria-labelledby="form-heading"
-    @submit.prevent="submitForm($el)"
+    data-turbo="false"
+    @submit.prevent="submitForm($event.target)"
 >
     @csrf
     <fieldset>
