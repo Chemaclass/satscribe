@@ -223,3 +223,18 @@ window.addEventListener('load', () => {
         return response;
     };
 });
+
+// Add this to your existing modal JavaScript
+document.addEventListener('alpine:init', () => {
+    Alpine.data('paywallModal', () => ({
+        init() {
+            this.$watch('show', (value) => {
+                if (value) {
+                    document.body.classList.add('modal-open');
+                } else {
+                    document.body.classList.remove('modal-open');
+                }
+            });
+        }
+    }));
+});
