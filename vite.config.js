@@ -6,6 +6,7 @@ export default defineConfig({
     base: '/build/',
     build: {
         manifest: true,
+        manifestDir: '.',
         outDir: 'public/build',
         assetsDir: 'assets',
         rollupOptions: {
