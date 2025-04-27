@@ -124,5 +124,7 @@ return [
     ],
 
     'cronitorClientKey' => env('CRONITOR_CLIENT_KEY'),
-    'pagination.per_page' => env('PAGINATION_PER_PAGE', 5),
+    'pagination' => [
+        'per_page' => env('APP_PAGINATION_PER_PAGE', 5)
+    ],
 ];
