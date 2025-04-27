@@ -139,6 +139,24 @@ npm run build
 log "🧹 Pruning dev dependencies..."
 npm prune --omit=dev
 
+# Disable rollback trap
+trap - ERR
+
+# Update symlink
+log "🔗 Updating current symlink..."
+ln -sfn "$NEW_RELEASE_DIR" "$CURRENT_DIR"
+cd "$CURRENT_DIR"
+
+# 🔒 Fix database folder and file permissions in current release
+log "🔒 Fixing database folder and file permissions in current release..."
+sudo chown -R $USER:www-data "database"
+sudo chmod -R 775 "database"
+
+# 🔒 Fix storage and cache permissions
+log "🔒 Fixing permissions for storage and cache in current release..."
+sudo chown -R $USER:www-data "storage" "bootstrap/cache"
+sudo chmod -R 775 "storage" "bootstrap/cache"
+
 # Laravel cache clearing and caching
 log "🧹 Clearing and caching Laravel configuration..."
 php artisan config:clear
@@ -153,23 +171,6 @@ php artisan view:cache
 # Run database migrations
 log "🗄️ Running database migrations..."
 php artisan migrate --force
-
-# Disable rollback trap
-trap - ERR
-
-# Update symlink
-log "🔗 Updating current symlink..."
-ln -sfn "$NEW_RELEASE_DIR" "$CURRENT_DIR"
-
-# 🔒 Fix database folder and file permissions in current release
-log "🔒 Fixing database folder and file permissions in current release..."
-sudo chown -R $USER:www-data "$CURRENT_DIR/database"
-sudo chmod -R 775 "$CURRENT_DIR/database"
-
-# 🔒 Fix storage and cache permissions
-log "🔒 Fixing permissions for storage and cache in current release..."
-sudo chown -R $USER:www-data "$CURRENT_DIR/storage" "$CURRENT_DIR/bootstrap/cache"
-sudo chmod -R 775 "$CURRENT_DIR/storage" "$CURRENT_DIR/bootstrap/cache"
 
 # Cleanup old releases
 cleanup_old_releases
