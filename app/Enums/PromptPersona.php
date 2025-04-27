@@ -10,7 +10,7 @@ enum PromptPersona: string
     case Developer = 'developer';
     case Storyteller = 'storyteller';
 
-    const DEFAULT = self::Educator->value;
+    const DEFAULT = self::Developer->value;
 
     public function label(): string
     {

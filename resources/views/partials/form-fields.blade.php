@@ -111,7 +111,7 @@
                             >
                                 @foreach (\App\Enums\PromptPersona::cases() as $p)
                                     <option value="{{ $p->value }}"
-                                        {{ old('persona', $persona ?? 'educator') === $p->value ? 'selected' : '' }}>
+                                        {{ old('persona', $persona ?? 'developer') === $p->value ? 'selected' : '' }}>
                                         {{ $p->label() }}
                                     </option>
                                 @endforeach

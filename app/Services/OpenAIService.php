@@ -37,7 +37,7 @@ final readonly class OpenAIService
                 ],
                 [
                     'role' => 'user',
-                    'content' => $this->preparePrompt($data, $input->type, $persona, $question),
+                    'content' => $this->preparePrompt($data, $input->type, $question),
                 ],
             ],
             'max_tokens' => $persona->maxTokens(),
@@ -60,44 +60,59 @@ final readonly class OpenAIService
     private function preparePrompt(
         BlockchainData $data,
         PromptType $type,
-        PromptPersona $persona,
         string $question,
     ): string {
         $sections = [];
+
+        // 1. Task
         $sections[] = <<<TEXT
-Task:
-- Answer the provided question (if any) FIRST.
+Task Instructions:
+- If a question is provided, answer it directly and briefly FIRST.
 - Then summarize the most relevant insights from the blockchain context.
-- Do NOT fabricate missing data.
-- Do NOT repeat information already stated.
-- Focus on insights that are New, Surprising, Non-obvious, Historically or technically meaningful
-- The values are satoshis.
+- Focus on insights that are:
+    - New
+    - Surprising
+    - Non-obvious
+    - Historically or technically meaningful
+- DO NOT fabricate missing information.
+- DO NOT merely repeat the provided data.
+- All numeric values are denominated in satoshis.
 TEXT;
+
+        // 2. Additional Task Specific to Transaction or Block
         $sections[] = $this->getAdditionalTaskInstructions($type);
 
+        // 3. Writing Style
         $sections[] = <<<TEXT
 Writing Style:
-- Use markdown formatting (headers, bullet points, emphasis where useful).
+- Use markdown formatting (headers, bullet points, and emphasis where appropriate).
 - Prefer active voice over passive voice.
-- Keep sentences and paragraphs short for readability.
+- Keep sentences and paragraphs concise (aim for under 80 words per paragraph).
 - Group related ideas logically.
-- Maintain a professional but accessible tone.
-- End answers naturally without abrupt cut-offs.
+- Maintain a professional yet accessible tone.
+- End the response naturally without abrupt cut-offs.
 TEXT;
 
         // 4. Question-specific instructions
-        if ($question) {
-            $sections[] = $question;
+        if ($question !== '') {
+            $sections[] = <<<TEXT
+User Question:
+{$question}
+TEXT;
         } else {
-            $sections[] = "Explicitly mention if this {$type->value} is historically important.";
+            $sections[] = <<<TEXT
+Note:
+Explicitly mention if this {$type->value} is historically important or notable.
+TEXT;
         }
 
+        // 5. Blockchain Data Context
         $sections[] = <<<TEXT
-Blockchain Context:
-You are allowed to extract information ONLY from this section.
-Do NOT invent details not explicitly available here.
-Summarize and interpret — do not simply repeat.
-If there is no question, do not say anything about any question.
+Blockchain Data Context:
+You must derive all insights strictly from the following data.
+- DO NOT invent or hallucinate missing information.
+- DO NOT mechanically list or mirror the data.
+- Focus on interpretation, summarization, and meaningful takeaways.
 {$data->toPrompt()}
 TEXT;
 
