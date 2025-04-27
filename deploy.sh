@@ -49,6 +49,13 @@ check_commands() {
   done
 }
 
+rollback_on_failure() {
+  log "❌ Deployment failed. Cleaning up..."
+  rm -rf "$NEW_RELEASE_DIR"
+  log "🧹 Cleaned up incomplete release: $NEW_RELEASE_DIR"
+  exit 1
+}
+
 #######################
 # DEPLOY PROCESS
 #######################
@@ -60,6 +67,9 @@ check_commands
 
 # Ensure releases dir exists
 mkdir -p "$RELEASES_DIR"
+
+# Setup trap to rollback if anything fails
+trap rollback_on_failure ERR
 
 # Clone latest code
 log "🔄 Cloning repository..."
@@ -97,6 +107,9 @@ php artisan view:cache
 # Run database migrations
 log "🗄️ Running database migrations..."
 php artisan migrate --force
+
+# If everything up to here succeeded, disable the failure trap
+trap - ERR
 
 # Atomically update symlink
 log "🔗 Updating current symlink..."
