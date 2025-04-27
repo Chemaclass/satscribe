@@ -403,3 +403,16 @@ body.modal-open {
 .dark .persona-label {
     color: var(--btc-orange-light); /* or orange-100 */
 }
+
+.prose ul > li {
+    position: relative;
+    padding-left: 1.5em;
+}
+
+.prose ul > li::before {
+    content: '•';
+    position: absolute;
+    left: 0;
+    color: var(--btc-orange);
+    font-weight: bold;
+}

@@ -10,7 +10,7 @@
         <h2 class="text-2xl font-bold mb-2 flex items-center">
             <i data-lucide="bot" class="w-6 h-6"></i> AI Summary
         </h2>
-        <div class="prose">
+        <div class="prose dark:prose-invert">
             {!! Str::markdown($result->ai_response) !!}
         </div>
     </div>
