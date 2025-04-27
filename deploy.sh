@@ -105,8 +105,9 @@ else
   rollback_on_failure
 fi
 
-# Always fix .env permissions
-chmod 644 "$NEW_RELEASE_DIR/database/database.sqlite"
+# Always fix database permissions
+sudo chown $USER:www-data "$NEW_RELEASE_DIR/database/database.sqlite"
+chmod 664 "$NEW_RELEASE_DIR/database/database.sqlite"
 
 # Go into the new release
 cd "$NEW_RELEASE_DIR"
