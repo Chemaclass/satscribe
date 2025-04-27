@@ -63,49 +63,60 @@ final readonly class OpenAIService
 
         $sections = [];
 
+        // 1. System and Persona Context
         $sections[] = <<<TEXT
 {$persona->systemPrompt()}.
-You will receive structured blockchain data for context purposes only.
-DO NOT mechanically list all fields or repeat the data back.
-Use the provided data to craft an insightful, persona-aligned answer.
-Prioritize good writing and clarity over exhaustive detail.
+You will receive structured blockchain data for CONTEXT ONLY.
+Do NOT mechanically list or repeat back the data.
+Your role is to craft an insightful, persona-aligned response.
+Prioritize clarity, brevity, and meaningful key takeaways over exhaustive details.
 TEXT;
+
+        // 2. Task Instructions based on type
         if ($type === PromptType::Transaction) {
             $additionalTask = <<<TEXT
 - Identify the transaction type (e.g., coinbase, CoinJoin-like, P2PK, P2PKH, P2SH, P2MS, P2WPKH, P2WSH, P2TR, etc.).
-- Highlight any unusual input/output patterns (e.g., unusually large number of inputs, outputs, high consolidation, or privacy techniques).
-- If the transaction paid exceptionally high fees relative to its size, mention it.
+- Highlight unusual input/output patterns (e.g., large numbers of inputs/outputs, consolidation behavior, privacy techniques).
+- Mention if the transaction paid exceptionally high fees relative to its size.
 - If the transaction appears to be a consolidation or CoinJoin, explain briefly.
 TEXT;
         } else { // Block
             $additionalTask = <<<TEXT
 - Highlight if the block has only one transaction, an unusually low or high transaction count, or exceptionally large total fees.
-- Mention if the block's coinbase transaction contains an OP_RETURN output.
-- Compare key attributes (timestamp, size, miner) with the previous and next block if interesting patterns are observed.
-- Point out if the miner is notable, unexpected, or has changed compared to adjacent blocks.
-- Mention if the block has unusual size, timestamp gaps, or other anomalies.
-- If the block has historical significance, clearly state why.
+- Mention if the coinbase transaction contains an OP_RETURN output.
+- Compare size, timestamp, and miner with adjacent blocks if noteworthy.
+- Mention if the miner is notable, changed recently, or unexpected.
+- Highlight any anomalies (size, timestamp gaps, etc.).
+- If the block has historical significance, clearly explain why.
 TEXT;
         }
+
         $sections[] = <<<TEXT
 Task:
 - Answer the provided question (if any) FIRST.
+- Then summarize the most relevant insights from the blockchain context.
 - Do NOT fabricate missing data.
-- Do NOT repeat information already given or answered within the context.
+- Do NOT repeat information already stated.
+- Focus on what is interesting or unusual, not exhaustive lists.
+- The values are satoshis.
 $additionalTask
-
-Instructions:
-- Use markdown formatting.
-- Paragraphs should not exceed 80 words.
-- Write clearly, concisely, and avoid technical dumps.
-- Focus on insights, not mechanical repetition.
 TEXT;
-        if ($type === PromptType::Block) {
-            $sections[] = "- If the block has only one transaction or something extraordinary happens, mention it.";
-        }
 
+        // 3. Global Writing Instructions
+        $sections[] = <<<TEXT
+Writing Style:
+- Use markdown formatting.
+- Keep paragraphs under 80 words.
+- Use bullet points where appropriate for clarity.
+- Focus on actionable, concise insights.
+- End the answer naturally without abrupt cut-offs.
+TEXT;
+
+        // 4. Question-specific instructions
         $sections[] = $questionInstructions;
-        $sections[] = "Blockchain Data Context:\n".$data->toPrompt();
+
+        // 5. Blockchain context (always last)
+        $sections[] = "Blockchain Data Context:\n" . $data->toPrompt();
 
         return implode("\n\n", $sections);
     }

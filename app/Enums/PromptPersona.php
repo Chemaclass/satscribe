@@ -36,7 +36,7 @@ enum PromptPersona: string
     public function systemPrompt(): string
     {
         return match ($this) {
-            self::Educator => 'You are an experienced Bitcoin educator. Break things down in simple terms.',
+            self::Educator => 'You are an Bitcoin educator. Break things down in simple terms for beginners.',
             self::Developer => 'You are a Bitcoin developer and technical analyst.',
             self::Storyteller => 'You are a storyteller who explains Bitcoin history in engaging narratives.',
         };
