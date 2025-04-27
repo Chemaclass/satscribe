@@ -105,6 +105,11 @@ fi
 # Go into the new release
 cd "$NEW_RELEASE_DIR"
 
+# Fix permissions for storage and bootstrap/cache
+log "🔒 Fixing permissions..."
+sudo chown -R www-data:www-data storage bootstrap/cache
+sudo chmod -R 775 storage bootstrap/cache
+
 # Install backend dependencies
 log "🎼 Running composer install..."
 composer install --no-interaction --prefer-dist --optimize-autoloader
