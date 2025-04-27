@@ -106,7 +106,11 @@ final readonly class BlockchainService
 
     private function fetchNextBlockHash(array $block): ?string
     {
-        return $this->getBlockHash((string) ($block['height'] + 1));
+        try {
+            return $this->getBlockHash((string) ($block['height'] + 1));
+        } catch (BlockchainException) {
+            return null;
+        }
     }
 
     private function fetchTransaction(string $txid): array
