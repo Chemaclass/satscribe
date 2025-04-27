@@ -110,14 +110,14 @@ function searchInputValidator(initial = '') {
                 if (data.status === 'rate_limited') {
                     window.dispatchEvent(new CustomEvent('rate-limit-reached', {
                         detail: {
-                            invoice: data.lnInvoice ?? {},
+                            invoice: data.invoice ?? {},
                             maxAttempts: data.maxAttempts
                         }
                     }));
 
                     document.dispatchEvent(new CustomEvent('invoice-created', {
                         detail: {
-                            identifier: data.lnInvoice.identifier,
+                            identifier: data.invoice.identifier,
                         }
                     }));
 
