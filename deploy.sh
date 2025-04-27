@@ -105,9 +105,10 @@ else
   rollback_on_failure
 fi
 
-# Always fix database permissions
-sudo chown $USER:www-data "$NEW_RELEASE_DIR/database/database.sqlite"
-chmod 664 "$NEW_RELEASE_DIR/database/database.sqlite"
+# 🔒 Fix database folder and file permissions
+log "🔒 Fixing database folder and file permissions..."
+sudo chown -R $USER:www-data "$NEW_RELEASE_DIR/database"
+sudo chmod -R 775 "$NEW_RELEASE_DIR/database"
 
 # Go into the new release
 cd "$NEW_RELEASE_DIR"
@@ -159,10 +160,10 @@ trap - ERR
 log "🔗 Updating current symlink..."
 ln -sfn "$NEW_RELEASE_DIR" "$CURRENT_DIR"
 
-# 🔒 Fix database permissions
-log "🔒 Fixing database permissions in current release..."
-sudo chown $USER:www-data "$CURRENT_DIR/database/database.sqlite"
-chmod 664 "$CURRENT_DIR/database/database.sqlite"
+# 🔒 Fix database folder and file permissions in current release
+log "🔒 Fixing database folder and file permissions in current release..."
+sudo chown -R $USER:www-data "$CURRENT_DIR/database"
+sudo chmod -R 775 "$CURRENT_DIR/database"
 
 # 🔒 Fix storage and cache permissions
 log "🔒 Fixing permissions for storage and cache in current release..."
