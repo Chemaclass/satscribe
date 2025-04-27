@@ -5,21 +5,29 @@ import tailwindcss from '@tailwindcss/vite';
 export default defineConfig({
     base: '/build/',
     build: {
-        manifest: true,
-        manifestDir: '.',
         outDir: 'public/build',
         assetsDir: 'assets',
+        manifest: true,
         rollupOptions: {
             input: [
                 'resources/css/app.css',
                 'resources/js/app.js',
             ],
+            output: {
+                assetFileNames: (assetInfo) => {
+                    if (assetInfo.name === 'manifest.json') {
+                        return 'manifest.json'; // Write to root
+                    }
+                    return 'assets/[name]-[hash][extname]';
+                }
+            }
         },
     },
     plugins: [
         laravel({
             input: ['resources/css/app.css', 'resources/js/app.js'],
             refresh: true,
+            buildDirectory: 'build/.vite',
         }),
         tailwindcss(),
     ],
