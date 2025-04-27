@@ -105,7 +105,11 @@ fi
 # Go into the new release
 cd "$NEW_RELEASE_DIR"
 
-# 🔒 Fix permissions before composer install
+# Ensure storage and cache directories exist
+log "📂 Ensuring storage and cache directories exist..."
+mkdir -p storage/framework/cache storage/framework/sessions storage/framework/views storage/logs bootstrap/cache
+
+# 🔒 Fix permissions after creating folders
 log "🔒 Fixing permissions..."
 sudo chown -R www-data:www-data storage bootstrap/cache
 sudo chmod -R 775 storage bootstrap/cache
