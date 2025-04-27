@@ -159,6 +159,11 @@ trap - ERR
 log "🔗 Updating current symlink..."
 ln -sfn "$NEW_RELEASE_DIR" "$CURRENT_DIR"
 
+# 🔒 Fix database permissions again in current
+log "🔒 Fixing database permissions in current release..."
+sudo chown $USER:www-data "$CURRENT_DIR/database/database.sqlite"
+chmod 664 "$CURRENT_DIR/database/database.sqlite"
+
 # Cleanup old releases
 cleanup_old_releases
 
