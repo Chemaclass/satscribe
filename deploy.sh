@@ -6,9 +6,9 @@ set -euo pipefail
 #######################
 
 PROJECT_NAME="satscribe"
-DEPLOY_DIR="$HOME/$PROJECT_NAME"
+LOCAL_REPO_DIR="/$HOME/Code/$PROJECT_NAME"
+DEPLOY_DIR="/$HOME/$PROJECT_NAME"
 BRANCH="main"
-REMOTE_REPO="git@github.com:Chemaclass/satscribe.git"
 RELEASES_DIR="$DEPLOY_DIR/releases"
 CURRENT_DIR="$DEPLOY_DIR/current"
 KEEP_RELEASES=5
@@ -71,9 +71,25 @@ mkdir -p "$RELEASES_DIR"
 # Setup trap to rollback if anything fails
 trap rollback_on_failure ERR
 
-# Clone latest code
-log "🔄 Cloning repository..."
-git clone --branch "$BRANCH" --depth=1 "$REMOTE_REPO" "$NEW_RELEASE_DIR"
+# Clone latest code from local repo
+log "🔄 Cloning local repository..."
+git clone --branch "$BRANCH" --depth=1 "file://$LOCAL_REPO_DIR" "$NEW_RELEASE_DIR"
+
+# Copy persistent files from current release (if exists)
+if [ -e "$CURRENT_DIR/.env" ]; then
+  log "📄 Copying .env from current release..."
+  cp "$CURRENT_DIR/.env" "$NEW_RELEASE_DIR/.env"
+else
+  log "⚠️ No existing .env found in current release, skipping copy."
+fi
+
+if [ -e "$CURRENT_DIR/database/database.sqlite" ]; then
+  log "🗄️ Copying database from current release..."
+  mkdir -p "$NEW_RELEASE_DIR/database"
+  cp "$CURRENT_DIR/database/database.sqlite" "$NEW_RELEASE_DIR/database/database.sqlite"
+else
+  log "⚠️ No existing database found in current release, skipping copy."
+fi
 
 # Go into the new release
 cd "$NEW_RELEASE_DIR"
