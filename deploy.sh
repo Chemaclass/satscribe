@@ -88,6 +88,9 @@ else
   rollback_on_failure
 fi
 
+# Always fix .env permissions
+chmod 644 "$NEW_RELEASE_DIR/.env"
+
 # Copy persistent database
 if [ -e "$CURRENT_DIR/database/database.sqlite" ]; then
   log "🗄️ Copying database from current release..."
@@ -101,6 +104,9 @@ else
   log "❌ No database.sqlite found in current release or fallback repo. Aborting."
   rollback_on_failure
 fi
+
+# Always fix .env permissions
+chmod 644 "$NEW_RELEASE_DIR/database/database.sqlite"
 
 # Go into the new release
 cd "$NEW_RELEASE_DIR"
