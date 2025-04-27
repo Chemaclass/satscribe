@@ -124,8 +124,11 @@ function searchInputValidator(initial = '') {
                 }
 
                 const resultsContainer = document.getElementById('results-container');
-                resultsContainer.innerHTML = data.html || data.error || '';
-
+                resultsContainer.innerHTML = `
+    <div class="prose prose-btc max-w-3xl mx-auto mt-8 dark:prose-invert fade-in">
+        ${data.html || data.error || ''}
+    </div>
+`;
                 window.refreshLucideIcons?.();
 
                 const url = new URL(window.location);

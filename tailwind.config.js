@@ -1,6 +1,5 @@
-// tailwind.config.js
 export default {
-    darkMode: 'class', // or 'media' if you want system preference
+    darkMode: 'class',
     content: [
         "./resources/**/*.blade.php",
         "./resources/**/*.js",

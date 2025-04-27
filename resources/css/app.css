@@ -281,6 +281,15 @@ pre,
     vertical-align: middle;
 }
 
+.fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
 button i[data-lucide] {
     cursor: pointer;
 }
@@ -292,6 +301,22 @@ button i[data-lucide] {
     color: currentColor;
 }
 
+.prose {
+    --tw-prose-bullets: #f7931a; /* Bitcoin orange for bullets */
+}
+.prose h1 { font-size: 2.25rem; }
+.prose h2 { font-size: 1.5rem; }
+.prose ul { list-style: disc; padding-left: 1rem; }
+.prose ol { list-style: decimal; padding-left: 1rem; }
+.prose li { margin-bottom: 0.5rem; }
+.prose a { color: var(--btc-orange); }
+.prose a:hover { color: var(--btc-orange-dark); }
+.prose strong { font-weight: 600; }
+.prose code {
+    background-color: #f3f4f6;
+    color: #d1d5db;
+    padding: 0.2rem 0.4rem;
+}
 /* Add to your existing CSS */
 .backdrop-blur-sm {
     backdrop-filter: blur(8px);
