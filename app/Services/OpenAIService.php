@@ -61,45 +61,66 @@ final readonly class OpenAIService
     ): string {
         $questionInstructions = $question ?: $this->defaultQuestionInstructions($type);
 
-        $corePrompt = <<<PROMPT
-Describe this Bitcoin {$type->value} using the following blockchain data:
-{$data->toPrompt()}
+        $sections = [];
+
+        $sections[] = <<<TEXT
+{$persona->systemPrompt()}.
+You will receive structured blockchain data for context purposes only.
+DO NOT mechanically list all fields or repeat the data back.
+Use the provided data to craft an insightful, persona-aligned answer.
+Prioritize good writing and clarity over exhaustive detail.
+TEXT;
+        if ($type === PromptType::Transaction) {
+            $additionalTask = <<<TEXT
+- Identify the transaction type (e.g., coinbase, CoinJoin-like, P2PK, P2PKH, P2SH, P2MS, P2WPKH, P2WSH, P2TR, etc.).
+- Highlight any unusual input/output patterns (e.g., unusually large number of inputs, outputs, high consolidation, or privacy techniques).
+- If the transaction paid exceptionally high fees relative to its size, mention it.
+- If the transaction appears to be a consolidation or CoinJoin, explain briefly.
+TEXT;
+        } else { // Block
+            $additionalTask = <<<TEXT
+- Highlight if the block has only one transaction, an unusually low or high transaction count, or exceptionally large total fees.
+- Mention if the block's coinbase transaction contains an OP_RETURN output.
+- Compare key attributes (timestamp, size, miner) with the previous and next block if interesting patterns are observed.
+- Point out if the miner is notable, unexpected, or has changed compared to adjacent blocks.
+- Mention if the block has unusual size, timestamp gaps, or other anomalies.
+- If the block has historical significance, clearly state why.
+TEXT;
+        }
+        $sections[] = <<<TEXT
+Task:
+- Answer the provided question (if any) FIRST.
+- Do NOT fabricate missing data.
+- Do NOT repeat information already given or answered within the context.
+$additionalTask
 
 Instructions:
-- The values are in satoshis (1 satoshi = 0.00000001 BTC).
-- Skip "Unknown" or anything that you are not certain about, avoid repeating information.
-- If I asked you a question, you should answer it first, followed by a tldr of whatever you consider best.
-{$questionInstructions}
-PROMPT;
+- Use markdown formatting.
+- Paragraphs should not exceed 80 words.
+- Write clearly, concisely, and avoid technical dumps.
+- Focus on insights, not mechanical repetition.
+TEXT;
+        if ($type === PromptType::Block) {
+            $sections[] = "- If the block has only one transaction or something extraordinary happens, mention it.";
+        }
 
-        return $this->wrapPromptWithPersona($corePrompt, $persona);
+        $sections[] = $questionInstructions;
+        $sections[] = "Blockchain Data Context:\n".$data->toPrompt();
+
+        return implode("\n\n", $sections);
     }
 
     private function defaultQuestionInstructions(PromptType $type): string
     {
-        $prompt = <<<TEXT
-Use markdown formatting.
-A paragraph should not be larger than 80 words.
-If it's a historically important {$type->value}, mention it explicitly.
+        return <<<TEXT
+- Use markdown formatting.
+- Keep paragraphs below 80 words.
+- Explicitly mention if this {$type->value} is historically important.
 TEXT;
-
-        if ($type === PromptType::Block) {
-            $prompt .= <<<PROMPT
-- If the block contains just one tx or something extraordinary occurs on it, say so.
-PROMPT;
-        }
-
-        return $prompt;
-    }
-
-    private function wrapPromptWithPersona(string $prompt, PromptPersona $persona): string
-    {
-        return "{$persona->systemPrompt()}. End your response naturally, without cutting off mid-sentence. \n\n{$prompt}";
     }
 
     private function trimToLastFullSentence(string $text): string
     {
-        // Match all ending sentence punctuation
         $matches = [];
         preg_match_all('/[.?!](?=\s|$)/u', $text, $matches, PREG_OFFSET_CAPTURE);
 

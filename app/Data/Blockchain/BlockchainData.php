@@ -5,20 +5,20 @@ namespace App\Data\Blockchain;
 
 use App\Data\BlockchainDataInterface;
 
-final class BlockchainData
+final readonly class BlockchainData
 {
     private function __construct(
-        public readonly ?BlockData $block,
-        public readonly ?TransactionData $transaction,
-        public readonly ?BlockData $previousBlock,
-        public readonly ?BlockData $nextBlock,
-        public readonly ?BlockData $transactionBlock,
+        public ?BlockData $block,
+        public ?TransactionData $transaction,
+        public ?BlockData $previousBlock,
+        public ?BlockData $nextBlock,
+        public ?BlockData $transactionBlock,
     ) {
     }
 
     public function current(): BlockchainDataInterface
     {
-        if ($this->transaction !== null) {
+        if ($this->transaction instanceof TransactionData) {
             return $this->transaction;
         }
 
@@ -51,21 +51,21 @@ final class BlockchainData
     {
         $sections = [];
 
-        if ($this->block) {
+        if ($this->block instanceof BlockData) {
             $sections[] = $this->block->toPrompt();
 
-            if ($this->previousBlock) {
+            if ($this->previousBlock instanceof BlockData) {
                 $sections[] = "---\nPrevious Block Summary\n";
                 $sections[] = $this->previousBlock->toPrompt();
             }
 
-            if ($this->nextBlock) {
+            if ($this->nextBlock instanceof BlockData) {
                 $sections[] = "---\nNext Block Summary\n";
                 $sections[] = $this->nextBlock->toPrompt();
             }
         }
 
-        if ($this->transaction) {
+        if ($this->transaction instanceof TransactionData) {
             $sections[] = $this->transaction->toPrompt();
         }
 
