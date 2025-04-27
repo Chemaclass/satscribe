@@ -32,6 +32,10 @@ final readonly class OpenAIService
             'model' => $this->openAiModel,
             'messages' => [
                 [
+                    'role' => 'system',
+                    'content' => $persona->systemPrompt(),
+                ],
+                [
                     'role' => 'user',
                     'content' => $this->preparePrompt($data, $input->type, $persona, $question),
                 ],
@@ -59,37 +63,7 @@ final readonly class OpenAIService
         PromptPersona $persona,
         string $question,
     ): string {
-        $questionInstructions = $question
-            ?: "Explicitly mention if this {$type->value} is historically important.";
-
         $sections = [];
-
-        // 1. System and Persona Context
-        $sections[] = <<<TEXT
-{$persona->systemPrompt()}.
-You will receive structured blockchain data for CONTEXT ONLY.
-Do NOT mechanically list or repeat back the data.
-Your role is to craft an insightful, persona-aligned response.
-Prioritize clarity, brevity, and meaningful key takeaways over exhaustive details.
-TEXT;
-
-        // 2. Task Instructions based on type
-        if ($type === PromptType::Transaction) {
-            $additionalTask = <<<TEXT
-- Identify the transaction type (e.g., coinbase, CoinJoin-like, P2PK, P2PKH, P2SH, P2MS, P2WPKH, P2WSH, P2TR, etc.).
-- Highlight unusual input/output patterns (e.g., large numbers of inputs/outputs, consolidation behavior, privacy techniques).
-- Mention if the transaction paid exceptionally high fees relative to its size.
-TEXT;
-        } else { // Block
-            $additionalTask = <<<TEXT
-- Highlight if the block has only one transaction, an unusually low or high transaction count, or exceptionally large total fees.
-- Compare size, timestamp, and miner with adjacent blocks if noteworthy.
-- Mention if the miner is notable, changed recently, or unexpected.
-- Highlight any anomalies (size, timestamp gaps, etc.).
-- If the block has historical significance, clearly explain why.
-TEXT;
-        }
-
         $sections[] = <<<TEXT
 Task:
 - Answer the provided question (if any) FIRST.
@@ -98,10 +72,9 @@ Task:
 - Do NOT repeat information already stated.
 - Focus on insights that are New, Surprising, Non-obvious, Historically or technically meaningful
 - The values are satoshis.
-$additionalTask
 TEXT;
+        $sections[] = $this->getAdditionalTaskInstructions($type);
 
-        // 3. Global Writing Instructions
         $sections[] = <<<TEXT
 Writing Style:
 - Use markdown formatting (headers, bullet points, emphasis where useful).
@@ -113,10 +86,20 @@ Writing Style:
 TEXT;
 
         // 4. Question-specific instructions
-        $sections[] = $questionInstructions;
+        if ($question) {
+            $sections[] = $question;
+        } else {
+            $sections[] = "Explicitly mention if this {$type->value} is historically important.";
+        }
 
-        // 5. Blockchain context (always last)
-        $sections[] = "Blockchain Data Context:\n".$data->toPrompt();
+        $sections[] = <<<TEXT
+Blockchain Context:
+You are allowed to extract information ONLY from this section.
+Do NOT invent details not explicitly available here.
+Summarize and interpret — do not simply repeat.
+If there is no question, do not say anything about any question.
+{$data->toPrompt()}
+TEXT;
 
         return implode("\n\n", $sections);
     }
@@ -132,5 +115,25 @@ TEXT;
         }
 
         return $text; // fallback
+    }
+
+    private function getAdditionalTaskInstructions(PromptType $type): string
+    {
+        if ($type === PromptType::Transaction) {
+            return <<<TEXT
+- Identify the transaction type (e.g., coinbase, CoinJoin-like, P2PK, P2PKH, P2SH, P2MS, P2WPKH, P2WSH, P2TR, etc.).
+- Highlight unusual input/output patterns (e.g., large numbers of inputs/outputs, consolidation behavior, privacy techniques).
+- Mention if the transaction paid exceptionally high fees relative to its size.
+TEXT;
+        }
+
+        // Block
+        return <<<TEXT
+- Highlight if the block has only one transaction, an unusually low or high transaction count, or exceptionally large total fees.
+- Compare size, timestamp, and miner with adjacent blocks if noteworthy.
+- Mention if the miner is notable, changed recently, or unexpected.
+- Highlight any anomalies (size, timestamp gaps, etc.).
+- If the block has historical significance, clearly explain why.
+TEXT;
     }
 }
