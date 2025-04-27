@@ -6,9 +6,10 @@ set -euo pipefail
 #######################
 
 PROJECT_NAME="satscribe"
-LOCAL_REPO_DIR="/$HOME/Code/$PROJECT_NAME"
-DEPLOY_DIR="/$HOME/$PROJECT_NAME"
+LOCAL_REPO_DIR="$HOME/Code/$PROJECT_NAME"
+DEPLOY_DIR="$HOME/$PROJECT_NAME"
 BRANCH="main"
+REMOTE_REPO="git@github.com:Chemaclass/satscribe.git"
 RELEASES_DIR="$DEPLOY_DIR/releases"
 CURRENT_DIR="$DEPLOY_DIR/current"
 KEEP_RELEASES=5
@@ -71,24 +72,34 @@ mkdir -p "$RELEASES_DIR"
 # Setup trap to rollback if anything fails
 trap rollback_on_failure ERR
 
-# Clone latest code from local repo
-log "🔄 Cloning local repository..."
-git clone --branch "$BRANCH" --depth=1 "file://$LOCAL_REPO_DIR" "$NEW_RELEASE_DIR"
+# Clone latest code from GitHub
+log "🔄 Cloning remote repository..."
+git clone --branch "$BRANCH" --depth=1 "$REMOTE_REPO" "$NEW_RELEASE_DIR"
 
-# Copy persistent files from current release (if exists)
+# Copy persistent .env
 if [ -e "$CURRENT_DIR/.env" ]; then
   log "📄 Copying .env from current release..."
   cp "$CURRENT_DIR/.env" "$NEW_RELEASE_DIR/.env"
+elif [ -e "$LOCAL_REPO_DIR/.env" ]; then
+  log "📄 Current release has no .env, copying fallback from local repo..."
+  cp "$LOCAL_REPO_DIR/.env" "$NEW_RELEASE_DIR/.env"
 else
-  log "⚠️ No existing .env found in current release, skipping copy."
+  log "❌ No .env found in current release($CURRENT_DIR) or fallback repo($LOCAL_REPO_DIR). Aborting."
+  rollback_on_failure
 fi
 
+# Copy persistent database
 if [ -e "$CURRENT_DIR/database/database.sqlite" ]; then
   log "🗄️ Copying database from current release..."
   mkdir -p "$NEW_RELEASE_DIR/database"
   cp "$CURRENT_DIR/database/database.sqlite" "$NEW_RELEASE_DIR/database/database.sqlite"
+elif [ -e "$LOCAL_REPO_DIR/database/database.sqlite" ]; then
+  log "🗄️ Current release has no database, copying fallback from local repo..."
+  mkdir -p "$NEW_RELEASE_DIR/database"
+  cp "$LOCAL_REPO_DIR/database/database.sqlite" "$NEW_RELEASE_DIR/database/database.sqlite"
 else
-  log "⚠️ No existing database found in current release, skipping copy."
+  log "❌ No database.sqlite found in current release($CURRENT_DIR) or fallback repo($LOCAL_REPO_DIR). Aborting."
+  rollback_on_failure
 fi
 
 # Go into the new release
