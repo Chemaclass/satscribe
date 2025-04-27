@@ -22,7 +22,16 @@
         </div>
     </header>
 
-    <div x-data="searchInputValidator('{{ old('search', $search ?? '') }}')" x-init="validate()">
+    <div x-data="searchInputValidator('{{ old('search', $search ?? '') }}')"
+         x-init="
+            validate();
+            $watch('isSubmitting', value => {
+                if (value) {
+                    window.refreshLucideIcons?.();
+                }
+            });
+        "
+    >
         {{-- Form + Icon Side-by-Side --}}
         <div class="flex flex-col sm:flex-row sm:justify-between items-start sm:items-start gap-6 max-w-5xl">
             {{-- Left: Form --}}
