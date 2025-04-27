@@ -152,17 +152,22 @@ php artisan view:cache
 log "🗄️ Running database migrations..."
 php artisan migrate --force
 
-# If everything up to here succeeded, disable the failure trap
+# Disable rollback trap
 trap - ERR
 
-# Atomically update symlink
+# Update symlink
 log "🔗 Updating current symlink..."
 ln -sfn "$NEW_RELEASE_DIR" "$CURRENT_DIR"
 
-# 🔒 Fix database permissions again in current
+# 🔒 Fix database permissions
 log "🔒 Fixing database permissions in current release..."
 sudo chown $USER:www-data "$CURRENT_DIR/database/database.sqlite"
 chmod 664 "$CURRENT_DIR/database/database.sqlite"
+
+# 🔒 Fix storage and cache permissions
+log "🔒 Fixing permissions for storage and cache in current release..."
+sudo chown -R $USER:www-data "$CURRENT_DIR/storage" "$CURRENT_DIR/bootstrap/cache"
+sudo chmod -R 775 "$CURRENT_DIR/storage" "$CURRENT_DIR/bootstrap/cache"
 
 # Cleanup old releases
 cleanup_old_releases
