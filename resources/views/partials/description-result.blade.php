@@ -7,16 +7,16 @@
     @endif
 
     <div class="section rounded p-4 shadow-sm">
-        <h2 class="text-lg font-semibold mb-2 flex items-center gap-2">
-            <i data-lucide="bot" class="w-6 h-6"></i>AI Summary
+        <h2 class="text-2xl font-bold mb-2 flex items-center">
+            <i data-lucide="bot" class="w-6 h-6"></i> AI Summary
         </h2>
-        <div class="prose-btc">
+        <div class="prose">
             {!! Str::markdown($result->ai_response) !!}
         </div>
     </div>
 
     <div class="section rounded p-4 shadow-sm">
-        <h2 class="text-lg font-semibold mb-2 flex items-center gap-2">
+        <h2 class="text-2xl font-bold mb-2 flex items-center">
             <i data-lucide="box" class="w-6 h-6"></i> Raw Blockchain Data
         </h2>
         <div class="code-block-collapsible">

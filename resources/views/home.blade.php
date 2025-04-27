@@ -38,27 +38,28 @@
 
         {{-- Loading State --}}
         <template x-if="isSubmitting">
-            <section
-                class="description-body w-full max-w-3xl mx-auto space-y-6"
-                x-init="$nextTick(() => window.refreshLucideIcons?.())"
-            >
+            <section id="description-body-results" class="description-body w-full max-w-3xl mx-auto space-y-6">
                 <div class="section rounded p-4 shadow-sm">
-                    <h2 class="text-lg font-semibold mb-2 flex items-center gap-2">
-                        <i data-lucide="bot" class="w-6 h-6"></i>AI Summary
+                    <h2 class="text-2xl font-bold mb-2 flex items-center">
+                        <i data-lucide="bot" class="w-6 h-6"></i> AI Summary
                     </h2>
-                    <div class="leading-relaxed flex items-center gap-2">
-                        <i data-lucide="loader-2" class="w-5 h-5 animate-spin text-orange-400"></i>
-                        Generating response from the AI...
+                    <div class="leading-relaxed prose dark:prose-invert">
+                        <p class="flex items-center gap-2">
+                            <i data-lucide="loader-2" class="w-5 h-5 animate-spin text-orange-400"></i>
+                            Generating response from the AI...
+                        </p>
                     </div>
                 </div>
 
                 <div class="section rounded p-4 shadow-sm">
-                    <h2 class="text-lg font-semibold mb-2 flex items-center gap-2">
+                    <h2 class="text-2xl font-bold mb-2 flex items-center">
                         <i data-lucide="box" class="w-6 h-6"></i> Raw Blockchain Data
                     </h2>
-                    <div class="code-block-collapsible flex items-center gap-2">
-                        <i data-lucide="loader-2" class="w-5 h-5 animate-spin text-orange-400"></i>
-                        Fetching blockchain data...
+                    <div class="leading-relaxed prose dark:prose-invert">
+                        <p class="flex items-center gap-2">
+                            <i data-lucide="loader-2" class="w-5 h-5 animate-spin text-orange-400"></i>
+                            Fetching blockchain data...
+                        </p>
                     </div>
                 </div>
             </section>
@@ -124,11 +125,8 @@ function searchInputValidator(initial = '') {
                 }
 
                 const resultsContainer = document.getElementById('results-container');
-                resultsContainer.innerHTML = `
-    <div class="prose prose-btc max-w-3xl mx-auto mt-8 dark:prose-invert fade-in">
-        ${data.html || data.error || ''}
-    </div>
-`;
+                resultsContainer.innerHTML = data.html || data.error || '';
+
                 window.refreshLucideIcons?.();
 
                 const url = new URL(window.location);
