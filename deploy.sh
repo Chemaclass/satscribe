@@ -131,6 +131,11 @@ composer install --no-interaction --prefer-dist --optimize-autoloader
 log "📦 Installing full npm dependencies (including dev)..."
 npm install --prefer-offline
 
+# Build frontend assets
+log "🛠 Building frontend assets..."
+npm run build
+#todo: npm ci --omit=dev
+
 # Disable rollback trap
 trap - ERR
 
@@ -139,9 +144,6 @@ log "🔗 Updating current symlink..."
 ln -sfn "$NEW_RELEASE_DIR" "$CURRENT_DIR"
 cd "$CURRENT_DIR"
 
-# Build frontend assets
-log "🛠 Building frontend assets..."
-npm run build
 
 # 🔒 Fix database folder and file permissions in current release
 log "🔒 Fixing database folder and file permissions in current release..."
