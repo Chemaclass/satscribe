@@ -6,8 +6,8 @@ set -euo pipefail
 #######################
 
 PROJECT_NAME="satscribe"
-LOCAL_REPO_DIR="$HOME/Code/$PROJECT_NAME"
 DEPLOY_DIR="$HOME/$PROJECT_NAME"
+LOCAL_REPO_DIR="$HOME/Code/$PROJECT_NAME"
 BRANCH="main"
 REMOTE_REPO="git@github.com:Chemaclass/satscribe.git"
 RELEASES_DIR="$DEPLOY_DIR/releases"
@@ -34,7 +34,7 @@ cleanup_old_releases() {
     local remove_releases=("${releases[@]:KEEP_RELEASES}")
     for old_release in "${remove_releases[@]}"; do
       log "🗑️ Removing old release: $old_release"
-      rm -rf "$RELEASES_DIR/$old_release"
+      sudo rm -rf "$RELEASES_DIR/$old_release"
     done
   else
     log "✅ No old releases to remove."
@@ -52,7 +52,7 @@ check_commands() {
 
 rollback_on_failure() {
   log "❌ Deployment failed. Cleaning up..."
-  rm -rf "$NEW_RELEASE_DIR"
+  sudo rm -rf "$NEW_RELEASE_DIR"
   log "🧹 Cleaned up incomplete release: $NEW_RELEASE_DIR"
   exit 1
 }
@@ -84,7 +84,7 @@ elif [ -e "$LOCAL_REPO_DIR/.env" ]; then
   log "📄 Current release has no .env, copying fallback from local repo..."
   cp "$LOCAL_REPO_DIR/.env" "$NEW_RELEASE_DIR/.env"
 else
-  log "❌ No .env found in current release($CURRENT_DIR) or fallback repo($LOCAL_REPO_DIR). Aborting."
+  log "❌ No .env found in current release or fallback repo. Aborting."
   rollback_on_failure
 fi
 
@@ -98,14 +98,14 @@ elif [ -e "$LOCAL_REPO_DIR/database/database.sqlite" ]; then
   mkdir -p "$NEW_RELEASE_DIR/database"
   cp "$LOCAL_REPO_DIR/database/database.sqlite" "$NEW_RELEASE_DIR/database/database.sqlite"
 else
-  log "❌ No database.sqlite found in current release($CURRENT_DIR) or fallback repo($LOCAL_REPO_DIR). Aborting."
+  log "❌ No database.sqlite found in current release or fallback repo. Aborting."
   rollback_on_failure
 fi
 
 # Go into the new release
 cd "$NEW_RELEASE_DIR"
 
-# Fix permissions for storage and bootstrap/cache
+# 🔒 Fix permissions before composer install
 log "🔒 Fixing permissions..."
 sudo chown -R www-data:www-data storage bootstrap/cache
 sudo chmod -R 775 storage bootstrap/cache
@@ -131,6 +131,7 @@ log "🧹 Clearing and caching Laravel configuration..."
 php artisan config:clear
 php artisan route:clear
 php artisan view:clear
+php artisan cache:clear
 
 php artisan config:cache
 php artisan route:cache
