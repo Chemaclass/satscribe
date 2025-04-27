@@ -135,10 +135,6 @@ npm install --prefer-offline
 log "🛠 Building frontend assets..."
 npm run build
 
-# (Optional) Remove dev dependencies after build
-log "🧹 Pruning dev dependencies..."
-npm prune --omit=dev
-
 # Disable rollback trap
 trap - ERR
 
