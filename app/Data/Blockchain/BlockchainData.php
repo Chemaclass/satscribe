@@ -25,7 +25,7 @@ final readonly class BlockchainData
         return $this->block;
     }
 
-    public static function forBlock(BlockData $block, BlockData $previous, ?BlockData $next = null): self
+    public static function forBlock(BlockData $block, ?BlockData $previous = null, ?BlockData $next = null): self
     {
         return new self(
             block: $block,

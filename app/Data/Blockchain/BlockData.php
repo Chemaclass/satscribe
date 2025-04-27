@@ -17,7 +17,7 @@ final readonly class BlockData implements BlockchainDataInterface
         public int $size,
         public int $weight,
         public string $merkleRoot,
-        public string $previousBlockHash,
+        public ?string $previousBlockHash,
         public int $medianTime,
         public int $nonce,
         public int $bits,
