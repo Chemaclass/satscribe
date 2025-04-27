@@ -108,7 +108,8 @@ fi
 # 🔒 Fix database folder and file permissions
 log "🔒 Fixing database folder and file permissions..."
 sudo chown -R $USER:www-data "$NEW_RELEASE_DIR/database"
-sudo chmod -R 775 "$NEW_RELEASE_DIR/database"
+find "$NEW_RELEASE_DIR/database" -type d -exec chmod 775 {} \;
+find "$NEW_RELEASE_DIR/database" -type f -exec chmod 664 {} \;
 
 # Go into the new release
 cd "$NEW_RELEASE_DIR"
