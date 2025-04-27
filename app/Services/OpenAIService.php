@@ -59,7 +59,8 @@ final readonly class OpenAIService
         PromptPersona $persona,
         string $question,
     ): string {
-        $questionInstructions = $question ?: $this->defaultQuestionInstructions($type);
+        $questionInstructions = $question
+            ?: "Explicitly mention if this {$type->value} is historically important.";
 
         $sections = [];
 
@@ -82,7 +83,6 @@ TEXT;
         } else { // Block
             $additionalTask = <<<TEXT
 - Highlight if the block has only one transaction, an unusually low or high transaction count, or exceptionally large total fees.
-- Mention if the coinbase transaction contains an OP_RETURN output.
 - Compare size, timestamp, and miner with adjacent blocks if noteworthy.
 - Mention if the miner is notable, changed recently, or unexpected.
 - Highlight any anomalies (size, timestamp gaps, etc.).
@@ -96,7 +96,7 @@ Task:
 - Then summarize the most relevant insights from the blockchain context.
 - Do NOT fabricate missing data.
 - Do NOT repeat information already stated.
-- Focus on what is interesting or unusual, not exhaustive lists.
+- Focus on insights that are New, Surprising, Non-obvious, Historically or technically meaningful
 - The values are satoshis.
 $additionalTask
 TEXT;
@@ -104,29 +104,21 @@ TEXT;
         // 3. Global Writing Instructions
         $sections[] = <<<TEXT
 Writing Style:
-- Use markdown formatting.
-- Keep paragraphs under 80 words.
-- Use bullet points where appropriate for clarity.
-- Focus on actionable, concise insights.
-- End the answer naturally without abrupt cut-offs.
+- Use markdown formatting (headers, bullet points, emphasis where useful).
+- Prefer active voice over passive voice.
+- Keep sentences and paragraphs short for readability.
+- Group related ideas logically.
+- Maintain a professional but accessible tone.
+- End answers naturally without abrupt cut-offs.
 TEXT;
 
         // 4. Question-specific instructions
         $sections[] = $questionInstructions;
 
         // 5. Blockchain context (always last)
-        $sections[] = "Blockchain Data Context:\n" . $data->toPrompt();
+        $sections[] = "Blockchain Data Context:\n".$data->toPrompt();
 
         return implode("\n\n", $sections);
-    }
-
-    private function defaultQuestionInstructions(PromptType $type): string
-    {
-        return <<<TEXT
-- Use markdown formatting.
-- Keep paragraphs below 80 words.
-- Explicitly mention if this {$type->value} is historically important.
-TEXT;
     }
 
     private function trimToLastFullSentence(string $text): string
