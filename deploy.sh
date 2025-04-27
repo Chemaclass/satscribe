@@ -6,7 +6,7 @@ set -euo pipefail
 #######################
 
 PROJECT_NAME="satscribe"
-DEPLOY_DIR="$HOME/Code/$PROJECT_NAME"
+DEPLOY_DIR="$HOME/$PROJECT_NAME"
 BRANCH="main"
 REMOTE_REPO="git@github.com:Chemaclass/satscribe.git"
 RELEASES_DIR="$DEPLOY_DIR/releases"
