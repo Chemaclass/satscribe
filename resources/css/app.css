@@ -404,15 +404,78 @@ body.modal-open {
     color: var(--btc-orange-light); /* or orange-100 */
 }
 
-.prose ul > li {
-    position: relative;
-    padding-left: 1.5em;
-}
+/* PROSE BEGIN */
+/* Fix bulleted lists */
+ .prose ul > li {
+     position: relative;
+     padding-left: 1.5em;
+     margin-bottom: 0.5em; /* better vertical rhythm */
+ }
 
 .prose ul > li::before {
     content: '•';
     position: absolute;
     left: 0;
-    color: var(--btc-orange);
+    color: var(--btc-orange, orange);
     font-weight: bold;
 }
+
+/* Fix numbered lists */
+.prose ol {
+    list-style: decimal inside;
+}
+
+.prose ol > li {
+    padding-left: 0.5em;
+    margin-bottom: 0.5em;
+}
+
+/* Improve paragraph spacing */
+.prose p {
+    margin-bottom: 1rem;
+}
+
+/* Beautify code blocks */
+.prose pre {
+    background-color: #1a1a1a;
+    color: #f8f8f8;
+    padding: 1em;
+    border-radius: 0.5em;
+    overflow-x: auto;
+    font-size: 0.875rem; /* text-sm */
+}
+
+/* Beautify blockquotes */
+.prose blockquote {
+    border-left: 4px solid var(--btc-orange, orange);
+    padding-left: 1em;
+    font-style: italic;
+    color: #555;
+}
+
+/* Custom link color */
+.prose a {
+    color: var(--btc-orange, orange);
+    text-decoration: underline;
+}
+
+/* Optional: Better HR separator */
+.prose hr {
+    border: none;
+    border-top: 2px solid var(--btc-orange, orange);
+    margin: 2rem 0;
+}
+
+/* Optional: Tables (if AI generates tables) */
+.prose table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.prose th,
+.prose td {
+    border: 1px solid #ccc;
+    padding: 0.5em;
+    text-align: left;
+}
+/* PROSE END */
