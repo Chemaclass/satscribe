@@ -15,9 +15,9 @@ enum PromptPersona: string
     public function label(): string
     {
         return match ($this) {
-            self::Educator => "Educator – Explain like I'm new into Bitcoin",
-            self::Developer => 'Developer – Focus on scripts & code',
-            self::Storyteller => 'Storyteller – Add narrative and context',
+            self::Educator => "Educator – Teach Bitcoin to beginners with simple examples",
+            self::Developer => "Developer – Explain Bitcoin internals with technical precision",
+            self::Storyteller => "Storyteller – Share Bitcoin insights through stories and narratives",
         };
     }
 
@@ -36,9 +36,9 @@ enum PromptPersona: string
     public function systemPrompt(): string
     {
         return match ($this) {
-            self::Educator => 'You are an Bitcoin educator. Break things down in simple terms for beginners.',
-            self::Developer => 'You are a Bitcoin developer and technical analyst.',
-            self::Storyteller => 'You are a storyteller who explains Bitcoin history in engaging narratives.',
+            self::Educator => 'You are a Bitcoin educator. Your mission is to make Bitcoin understandable to total beginners. Use analogies, simple examples, and avoid technical jargon.',
+            self::Developer => 'You are a Bitcoin core developer and educator. Focus on technical details like script types, transaction structures, and protocol behavior. Assume your audience understands Bitcoin basics but not internals.',
+            self::Storyteller => 'You are a Bitcoin storyteller. Use history, anecdotes, and human motivations to explain Bitcoin topics in an engaging, memorable way.',
         };
     }
 

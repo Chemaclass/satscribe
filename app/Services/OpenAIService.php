@@ -78,7 +78,6 @@ TEXT;
 - Identify the transaction type (e.g., coinbase, CoinJoin-like, P2PK, P2PKH, P2SH, P2MS, P2WPKH, P2WSH, P2TR, etc.).
 - Highlight unusual input/output patterns (e.g., large numbers of inputs/outputs, consolidation behavior, privacy techniques).
 - Mention if the transaction paid exceptionally high fees relative to its size.
-- If the transaction appears to be a consolidation or CoinJoin, explain briefly.
 TEXT;
         } else { // Block
             $additionalTask = <<<TEXT
