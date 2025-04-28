@@ -30,18 +30,15 @@ final readonly class BlockHeightProvider
         return $this->cache->remember(
             self::CACHE_KEY,
             Carbon::now()->addMinutes(self::CACHE_TTL_MINUTES),
-            fn() => $this->fetchHeightWithFallback()
+            function () {
+                try {
+                    return $this->getCurrentBlockHeight() + self::BUFFER_HEIGHT;
+                } catch (RuntimeException $e) {
+                    $this->logger->warning('[BlockHeightProvider] '.$e->getMessage());
+                    return self::FALLBACK_HEIGHT;
+                }
+            }
         );
-    }
-
-    private function fetchHeightWithFallback(): int
-    {
-        try {
-            return $this->getCurrentBlockHeight() + self::BUFFER_HEIGHT;
-        } catch (RuntimeException $e) {
-            $this->logger->warning('[BlockHeightProvider] '.$e->getMessage());
-            return self::FALLBACK_HEIGHT;
-        }
     }
 
     public function getCurrentBlockHeight(): int

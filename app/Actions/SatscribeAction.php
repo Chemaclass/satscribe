@@ -30,10 +30,10 @@ final readonly class SatscribeAction
     public function execute(
         PromptInput $input,
         PromptPersona $persona,
-        bool $refresh = false,
-        ?string $question = '',
+        bool $refreshEnabled = false,
+        string $question = '',
     ): GeneratedPrompt {
-        if (!$refresh) {
+        if (!$refreshEnabled) {
             $cached = $this->repository->findByCriteria($input, $persona, $question);
 
             if ($cached instanceof SatscribeDescription && !$cached->force_refresh) {
@@ -41,7 +41,7 @@ final readonly class SatscribeAction
             }
         }
 
-        $fresh = $this->getFreshResult($input, $persona, $refresh, $question);
+        $fresh = $this->getFreshResult($input, $persona, $refreshEnabled, $question);
 
         return new GeneratedPrompt($fresh, isFresh: true);
     }

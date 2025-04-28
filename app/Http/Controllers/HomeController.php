@@ -15,6 +15,7 @@ use App\Services\BlockHeightProvider;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 final readonly class HomeController
 {
@@ -36,19 +37,21 @@ final readonly class HomeController
         $search = $this->getPromptInput($request);
         $persona = $this->getPromptPersona($request);
         $question = $request->getQuestionInput();
-        $refresh = $request->isRefreshEnabled();
+        $refreshEnabled = $request->isRefreshEnabled();
 
         try {
-            $generatedPrompt = $action->execute($search, $persona, $refresh, $question);
+            $generatedPrompt = $action->execute($search, $persona, $refreshEnabled, $question);
         } catch (BlockchainException|OpenAIError $e) {
             Log::error('Failed to describe prompt result', [
                 'search' => $search->text,
-                'refresh' => $refresh,
+                'refreshEnabled' => $refreshEnabled,
                 'question' => $question,
                 'persona' => $persona->value,
                 'error' => $e->getMessage(),
             ]);
-            return response()->json(['error' => $e->getMessage()], 422);
+            return response()->json([
+                'error' => $e->getMessage()
+            ], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
         return response()->json([
@@ -58,7 +61,7 @@ final readonly class HomeController
                 'search' => $search->text,
                 'question' => $question,
                 'persona' => $persona->value,
-                'refreshed' => $refresh,
+                'refreshed' => $refreshEnabled,
             ])->render()
         ]);
     }

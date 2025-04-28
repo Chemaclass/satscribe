@@ -14,7 +14,7 @@ final class SatscribeDescriptionRepository
     public function findByCriteria(
         PromptInput $input,
         PromptPersona $persona,
-        ?string $question = null,
+        string $question = '',
     ): ?SatscribeDescription {
         return SatscribeDescription::query()
             ->where('type', $input->type->value)
@@ -36,7 +36,7 @@ final class SatscribeDescriptionRepository
         string $aiResponse,
         BlockchainDataInterface $blockchainData,
         PromptPersona $persona,
-        ?string $question = null
+        string $question = ''
     ): SatscribeDescription {
         $raw = $blockchainData->toArray();
 
