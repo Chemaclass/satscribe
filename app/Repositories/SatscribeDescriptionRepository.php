@@ -8,9 +8,15 @@ use App\Data\PromptInput;
 use App\Enums\PromptPersona;
 use App\Enums\PromptType;
 use App\Models\SatscribeDescription;
+use Illuminate\Pagination\Paginator;
 
-final class SatscribeDescriptionRepository
+final readonly class SatscribeDescriptionRepository
 {
+    public function __construct(
+        private int $perPage
+    ) {
+    }
+
     public function findByCriteria(
         PromptInput $input,
         PromptPersona $persona,
@@ -53,5 +59,11 @@ final class SatscribeDescriptionRepository
             'force_refresh' => $forceRefresh,
             'persona' => $persona,
         ]);
+    }
+
+    public function getPagination(): Paginator
+    {
+        return SatscribeDescription::latest()
+            ->simplePaginate($this->perPage);
     }
 }

@@ -4,19 +4,16 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Models\SatscribeDescription;
+use App\Repositories\SatscribeDescriptionRepository;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 final class HistoryController
 {
-    public function index(): View
+    public function index(SatscribeDescriptionRepository $repository): View
     {
-        $perPage = config('app.pagination.per_page');
-
-        $descriptions = SatscribeDescription::latest()->simplePaginate($perPage);
-
         return view('history', [
-            'descriptions' => $descriptions,
+            'descriptions' => $repository->getPagination(),
         ]);
     }
 
