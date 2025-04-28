@@ -9,6 +9,7 @@ use App\Actions\SatscribeAction;
 use App\Http\Middleware\IpRateLimiter;
 use App\Services\Alby\AlbyClient;
 use App\Services\Alby\AlbyClientInterface;
+use App\Services\BlockHeightProvider;
 use App\Services\OpenAIService;
 use App\Services\PriceService;
 use Illuminate\Pagination\Paginator;
@@ -50,6 +51,11 @@ final class AppServiceProvider extends ServiceProvider
             ->when(PriceService::class)
             ->needs('$enabled')
             ->giveConfig('features.btc_price');
+
+        $this->app
+            ->when(BlockHeightProvider::class)
+            ->needs('$enabled')
+            ->giveConfig('features.btc_block_height');
 
         $this->app
             ->when(IpRateLimiter::class)

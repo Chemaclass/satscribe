@@ -23,6 +23,7 @@ final readonly class BlockHeightProvider
         private Cache $cache,
         private HttpClient $http,
         private LoggerInterface $logger,
+        private bool $enabled,
     ) {
     }
 
@@ -47,6 +48,10 @@ final readonly class BlockHeightProvider
 
     public function getCurrentBlockHeight(): int
     {
+        if (!$this->enabled) {
+            return self::FALLBACK_HEIGHT;
+        }
+
         $url = self::API_BASE_URL.self::BLOCKS_TIP_PATH;
         $response = $this->http->get($url);
         if ($response->failed()) {
