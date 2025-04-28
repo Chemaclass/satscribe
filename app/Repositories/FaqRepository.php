@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Models\Faq;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 final class FaqRepository
@@ -20,5 +22,35 @@ final class FaqRepository
     public function insertMany(array $rows): void
     {
         DB::table('faqs')->insert($rows);
+    }
+
+    public function getCollectionBySearch(string $search): Collection
+    {
+        $query = Faq::query();
+
+        if (!empty($search)) {
+            $query->where(function ($q) use ($search): void {
+                $q->where('title', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
+        return $query->orderByDesc('highlight')
+            ->orderBy('priority')
+            ->get();
+    }
+
+    /**
+     * @param  Collection<int, Faq>  $faqs
+     * @return  Collection<int, string>
+     */
+    public function getCategories(Collection $faqs): Collection
+    {
+        return $faqs
+            ->flatMap(fn($faq) => explode(',', (string) $faq->categories))
+            ->map(fn($c) => trim($c))
+            ->unique()
+            ->sort()
+            ->values();
     }
 }
