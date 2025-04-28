@@ -10,7 +10,7 @@ interface AlbyClientInterface
 
     public function getInfo(): array;
 
-    public function addInvoice(InvoiceData $invoice): array;
+    public function createInvoice(InvoiceData $invoice): array;
 
     public function getInvoice(string $hash): array;
 

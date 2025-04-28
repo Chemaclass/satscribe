@@ -58,9 +58,9 @@ final class AlbyClient implements AlbyClientInterface
     /**
      * Create a new Lightning invoice.
      *
-     * @return array Created invoice details including id and r_hash
+     * @return array{id:string, r_hash:string, payment_hash:string} Created invoice details
      */
-    public function addInvoice(InvoiceData $invoice): array
+    public function createInvoice(InvoiceData $invoice): array
     {
         $params = [
             "amount" => $invoice->amount,

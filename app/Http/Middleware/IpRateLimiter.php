@@ -38,7 +38,7 @@ final readonly class IpRateLimiter
                 'key' => $key,
                 'retryAfter' => RateLimiter::availableIn($key),
                 'maxAttempts' => $this->maxAttempts,
-                'invoice' => $this->albyClient->addInvoice(
+                'invoice' => $this->albyClient->createInvoice(
                     new InvoiceData(
                         amount: $this->lnInvoiceAmountInSats,
                         memo: $memo,
