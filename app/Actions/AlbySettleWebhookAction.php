@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
-use App\Http\Middleware\IpRateLimiter;
-use Throwable;
 use App\Exceptions\InvalidAlbyWebhookSignatureException;
+use App\Http\Middleware\IpRateLimiter;
 use Illuminate\Cache\RateLimiter;
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Psr\Log\LoggerInterface;
 use Svix\Webhook;
+use Throwable;
 
 final readonly class AlbySettleWebhookAction
 {
@@ -40,7 +40,9 @@ final readonly class AlbySettleWebhookAction
 
         $this->logger->info('Webhook payload', ['payload' => $verifiedPayload]);
 
-        if (($verifiedPayload['type'] ?? '') === 'incoming' && ($verifiedPayload['state'] ?? '') === 'SETTLED') {
+        if (($verifiedPayload['type'] ?? '') === 'incoming'
+            && ($verifiedPayload['state'] ?? '') === 'SETTLED'
+        ) {
             $this->handleInvoiceSettled($verifiedPayload);
         } else {
             $this->logger->info('Unhandled webhook payload', ['payload' => $verifiedPayload]);
@@ -53,7 +55,7 @@ final readonly class AlbySettleWebhookAction
         string $svixTimestamp,
         string $svixSignature,
     ): array {
-        if ($this->webhookSecret === '' || $this->webhookSecret === '0') {
+        if ($this->webhookSecret === '') {
             $this->logger->warning('Webhook secret not configured');
             throw new InvalidAlbyWebhookSignatureException();
         }
@@ -66,6 +68,7 @@ final readonly class AlbySettleWebhookAction
             ]);
 
             $this->logger->info('Webhook successfully verified');
+            // @todo: return DTO instead of raw array
             return json_decode($payload, true, flags: JSON_THROW_ON_ERROR);
         } catch (Throwable $e) {
             $this->logger->warning('Webhook verification failed', ['error' => $e->getMessage()]);
@@ -73,31 +76,37 @@ final readonly class AlbySettleWebhookAction
         }
     }
 
+    /**
+     * @param  array{
+     *     payment_hash: string,
+     *     type: string,
+     *     state: string,
+     *     memo: string,
+     *     amount: int,
+     * }  $payload
+     */
     private function handleInvoiceSettled(array $payload): void
     {
-        $invoiceHash = $payload['payment_hash'] ?? null;
-        $memo = $payload['memo'] ?? '';
+        $invoiceHash = $payload['payment_hash'];
+        $memo = $payload['memo'];
 
         $this->logger->info('Invoice settled', ['$memo' => $memo]);
 
-        if (str_contains($memo, '#')) {
-            $hash = $this->extractShortHash($memo);
-            if ($hash) {
-                $ip = $this->cache->pull(IpRateLimiter::createRateLimitKey($hash));
+        $hash = $this->extractShortHash($memo);
+        if ($hash !== null) {
+            $ip = $this->cache->pull(IpRateLimiter::createCacheKey($hash));
 
-                if ($ip) {
-                    $key = IpRateLimiter::createRateLimitKey($ip);
-                    $this->rateLimiter->clear($key);
-                    $this->logger->info('Rate limit cleared for IP', ['ip' => $ip]);
-                } else {
-                    $this->logger->warning('No IP found for hash', ['shortHash' => $hash]);
-                }
+            if ($ip) {
+                $this->rateLimiter->clear(IpRateLimiter::createRateLimitKey($ip));
+                $this->logger->info('Rate limit cleared for IP', ['ip' => $ip]);
+            } else {
+                $this->logger->warning('No IP found for hash', ['shortHash' => $hash]);
             }
         }
 
         $this->logger->info('Invoice settled', [
             'payment_hash' => $invoiceHash,
-            'amount' => $payload['amount'] ?? 0,
+            'amount' => $payload['amount'],
         ]);
     }
 

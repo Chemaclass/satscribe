@@ -23,12 +23,17 @@ final readonly class IpRateLimiter
     ) {
     }
 
+    public static function containsHash(string $memo): bool
+    {
+        return str_contains($memo, '#');
+    }
+
     public static function createRateLimitKey(string $ip): string
     {
         return 'ip_rate_limit_'.$ip;
     }
 
-    private static function createCacheKey(string $hash): string
+    public static function createCacheKey(string $hash): string
     {
         return 'invoice_ip_mapping_'.$hash;
     }
