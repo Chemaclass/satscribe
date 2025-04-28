@@ -23,14 +23,25 @@ final readonly class IpRateLimiter
     ) {
     }
 
+    public static function createRateLimitKey(string $ip): string
+    {
+        return 'ip_rate_limit_'.$ip;
+    }
+
+    private static function createCacheKey(string $hash): string
+    {
+        return 'invoice_ip_mapping_'.$hash;
+    }
+
     public function handle(Request $request, Closure $next): Response
     {
         $ip = $request->ip();
-        $key = 'ip_rate_limit_'.$ip;
+
+        $key = self::createRateLimitKey($ip);
         $shortHash = substr(md5($key), 0, 8);
         $memo = sprintf('Zap to keep Satscribe flowing ⚡️ #%s', $shortHash);
 
-        $this->cache->put('invoice_ip_mapping_'.$shortHash, $ip, now()->addHours(1));
+        $this->cache->put(self::createCacheKey($shortHash), $ip, now()->addHour());
 
         if (RateLimiter::tooManyAttempts($key, $this->maxAttempts)) {
             return response()->json([
@@ -45,7 +56,7 @@ final readonly class IpRateLimiter
                         expiry: $this->lnInvoiceExpirySeconds,
                     )
                 ),
-            ], 429);
+            ], Response::HTTP_TOO_MANY_REQUESTS);
         }
 
         RateLimiter::hit($key, 60 * 60); // Reset after 1 hour

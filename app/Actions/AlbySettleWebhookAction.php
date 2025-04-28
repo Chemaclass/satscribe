@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
+use App\Http\Middleware\IpRateLimiter;
 use Throwable;
 use App\Exceptions\InvalidAlbyWebhookSignatureException;
 use Illuminate\Cache\RateLimiter;
@@ -80,16 +81,16 @@ final readonly class AlbySettleWebhookAction
         $this->logger->info('Invoice settled', ['$memo' => $memo]);
 
         if (str_contains($memo, '#')) {
-            $shortHash = $this->extractShortHash($memo);
-            if ($shortHash) {
-                $ip = $this->cache->pull('invoice_ip_mapping_'.$shortHash);
+            $hash = $this->extractShortHash($memo);
+            if ($hash) {
+                $ip = $this->cache->pull(IpRateLimiter::createRateLimitKey($hash));
 
                 if ($ip) {
-                    $key = 'ip_rate_limit_'.$ip;
+                    $key = IpRateLimiter::createRateLimitKey($ip);
                     $this->rateLimiter->clear($key);
                     $this->logger->info('Rate limit cleared for IP', ['ip' => $ip]);
                 } else {
-                    $this->logger->warning('No IP found for hash', ['shortHash' => $shortHash]);
+                    $this->logger->warning('No IP found for hash', ['shortHash' => $hash]);
                 }
             }
         }
