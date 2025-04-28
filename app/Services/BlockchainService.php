@@ -22,11 +22,6 @@ final readonly class BlockchainService
     ) {
     }
 
-    public function getLast(): int
-    {
-        return (int) $this->http->get(self::BASE_URL."/blocks/tip/height");
-    }
-
     public function getBlockchainData(PromptInput $input): BlockchainData
     {
         return $input->isBlock()

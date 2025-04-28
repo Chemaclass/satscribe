@@ -12,8 +12,6 @@ use RuntimeException;
 
 final readonly class BlockHeightProvider
 {
-    private const API_BASE_URL = 'https://blockstream.info/api';
-    private const BLOCKS_TIP_PATH = '/blocks/tip/height';
     private const CACHE_KEY = 'max_possible_block_height';
     private const CACHE_TTL_MINUTES = 10;
     private const FALLBACK_HEIGHT = 100_000_000;
@@ -52,7 +50,7 @@ final readonly class BlockHeightProvider
             return self::FALLBACK_HEIGHT;
         }
 
-        $url = self::API_BASE_URL.self::BLOCKS_TIP_PATH;
+        $url = 'https://blockstream.info/api/blocks/tip/height';
         $response = $this->http->get($url);
         if ($response->failed()) {
             throw new RuntimeException("Blockstream API request failed for [$url]. Status: {$response->status()}");
