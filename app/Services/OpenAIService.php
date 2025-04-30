@@ -37,7 +37,7 @@ final readonly class OpenAIService
                 ],
                 [
                     'role' => 'user',
-                    'content' => $this->preparePrompt($data, $input->type, $question),
+                    'content' => $this->preparePrompt($data, $input->type, $question, $persona),
                 ],
             ],
             'max_tokens' => $persona->maxTokens(),
@@ -61,10 +61,10 @@ final readonly class OpenAIService
         BlockchainData $data,
         PromptType $type,
         string $question,
+        PromptPersona $persona
     ): string {
         $sections = [];
 
-        // 1. Task
         $sections[] = <<<TEXT
 Task Instructions:
 - If a question is provided, answer it directly and briefly FIRST.
@@ -79,10 +79,9 @@ Task Instructions:
 - All numeric values are denominated in satoshis.
 TEXT;
 
-        // 2. Additional Task Specific to Transaction or Block
         $sections[] = $this->getAdditionalTaskInstructions($type);
+        $sections[] = $persona->instructions($type);
 
-        // 3. Writing Style
         $sections[] = <<<TEXT
 Writing Style:
 - Use markdown formatting (headers, bullet points, and emphasis where appropriate).
@@ -93,26 +92,14 @@ Writing Style:
 - End the response naturally without abrupt cut-offs.
 TEXT;
 
-        // 4. Question-specific instructions
         if ($question !== '') {
-            $sections[] = <<<TEXT
-User Question:
-{$question}
-TEXT;
-        } else {
-            $sections[] = <<<TEXT
-Note:
-Explicitly mention if this {$type->value} is historically important or notable.
-TEXT;
+            $sections[] = "User Question:\n{$question}";
         }
 
-        // 5. Blockchain Data Context
         $sections[] = <<<TEXT
 Blockchain Data Context:
-You must derive all insights strictly from the following data.
-- DO NOT invent or hallucinate missing information.
-- DO NOT mechanically list or mirror the data.
-- Focus on interpretation, summarization, and meaningful takeaways.
+All insights must be grounded in the following data.
+Do not fabricate or repeat. Interpret and summarize meaningfully.
 {$data->toPrompt()}
 TEXT;
 
@@ -121,15 +108,25 @@ TEXT;
 
     private function trimToLastFullSentence(string $text): string
     {
-        $matches = [];
-        preg_match_all('/[.?!](?=\s|$)/u', $text, $matches, PREG_OFFSET_CAPTURE);
+        $text = trim($text);
 
-        if (isset($matches[0]) && $matches[0] !== []) {
+        // Match sentence-ending punctuation followed by space or end
+        // Handles English and common Unicode (e.g., …)
+        $matches = [];
+        preg_match_all('/[.?!…](?=\s|$)/u', $text, $matches, PREG_OFFSET_CAPTURE);
+
+        if (!empty($matches[0])) {
             $last = end($matches[0]);
-            return mb_substr($text, 0, $last[1] + 1);
+            $cutPos = $last[1] + mb_strlen($last[0]);
+            $clean = mb_substr($text, 0, $cutPos);
+
+            // Final cleanup: remove hanging markdown artifacts
+            $clean = preg_replace('/(\*\*|\*|_|\-)+$/u', '', $clean);
+
+            return trim($clean);
         }
 
-        return $text; // fallback
+        return $text; // fallback: no sentence-ending punctuation found
     }
 
     private function getAdditionalTaskInstructions(PromptType $type): string

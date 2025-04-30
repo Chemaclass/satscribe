@@ -43,11 +43,64 @@ enum PromptPersona: string
 
         return <<<TEXT
 $persona
-You will receive structured blockchain data for CONTEXT ONLY.
-Do NOT mechanically list or repeat back the data.
 Your role is to craft an insightful, persona-aligned response.
-Prioritize clarity, brevity, and meaningful key takeaways over exhaustive details.
+Always end your response cleanly. Avoid cutting off mid-sentence. If you're nearing the end of your message, wrap up your final thought gracefully.
+You will receive structured blockchain data for CONTEXT ONLY. Do NOT mechanically list or repeat back the data.
 TEXT;
+    }
+
+    public function instructions(PromptType $type): string
+    {
+        return match ($this) {
+            self::Educator => <<<TEXT
+Task:
+- Explain using simple, real-world analogies.
+- Avoid jargon. Assume no prior Bitcoin knowledge.
+- If a question is asked, answer it first in one sentence, then elaborate.
+- Emphasize "why" over "how".
+- Be encouraging and clear.
+
+Style:
+- Use short paragraphs and friendly tone.
+- Bullet points or headers are welcome if helpful.
+- End with a recap or takeaway.
+
+Context:
+This explanation refers to a {$type->value}.
+TEXT,
+
+            self::Developer => <<<TEXT
+Task:
+- If a question is provided, answer it concisely first.
+- Provide technical insights from the blockchain context.
+- Highlight unusual inputs, outputs, fees, or patterns.
+
+Style:
+- Use technical terms and correct nomenclature.
+- Organize insights into clearly structured sections using markdown.
+- Avoid unnecessary elaboration.
+
+Context:
+This explanation refers to a {$type->value}.
+TEXT,
+
+            self::Storyteller => <<<TEXT
+Task:
+- Explain the topic using a story or metaphor.
+- Assume the listener is a curious child.
+- Use vivid language and simple concepts.
+- Focus on human motivations or analogies (like boxes, messengers, treasure maps).
+- Begin with a short story or setup, then introduce the technical part gently.
+
+Style:
+- Story-driven, engaging, and playful tone.
+- Use character names or metaphors where fitting.
+- End with a lesson or "moral of the story".
+
+Context:
+This explanation refers to a {$type->value}.
+TEXT,
+        };
     }
 
     public function maxTokens(): int
