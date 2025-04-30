@@ -148,7 +148,7 @@
                     </div>
 
                     {{-- Refresh checkbox --}}
-                    <div class="flex items-start gap-3 ">
+                    <div class="flex items-start gap-3">
                         <input
                             type="checkbox"
                             id="refresh"
@@ -156,10 +156,10 @@
                             value="true"
                             class="checkbox-input mt-1 accent-orange-500 dark:accent-orange-400 cursor-pointer"
                         >
-                        <label for="refresh" class="checkbox-label text-sm text-gray-800 dark:text-orange-200 cursor-pointer">
-                            <strong class="text-orange-700 dark:text-orange-400">Fetch the latest data from the blockchain</strong><br>
+                        <label for="refresh" class="block text-sm font-medium text-gray-900 mb-1 cursor-pointer">
+                            Fetch the latest data from the blockchain<br>
                             <small class="checkbox-help text-gray-600 dark:text-gray-400">
-                                (Skips cached descriptions and requests live data from the blockchain and OpenAI)
+                                (Skips cached data and requests fresh live data from the blockchain and OpenAI)
                             </small>
                         </label>
                     </div>
