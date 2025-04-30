@@ -75,9 +75,16 @@
                         <template x-if="faq.categories">
                             <div class="flex flex-wrap items-center gap-1 sm:text-right">
                                 <template x-for="cat in faq.categories.split(',')">
-                                    <span class="category-badge">
+                                    <button
+                                        class="category-badge transition-colors duration-150 px-2 py-0.5 text-xs font-medium rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-orange-200 dark:hover:bg-orange-300 flex items-center gap-1 cursor-pointer"
+                                        :class="category === cat.trim() ? 'bg-orange-300 text-white dark:bg-orange-400' : ''"
+                                        @click="category === cat.trim() ? category = '' : category = cat.trim()"
+                                    >
+                                        <template x-if="category === cat.trim()">
+                                            <span class="ml-1 text-xs font-bold">✕</span>
+                                        </template>
                                         <span x-text="cat.trim()"></span>
-                                    </span>
+                                    </button>
                                 </template>
                             </div>
                         </template>
