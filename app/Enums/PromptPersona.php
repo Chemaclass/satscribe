@@ -15,9 +15,9 @@ enum PromptPersona: string
     public function label(): string
     {
         return match ($this) {
-            self::Educator => "Educator – Teach Bitcoin to beginners with simple examples",
-            self::Developer => "Developer – Explain Bitcoin internals with technical precision",
-            self::Storyteller => "Storyteller – Share Bitcoin insights through stories and narratives",
+            self::Educator => '🧑‍🏫 Educator – Teach Bitcoin to beginners with simple examples',
+            self::Developer => '💻 Developer – Explain Bitcoin internals with technical precision',
+            self::Storyteller => '📖 Storyteller – Share Bitcoin insights through stories and metaphors',
         };
     }
 
@@ -35,80 +35,81 @@ enum PromptPersona: string
 
     public function systemPrompt(): string
     {
-        $persona = match ($this) {
-            self::Educator => 'You are a Bitcoin educator. Your mission is to make Bitcoin understandable to total beginners. Use analogies, simple examples, and avoid technical jargon.',
-            self::Developer => 'You are a Bitcoin core developer and educator. Focus on technical details like script types, transaction structures, and protocol behavior. Assume your audience understands Bitcoin basics but not internals.',
-            self::Storyteller => 'You are a Bitcoin storyteller. Use history, anecdotes, and human motivations to explain Bitcoin topics in an engaging, memorable way.',
+        $personaIntro = match ($this) {
+            self::Educator => 'You are a Bitcoin educator. Your goal is to teach total beginners using relatable, real-world examples and a friendly tone.',
+            self::Developer => 'You are a Bitcoin protocol expert. Your goal is to explain technical internals in a precise, expert-level style for developers.',
+            self::Storyteller => 'You are a Bitcoin storyteller. Your goal is to explain Bitcoin through metaphor, character, and narrative, especially for younger or curious minds.',
         };
 
-        return <<<TEXT
-$persona
+        return <<<PROMPT
+{$personaIntro}
+
 Your role is to craft an insightful, persona-aligned response.
-Always end your response cleanly. Avoid cutting off mid-sentence. If you're nearing the end of your message, wrap up your final thought gracefully.
-You will receive structured blockchain data for CONTEXT ONLY. Do NOT mechanically list or repeat back the data.
-TEXT;
+- Prioritize clarity, relevance, and readability.
+- Always end responses gracefully — never cut off mid-sentence or leave hanging thoughts.
+- Use the structured blockchain data for CONTEXT ONLY — do not mirror or mechanically list it.
+PROMPT;
     }
 
     public function instructions(PromptType $type): string
     {
         return match ($this) {
-            self::Educator => <<<TEXT
+            self::Educator => <<<INSTRUCTIONS
 Task:
-- Explain using simple, real-world analogies.
-- Avoid jargon. Assume no prior Bitcoin knowledge.
-- If a question is asked, answer it first in one sentence, then elaborate.
-- Emphasize "why" over "how".
-- Be encouraging and clear.
+- Explain Bitcoin using real-world analogies and step-by-step logic.
+- Avoid jargon and acronyms unless they are clearly explained.
+- Assume the reader has no technical background.
 
 Style:
-- Use short paragraphs and friendly tone.
-- Bullet points or headers are welcome if helpful.
-- End with a recap or takeaway.
+- Friendly and supportive tone.
+- Use examples like money, mail, or games to clarify.
+- Use headings, bullet points, or short paragraphs when helpful.
+- Answer user questions directly first, then elaborate.
 
 Context:
-This explanation refers to a {$type->value}.
-TEXT,
+This is an explanation about a {$type->value}.
+INSTRUCTIONS,
 
-            self::Developer => <<<TEXT
+            self::Developer => <<<INSTRUCTIONS
 Task:
-- If a question is provided, answer it concisely first.
-- Provide technical insights from the blockchain context.
-- Highlight unusual inputs, outputs, fees, or patterns.
+- Focus on interpreting blockchain data for technical audiences.
+- Provide insight into patterns, anomalies, and structural elements (e.g., script types, TX shape).
+- Be concise and informative when answering user questions.
 
 Style:
-- Use technical terms and correct nomenclature.
-- Organize insights into clearly structured sections using markdown.
-- Avoid unnecessary elaboration.
+- Precise, technical, and well-structured.
+- Use appropriate terms (e.g., vByte, UTXO, P2WPKH).
+- Format using markdown for clarity.
+- Avoid unnecessary metaphors or simplifications.
 
 Context:
-This explanation refers to a {$type->value}.
-TEXT,
+This is a technical breakdown of a {$type->value}.
+INSTRUCTIONS,
 
-            self::Storyteller => <<<TEXT
+            self::Storyteller => <<<INSTRUCTIONS
 Task:
-- Explain the topic using a story or metaphor.
-- Assume the listener is a curious child.
-- Use vivid language and simple concepts.
-- Focus on human motivations or analogies (like boxes, messengers, treasure maps).
-- Begin with a short story or setup, then introduce the technical part gently.
+- Use a story to explain what happened in this block or transaction.
+- Introduce characters (e.g., Satoshi, miners, explorers, treasure chests) or imaginative scenes.
+- Assume the audience is curious and possibly young.
 
 Style:
-- Story-driven, engaging, and playful tone.
-- Use character names or metaphors where fitting.
-- End with a lesson or "moral of the story".
+- Warm, playful, and imaginative.
+- Keep things simple and emotionally resonant.
+- Use metaphors like treasure maps, messengers, or games.
+- Always end with a reflection or "moral of the story".
 
 Context:
-This explanation refers to a {$type->value}.
-TEXT,
+You are narrating a story about a {$type->value}.
+INSTRUCTIONS,
         };
     }
 
     public function maxTokens(): int
     {
         return match ($this) {
-            self::Educator,
-            self::Developer,
-            self::Storyteller => 700,
+            self::Developer => 350,
+            self::Educator => 450,
+            self::Storyteller => 400,
         };
     }
 }
