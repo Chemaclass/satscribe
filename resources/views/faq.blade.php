@@ -33,7 +33,7 @@
 
         {{-- Answer Type Tabs --}}
         <div class="flex mt-4 gap-2 mb-4 text-sm items-center">
-            <span class="text-xs">Answer style:</span>
+            <span class="text-xs" title="Choose the level of detail in answers">Answer style:</span>
             @foreach ([
                 'tldr' => ['icon' => 'scissors', 'label' => 'TL;DR'],
                 'beginner' => ['icon' => 'book', 'label' => 'Beginner'],
@@ -67,7 +67,7 @@
                 >
                     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
                         <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
-                            <span x-text="faq.question"></span>
+                            <span x-html="faq.highlighted_question"></span>
                             <template x-if="faq.highlight">
                                 <span class="faq-highlight ml-2 block sm:inline">★ Highlight</span>
                             </template>
@@ -83,10 +83,10 @@
                         </template>
                     </div>
 
-                    <!-- Answers -->
-                    <p class="faq-answer mb-2" x-show="answerLevel === 'tldr'" x-text="faq.answer_tldr"></p>
-                    <p class="faq-answer mb-2" x-show="answerLevel === 'beginner'" x-text="faq.answer_beginner"></p>
-                    <p class="faq-answer mb-2" x-show="answerLevel === 'advance'" x-text="faq.answer_advance"></p>
+                    <!-- Replace x-text with x-html for answers -->
+                    <p class="faq-answer mb-2" x-show="answerLevel === 'tldr'" x-html="faq.highlighted_tldr"></p>
+                    <p class="faq-answer mb-2" x-show="answerLevel === 'beginner'" x-html="faq.highlighted_beginner"></p>
+                    <p class="faq-answer mb-2" x-show="answerLevel === 'advance'" x-html="faq.highlighted_advance"></p>
 
                     <template x-if="faq.link">
                         <a :href="faq.link" target="_blank"
@@ -113,12 +113,26 @@
                     window.dispatchEvent(new CustomEvent('answer-level-change', { detail: level }));
                 },
                 filteredFaqs() {
-                    return this.faqs.filter(faq => {
-                        const inCategory = this.category === '' || faq.categories.toLowerCase().includes(this.category.toLowerCase());
-                        const matchSearch = faq.question.toLowerCase().includes(this.search.toLowerCase());
-                        return inCategory && matchSearch;
-                    });
-                }
+                    return this.faqs
+                        .filter(faq => {
+                            const inCategory = this.category === '' || faq.categories.toLowerCase().includes(this.category.toLowerCase());
+                            const matchSearch = faq.question.toLowerCase().includes(this.search.toLowerCase()) ||
+                                faq.answer_tldr.toLowerCase().includes(this.search.toLowerCase());
+                            return inCategory && matchSearch;
+                        })
+                        .map(faq => ({
+                            ...faq,
+                            highlighted_question: this.highlightMatch(faq.question, this.search),
+                            highlighted_tldr: this.highlightMatch(faq.answer_tldr, this.search),
+                            highlighted_beginner: this.highlightMatch(faq.answer_beginner, this.search),
+                            highlighted_advance: this.highlightMatch(faq.answer_advance, this.search),
+                        }));
+                },
+                highlightMatch(text, term) {
+                    if (!term) return text;
+                    const regex = new RegExp(`(${term})`, 'gi');
+                    return text.replace(regex, '<mark>$1</mark>');
+                },
             }));
         });
     </script>
