@@ -6,51 +6,36 @@ namespace App\Data;
 final class QuestionPlaceholder
 {
     public const SAMPLE_QUESTIONS = [
-        // Transaction-focused
-        'How many inputs and outputs are there?',
-        'What is the transaction fee?',
-        'What is the fee rate (sat/vB)?',
-        'Is this transaction using Taproot?',
-        'Is this a SegWit transaction?',
-        'What is the total value transferred?',
-        'What is the largest output value?',
-        'Are any outputs non-standard?',
-        'Are any of the addresses multisig?',
-        'Is this a coinbase transaction?',
-        'Was the fee considered high at the time?',
-        'What type of script does this transaction use?',
-        'What’s the likely purpose of this transaction?',
-        'Is this part of a CoinJoin?',
-        'Is this a self-transfer between wallets?',
-        'Does this transaction look like a batch payment?',
-        'Is this transaction economically relevant?',
-        'How old are the inputs in this transaction?',
-
-        // Block-focused
-        'Which mining pool mined this block?',
-        'How many transactions are in this block?',
-        'What is the total block reward?',
-        'What is the size of this block?',
-        'How long did it take to mine this block?',
-        'Are there any large transactions in this block?',
-        'Are there any Ordinals or inscriptions here?',
-        'What was the difficulty for this block?',
-        'Was this block mined quickly or slowly?',
-        'What is the average fee per transaction in this block?',
-        'Are there any unusual patterns in this block?',
-        'How much total value was transferred in this block?',
-
-        // General & Creative
-        'Explain this block in simple terms.',
-        'Is there anything interesting or unusual about this transaction?',
-        'Write a short explanation for beginners.',
-        'What stands out in this block’s activity?',
-        'Could this transaction be related to an exchange?',
-        'Is this a common pattern seen in Bitcoin usage?',
+        'transaction' => [
+            "What is the fee and fee rate?",
+            "Is this a CoinJoin or a batch transaction?",
+            "Does it use Taproot or SegWit?",
+            "Is it a self-transfer between wallets?",
+        ],
+        'block' => [
+            "Which pool mined this block?",
+            "How many transactions are inside?",
+            "How big is this block and how fast was it mined?",
+            "Are there any Ordinals or inscriptions?",
+        ],
+        'both' => [
+            "Explain this like I'm five.",
+            "What's unusual or interesting here?",
+            "Could this be linked to an exchange or service?",
+            "Write a short, simple summary.",
+        ],
     ];
 
     public static function rand(): string
     {
-        return self::SAMPLE_QUESTIONS[array_rand(self::SAMPLE_QUESTIONS)];
+        return collect(self::SAMPLE_QUESTIONS)->flatten()->random();
+    }
+
+    /**
+     * @return list<string>
+     */
+    public static function groupedPrompts(): array
+    {
+        return self::SAMPLE_QUESTIONS;
     }
 }
