@@ -147,6 +147,41 @@
                         @enderror
                     </div>
 
+                    {{-- Suggested Prompts --}}
+                    <div x-data="{ promptType: null }"
+                         x-init="$watch('input', value => {
+        if (/^[a-fA-F0-9]{64}$/.test(value)) {
+            promptType = 'transaction';
+        } else if (/^\d+$/.test(value)) {
+            promptType = 'block';
+        } else {
+            promptType = null;
+        }
+     })"
+                         class="mt-3"
+                    >
+                        <template x-if="promptType">
+                            <div>
+                                <p class="text-sm font-medium text-gray-800 dark:text-gray-200 mb-1">
+                                    Suggested Questions
+                                </p>
+                                <div class="flex flex-wrap gap-2">
+                                    @foreach ($suggestedPromptsGrouped as $type => $questions)
+                                        <template x-if="promptType === '{{ $type }}' || '{{ $type }}' === 'both'">
+                                            <template x-for="prompt in @js($questions)" :key="prompt">
+                                                <button type="button"
+                                                        class="px-3 py-1 rounded-full text-sm bg-gray-100 hover:bg-orange-100 text-gray-700 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-orange-400 dark:hover:text-gray-900 transition cursor-pointer"
+                                                        @click="document.getElementById('question').value = prompt">
+                                                    <span x-text="prompt"></span>
+                                                </button>
+                                            </template>
+                                        </template>
+                                    @endforeach
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+
                     {{-- Refresh checkbox --}}
                     <div class="flex items-start gap-3">
                         <input

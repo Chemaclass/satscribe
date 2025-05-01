@@ -28,6 +28,7 @@ final readonly class HomeController
     {
         return view('home', [
             'questionPlaceholder' => QuestionPlaceholder::rand(),
+            'suggestedPromptsGrouped' => QuestionPlaceholder::groupedPrompts(),
             'maxBitcoinBlockHeight' => $this->heightProvider->getMaxPossibleBlockHeight(),
         ]);
     }
