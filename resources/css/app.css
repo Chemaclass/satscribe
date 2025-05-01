@@ -314,11 +314,11 @@ pre,
 
 .description-item {
     @apply p-5 rounded-lg shadow-sm transition hover:shadow-md mb-4;
-    @apply bg-white hover:bg-orange-50 text-gray-900;
+    @apply bg-white text-gray-900;
 }
 
 .dark .description-item {
-    @apply bg-gray-800 hover:bg-gray-700 text-gray-100;
+    @apply bg-gray-800 text-gray-100;
 }
 
 .description-question {
@@ -330,12 +330,12 @@ pre,
     @apply bg-gray-700 text-orange-100 ring-1 ring-gray-700;
 }
 
-.persona-label {
+label {
     color: #1f2937;
 }
 
-.dark .persona-label {
-    color: var(--btc-orange-light);
+.dark label {
+    color: var(--btc-text-light);
 }
 
 /* =============================================================================
@@ -450,6 +450,17 @@ body.modal-open {
     }
 }
 
+a,
+.link {
+    color: var(--btc-orange, orange);
+    cursor: pointer;
+}
+
+a:hover,
+.link:hover {
+    text-decoration: underline;
+}
+
 /* =============================================================================
    Prose Styling (Markdown / Rich Text)
 ============================================================================= */
@@ -494,11 +505,6 @@ body.modal-open {
     padding-left: 1em;
     font-style: italic;
     color: #555;
-}
-
-.prose a {
-    color: var(--btc-orange, orange);
-    text-decoration: underline;
 }
 
 .prose hr {

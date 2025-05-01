@@ -62,7 +62,7 @@
                         <div class="description-meta mt-2 flex justify-between items-center text-sm text-gray-500">
                             <span>{{ $desc->created_at->diffForHumans() }}</span>
                             <button type="button"
-                                    class="toggle-history-raw-btn text-blue-600 hover:underline"
+                                    class="toggle-history-raw-btn link"
                                     data-target="raw-{{ $desc->id }}"
                                     data-id="{{ $desc->id }}">
                                 Show raw data
@@ -125,9 +125,8 @@
                     const targetId = button.dataset.target;
                     const rawBlock = document.getElementById(targetId);
                     const isHidden = rawBlock.classList.contains('hidden');
-
                     rawBlock.classList.toggle('hidden');
-                    button.textContent = isHidden ? 'Hide raw data' : 'Show raw data';
+                    button.textContent = isHidden ? 'Show raw data' : 'Hide raw data';
                 });
             });
         });
