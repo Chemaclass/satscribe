@@ -54,8 +54,8 @@
                             <strong>Question:</strong> {{ $desc->question }}
                         </div>
                         @endif
-                        <div class="description-body relative">
-                            <div id="{{ $entryId }}" class="prose markdown-content collapsed-response overflow-hidden max-h-[6.5rem] transition-all duration-300">
+                        <div class="description-body relative collapsed" data-target="{{ $entryId }}">
+                            <div id="{{ $entryId }}" class="prose markdown-content overflow-hidden max-h-[8.5rem] transition-all duration-300">
                                 {!! Str::markdown($desc->ai_response) !!}
                             </div>
                         </div>
@@ -101,20 +101,20 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // Toggle AI response collapse
-            document.querySelectorAll('.toggle-response-button').forEach(button => {
-                button.addEventListener('click', () => {
-                    const targetId = button.dataset.target;
-                    const target = document.getElementById(targetId);
-                    const isCollapsed = target.classList.contains('collapsed-response');
+            // Make .description-body clickable to toggle expansion
+            document.querySelectorAll('.description-body').forEach(body => {
+                const targetId = body.dataset.target;
+                const content = document.getElementById(targetId);
 
-                    target.classList.toggle('collapsed-response');
+                body.addEventListener('click', () => {
+                    const isCollapsed = body.classList.contains('collapsed');
+
                     if (isCollapsed) {
-                        target.classList.remove('max-h-[6.5rem]');
-                        button.textContent = 'Show less';
+                        body.classList.remove('collapsed');
+                        content.classList.remove('max-h-[8.5rem]');
                     } else {
-                        target.classList.add('max-h-[6.5rem]');
-                        button.textContent = 'Show more';
+                        body.classList.add('collapsed');
+                        content.classList.add('max-h-[8.5rem]');
                     }
                 });
             });
