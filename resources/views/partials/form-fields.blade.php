@@ -48,40 +48,8 @@
             {{-- Hidden flag --}}
             <input type="hidden" name="submitted" value="1">
 
-            {{-- Submit button --}}
-            <div class="form-actions mt-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
-                <button
-                    type="submit"
-                    class="form-button w-full sm:w-auto"
-                    id="submit-button"
-                    :disabled="isSubmitting"
-                >
-                    <i data-lucide="loader-2" class="animate-spin mr-2" x-show="isSubmitting" x-cloak></i>
-                    <span x-show="!isSubmitting" x-cloak id="submit-text">Satscribe</span>
-                    <span x-show="!isSubmitting" x-cloak id="submit-icon" class="sm-2">
-                        <i data-lucide="zap" class="w-4 h-4"></i>
-                    </span>
-                </button>
-
-                {{-- Optional freshness badge --}}
-                @isset($isFresh)
-                    @if ($isFresh)
-                        <div class="inline-flex items-center text-sm text-green-800 bg-green-100 border border-green-200 px-3 py-2 rounded-md shadow-sm">
-                            <i data-lucide="flask" class="text-green-500 mr-1"></i>
-                            <strong class="mr-1">Fresh!</strong>
-                            <span>Generation using live blockchain data ✨</span>
-                        </div>
-                    @else
-                        <div class="inline-flex items-center text-sm text-yellow-800 bg-yellow-100 border border-yellow-200 px-3 py-2 rounded-md shadow-sm">
-                            <i data-lucide="history" class="text-yellow-600 mr-1"></i>
-                            <span>Loaded from previous analysis (cached)</span>
-                        </div>
-                    @endif
-                @endisset
-            </div>
-
             {{-- Advanced options --}}
-            <div x-data="{ showAdvanced: false }" class="form-group mb-4">
+            <div x-data="{ showAdvanced: false }" class="form-group ">
                 <button
                     type="button"
                     class="text-sm font-medium text-orange-600 hover:text-orange-700 flex items-center cursor-pointer gap-2 mt-4"
@@ -96,7 +64,7 @@
                     x-show="showAdvanced"
                     x-cloak
                     x-transition
-                    class="mt-4 advanced-fields mt-1 rounded-lg px-4 py-3 space-y-4 shadow-sm"
+                    class="mt-4 advanced-fields rounded-lg px-4 py-3 space-y-4 shadow-sm"
                 >
                     {{-- Persona selection --}}
                     <div>
@@ -200,6 +168,39 @@
                     </div>
                 </div>
             </div>
+
+            {{-- Submit button --}}
+            <div class="form-actions mt-4 mb-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+                <button
+                    type="submit"
+                    class="form-button w-full sm:w-auto"
+                    id="submit-button"
+                    :disabled="isSubmitting"
+                >
+                    <i data-lucide="loader-2" class="animate-spin mr-2" x-show="isSubmitting" x-cloak></i>
+                    <span x-show="!isSubmitting" x-cloak id="submit-text">Satscribe</span>
+                    <span x-show="!isSubmitting" x-cloak id="submit-icon" class="sm-2">
+                        <i data-lucide="zap" class="w-4 h-4"></i>
+                    </span>
+                </button>
+
+                {{-- Optional freshness badge --}}
+                @isset($isFresh)
+                    @if ($isFresh)
+                        <div class="inline-flex items-center text-sm text-green-800 bg-green-100 border border-green-200 px-3 py-2 rounded-md shadow-sm">
+                            <i data-lucide="flask" class="text-green-500 mr-1"></i>
+                            <strong class="mr-1">Fresh!</strong>
+                            <span>Generation using live blockchain data ✨</span>
+                        </div>
+                    @else
+                        <div class="inline-flex items-center text-sm text-yellow-800 bg-yellow-100 border border-yellow-200 px-3 py-2 rounded-md shadow-sm">
+                            <i data-lucide="history" class="text-yellow-600 mr-1"></i>
+                            <span>Loaded from previous analysis (cached)</span>
+                        </div>
+                    @endif
+                @endisset
+            </div>
+
         </fieldset>
     </fieldset>
 </form>
