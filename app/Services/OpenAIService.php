@@ -63,18 +63,36 @@ final readonly class OpenAIService
         string $question,
         PromptPersona $persona
     ): string {
-        $sections = [];
+        return implode("\n\n", array_filter([
+            $question !== ''
+                ? $this->buildQuestionPrompt($question)
+                : $this->buildInsightPrompt($type, $persona),
 
-        if ($question !== '') {
-            $sections[] = <<<TEXT
+            $this->buildWritingStyleInstructions(),
+            $this->buildBlockchainContext($data),
+        ]));
+    }
+
+    private function buildQuestionPrompt(string $question): string
+    {
+        return <<<TEXT
+Task Instructions:
+- DO NOT fabricate missing information.
+- DO NOT merely repeat the provided data.
+- All numeric values are denominated in satoshis.
+
 Task:
 Answer the user's question using the blockchain data below if needed. Be concise and relevant — avoid additional analysis or unrelated context unless explicitly required to support the answer.
 
 User Question:
 {$question}
 TEXT;
-        } else {
-            $sections[] = <<<TEXT
+    }
+
+    private function buildInsightPrompt(PromptType $type, PromptPersona $persona): string
+    {
+        return implode("\n\n", [
+            <<<TEXT
 Task Instructions:
 - Summarize the most relevant insights from the blockchain context.
 - Focus on insights that are:
@@ -85,13 +103,15 @@ Task Instructions:
 - DO NOT fabricate missing information.
 - DO NOT merely repeat the provided data.
 - All numeric values are denominated in satoshis.
-TEXT;
-            // Add the shared analysis instructions and writing style
-            $sections[] = $this->getAdditionalTaskInstructions($type);
-            $sections[] = $persona->instructions($type);
-        }
+TEXT,
+            $this->getAdditionalTaskInstructions($type),
+            $persona->instructions($type),
+        ]);
+    }
 
-        $sections[] = <<<TEXT
+    private function buildWritingStyleInstructions(): string
+    {
+        return <<<TEXT
 Writing Style:
 - Use markdown formatting (headers, bullet points, and emphasis where appropriate).
 - Prefer active voice over passive voice.
@@ -100,23 +120,38 @@ Writing Style:
 - Maintain a professional yet accessible tone.
 - End the response naturally without abrupt cut-offs.
 TEXT;
+    }
 
-        $sections[] = <<<TEXT
+    private function buildBlockchainContext(BlockchainData $data): string
+    {
+        return <<<TEXT
 Blockchain Data Context:
 All insights must be grounded in the following data. Do not fabricate or repeat. Interpret and summarize meaningfully.
 {$data->toPrompt()}
 TEXT;
+    }
 
-        return implode("\n\n", $sections);
+    private function getAdditionalTaskInstructions(PromptType $type): string
+    {
+        return $type === PromptType::Transaction
+            ? <<<TEXT
+- Identify the transaction type (e.g., coinbase, CoinJoin-like, P2PK, P2PKH, P2SH, P2MS, P2WPKH, P2WSH, P2TR, etc.).
+- Highlight unusual input/output patterns (e.g., large numbers of inputs/outputs, consolidation behavior, privacy techniques).
+- Mention if the transaction paid exceptionally high fees relative to its size.
+TEXT
+            : <<<TEXT
+- Highlight if the block has only one transaction, an unusually low or high transaction count, or exceptionally large total fees.
+- Compare size, timestamp, and miner with adjacent blocks if noteworthy.
+- Mention if the miner is notable, changed recently, or unexpected.
+- Highlight any anomalies (size, timestamp gaps, etc.).
+- If the block has historical significance, clearly explain why.
+TEXT;
     }
 
     private function trimToLastFullSentence(string $text): string
     {
         $text = trim($text);
 
-        // Match sentence-ending punctuation followed by space or end
-        // Handles English and common Unicode (e.g., …)
-        $matches = [];
         preg_match_all('/[.?!…](?=\s|$)/u', $text, $matches, PREG_OFFSET_CAPTURE);
 
         if (!empty($matches[0])) {
@@ -124,32 +159,9 @@ TEXT;
             $cutPos = $last[1] + mb_strlen($last[0]);
             $clean = mb_substr($text, 0, $cutPos);
 
-            // Final cleanup: remove hanging markdown artifacts
-            $clean = preg_replace('/(\*\*|\*|_|\-)+$/u', '', $clean);
-
-            return trim($clean);
+            return trim(preg_replace('/(\*\*|\*|_|\-)+$/u', '', $clean));
         }
 
-        return $text; // fallback: no sentence-ending punctuation found
-    }
-
-    private function getAdditionalTaskInstructions(PromptType $type): string
-    {
-        if ($type === PromptType::Transaction) {
-            return <<<TEXT
-- Identify the transaction type (e.g., coinbase, CoinJoin-like, P2PK, P2PKH, P2SH, P2MS, P2WPKH, P2WSH, P2TR, etc.).
-- Highlight unusual input/output patterns (e.g., large numbers of inputs/outputs, consolidation behavior, privacy techniques).
-- Mention if the transaction paid exceptionally high fees relative to its size.
-TEXT;
-        }
-
-        // Block
-        return <<<TEXT
-- Highlight if the block has only one transaction, an unusually low or high transaction count, or exceptionally large total fees.
-- Compare size, timestamp, and miner with adjacent blocks if noteworthy.
-- Mention if the miner is notable, changed recently, or unexpected.
-- Highlight any anomalies (size, timestamp gaps, etc.).
-- If the block has historical significance, clearly explain why.
-TEXT;
+        return $text;
     }
 }

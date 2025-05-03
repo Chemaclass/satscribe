@@ -21,7 +21,6 @@ final class QuestionPlaceholder
         'both' => [
             "Explain this like I'm five.",
             "What's unusual or interesting here?",
-            "Could this be linked to an exchange or service?",
             "Write a short, simple summary.",
         ],
     ];
