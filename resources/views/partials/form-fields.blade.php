@@ -53,10 +53,10 @@
         <div x-data="{ showAdvanced: false }" class="form-group ">
             <button
                 type="button"
-                class="text-sm font-medium text-orange-600 hover:text-orange-700 flex items-center cursor-pointer gap-2 mt-4"
+                class="text-sm font-medium hover:text-orange-200 flex items-center cursor-pointer gap-2 mt-4"
                 @click="showAdvanced = !showAdvanced"
             >
-                <i data-lucide="sliders-horizontal" class="text-orange-500"></i>
+                <i data-lucide="sliders-horizontal"></i>
                 <span x-show="!showAdvanced">Show advanced fields ▾</span>
                 <span x-show="showAdvanced">Hide advanced fields ▴</span>
             </button>
