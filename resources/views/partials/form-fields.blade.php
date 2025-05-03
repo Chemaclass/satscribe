@@ -1,9 +1,10 @@
 <form
+    id="satscribe-form"
     method="POST"
     action="{{ route('home.submit') }}"
+    @submit.prevent="submitForm($event.target)"
     aria-labelledby="form-heading"
     data-turbo="false"
-    @submit.prevent="submitForm($event.target)"
 >
     @csrf
 
@@ -14,12 +15,14 @@
         <div class="flex gap-2 items-start">
             <div class="flex-grow">
                 <input
+                    id="search-input"
                     type="text"
                     name="search"
                     x-model="input"
                     @input="validate"
-                    placeholder="Enter transaction ID or block height..."
+                    :disabled="isSubmitting"
                     class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                    placeholder="Enter transaction ID or block height..."
                     required
                 >
             </div>
@@ -29,9 +32,9 @@
                     id="surprise-button"
                     type="button"
                     @click="fetchRandomBlock()"
-                    class="px-4 h-[42px] bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md flex items-center gap-2  cursor-pointer"
-                    title="Get a random block"
                     :disabled="isSubmitting"
+                    class="px-4 h-[42px] bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md flex items-center gap-2 cursor-pointer"
+                    title="Get a random block"
                 >
                     <i data-lucide="shuffle" class="w-4 h-4"></i>
                     <span class="hidden md:inline">Surprise Me</span>
@@ -45,9 +48,6 @@
 
         {{-- Helper text --}}
         <p x-text="helperText" :class="helperClass" class="text-sm mt-1 block"></p>
-
-        {{-- Hidden flag --}}
-        <input type="hidden" name="submitted" value="1">
 
         {{-- Advanced options --}}
         <div x-data="{ showAdvanced: false }" class="form-group ">
@@ -131,7 +131,7 @@
                 >
                     <template x-if="promptType">
                         <div>
-                            <p class="text-sm font-medium text-gray-800 dark:text-gray-200 mb-1">
+                            <p class="text-sm font-medium mb-1">
                                 Suggested Questions
                             </p>
                             <div class="flex flex-wrap gap-2">
@@ -173,14 +173,14 @@
         {{-- Submit button --}}
         <div class="form-actions mt-4 mb-4 sm:flex-row">
             <button
-                type="submit"
-                class="form-button w-full"
                 id="submit-button"
+                type="submit"
                 :disabled="isSubmitting"
+                class="form-button w-full"
             >
                 <i data-lucide="loader-2" class="animate-spin mr-2" x-show="isSubmitting" x-cloak></i>
-                <span x-show="!isSubmitting" x-cloak id="submit-text">Satscribe</span>
-                <span x-show="!isSubmitting" x-cloak id="submit-icon" class="sm-2">
+                <span id="submit-text" x-show="!isSubmitting" x-cloak>Satscribe</span>
+                <span id="submit-icon" x-show="!isSubmitting" x-cloak class="sm-2">
                     <i data-lucide="zap" class="w-4 h-4"></i>
                 </span>
             </button>

@@ -151,11 +151,11 @@ function searchInputValidator(initial = '') {
         },
 
         get helperText() {
-            if (!this.input.trim()) return 'Enter a valid TXID (64 hex chars), block height (number), or block hash.';
+            if (!this.input.trim()) return 'Enter a valid TXID, block height, or block hash.';
             if (!this.valid) return 'Invalid format. Must be a TXID, block height, or block hash.';
             if (this.isBlockHash) return 'Valid block hash found.';
-            if (this.isHex64) return 'Valid TXID (64 hex chars) found.';
-            if (this.isBlockHeight) return 'Valid block height (number) found.';
+            if (this.isHex64) return 'Valid TXID found.';
+            if (this.isBlockHeight) return 'Valid block height found.';
             return '';
         },
 
