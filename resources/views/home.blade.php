@@ -95,6 +95,7 @@ function searchInputValidator(initial = '') {
         valid: false,
         isHex64: false,
         isBlockHeight: false,
+        isBlockHash: false,
         isSubmitting: false,
 
         async submitForm(form) {
@@ -106,7 +107,7 @@ function searchInputValidator(initial = '') {
             try {
                 const formData = new FormData(form);
 
-                const { data } = await axios.post(form.action, formData, {
+                const {data} = await axios.post(form.action, formData, {
                     headers: {
                         'X-Requested-With': 'XMLHttpRequest',
                         'Accept': 'application/json',
@@ -150,8 +151,9 @@ function searchInputValidator(initial = '') {
         },
 
         get helperText() {
-            if (!this.input.trim()) return 'Enter a valid TXID (64 hex chars) or block height (number).';
-            if (!this.valid) return 'Invalid format. Must be a TXID or block height.';
+            if (!this.input.trim()) return 'Enter a valid TXID (64 hex chars), block height (number), or block hash.';
+            if (!this.valid) return 'Invalid format. Must be a TXID, block height, or block hash.';
+            if (this.isBlockHash) return 'Valid block hash found.';
             if (this.isHex64) return 'Valid TXID (64 hex chars) found.';
             if (this.isBlockHeight) return 'Valid block height (number) found.';
             return '';
@@ -164,10 +166,12 @@ function searchInputValidator(initial = '') {
 
         validate() {
             const trimmed = this.input.trim();
-            this.isHex64 = /^[a-fA-F0-9]{64}$/.test(trimmed);
             const height = parseInt(trimmed, 10);
-            this.isBlockHeight = /^\d+$/.test(trimmed) && height <= {{ $maxBitcoinBlockHeight ?? 100_000_000 }};
-            this.valid = this.isHex64 || this.isBlockHeight;
+
+            this.isHex64 = /^[a-fA-F0-9]{64}$/.test(trimmed);
+            this.isBlockHeight = /^\d+$/.test(trimmed) && height <= {{ $maxBitcoinBlockHeight ?? 10_000_000 }};
+            this.isBlockHash = this.isHex64 && trimmed.startsWith('00000000');
+            this.valid = this.isHex64 || this.isBlockHeight || this.isBlockHash;
         }
     };
 }
