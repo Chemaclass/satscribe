@@ -172,7 +172,19 @@ function searchInputValidator(initial = '') {
             this.isBlockHeight = /^\d+$/.test(trimmed) && height <= {{ $maxBitcoinBlockHeight ?? 10_000_000 }};
             this.isBlockHash = this.isHex64 && trimmed.startsWith('00000000');
             this.valid = this.isHex64 || this.isBlockHeight || this.isBlockHash;
-        }
+        },
+
+        async fetchRandomBlock() {
+            const maxHeight = {{ $maxBitcoinBlockHeight ?? 10_000_000 }};
+            const randomHeight = Math.floor(Math.random() * maxHeight);
+            this.input = randomHeight.toString();
+            this.validate();
+
+            const form = document.querySelector('form');
+            if (form) {
+                await this.submitForm(form);
+            }
+        },
     };
 }
 </script>
