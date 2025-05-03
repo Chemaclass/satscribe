@@ -549,7 +549,7 @@ a:hover,
 ============================================================================ */
 
 /* Make entire body clickable */
-.description-body {
+#history .description-body {
     cursor: pointer;
 }
 

@@ -3,7 +3,7 @@
 @section('title', 'Satscribe History')
 
 @section('content')
-    <section class="sm:px-6 lg:px-8 px-4 py-6">
+    <section id="history" class="sm:px-6 lg:px-8 px-4 py-6">
         {{-- Header --}}
         <header class="section-header">
             <div class="flex flex-col max-w-2xl">
