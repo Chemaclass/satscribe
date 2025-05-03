@@ -26,6 +26,7 @@
 
             <div class="flex flex-col items-start relative">
                 <button
+                    id="surprise-button"
                     type="button"
                     @click="fetchRandomBlock()"
                     class="px-4 h-[42px] bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md flex items-center gap-2  cursor-pointer"
