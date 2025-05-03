@@ -53,7 +53,7 @@
         <div x-data="{ showAdvanced: false }" class="form-group ">
             <button
                 type="button"
-                class="text-sm font-medium hover:text-orange-200 flex items-center cursor-pointer gap-2 mt-4"
+                class="text-sm font-medium flex items-center cursor-pointer gap-2 mt-4"
                 @click="showAdvanced = !showAdvanced"
             >
                 <i data-lucide="sliders-horizontal"></i>
