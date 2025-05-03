@@ -166,11 +166,12 @@ function searchInputValidator(initial = '') {
 
         validate() {
             const trimmed = this.input.trim();
-            this.isHex64 = /^[a-fA-F0-9]{64}$/.test(trimmed);
             const height = parseInt(trimmed, 10);
-            this.isBlockHeight = /^\d+$/.test(trimmed) && height <= {{ $maxBitcoinBlockHeight ?? 100_000_000 }};
+
+            this.isHex64 = /^[a-fA-F0-9]{64}$/.test(trimmed);
+            this.isBlockHeight = /^\d+$/.test(trimmed) && height <= {{ $maxBitcoinBlockHeight ?? 10_000_000 }};
             this.isBlockHash = this.isHex64 && trimmed.startsWith('00000000');
-            this.valid = this.isBlockHeight || this.isBlockHash || (this.isHex64 && !this.isBlockHash);
+            this.valid = this.isHex64 || this.isBlockHeight || this.isBlockHash;
         }
     };
 }
