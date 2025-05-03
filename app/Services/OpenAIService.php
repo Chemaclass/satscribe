@@ -76,13 +76,8 @@ final readonly class OpenAIService
     private function buildQuestionPrompt(string $question): string
     {
         return <<<TEXT
-Task Instructions:
-- DO NOT fabricate missing information.
-- DO NOT merely repeat the provided data.
-- All numeric values are denominated in satoshis.
-
 Task:
-Answer the user's question using the blockchain data below if needed. Be concise and relevant — avoid additional analysis or unrelated context unless explicitly required to support the answer.
+Answer the user's question using the blockchain data below. Be concise and relevant — avoid additional analysis or unrelated context unless explicitly required to support the answer.
 
 User Question:
 {$question}
