@@ -65,10 +65,18 @@ final readonly class OpenAIService
     ): string {
         $sections = [];
 
-        $sections[] = <<<TEXT
+        if ($question !== '') {
+            $sections[] = <<<TEXT
+Task:
+Answer the user's question using the blockchain data below if needed. Be concise and relevant — avoid additional analysis or unrelated context unless explicitly required to support the answer.
+
+User Question:
+{$question}
+TEXT;
+        } else {
+            $sections[] = <<<TEXT
 Task Instructions:
-- If a question is provided, answer it directly and briefly FIRST.
-- Then summarize the most relevant insights from the blockchain context.
+- Summarize the most relevant insights from the blockchain context.
 - Focus on insights that are:
     - New
     - Surprising
@@ -78,9 +86,10 @@ Task Instructions:
 - DO NOT merely repeat the provided data.
 - All numeric values are denominated in satoshis.
 TEXT;
-
-        $sections[] = $this->getAdditionalTaskInstructions($type);
-        $sections[] = $persona->instructions($type);
+            // Add the shared analysis instructions and writing style
+            $sections[] = $this->getAdditionalTaskInstructions($type);
+            $sections[] = $persona->instructions($type);
+        }
 
         $sections[] = <<<TEXT
 Writing Style:
@@ -92,14 +101,9 @@ Writing Style:
 - End the response naturally without abrupt cut-offs.
 TEXT;
 
-        if ($question !== '') {
-            $sections[] = "User Question:\n{$question}";
-        }
-
         $sections[] = <<<TEXT
 Blockchain Data Context:
-All insights must be grounded in the following data.
-Do not fabricate or repeat. Interpret and summarize meaningfully.
+All insights must be grounded in the following data. Do not fabricate or repeat. Interpret and summarize meaningfully.
 {$data->toPrompt()}
 TEXT;
 
