@@ -61,12 +61,20 @@
                         </div>
                         <div class="description-meta mt-2 flex justify-between items-center text-sm text-gray-500">
                             <span>{{ $desc->created_at->diffForHumans() }}</span>
-                            <button type="button"
-                                    class="toggle-history-raw-btn link"
-                                    data-target="raw-{{ $desc->id }}"
-                                    data-id="{{ $desc->id }}">
-                                Show raw data
-                            </button>
+
+                            <div class="flex gap-4 items-center">
+                                <button type="button"
+                                        class="toggle-description-btn link"
+                                        data-target="{{ $entryId }}">
+                                    Show full response
+                                </button>
+                                <button type="button"
+                                        class="toggle-history-raw-btn link"
+                                        data-target="raw-{{ $desc->id }}"
+                                        data-id="{{ $desc->id }}">
+                                    Show raw data
+                                </button>
+                            </div>
                         </div>
                     <pre id="raw-{{ $desc->id }}"
                          class="hidden bg-gray-100 text-xs p-3 rounded overflow-auto max-h-96 whitespace-pre-wrap"
@@ -101,21 +109,34 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // Make .description-body clickable to toggle expansion
-            document.querySelectorAll('.description-body').forEach(body => {
-                const targetId = body.dataset.target;
+            function toggleDescription(targetId) {
+                const body = document.querySelector(`.description-body[data-target="${targetId}"]`);
                 const content = document.getElementById(targetId);
+                const button = document.querySelector(`.toggle-description-btn[data-target="${targetId}"]`);
 
+                body.classList.toggle('collapsed');
+                const isNowCollapsed = body.classList.contains('collapsed');
+                content.classList.toggle('max-h-[8.5rem]', isNowCollapsed);
+
+                if (button) {
+                    button.textContent = isNowCollapsed ? 'Show full response' : 'Hide full response';
+                }
+            }
+
+            // Click on .description-body
+            document.querySelectorAll('.description-body').forEach(body => {
                 body.addEventListener('click', () => {
-                    const isCollapsed = body.classList.contains('collapsed');
+                    const targetId = body.dataset.target;
+                    toggleDescription(targetId);
+                });
+            });
 
-                    if (isCollapsed) {
-                        body.classList.remove('collapsed');
-                        content.classList.remove('max-h-[8.5rem]');
-                    } else {
-                        body.classList.add('collapsed');
-                        content.classList.add('max-h-[8.5rem]');
-                    }
+            // Click on button
+            document.querySelectorAll('.toggle-description-btn').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    e.stopPropagation(); // prevent also triggering the body click
+                    const targetId = button.dataset.target;
+                    toggleDescription(targetId);
                 });
             });
         });
