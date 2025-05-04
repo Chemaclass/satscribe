@@ -28,7 +28,7 @@
             </button>
         </div>
         <pre id="raw-{{ $result->id }}"
-             class="hidden bg-gray-100 text-xs p-3 rounded overflow-auto max-h-64 whitespace-pre-wrap"
+             class="hidden bg-gray-100 text-xs p-3 rounded overflow-auto max-h-128 whitespace-pre-wrap"
              data-loaded="false">
     <span class="loading">Loading...</span>
 </pre>
