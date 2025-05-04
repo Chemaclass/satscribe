@@ -69,7 +69,7 @@
                             </button>
                         </div>
                     <pre id="raw-{{ $desc->id }}"
-                         class="hidden bg-gray-100 text-xs p-3 rounded overflow-auto max-h-64 whitespace-pre-wrap"
+                         class="hidden bg-gray-100 text-xs p-3 rounded overflow-auto max-h-96 whitespace-pre-wrap"
                          data-loaded="false">
     <span class="loading">Loading...</span>
 </pre>
@@ -116,17 +116,6 @@
                         body.classList.add('collapsed');
                         content.classList.add('max-h-[8.5rem]');
                     }
-                });
-            });
-
-            // Toggle raw JSON display
-            document.querySelectorAll('.toggle-history-raw-btn').forEach(button => {
-                button.addEventListener('click', () => {
-                    const targetId = button.dataset.target;
-                    const rawBlock = document.getElementById(targetId);
-                    const isHidden = rawBlock.classList.contains('hidden');
-                    rawBlock.classList.toggle('hidden');
-                    button.textContent = isHidden ? 'Show raw data' : 'Hide raw data';
                 });
             });
         });
