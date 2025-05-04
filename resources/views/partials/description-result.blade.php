@@ -19,11 +19,19 @@
         <h2 class="text-2xl font-bold mb-2 flex items-center">
             <i data-lucide="box" class="w-6 h-6"></i> Raw Blockchain Data
         </h2>
-        <div class="code-block-collapsible">
-    <pre class="blockchain-data code-block collapsed overflow-x-auto text-sm sm:text-base max-h-[200px] overflow-y-auto transition-all duration-500">
-{{ json_encode($result->raw_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) }}
-    </pre>
-            <button class="load-more-btn mt-2 text-orange-500 cursor-pointer hover:underline text-sm">Load more</button>
+        <div class="description-meta mt-2 flex justify-between items-center text-sm text-gray-500">
+            <button type="button"
+                    class="toggle-history-raw-btn link"
+                    data-target="raw-{{ $result->id }}"
+                    data-id="{{ $result->id }}">
+                Show raw data
+            </button>
         </div>
+        <pre id="raw-{{ $result->id }}"
+             class="hidden bg-gray-100 text-xs p-3 rounded overflow-auto max-h-64 whitespace-pre-wrap"
+             data-loaded="false">
+    <span class="loading">Loading...</span>
+</pre>
+        </li>
     </div>
 </section>

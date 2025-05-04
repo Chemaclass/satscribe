@@ -180,31 +180,34 @@ document.addEventListener('click', function (event) {
     }
 });
 
-document.querySelectorAll('.toggle-history-raw-btn').forEach(button => {
-    button.addEventListener('click', async () => {
-        const targetId = button.dataset.target;
-        const entryId = button.dataset.id;
-        const rawBlock = document.getElementById(targetId);
+document.addEventListener('click', async function (event) {
+    const button = event.target.closest('.toggle-history-raw-btn');
+    if (!button) return;
 
-        const isLoaded = rawBlock.dataset.loaded === "true";
-        const isVisible = window.getComputedStyle(rawBlock).display !== 'none';
+    const targetId = button.dataset.target;
+    const entryId = button.dataset.id;
+    const rawBlock = document.getElementById(targetId);
 
-        if (!isLoaded) {
-            try {
-                const data = await loadRawData(entryId);
-                rawBlock.innerText = JSON.stringify(data, null, 2);
-                rawBlock.dataset.loaded = "true";
-            } catch (err) {
-                rawBlock.innerText = "Failed to load data.";
-                rawBlock.dataset.loaded = "true";
-            }
+    if (!rawBlock) return;
 
-            toggleRawBlockVisibility(button, rawBlock, true);
-            return;
+    const isLoaded = rawBlock.dataset.loaded === "true";
+    const isVisible = window.getComputedStyle(rawBlock).display !== 'none';
+
+    if (!isLoaded) {
+        try {
+            const data = await loadRawData(entryId);
+            rawBlock.innerText = JSON.stringify(data, null, 2);
+            rawBlock.dataset.loaded = "true";
+        } catch (err) {
+            rawBlock.innerText = "Failed to load data.";
+            rawBlock.dataset.loaded = "true";
         }
 
-        toggleRawBlockVisibility(button, rawBlock, !isVisible);
-    });
+        toggleRawBlockVisibility(button, rawBlock, true);
+        return;
+    }
+
+    toggleRawBlockVisibility(button, rawBlock, !isVisible);
 });
 
 window.addEventListener('load', () => {

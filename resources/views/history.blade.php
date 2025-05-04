@@ -118,17 +118,6 @@
                     }
                 });
             });
-
-            // Toggle raw JSON display
-            document.querySelectorAll('.toggle-history-raw-btn').forEach(button => {
-                button.addEventListener('click', () => {
-                    const targetId = button.dataset.target;
-                    const rawBlock = document.getElementById(targetId);
-                    const isHidden = rawBlock.classList.contains('hidden');
-                    rawBlock.classList.toggle('hidden');
-                    button.textContent = isHidden ? 'Show raw data' : 'Hide raw data';
-                });
-            });
         });
     </script>
 @endsection
