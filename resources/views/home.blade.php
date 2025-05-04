@@ -55,7 +55,7 @@
                     <div class="leading-relaxed prose dark:prose-invert">
                         <p class="flex items-center gap-2">
                             <i data-lucide="loader-2" class="w-5 h-5 animate-spin text-orange-400"></i>
-                            Generating response from the AI...
+                            <span x-text="loadingMessage"></span>
                         </p>
                     </div>
                 </div>
@@ -85,11 +85,13 @@ function searchInputValidator(initial = '') {
         isBlockHeight: false,
         isBlockHash: false,
         isSubmitting: false,
+        loadingMessage: '',
 
         async submitForm(form) {
             if (this.isSubmitting) return;
 
             document.getElementById('description-body-results')?.style.setProperty('display', 'none');
+            this.loadingMessage = this.loadingMessages[Math.floor(Math.random() * this.loadingMessages.length)];
             this.isSubmitting = true;
 
             try {
@@ -173,6 +175,21 @@ function searchInputValidator(initial = '') {
                 await this.submitForm(form);
             }
         },
+
+        loadingMessages: [
+            "Just a sec — I'm working on your request and putting everything together for you!",
+            "Hang on a moment while I sort this out for you — almost there!",
+            "Give me a moment, I'm digging into your request and cooking up a response.",
+            "One moment while I pull everything together — this will be worth the wait!",
+            "Working on it! Just making sure I get you the best answer I can.",
+            "Hold tight — I'm piecing things together and getting your reply ready.",
+            "Crafting your answer — I'll be done in a flash.",
+            "Almost done — just double-checking everything for you!",
+            "Hang tight — I'm wrapping this up right now.",
+            "Working my magic — your response is coming up shortly!",
+            "Just a moment — pulling in all the right info for you.",
+            "On it! I'm making sure every detail is spot-on.",
+        ],
     };
 }
 </script>
