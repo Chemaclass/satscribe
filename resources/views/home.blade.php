@@ -64,11 +64,7 @@
     </div>
 
     {{-- Results Container --}}
-    <div id="results-container">
-        @isset($result)
-            @include('partials.description-result')
-        @endisset
-    </div>
+    <div id="results-container"></div>
 </section>
 
 <x-paywall-modal/>
