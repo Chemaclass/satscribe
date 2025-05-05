@@ -11,7 +11,7 @@
     <fieldset>
         <legend id="form-heading" class="sr-only">Describe Bitcoin Data</legend>
 
-        {{-- Input + Surprise Me --}}
+        {{-- Search input --}}
         <div class="flex gap-2 items-start">
             <div class="flex-grow">
                 <input
@@ -25,20 +25,6 @@
                     placeholder="Enter txid or block height"
                     required
                 >
-            </div>
-
-            <div class="flex flex-col items-start relative">
-                <button
-                    id="surprise-button"
-                    type="button"
-                    @click="fetchRandomBlock()"
-                    :disabled="isSubmitting"
-                    class="px-4 h-[42px] bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md flex items-center gap-2 cursor-pointer"
-                    title="Get a random block"
-                >
-                    <i data-lucide="shuffle" class="w-4 h-4"></i>
-                    <span class="hidden md:inline">Surprise Me</span>
-                </button>
             </div>
 
             @error('search')
@@ -170,19 +156,31 @@
             </div>
         </div>
 
-        {{-- Submit button --}}
-        <div class="form-actions mt-4 mb-4 sm:flex-row">
+        {{-- Submit + Surprise Buttons --}}
+        <div class="form-actions mt-4 mb-4 flex gap-2">
             <button
                 id="submit-button"
                 type="submit"
                 :disabled="isSubmitting"
-                class="form-button w-full"
+                class="form-button w-3/4"
             >
                 <i data-lucide="loader-2" class="animate-spin mr-2" x-show="isSubmitting" x-cloak></i>
-                <span id="submit-text" x-show="!isSubmitting" x-cloak>Satscribe</span>
+                <span id="submit-text" x-show="!isSubmitting" x-cloak>Submit</span>
                 <span id="submit-icon" x-show="!isSubmitting" x-cloak class="sm-2">
                     <i data-lucide="zap" class="w-4 h-4"></i>
                 </span>
+            </button>
+
+            <button
+                id="surprise-button"
+                type="button"
+                @click="fetchRandomBlock()"
+                :disabled="isSubmitting"
+                class="w-1/4 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md flex items-center justify-center gap-2 cursor-pointer"
+                title="Get a random block"
+            >
+                <i data-lucide="shuffle" class="w-4 h-4"></i>
+                <span class="hidden md:inline">Surprise</span>
             </button>
         </div>
     </fieldset>

@@ -39,7 +39,7 @@
                 @include('partials.form-fields')
             </div>
             {{-- Right: Bitcoin Icon --}}
-            <div class="hidden sm:flex w-1/3 h-60 items-center justify-center select-none" aria-hidden="true">
+            <div class="hidden sm:flex w-1/3 h-45 items-center justify-center select-none" aria-hidden="true">
                 <i data-lucide="bitcoin" class="w-[150px] h-[150px] animate-bounce-wave text-orange-500"
                    style="color: var(--btc-orange);"></i>
             </div>
