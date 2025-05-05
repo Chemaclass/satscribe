@@ -83,7 +83,7 @@
                     </small>
                 </div>
 
-                {{-- Optional question --}}
+                {{-- Optional question + Suggested Prompts --}}
                 <div class="form-section mb-6">
                     <label for="question" class="block text-sm font-medium text-gray-900 mb-1">
                         Ask a Question
@@ -99,32 +99,24 @@
                         autocomplete="off"
                         maxlength="200"
                     >
-                    <small id="questionHelp" class="text-gray-600 text-sm mt-1 block">
+                    <small id="questionHelp" class="text-gray-600 text-sm mt-1 block mb-2">
                         Ask the AI a specific question about this transaction or block.
                     </small>
-                    @error('question')
-                    <div class="error mt-1 text-red-500 text-sm" role="alert">{{ $message }}</div>
-                    @enderror
-                </div>
 
-                {{-- Suggested Prompts --}}
-                <div x-data="{ promptType: null }"
-                     x-init="$watch('input', value => {
-    if (/^[a-fA-F0-9]{64}$/.test(value)) {
-        promptType = 'transaction';
-    } else if (/^\d+$/.test(value)) {
-        promptType = 'block';
-    } else {
-        promptType = null;
-    }
- })"
-                     class="mt-3"
-                >
-                    <template x-if="promptType">
-                        <div>
-                            <p class="text-sm font-medium mb-1">
-                                Suggested Questions
-                            </p>
+                    {{-- Suggested Prompts inline --}}
+                    <div
+                        x-data="{ promptType: null }"
+                        x-init="$watch('input', value => {
+            if (/^[a-fA-F0-9]{64}$/.test(value)) {
+                promptType = 'transaction';
+            } else if (/^\d+$/.test(value)) {
+                promptType = 'block';
+            } else {
+                promptType = null;
+            }
+        })"
+                    >
+                        <template x-if="promptType">
                             <div class="flex flex-wrap gap-2">
                                 @foreach ($suggestedPromptsGrouped as $type => $questions)
                                     <template x-if="promptType === '{{ $type }}' || '{{ $type }}' === 'both'">
@@ -138,8 +130,12 @@
                                     </template>
                                 @endforeach
                             </div>
-                        </div>
-                    </template>
+                        </template>
+                    </div>
+
+                    @error('question')
+                    <div class="error mt-1 text-red-500 text-sm" role="alert">{{ $message }}</div>
+                    @enderror
                 </div>
 
                 {{-- Refresh checkbox --}}
