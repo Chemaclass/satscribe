@@ -121,7 +121,7 @@
                                     <template x-if="promptType === '{{ $type }}' || '{{ $type }}' === 'both'">
                                         <template x-for="prompt in @js($questions)" :key="prompt">
                                             <button type="button"
-                                                    class="px-3 py-1 rounded-full text-sm bg-gray-100 hover:bg-orange-100 text-gray-700 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-orange-400 dark:hover:text-gray-900 transition cursor-pointer"
+                                                    class="suggested-question-prompt px-3 py-1 rounded-full text-sm transition cursor-pointer"
                                                     @click="document.getElementById('question').value = prompt">
                                                 <span x-text="prompt"></span>
                                             </button>
@@ -144,7 +144,7 @@
                         id="refresh"
                         name="refresh"
                         value="true"
-                        class="checkbox-input mt-1 accent-orange-500 dark:accent-orange-400 cursor-pointer"
+                        class="checkbox-input mt-1 cursor-pointer"
                     >
                     <label for="refresh" class="block text-sm font-medium text-gray-900 mb-1 cursor-pointer">
                         Fetch the latest data from the blockchain<br>

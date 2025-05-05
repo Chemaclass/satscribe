@@ -17,6 +17,7 @@ final class QuestionPlaceholder
             "What is the estimated USD value transferred?",
             "Is this transaction related to a known address or service?",
             "Does this transaction consolidate UTXOs?",
+            "Is this a typical example of a Bitcoin transaction?",
         ],
         'block' => [
             "Which pool mined this block?",
@@ -29,6 +30,7 @@ final class QuestionPlaceholder
             "Does this block signal support for any soft forks?",
             "Are there any empty or low-fee transactions?",
             "What was the difficulty at this block height?",
+            "Is this a typical example of a Bitcoin block?",
         ],
         'both' => [
             "Explain this like I'm five.",
@@ -39,7 +41,6 @@ final class QuestionPlaceholder
             "What can we learn from this data?",
             "How does this fit into the big picture of Bitcoin?",
             "Can you identify any trends or anomalies?",
-            "Is this a typical example of a Bitcoin transaction/block?",
             "What is the educational value of this?",
         ],
     ];

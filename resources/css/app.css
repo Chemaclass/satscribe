@@ -590,3 +590,28 @@ a:hover,
     opacity: 0.6;
     cursor: not-allowed;
 }
+
+.suggested-question-prompt {
+    display: inline-block;
+    font-size: 0.875rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    color: var(--btc-text-dark);
+    transition: background-color 0.1s ease, color 0.1s ease;
+    cursor: pointer;
+}
+
+.suggested-question-prompt:hover {
+    background-color: var(--btc-orange-light);
+    color: var(--btc-text-dark);
+}
+
+.dark .suggested-question-prompt {
+    background-color: var(--btc-border-dark);
+    color: var(--btc-text-light);
+}
+
+.dark .suggested-question-prompt:hover {
+    background-color: var(--btc-orange-dark);
+    color: var(--btc-text-dark);
+}
