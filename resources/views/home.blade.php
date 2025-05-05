@@ -164,6 +164,11 @@ function searchInputValidator(initial = '') {
             const maxHeight = {{ $maxBitcoinBlockHeight ?? 10_000_000 }};
             const randomHeight = Math.floor(Math.random() * maxHeight);
             this.input = randomHeight.toString();
+
+            // Sync input DOM value
+            const inputEl = document.getElementById('search-input');
+            if (inputEl) inputEl.value = this.input;
+
             this.validate();
 
             const form = document.querySelector('form');
