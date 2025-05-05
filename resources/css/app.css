@@ -604,6 +604,7 @@ a:hover,
 
 .suggested-question-prompt:hover {
     color: var(--btc-text-dark);
+    background-color: var(--btc-orange-light);
 }
 
 .dark .suggested-question-prompt {
