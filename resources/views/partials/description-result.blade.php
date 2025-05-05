@@ -16,6 +16,8 @@
 
         {{-- Raw Data Toggle Button --}}
         <div class="description-meta mt-4 flex justify-between items-center text-sm text-gray-500">
+            <span>{{ $result->created_at->diffForHumans() }}</span>
+
             <button type="button"
                     class="toggle-history-raw-btn link"
                     data-target="raw-{{ $result->id }}"
