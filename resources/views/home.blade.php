@@ -188,5 +188,30 @@ function searchInputValidator(initial = '') {
         ],
     };
 }
+
+function resubmitWithRefresh(searchValue, questionValue = '') {
+    const form = document.getElementById('satscribe-form');
+    if (!form) return;
+
+    const searchInput = document.getElementById('search-input');
+    const questionInput = document.querySelector('input[name="question"]');
+    const refreshCheckbox = document.getElementById('refresh');
+
+    if (searchInput) searchInput.value = searchValue;
+    if (questionInput) questionInput.value = questionValue;
+    if (refreshCheckbox) refreshCheckbox.checked = true;
+
+    // Update Alpine state manually
+    if (window.Alpine) {
+        const component = Alpine.closestDataStack(form);
+        if (component) {
+            component.input = searchValue;
+            component.validate?.();
+        }
+    }
+
+    // Submit form programmatically
+    form.dispatchEvent(new Event('submit', { bubbles: true }));
+}
 </script>
 @endpush
