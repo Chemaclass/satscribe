@@ -9,7 +9,7 @@
 >
 <head>
     <meta charset="UTF-8">
-    <title>@yield('title', 'Satscribe – AI Satoshi Describer')</title>
+    <title>@yield('title', 'Satscribe – Satoshi Describer')</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script>
     if (localStorage.getItem('theme') === 'dark') {
