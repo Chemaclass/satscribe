@@ -113,7 +113,7 @@ function searchInputValidator(initial = '') {
                         'Accept': 'application/json',
                     },
                     validateStatus: function (status) {
-                        return true; // Accept all HTTP status codes
+                        return true;
                     }
                 });
 
@@ -143,6 +143,12 @@ function searchInputValidator(initial = '') {
                 url.searchParams.set('search', formData.get('search'));
                 window.history.pushState({}, '', url);
 
+                const searchInput = document.getElementById('search-input');
+                if (searchInput && data.search?.text) {
+                    searchInput.value = data.search.text;
+                    this.input = data.search.text;
+                    this.validate();
+                }
             } catch (error) {
                 console.error('submitForm error:', error.message);
             } finally {

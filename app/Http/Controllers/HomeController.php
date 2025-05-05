@@ -56,6 +56,7 @@ final readonly class HomeController
         }
 
         return response()->json([
+            'search' => $search,
             'html' => view('partials.description-result', [
                 'result' => $generatedPrompt->result,
                 'isFresh' => $generatedPrompt->isFresh,

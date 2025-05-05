@@ -28,7 +28,6 @@
                     spellcheck="false"
                     class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                     placeholder="Enter txid or block height"
-                    required
                 />
             </div>
 
