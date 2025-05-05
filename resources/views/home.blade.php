@@ -82,6 +82,20 @@ function searchInputValidator(initial = '') {
         isBlockHash: false,
         isSubmitting: false,
         loadingMessage: '',
+        loadingMessages: [
+            "Just a sec — I'm working on your request and putting everything together for you!",
+            "Hang on a moment while I sort this out for you — almost there!",
+            "Give me a moment, I'm digging into your request and cooking up a response.",
+            "One moment while I pull everything together — this will be worth the wait!",
+            "Working on it! Just making sure I get you the best answer I can.",
+            "Hold tight — I'm piecing things together and getting your reply ready.",
+            "Crafting your answer — I'll be done in a flash.",
+            "Almost done — just double-checking everything for you!",
+            "Hang tight — I'm wrapping this up right now.",
+            "Working my magic — your response is coming up shortly!",
+            "Just a moment — pulling in all the right info for you.",
+            "On it! I'm making sure every detail is spot-on.",
+        ],
 
         async submitForm(form) {
             if (this.isSubmitting) return;
@@ -165,9 +179,26 @@ function searchInputValidator(initial = '') {
             const randomHeight = Math.floor(Math.random() * maxHeight);
             this.input = randomHeight.toString();
 
-            // Sync input DOM value
-            const inputEl = document.getElementById('search-input');
-            if (inputEl) inputEl.value = this.input;
+            // Sync DOM input
+            const searchInput = document.getElementById('search-input');
+            if (searchInput) searchInput.value = this.input;
+
+            // Pick a random question
+            const groups = window.suggestedPromptsGrouped || {};
+            let possibleQuestions = [
+                ...(groups['both'] || []),
+                ...(groups['block'] || []),
+            ];
+            const questionInput = document.getElementById('question');
+            if (questionInput && possibleQuestions.length > 0) {
+                questionInput.value = possibleQuestions[Math.floor(Math.random() * possibleQuestions.length)];
+            }
+
+            // Random persona
+            const personaSelect = document.getElementById('persona');
+            if (personaSelect && personaSelect.options.length > 0) {
+                personaSelect.selectedIndex = Math.floor(Math.random() * personaSelect.options.length);
+            }
 
             this.validate();
 
@@ -176,21 +207,6 @@ function searchInputValidator(initial = '') {
                 await this.submitForm(form);
             }
         },
-
-        loadingMessages: [
-            "Just a sec — I'm working on your request and putting everything together for you!",
-            "Hang on a moment while I sort this out for you — almost there!",
-            "Give me a moment, I'm digging into your request and cooking up a response.",
-            "One moment while I pull everything together — this will be worth the wait!",
-            "Working on it! Just making sure I get you the best answer I can.",
-            "Hold tight — I'm piecing things together and getting your reply ready.",
-            "Crafting your answer — I'll be done in a flash.",
-            "Almost done — just double-checking everything for you!",
-            "Hang tight — I'm wrapping this up right now.",
-            "Working my magic — your response is coming up shortly!",
-            "Just a moment — pulling in all the right info for you.",
-            "On it! I'm making sure every detail is spot-on.",
-        ],
     };
 }
 

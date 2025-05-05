@@ -1,3 +1,6 @@
+<script>
+    window.suggestedPromptsGrouped = @json($suggestedPromptsGrouped);
+</script>
 <form
     id="satscribe-form"
     method="POST"
