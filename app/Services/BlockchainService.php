@@ -10,6 +10,7 @@ use App\Data\Blockchain\TransactionData;
 use App\Data\PromptInput;
 use App\Exceptions\BlockchainException;
 use Illuminate\Http\Client\Factory as HttpClient;
+use Illuminate\Support\Facades\Log;
 use Psr\Log\LoggerInterface;
 
 final readonly class BlockchainService
@@ -36,16 +37,22 @@ final readonly class BlockchainService
         $rawBlock = $this->fetchBlock($hash);
         $txs = $this->fetchBlockTransactions($hash);
 
-        $previousBlock = $rawBlock['previousblockhash'] ?? null;
-        $previousBlockData = $previousBlock ? $this->fetchBlock($previousBlock) : null;
+        $previousBlockHash = $rawBlock['previousblockhash'] ?? null;
+        $previousBlockData = $previousBlockHash ? $this->fetchBlock($previousBlockHash) : null;
 
         $nextBlockHash = $this->fetchNextBlockHash($rawBlock);
         $nextBlockData = $nextBlockHash ? $this->fetchBlock($nextBlockHash) : null;
 
         return BlockchainData::forBlock(
             BlockData::fromArray($rawBlock, $txs),
-            $previousBlockData ? BlockData::fromArray($previousBlockData) : null,
-            $nextBlockData ? BlockData::fromArray($nextBlockData) : null,
+            $previousBlockData ? BlockData::fromArray(
+                $previousBlockData,
+                $this->fetchBlockTransactions($previousBlockHash)
+            ) : null,
+            $nextBlockData ? BlockData::fromArray(
+                $nextBlockData,
+                $this->fetchBlockTransactions($nextBlockHash)
+            ) : null,
         );
     }
 
