@@ -4,14 +4,16 @@
             Explore Any Bitcoin Transaction or Block
         </h1>
         <p class="subtitle text-base sm:text-lg text-gray-700 leading-relaxed">
-            <strong>Satscribe</strong> makes Bitcoin easier to understand. <br class="hidden sm:block">
+            <strong>Satscribe</strong> makes Bitcoin easier to understand.
+            <br class="hidden sm:block">
             Just enter a transaction ID or block height to get an AI-powered explanation.
-        </p>
-        <p class="subtitle mt-1 text-sm text-gray-600 leading-relaxed">
-            Curious about the latest blocks and transactions?
-            <a href="https://mempool.space" target="_blank" rel="noopener" class="hover:underline">
-                Visit Mempool.space →
-            </a>
+            <br class="hidden sm:block">
+            <span class="subtitle mt-1 text-sm text-gray-600 leading-relaxed">
+                Curious about the latest blocks and transactions?
+                <a href="https://mempool.space" target="_blank" rel="noopener" class="hover:underline">
+                    Visit Mempool.space →
+                </a>
+            </span>
         </p>
     </div>
 </header>
