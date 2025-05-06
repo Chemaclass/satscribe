@@ -13,7 +13,10 @@
             {!! Str::markdown($result->ai_response) !!}
         </div>
 
-        <x-description-result.follow-up-suggestions :input="$result->input" />
+        <x-description-result.follow-up-suggestions
+            :input="$result->input"
+            :suggestions="$suggestions"
+        />
 
         <x-description-result.raw-data-toggle-button
             :id="$result->id"

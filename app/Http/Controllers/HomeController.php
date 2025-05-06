@@ -65,6 +65,7 @@ final readonly class HomeController
                 'question' => $question,
                 'persona' => $persona->value,
                 'refreshed' => $refreshEnabled,
+                'suggestions' => $this->generateSuggestions($search),
             ])->render()
         ]);
     }
@@ -82,5 +83,13 @@ final readonly class HomeController
     {
         return PromptPersona::tryFrom($request->getPersonaInput())
             ?? PromptPersona::from(PromptPersona::DEFAULT);
+    }
+
+    private function generateSuggestions(PromptInput $search): array
+    {
+        if ($search->isBlock()) {
+            return QuestionPlaceholder::forBlock();
+        }
+        return QuestionPlaceholder::forTx();
     }
 }

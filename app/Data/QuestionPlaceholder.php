@@ -53,6 +53,28 @@ final class QuestionPlaceholder
     /**
      * @return list<string>
      */
+    public static function forBlock(): array
+    {
+        return collect([
+            ...self::SAMPLE_QUESTIONS['block'],
+            ...self::SAMPLE_QUESTIONS['both'],
+        ])->shuffle()->take(5)->values()->all();
+    }
+
+    /**
+     * @return list<string>
+     */
+    public static function forTx(): array
+    {
+        return collect([
+            ...self::SAMPLE_QUESTIONS['transaction'],
+            ...self::SAMPLE_QUESTIONS['both'],
+        ])->shuffle()->take(5)->values()->all();
+    }
+
+    /**
+     * @return list<string>
+     */
     public static function groupedPrompts(): array
     {
         return collect(self::SAMPLE_QUESTIONS)
