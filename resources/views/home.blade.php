@@ -11,7 +11,7 @@
 
 @push('scripts')
 <script>
-function searchInputValidator(initial = '') {
+function searchInputValidator(initial = '', initialMaxHeight = 10_000_000) {
     return {
         input: initial,
         valid: false,
@@ -19,6 +19,7 @@ function searchInputValidator(initial = '') {
         isBlockHeight: false,
         isBlockHash: false,
         isSubmitting: false,
+        maxBitcoinBlockHeight: initialMaxHeight,
         loadingMessage: '',
         loadingMessages: [
             "Just a sec — I'm working on your request and putting everything together for you!",
@@ -54,6 +55,10 @@ function searchInputValidator(initial = '') {
                         return true;
                     }
                 });
+
+                if (data.maxBitcoinBlockHeight) {
+                    this.maxBitcoinBlockHeight = data.maxBitcoinBlockHeight;
+                }
 
                 if (data.status === 'rate_limited') {
                     window.dispatchEvent(new CustomEvent('rate-limit-reached', {
@@ -113,13 +118,13 @@ function searchInputValidator(initial = '') {
             const height = parseInt(trimmed, 10);
 
             this.isHex64 = /^[a-fA-F0-9]{64}$/.test(trimmed);
-            this.isBlockHeight = /^\d+$/.test(trimmed) && height <= {{ $maxBitcoinBlockHeight ?? 10_000_000 }};
+            this.isBlockHeight = /^\d+$/.test(trimmed) && height <= this.maxBitcoinBlockHeight;
             this.isBlockHash = this.isHex64 && trimmed.startsWith('00000000');
             this.valid = this.isHex64 || this.isBlockHeight || this.isBlockHash;
         },
 
         async fetchRandomBlock() {
-            const maxHeight = {{ $maxBitcoinBlockHeight ?? 10_000_000 }};
+            const maxHeight = this.maxBitcoinBlockHeight;
             const randomHeight = Math.floor(Math.random() * maxHeight);
             this.input = randomHeight.toString();
 

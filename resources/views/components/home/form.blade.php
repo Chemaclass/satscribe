@@ -1,4 +1,4 @@
-<div x-data="searchInputValidator('{{ old('search', $search ?? '') }}')"
+<div x-data="searchInputValidator('{{ old('search', $search ?? '') }}', {{ $maxBitcoinBlockHeight ?? 10_000_000 }})"
      x-init="
             validate();
             $watch('isSubmitting', value => {
