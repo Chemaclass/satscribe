@@ -41,7 +41,7 @@ final readonly class SatscribeAction
             }
         }
 
-        $fresh = $this->getFreshResult($input, $persona, $refreshEnabled, $question);
+        $fresh = $this->getFreshResult($input, $persona, $question);
 
         return new GeneratedPrompt($fresh, isFresh: true);
     }
@@ -49,15 +49,9 @@ final readonly class SatscribeAction
     private function getFreshResult(
         PromptInput $input,
         PromptPersona $persona,
-        bool $refresh,
         string $question = '',
     ): SatscribeDescription {
         $this->checkRateLimiter();
-
-        if ($refresh) {
-            // @todo: do not delete; instead save a new item, and when looking for the cached one, always fetch latest
-            $this->repository->deleteByTypeAndInput($input);
-        }
 
         $blockchainData = $this->blockchain->getBlockchainData($input);
         $question = $this->userInputSanitizer->sanitize($question);
