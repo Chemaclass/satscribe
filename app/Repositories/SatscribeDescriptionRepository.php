@@ -30,13 +30,6 @@ final readonly class SatscribeDescriptionRepository
             ->first();
     }
 
-    public function deleteByTypeAndInput(PromptInput $input): void
-    {
-        SatscribeDescription::where('type', $input->type->value)
-            ->where('input', $input->text)
-            ->delete();
-    }
-
     public function save(
         PromptInput $input,
         string $aiResponse,
