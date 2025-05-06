@@ -3,7 +3,7 @@
     $js = Vite::asset('resources/js/app.js');
 @endphp
 
-<link rel="preload" as="style" href="{{ $css }}" crossorigin>
+<link rel="preload" as="style" href="{{ $css }}" crossorigin importance="high">
 <link rel="stylesheet" href="{{ $css }}">
 
 <link rel="modulepreload" href="{{ $js }}" crossorigin>

@@ -1,7 +1,6 @@
 import { defineConfig } from 'vite';
 import laravel from 'laravel-vite-plugin';
 import tailwindcss from '@tailwindcss/vite';
-import { visualizer } from 'rollup-plugin-visualizer';
 
 export default defineConfig({
     plugins: [
@@ -10,7 +9,6 @@ export default defineConfig({
             refresh: true,
         }),
         tailwindcss(),
-        visualizer({ open: true }),
     ],
     optimizeDeps: {
         include: ['alpinejs'],
