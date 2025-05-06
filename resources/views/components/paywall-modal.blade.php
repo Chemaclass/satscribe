@@ -2,6 +2,7 @@
     x-data="invoiceModal()"
     x-init="init()"
     x-show="show"
+    @keydown.escape.window="closeModal"
     class="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm"
     style="display: none;"
     x-cloak
