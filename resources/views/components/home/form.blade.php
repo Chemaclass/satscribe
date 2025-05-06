@@ -1,4 +1,10 @@
-<div x-data="searchInputValidator('{{ old('search', $search ?? '') }}', {{ $maxBitcoinBlockHeight ?? 10_000_000 }})"
+@props([
+    'search' => '',
+    'maxBitcoinBlockHeight' => 10_000_000,
+    'suggestedPromptsGrouped'=> []
+])
+
+<div x-data="searchInputValidator('{{ $search }}', {{ $maxBitcoinBlockHeight }})"
      x-init="
             validate();
             $watch('isSubmitting', value => {
@@ -12,7 +18,9 @@
     <div class="flex flex-col sm:flex-row sm:justify-between items-start sm:items-start gap-6 max-w-5xl">
         {{-- Left: Form --}}
         <div class="w-full sm:w-2/3">
-            @include('partials.form-fields')
+            @include('partials.form-fields', [
+                'suggestedPromptsGrouped' => $suggestedPromptsGrouped,
+            ])
         </div>
         {{-- Right: Bitcoin Icon --}}
         <div class="hidden sm:flex w-1/3 h-45 items-center justify-center select-none" aria-hidden="true">

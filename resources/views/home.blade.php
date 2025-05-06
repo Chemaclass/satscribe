@@ -3,7 +3,11 @@
 @section('content')
 <section class="satscribe-home px-4 sm:px-6 lg:px-8 py-6">
     <x-home.header/>
-    <x-home.form :suggestedPromptsGrouped="$suggestedPromptsGrouped"/>
+    <x-home.form
+        :search="old('search', $search ?? '')"
+        :maxBitcoinBlockHeight="$maxBitcoinBlockHeight"
+        :suggestedPromptsGrouped="$suggestedPromptsGrouped"
+    />
     <div id="results-container"></div>
 </section>
 <x-paywall-modal/>
