@@ -14,12 +14,8 @@ final class Handler extends ExceptionHandler
     public function render($request, Throwable $e): Response
     {
         if ($e instanceof ThrottleRequestsException) {
-            if ($request->expectsHtml()) {
-                return response()->view('errors.too-many-requests', [], 429);
-            }
-
             return response()->json([
-                'message' => 'Too many requests. Please try again later.',
+                'message' => $e->getMessage(),
             ], Response::HTTP_TOO_MANY_REQUESTS);
         }
 

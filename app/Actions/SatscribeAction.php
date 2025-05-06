@@ -59,14 +59,14 @@ final readonly class SatscribeAction
 
         return $this->repository->save($input, $aiResponse, $blockchainData->current(), $persona, $question);
     }
-
     private function checkRateLimiter(): void
     {
-        $key = 'openai:'.$this->ip;
-        if (!RateLimiter::remaining($key, $this->maxOpenAIAttempts)) {
-            throw new ThrottleRequestsException('You have reached the daily OpenAI limit.');
+        $key = 'openai:' . $this->ip;
+
+        if (RateLimiter::tooManyAttempts($key, $this->maxOpenAIAttempts)) {
+            throw new ThrottleRequestsException('You have reached the daily OpenAI limit of ' . $this->maxOpenAIAttempts . ' requests.');
         }
 
-        RateLimiter::hit($key, 60 * 60 * 24); // one day
+        RateLimiter::hit($key, 60 * 60 * 24);
     }
 }
