@@ -67,6 +67,9 @@ final readonly class BlockchainData
 
         if ($this->transaction instanceof TransactionData) {
             $sections[] = $this->transaction->toPrompt();
+
+            $sections[] = "---\nTX Block Summary\n";
+            $sections[] = $this->transactionBlock->toPrompt();
         }
 
         return implode("\n\n", $sections);

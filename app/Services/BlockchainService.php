@@ -33,17 +33,17 @@ final readonly class BlockchainService
     {
         $hash = $this->getBlockHash($input);
 
-        $block = $this->fetchBlock($hash);
+        $rawBlock = $this->fetchBlock($hash);
         $txs = $this->fetchBlockTransactions($hash);
 
-        $previousBlock = $block['previousblockhash'] ?? null;
+        $previousBlock = $rawBlock['previousblockhash'] ?? null;
         $previousBlockData = $previousBlock ? $this->fetchBlock($previousBlock) : null;
 
-        $nextBlockHash = $this->fetchNextBlockHash($block);
+        $nextBlockHash = $this->fetchNextBlockHash($rawBlock);
         $nextBlockData = $nextBlockHash ? $this->fetchBlock($nextBlockHash) : null;
 
         return BlockchainData::forBlock(
-            BlockData::fromArray($block, $txs),
+            BlockData::fromArray($rawBlock, $txs),
             $previousBlockData ? BlockData::fromArray($previousBlockData) : null,
             $nextBlockData ? BlockData::fromArray($nextBlockData) : null,
         );
@@ -51,29 +51,29 @@ final readonly class BlockchainService
 
     private function buildTransactionData(string $txid): BlockchainData
     {
-        $tx = $this->fetchTransaction($txid);
-        $status = $this->fetchTransactionStatus($txid);
+        $rawTx = $this->fetchTransaction($txid);
+        $rawStatusTx = $this->fetchTransactionStatus($txid);
 
         $blockData = null;
-        if (!empty($status['block_hash'])) {
-            $block = $this->fetchBlock($status['block_hash']);
-            $blockData = BlockData::fromArray($block);
+        if (!empty($rawStatusTx['block_hash'])) {
+            $rawBlock = $this->fetchBlock($rawStatusTx['block_hash']);
+            $blockData = BlockData::fromArray($rawBlock);
         }
 
         return BlockchainData::forTransaction(
             new TransactionData(
-                txid: $tx['txid'],
-                version: $tx['version'],
-                locktime: $tx['locktime'],
-                vin: $tx['vin'],
-                vout: $tx['vout'],
-                size: $tx['size'],
-                weight: $tx['weight'],
-                fee: $tx['fee'],
-                confirmed: $status['confirmed'],
-                blockHeight: $status['block_height'] ?? null,
-                blockHash: $status['block_hash'] ?? null,
-                blockTime: $status['block_time'] ?? null,
+                txid: $rawTx['txid'],
+                version: $rawTx['version'],
+                locktime: $rawTx['locktime'],
+                vin: $rawTx['vin'],
+                vout: $rawTx['vout'],
+                size: $rawTx['size'],
+                weight: $rawTx['weight'],
+                fee: $rawTx['fee'],
+                confirmed: $rawStatusTx['confirmed'],
+                blockHeight: $rawStatusTx['block_height'] ?? null,
+                blockHash: $rawStatusTx['block_hash'] ?? null,
+                blockTime: $rawStatusTx['block_time'] ?? null,
             ),
             $blockData,
         );

@@ -26,7 +26,7 @@ final readonly class SatscribeDescriptionRepository
             ->where('type', $input->type->value)
             ->where('input', $input->text)
             ->where('persona', $persona->value)
-            ->when($question, fn($q) => $q->where('question', $question))
+            ->where('question', $question)
             ->first();
     }
 
