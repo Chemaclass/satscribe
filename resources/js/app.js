@@ -1,13 +1,47 @@
 import './bootstrap';
-import {createIcons, icons} from 'lucide';
 import Alpine from 'alpinejs';
 
 window.Alpine = Alpine;
 Alpine.start();
 
+import { createIcons } from 'lucide';
+import {
+    ChevronLeft,
+    ChevronRight,
+    Bitcoin,
+    Bot,
+    Loader2,
+    Lightbulb,
+    Scroll,
+    Sun,
+    Moon,
+    Github,
+    SlidersHorizontal,
+    Zap,
+    Shuffle,
+} from 'lucide';
+
+const usedIcons = {
+    ChevronLeft,
+    ChevronRight,
+    Bitcoin,
+    Bot,
+    Loader2,
+    Lightbulb,
+    Scroll,
+    Sun,
+    Moon,
+    Github,
+    SlidersHorizontal,
+    Zap,
+    Shuffle,
+};
+
+createIcons({ icons: usedIcons });
+
 // ---------- DOM READY ----------
 document.addEventListener('DOMContentLoaded', () => {
-    createIcons({icons});
+    createIcons({ icons: usedIcons });
 
     setupFormSubmissionUI();
     setupBlockchainToggle();
@@ -21,7 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     window.refreshLucideIcons = () => {
-        requestAnimationFrame(() => createIcons({icons}));
+        requestAnimationFrame(() => createIcons({icons: usedIcons}));
     };
 });
 

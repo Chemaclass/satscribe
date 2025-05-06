@@ -16,6 +16,7 @@
 Homestead.json
 Homestead.yaml
 npm-debug.log
+stats.html
 
 yarn-error.log
 /auth.json
