@@ -17,6 +17,8 @@ use Illuminate\Support\Facades\RateLimiter;
 
 final readonly class SatscribeAction
 {
+    private const RATE_LIMIT_SECONDS = 86400; // 24 hours
+
     public function __construct(
         private BlockchainService $blockchain,
         private OpenAIService $openai,
@@ -33,40 +35,44 @@ final readonly class SatscribeAction
         bool $refreshEnabled = false,
         string $question = '',
     ): GeneratedPrompt {
+        // Return a cached result unless forced to refresh
         if (!$refreshEnabled) {
-            $cached = $this->repository->findByCriteria($input, $persona, $question);
+            $existing = $this->repository->findByCriteria($input, $persona, $question);
 
-            if ($cached instanceof SatscribeDescription && !$cached->force_refresh) {
-                return new GeneratedPrompt($cached, isFresh: false);
+            if ($existing instanceof SatscribeDescription && !$existing->force_refresh) {
+                return new GeneratedPrompt($existing, isFresh: false);
             }
         }
 
-        $fresh = $this->getFreshResult($input, $persona, $question);
+        $result = $this->generateFreshPrompt($input, $persona, $question);
 
-        return new GeneratedPrompt($fresh, isFresh: true);
+        return new GeneratedPrompt($result, isFresh: true);
     }
 
-    private function getFreshResult(
+    private function generateFreshPrompt(
         PromptInput $input,
         PromptPersona $persona,
         string $question = '',
     ): SatscribeDescription {
-        $this->checkRateLimiter();
+        $this->enforceRateLimit();
 
         $blockchainData = $this->blockchain->getBlockchainData($input);
-        $question = $this->userInputSanitizer->sanitize($question);
-        $aiResponse = $this->openai->generateText($blockchainData, $input, $persona, $question);
+        $cleanQuestion = $this->userInputSanitizer->sanitize($question);
+        $aiResponse = $this->openai->generateText($blockchainData, $input, $persona, $cleanQuestion);
 
-        return $this->repository->save($input, $aiResponse, $blockchainData->current(), $persona, $question);
+        return $this->repository->save($input, $aiResponse, $blockchainData->current(), $persona, $cleanQuestion);
     }
-    private function checkRateLimiter(): void
+
+    private function enforceRateLimit(): void
     {
-        $key = 'openai:' . $this->ip;
+        $key = "openai:{$this->ip}";
 
         if (RateLimiter::tooManyAttempts($key, $this->maxOpenAIAttempts)) {
-            throw new ThrottleRequestsException('You have reached the daily OpenAI limit of ' . $this->maxOpenAIAttempts . ' requests.');
+            throw new ThrottleRequestsException(
+                "You have reached the daily OpenAI limit of {$this->maxOpenAIAttempts} requests."
+            );
         }
 
-        RateLimiter::hit($key, 60 * 60 * 24);
+        RateLimiter::hit($key, self::RATE_LIMIT_SECONDS);
     }
 }
