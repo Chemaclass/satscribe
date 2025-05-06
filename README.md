@@ -52,10 +52,7 @@ And migrate the DB:
 php artisan migrate
 ```
 
-Run the app:
+Run the app for local development:
 ```bash
-# The Backend
-php artisan serve
-# The Frontend
-npm run dev
+composer dev
 ```
