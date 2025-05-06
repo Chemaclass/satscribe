@@ -17,6 +17,7 @@ final class BlockSummary
         public int $timestamp,
         public ?string $miner,
         public int $coinbaseValue,
+        public ?string $coinbaseMessage,
         public bool $hasOpReturnInCoinbase,
         public array $topTransactionsByFee,
         public array $walletTypesBreakdown,
@@ -61,6 +62,7 @@ final class BlockSummary
             timestamp: $data->timestamp,
             miner: $miner,
             coinbaseValue: $coinbaseValue,
+            coinbaseMessage: $data->coinbaseMessage,
             hasOpReturnInCoinbase: $hasOpReturn,
             topTransactionsByFee: $topFees,
             walletTypesBreakdown: $walletTypes,
@@ -98,6 +100,7 @@ Block Summary
 - Height: {$this->height}
 - Timestamp: {$this->timestamp}
 - Miner: {$minerText}
+- Coinbase Message: {$this->coinbaseMessage}
 - Coinbase Value: {$this->coinbaseValue} sats
 - OP_RETURN in coinbase: {$opReturnText}
 - Total Transactions: {$this->txCount}

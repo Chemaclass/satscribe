@@ -23,11 +23,19 @@ final readonly class BlockData implements BlockchainDataInterface
         public int $bits,
         public float $difficulty,
         public array $transactions,
+        public ?string $coinbaseMessage = null,
     ) {
     }
 
     public static function fromArray(array $data, array $transactions = []): self
     {
+        $coinbaseMessage = null;
+
+        if (!empty($transactions[0]['vin'][0]['scriptsig'])) {
+            $coinbaseScript = $transactions[0]['vin'][0]['scriptsig'];
+            $coinbaseMessage = self::decodeCoinbaseScript($coinbaseScript);
+        }
+
         return new self(
             hash: $data['id'],
             height: $data['height'],
@@ -43,7 +51,20 @@ final readonly class BlockData implements BlockchainDataInterface
             bits: $data['bits'],
             difficulty: $data['difficulty'],
             transactions: $transactions,
+            coinbaseMessage: $coinbaseMessage,
         );
+    }
+
+    public static function decodeCoinbaseScript(string $hex): ?string
+    {
+        $binary = hex2bin($hex);
+        if ($binary === false) {
+            return null;
+        }
+
+        // Extract readable ASCII characters
+        $ascii = preg_replace('/[^[:print:]]/', '', $binary);
+        return trim($ascii);
     }
 
     public function getType(): string
@@ -73,6 +94,7 @@ final readonly class BlockData implements BlockchainDataInterface
             'bits' => $this->bits,
             'difficulty' => $this->difficulty,
             'transactions' => $this->transactions,
+            'coinbase_message' => $this->coinbaseMessage,
         ];
     }
 
