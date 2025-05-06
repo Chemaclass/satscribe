@@ -10,7 +10,7 @@ use App\Data\QuestionPlaceholder;
 use App\Enums\PromptPersona;
 use App\Exceptions\BlockchainException;
 use App\Exceptions\OpenAIError;
-use App\Http\Requests\SatscribeIndexRequest;
+use App\Http\Requests\HomeIndexRequest;
 use App\Services\BlockHeightProvider;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
@@ -33,7 +33,7 @@ final readonly class HomeController
         ]);
     }
 
-    public function submit(SatscribeIndexRequest $request, SatscribeAction $action): JsonResponse
+    public function submit(HomeIndexRequest $request, SatscribeAction $action): JsonResponse
     {
         $search = $this->getPromptInput($request);
         $persona = $this->getPromptPersona($request);
@@ -68,7 +68,7 @@ final readonly class HomeController
         ]);
     }
 
-    private function getPromptInput(SatscribeIndexRequest $request): PromptInput
+    private function getPromptInput(HomeIndexRequest $request): PromptInput
     {
         if ($request->hasSearchInput()) {
             return PromptInput::fromRaw($request->getSearchInput());
@@ -77,7 +77,7 @@ final readonly class HomeController
         return PromptInput::fromRaw($this->heightProvider->getCurrentBlockHeight());
     }
 
-    private function getPromptPersona(SatscribeIndexRequest $request): PromptPersona
+    private function getPromptPersona(HomeIndexRequest $request): PromptPersona
     {
         return PromptPersona::tryFrom($request->getPersonaInput())
             ?? PromptPersona::from(PromptPersona::DEFAULT);
