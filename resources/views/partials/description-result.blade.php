@@ -15,6 +15,7 @@
 
         <x-description-result.follow-up-suggestions
             :input="$result->input"
+            :question="$result->question"
             :suggestions="$suggestions"
         />
 

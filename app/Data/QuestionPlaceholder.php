@@ -58,7 +58,7 @@ final class QuestionPlaceholder
         return collect([
             ...self::SAMPLE_QUESTIONS['block'],
             ...self::SAMPLE_QUESTIONS['both'],
-        ])->shuffle()->take(5)->values()->all();
+        ])->shuffle()->take(6)->values()->all();
     }
 
     /**
@@ -69,7 +69,7 @@ final class QuestionPlaceholder
         return collect([
             ...self::SAMPLE_QUESTIONS['transaction'],
             ...self::SAMPLE_QUESTIONS['both'],
-        ])->shuffle()->take(5)->values()->all();
+        ])->shuffle()->take(6)->values()->all();
     }
 
     /**
