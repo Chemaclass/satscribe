@@ -78,7 +78,7 @@ final class QuestionPlaceholder
     public static function groupedPrompts(): array
     {
         return collect(self::SAMPLE_QUESTIONS)
-            ->map(fn(array $prompts) => collect($prompts)->shuffle()->take(3))
+            ->map(fn(array $prompts) => collect($prompts)->shuffle()->take(2))
             ->all();
     }
 }
