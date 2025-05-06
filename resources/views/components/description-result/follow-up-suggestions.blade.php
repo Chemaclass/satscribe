@@ -18,7 +18,7 @@
             <button
                 type="button"
                 class="suggested-question-prompt px-3 py-1 rounded-full text-sm transition"
-                @click="resubmitWithRefresh('{{ $input }}', '{{ $suggestion }}')"
+                @click="resubmit('{{ $input }}', '{{ $suggestion }}')"
             >
                 {{ $suggestion }}
             </button>

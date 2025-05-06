@@ -593,12 +593,12 @@ a:hover,
 
 .suggested-question-prompt {
     display: inline-block;
-    font-size: 0.875rem;
-    padding: 0.25rem 0.75rem;
+    font-size: 0.75rem;
+    padding: 0.15rem 0.5rem;
     border-radius: 9999px;
     background-color: var(--btc-text-light);
     color: var(--btc-text-dark);
-    transition: background-color 0.1s ease, color 0.1s ease;
+    transition: background-color 0.05s ease, color 0.05s ease;
     cursor: pointer;
 }
 

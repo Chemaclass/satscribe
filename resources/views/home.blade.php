@@ -154,17 +154,15 @@ function searchInputValidator(initial = '') {
     };
 }
 
-function resubmitWithRefresh(searchValue, questionValue = '') {
+function resubmit(searchValue, questionValue = '') {
     const form = document.getElementById('satscribe-form');
     if (!form) return;
 
     const searchInput = document.getElementById('search-input');
     const questionInput = document.querySelector('input[name="question"]');
-    const refreshCheckbox = document.getElementById('refresh');
 
     if (searchInput) searchInput.value = searchValue;
     if (questionInput) questionInput.value = questionValue;
-    if (refreshCheckbox) refreshCheckbox.checked = true;
 
     // Update Alpine state manually
     if (window.Alpine) {
@@ -176,7 +174,13 @@ function resubmitWithRefresh(searchValue, questionValue = '') {
     }
 
     // Submit form programmatically
-    form.dispatchEvent(new Event('submit', { bubbles: true }));
+    form.dispatchEvent(new Event('submit', {bubbles: true}));
+}
+
+function resubmitWithRefresh(searchValue, questionValue = '') {
+    const refreshCheckbox = document.getElementById('refresh');
+    if (refreshCheckbox) refreshCheckbox.checked = true;
+    resubmit(searchValue, questionValue);
 }
 </script>
 @endpush
