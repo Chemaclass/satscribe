@@ -448,6 +448,25 @@ body.modal-open {
         @apply bg-transparent text-gray-600 border-gray-300 hover:bg-gray-100;
         @apply dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700;
     }
+    .persona-btn {
+        @apply px-3 py-2 rounded-md text-sm font-medium border cursor-pointer transition;
+        @apply bg-white text-gray-800 border-gray-300 hover:bg-gray-100;
+        background-color: white;
+        color: var(--btc-text-dark);
+        border-color: #d1d5db;
+    }
+
+    .dark .persona-btn {
+        @apply bg-gray-800 text-gray-100 border-gray-600;
+    }
+
+    .persona-btn--active {
+        @apply bg-orange-100 text-orange-800 border-orange-300;
+    }
+
+    .dark .persona-btn--active {
+        @apply bg-orange-200 text-orange-900 border-orange-400;
+    }
 }
 
 a,

@@ -15,9 +15,17 @@ enum PromptPersona: string
     public function label(): string
     {
         return match ($this) {
-            self::Educator => '🧑‍🏫 Educator – Teach Bitcoin to beginners with simple examples',
-            self::Developer => '💻 Developer – Explain Bitcoin internals with technical precision',
-            self::Storyteller => '📖 Storyteller – Share Bitcoin insights through stories and metaphors',
+            self::Educator => '🧑‍🏫 Educator',
+            self::Developer => '💻 Developer',
+            self::Storyteller => '📖 Storyteller',
+        };
+    }
+    public function description(): string
+    {
+        return match ($this) {
+            self::Educator => 'Teach Bitcoin concepts with clarity and structure',
+            self::Developer => 'Explain Bitcoin internals with technical precision',
+            self::Storyteller => 'Share Bitcoin insights through stories and metaphor',
         };
     }
 
@@ -27,6 +35,7 @@ enum PromptPersona: string
             fn(self $persona) => [
                 'value' => $persona->value,
                 'label' => $persona->label(),
+                'description' => $persona->description(),
                 'enabled' => $persona->value === self::DEFAULT,
             ],
             self::cases()
