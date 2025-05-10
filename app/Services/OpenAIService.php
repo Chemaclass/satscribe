@@ -77,7 +77,9 @@ final readonly class OpenAIService
     {
         return <<<TEXT
 Task:
-Answer the user's question using the blockchain data below. Be concise and relevant — avoid additional analysis or unrelated context unless explicitly required to support the answer.
+The user may ask a general or abstract question (e.g., "Explain this like I'm five"). Unless the question is clearly unrelated to Bitcoin or blockchain, assume they are referring to the provided blockchain data context below.
+If the question is clearly unrelated to Bitcoin or blockchain (e.g., "What's the weather like?" or "Tell me a joke"), reply politely that this service only answers Bitcoin-related queries.
+Answer using only the blockchain data context. Be concise, relevant, and avoid adding unrelated analysis.
 
 User Question:
 {$question}
