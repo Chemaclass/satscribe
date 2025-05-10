@@ -20,6 +20,7 @@ enum PromptPersona: string
             self::Storyteller => '📖 Storyteller',
         };
     }
+
     public function description(): string
     {
         return match ($this) {

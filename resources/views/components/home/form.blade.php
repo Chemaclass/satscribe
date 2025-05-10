@@ -1,5 +1,9 @@
 @php
     use App\Enums\PromptPersona;
+
+    $personaDescriptions = collect(PromptPersona::cases())->mapWithKeys(fn($p) => [
+        $p->value => $p->description()
+    ])->toJson();
 @endphp
 
 @props([
@@ -83,34 +87,35 @@
                             class="mt-4 advanced-fields rounded-lg px-4 py-3 space-y-4 shadow-sm"
                         >
                             {{-- Persona selection --}}
-                            <div>
+                            <div
+                                x-data="{
+        selectedPersona: '{{ old('persona', $persona ?? PromptPersona::DEFAULT) }}',
+        descriptions: {{$personaDescriptions}}
+    }"
+                                class="space-y-2"
+                            >
                                 <label for="persona" class="persona-label block text-sm font-medium mb-1">
                                     AI Persona
                                 </label>
 
-                                <div
-                                    x-data="{ selectedPersona: '{{ old('persona', $persona ?? PromptPersona::DEFAULT) }}' }">
-                                    <input type="hidden" name="persona" :value="selectedPersona">
+                                <input type="hidden" name="persona" :value="selectedPersona">
 
-                                    <div class="persona-buttons flex gap-2 mt-2 w-full">
-                                        @foreach (PromptPersona::cases() as $p)
-                                            <button
-                                                type="button"
-                                                @click="selectedPersona = '{{ $p->value }}'"
-                                                :class="selectedPersona === '{{ $p->value }}'
-                                                ? 'persona-btn persona-btn--active'
-                                                : 'persona-btn'"
-                                                class="transition duration-200 ease-in-out w-1/3 text-center"
-                                            >
-                                                {{ $p->label() }}
-                                            </button>
-                                        @endforeach
-                                    </div>
-
-                                    <small class="checkbox-help mt-2 block">
-                                        Choose how you'd like the AI to explain things.
-                                    </small>
+                                <div class="persona-buttons flex gap-2 mt-2 w-full">
+                                    @foreach (PromptPersona::cases() as $p)
+                                        <button
+                                            type="button"
+                                            @click="selectedPersona = '{{ $p->value }}'"
+                                            :class="selectedPersona === '{{ $p->value }}'
+                    ? 'persona-btn persona-btn--active'
+                    : 'persona-btn'"
+                                            class="transition duration-200 ease-in-out w-1/3 text-center"
+                                        >
+                                            {{ $p->label() }}
+                                        </button>
+                                    @endforeach
                                 </div>
+
+                                <small class="checkbox-help block" x-text="descriptions[selectedPersona]"></small>
                             </div>
 
                             {{-- Optional question + Suggested Prompts --}}
