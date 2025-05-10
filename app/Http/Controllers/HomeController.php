@@ -30,6 +30,7 @@ final readonly class HomeController
             'questionPlaceholder' => QuestionPlaceholder::rand(),
             'suggestedPromptsGrouped' => QuestionPlaceholder::groupedPrompts(),
             'maxBitcoinBlockHeight' => $this->heightProvider->getMaxPossibleBlockHeight(),
+            'personaDescriptions' => PromptPersona::descriptions()->toJson(),
         ]);
     }
 

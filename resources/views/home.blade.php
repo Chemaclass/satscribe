@@ -7,6 +7,7 @@
         :search="old('search', $search ?? '')"
         :maxBitcoinBlockHeight="$maxBitcoinBlockHeight"
         :suggestedPromptsGrouped="$suggestedPromptsGrouped"
+        :personaDescriptions="$personaDescriptions"
     />
     <div id="results-container"></div>
 </section>

@@ -1,15 +1,12 @@
 @php
     use App\Enums\PromptPersona;
-
-    $personaDescriptions = collect(PromptPersona::cases())->mapWithKeys(fn($p) => [
-        $p->value => $p->description()
-    ])->toJson();
 @endphp
 
 @props([
     'search' => '',
     'maxBitcoinBlockHeight' => 10_000_000,
-    'suggestedPromptsGrouped'=> []
+    'suggestedPromptsGrouped'=> [],
+    'personaDescriptions'=> '',
 ])
 
 <script>
@@ -89,9 +86,9 @@
                             {{-- Persona selection --}}
                             <div
                                 x-data="{
-        selectedPersona: '{{ old('persona', $persona ?? PromptPersona::DEFAULT) }}',
-        descriptions: {{$personaDescriptions}}
-    }"
+                                    selectedPersona: '{{ old('persona', $persona ?? PromptPersona::DEFAULT) }}',
+                                    descriptions: {{$personaDescriptions}}
+                                }"
                                 class="space-y-2"
                             >
                                 <label for="persona" class="persona-label block text-sm font-medium mb-1">

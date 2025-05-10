@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Enums;
 
+use Illuminate\Support\Collection;
+
 enum PromptPersona: string
 {
     case Educator = 'educator';
@@ -11,6 +13,14 @@ enum PromptPersona: string
     case Storyteller = 'storyteller';
 
     const DEFAULT = self::Developer->value;
+
+    public static function descriptions(): Collection
+    {
+        return collect(self::cases())
+            ->mapWithKeys(fn(self $p) => [
+                $p->value => $p->description()
+            ]);
+    }
 
     public function label(): string
     {
