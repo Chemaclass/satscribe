@@ -29,7 +29,7 @@
         <button
             type="button"
             class="form-button"
-            @click="resubmit('{{ $input }}', $refs.customFollowUp.value)"
+            @click="resubmit({{ json_encode($input) }}, $refs.customFollowUp.value)"
         >
             Submit
         </button>
@@ -43,7 +43,7 @@
                     <button
                         type="button"
                         class="suggested-question-prompt px-3 py-1 rounded-full text-sm transition"
-                        @click="resubmit('{{ $input }}', '{{ $suggestion }}')"
+                        @click="resubmit({{ json_encode($input) }}, {{ json_encode($suggestion) }})"
                     >
                         {{ $suggestion }}
                     </button>
