@@ -53,15 +53,15 @@
                                 <button type="button"
                                         class="toggle-description-btn link"
                                         data-target="{{ $entryId }}">
-                                    <span class="hidden sm:inline">Show full response</span>
-                                    <span class="inline sm:hidden">Full</span>
+                                    <span class="full-label hidden sm:inline">Show full response</span>
+                                    <span class="short-label inline sm:hidden">Full</span>
                                 </button>
                                 <button type="button"
                                         class="toggle-history-raw-btn link"
                                         data-target="raw-{{ $conversation->id }}"
                                         data-id="{{ $conversation->id }}">
-                                    <span class="hidden sm:inline">Show raw data</span>
-                                    <span class="inline sm:hidden">Raw</span>
+                                    <span class="full-label hidden sm:inline">Show raw data</span>
+                                    <span class="short-label inline sm:hidden">Raw</span>
                                 </button>
                             </div>
                         </div>
@@ -119,8 +119,13 @@
                 const isNowCollapsed = body.classList.contains('collapsed');
                 content.classList.toggle('max-h-[8.5rem]', isNowCollapsed);
 
+                // Update labels inside the button, not the whole text content
                 if (button) {
-                    button.textContent = isNowCollapsed ? 'Show full response' : 'Hide full response';
+                    const fullLabel = button.querySelector('.full-label');
+                    const shortLabel = button.querySelector('.short-label');
+
+                    if (fullLabel) fullLabel.textContent = isNowCollapsed ? 'Show full response' : 'Hide full response';
+                    if (shortLabel) shortLabel.textContent = isNowCollapsed ? 'Full' : 'Hide';
                 }
             }
 
