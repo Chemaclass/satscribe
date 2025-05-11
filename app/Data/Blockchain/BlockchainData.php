@@ -69,7 +69,7 @@ final readonly class BlockchainData
             $sections[] = $this->transaction->toPrompt();
 
             $sections[] = "---\nTX Block Summary\n";
-            $sections[] = $this->transactionBlock->toPrompt();
+            $sections[] = $this->transactionBlock?->toPrompt() ?? 'Block not found';
         }
 
         return implode("\n\n", $sections);
