@@ -236,7 +236,7 @@
         <section id="description-body-results" class="description-body w-full max-w-3xl mx-auto space-y-6">
             <div class="section rounded p-4 shadow-sm">
                 <h2 class="text-2xl font-bold mb-2 flex items-center">
-                    <i data-lucide="bot" class="w-6 h-6"></i> Assistant
+                    <i data-lucide="bot" class="w-6 h-6 mr-2"></i> Assistant
                 </h2>
                 <div class="leading-relaxed prose dark:prose-invert">
                     <p class="flex items-center gap-2">
