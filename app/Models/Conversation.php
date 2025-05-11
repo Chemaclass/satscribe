@@ -13,6 +13,22 @@ final class Conversation extends Model
         'title',
     ];
 
+    public function getFirstUserMessage(): Message
+    {
+        return $this->messages()
+            ->where('role', 'user')
+            ->orderBy('id')
+            ->firstOrFail();
+    }
+
+    public function getFirstAssistantMessage(): Message
+    {
+        return $this->messages()
+            ->where('role', 'assistant')
+            ->orderBy('id')
+            ->firstOrFail();
+    }
+
     public function messages(): HasMany
     {
         return $this->hasMany(Message::class);
@@ -45,21 +61,21 @@ final class Conversation extends Model
         return $firstMsg?->meta['input'] ?? '';
     }
 
-   public function addUserMessage(string $content, array $meta = []): Message
-   {
-       return $this->messages()->create([
-           'role' => 'user',
-           'content' => $content,
-           'meta' => $meta,
-       ]);
-   }
+    public function addUserMessage(string $content, array $meta = []): Message
+    {
+        return $this->messages()->create([
+            'role' => 'user',
+            'content' => $content,
+            'meta' => $meta,
+        ]);
+    }
 
-   public function addAssistantMessage(string $content, array $meta = []): Message
-   {
-       return $this->messages()->create([
-           'role' => 'assistant',
-           'content' => $content,
-           'meta' => $meta,
-       ]);
-   }
+    public function addAssistantMessage(string $content, array $meta = []): Message
+    {
+        return $this->messages()->create([
+            'role' => 'assistant',
+            'content' => $content,
+            'meta' => $meta,
+        ]);
+    }
 }

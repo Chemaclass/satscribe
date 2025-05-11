@@ -1,5 +1,5 @@
 @php
-    use Illuminate\Support\Str;
+    use App\Models\Conversation;use Illuminate\Support\Str;
 @endphp
 
 @extends('layouts.base')
@@ -22,11 +22,11 @@
             <p>Empty history.</p>
         @else
             <ul class="description-list">
+                @php /** @var Conversation $conversation */@endphp
                 @foreach($conversations as $conversation)
                     @php
-                        $userMsg = $conversation->messages->firstWhere('role', 'user');
-                        $assistantMsg = $conversation->messages->firstWhere('role', 'assistant');
-                        $entryId = 'entry-' . $conversation->id;
+                        $assistantMsg = $conversation->getFirstAssistantMessage();
+                        $entryId = 'entry-' . $assistantMsg->id;
                     @endphp
 
                     <li class="description-item">
@@ -58,14 +58,14 @@
                                 </button>
                                 <button type="button"
                                         class="toggle-history-raw-btn link"
-                                        data-target="raw-{{ $conversation->id }}"
-                                        data-id="{{ $conversation->id }}">
+                                        data-target="raw-{{ $assistantMsg->id }}"
+                                        data-id="{{ $assistantMsg->id }}">
                                     <span class="full-label hidden sm:inline">Show raw data</span>
                                     <span class="short-label inline sm:hidden">Raw</span>
                                 </button>
                             </div>
                         </div>
-                        <pre id="raw-{{ $conversation->id }}"
+                        <pre id="raw-{{ $assistantMsg->id }}"
                              class="hidden bg-gray-100 text-xs p-3 rounded overflow-auto max-h-96 whitespace-pre-wrap"
                              data-loaded="false">
     <span class="loading">Loading...</span>
