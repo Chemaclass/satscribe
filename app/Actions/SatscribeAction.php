@@ -44,12 +44,12 @@ final readonly class SatscribeAction
             }
         }
 
-        $result = $this->generateFreshConversation($input, $persona, $question);
+        $result = $this->createNewConversation($input, $persona, $question);
 
         return new GeneratedPrompt($result, isFresh: true);
     }
 
-    private function generateFreshConversation(
+    private function createNewConversation(
         PromptInput $input,
         PromptPersona $persona,
         string $question = '',
@@ -60,7 +60,7 @@ final readonly class SatscribeAction
         $cleanQuestion = $this->userInputSanitizer->sanitize($question);
         $aiResponse = $this->openai->generateText($blockchainData, $input, $persona, $cleanQuestion);
 
-        return $this->repository->save($input, $aiResponse, $blockchainData->current(), $persona, $cleanQuestion);
+        return $this->repository->createConversation($input, $aiResponse, $blockchainData->current(), $persona, $cleanQuestion);
     }
 
     private function enforceRateLimit(): void

@@ -38,7 +38,7 @@ final readonly class ConversationRepository
     /**
      * Create a conversation and attach user & assistant messages using the legacy pattern.
      */
-    public function save(
+    public function createConversation(
         PromptInput $input,
         string $aiResponse,
         BlockchainDataInterface $blockchainData,
@@ -56,29 +56,19 @@ final readonly class ConversationRepository
             'title' => ucfirst($input->type->value) . ':' . $input->text,
         ]);
 
-        // User message (question)
-        $conversation->messages()->create([
-            'role' => 'user',
-            'content' => $question,
-            'meta' => [
-                'type' => $input->type->value,
-                'input' => $input->text,
-                'persona' => $persona->value,
-            ],
+        $conversation->addUserMessage($question, [
+            'type' => $input->type->value,
+            'input' => $input->text,
+            'persona' => $persona->value,
         ]);
 
-        // Assistant message (AI response)
-        $conversation->messages()->create([
-            'role' => 'assistant',
-            'content' => $aiResponse,
-            'meta' => [
-                'type' => $input->type->value,
-                'input' => $input->text,
-                'persona' => $persona->value,
-                'question' => $question,
-                'raw_data' => $raw,
-                'force_refresh' => $forceRefresh,
-            ],
+        $conversation->addAssistantMessage($aiResponse, [
+            'type' => $input->type->value,
+            'input' => $input->text,
+            'persona' => $persona->value,
+            'question' => $question,
+            'raw_data' => $raw,
+            'force_refresh' => $forceRefresh,
         ]);
 
         return $conversation;

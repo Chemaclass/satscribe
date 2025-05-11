@@ -44,4 +44,22 @@ final class Conversation extends Model
 
         return $firstMsg?->meta['input'] ?? '';
     }
+
+   public function addUserMessage(string $content, array $meta = []): Message
+   {
+       return $this->messages()->create([
+           'role' => 'user',
+           'content' => $content,
+           'meta' => $meta,
+       ]);
+   }
+
+   public function addAssistantMessage(string $content, array $meta = []): Message
+   {
+       return $this->messages()->create([
+           'role' => 'assistant',
+           'content' => $content,
+           'meta' => $meta,
+       ]);
+   }
 }
