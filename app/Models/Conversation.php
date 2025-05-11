@@ -17,4 +17,22 @@ final class Conversation extends Model
     {
         return $this->hasMany(Message::class);
     }
+
+    public function getTypeAttribute(): string
+    {
+        $firstMsg = $this->relationLoaded('messages')
+            ? $this->messages->first()
+            : $this->messages()->first();
+
+        return $firstMsg?->meta['type'] ?? '';
+    }
+
+    public function getInputAttribute(): string
+    {
+        $firstMsg = $this->relationLoaded('messages')
+            ? $this->messages->first()
+            : $this->messages()->first();
+
+        return $firstMsg?->meta['input'] ?? '';
+    }
 }

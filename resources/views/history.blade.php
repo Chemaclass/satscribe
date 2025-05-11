@@ -27,16 +27,13 @@
 
                 <li class="description-item">
                     <div class="description-header font-medium mb-1">
-                        {{-- Clickable area: user message --}}
-                        @if($userMsg)
-                            <div class="cursor-pointer w-full"
-                                 onclick="window.location.href='{{ route('conversations.show', ['conversation' => $conversation->id]) }}'">
-                                <strong>User:</strong>
-                                <span class="truncate overflow-hidden text-ellipsis block">
-                                    {{ Str::limit(strip_tags($userMsg->content), 120) }}
-                                </span>
-                            </div>
-                        @endif
+                        <div class="cursor-pointer w-full"
+                             onclick="window.location.href='{{ route('conversations.show', ['conversation' => $conversation->id]) }}'">
+                            <strong>{{ ucfirst($conversation->type) }}:</strong>
+                            <span class="truncate overflow-hidden text-ellipsis block link">
+                                {{ $conversation->input }}
+                            </span>
+                        </div>
                     </div>
                     <div class="description-body relative collapsed" data-target="{{ $entryId }}">
                         @if($assistantMsg)

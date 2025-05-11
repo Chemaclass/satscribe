@@ -4,9 +4,9 @@
 
 @props([
     'questionPlaceholder',
+    'persona',
     'search' => '',
     'question' => '',
-    'persona' => '',
     'maxBitcoinBlockHeight' => 10_000_000,
     'suggestedPromptsGrouped'=> [],
     'personaDescriptions'=> '',
