@@ -1,8 +1,8 @@
-@extends('layouts.base')
-
 @php
     use App\Enums\PromptPersona;
 @endphp
+
+@extends('layouts.base')
 
 @section('content')
     <section class="satscribe-home px-4 sm:px-6 lg:px-8 py-6">

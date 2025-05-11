@@ -8,7 +8,6 @@ use App\Data\PromptInput;
 use App\Enums\PromptPersona;
 use App\Enums\PromptType;
 use App\Models\Conversation;
-use App\Models\Message;
 use Illuminate\Pagination\Paginator;
 
 final readonly class ConversationRepository
