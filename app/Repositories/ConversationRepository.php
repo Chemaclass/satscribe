@@ -52,6 +52,7 @@ final readonly class ConversationRepository
             && $raw['status']['confirmed'] === false;
 
         // Create conversation
+        /** @var Conversation $conversation */
         $conversation = Conversation::create([
             'title' => ucfirst($input->type->value) . ':' . $input->text,
         ]);

@@ -16,6 +16,6 @@ Route::get('conversations/{conversation?}', [ConversationController::class, 'sho
 Route::post('/', [ConversationController::class, 'submit'])->name('conversation.submit')->middleware(IpRateLimiter::class);
 
 Route::get('history', [HistoryController::class, 'index'])->name('history');
-Route::get('history/{id}/raw', [HistoryController::class, 'getRaw'])->name('history.get-raw');
+Route::get('history/{messageId}/raw', [HistoryController::class, 'getRaw'])->name('history.get-raw');
 
 Route::get('faq', [FaqController::class, 'index'])->name('faq');

@@ -118,8 +118,9 @@ const toggleRawBlockVisibility = (button, rawBlock, visible) => {
     if (shortSpan) shortSpan.textContent = visible ? 'Hide' : 'Raw';
 };
 
-const loadRawData = async (entryId) => {
-    const response = await fetch(`/history/${entryId}/raw`);
+const loadRawData = async (messageId) => {
+    console.log({entryId: messageId});
+    const response = await fetch(`/history/${messageId}/raw`);
     if (!response.ok) throw new Error('Failed to fetch raw data');
     return await response.json();
 };
