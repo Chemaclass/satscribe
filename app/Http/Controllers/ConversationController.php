@@ -36,6 +36,7 @@ final readonly class ConversationController
         return view('home', [
             'questionPlaceholder' => QuestionPlaceholder::rand(),
             'suggestedPromptsGrouped' => QuestionPlaceholder::groupedPrompts(),
+            'suggestions' => $firstMsg->isBlock() ? QuestionPlaceholder::forBlock() : QuestionPlaceholder::forTx(),
             'maxBitcoinBlockHeight' => $this->heightProvider->getMaxPossibleBlockHeight(),
             'personaDescriptions' => PromptPersona::descriptions()->toJson(),
             'question' => $conversation->messages()->first()->content,

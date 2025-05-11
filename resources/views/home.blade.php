@@ -19,7 +19,7 @@
         @if(isset($conversation))
             @include('partials.conversation', [
                 'conversation' => $conversation,
-                'suggestions' => [],
+                'suggestions' => $suggestions,
             ])
         @endif
 

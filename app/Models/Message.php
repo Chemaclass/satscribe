@@ -24,4 +24,9 @@ final class Message extends Model
     {
         return $this->belongsTo(Conversation::class);
     }
+
+    public function isBlock(): bool
+    {
+        return $this->meta['type'] === 'block';
+    }
 }
