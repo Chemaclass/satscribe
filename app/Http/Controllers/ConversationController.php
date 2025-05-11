@@ -70,7 +70,7 @@ final readonly class ConversationController
         return response()->json([
             'maxBitcoinBlockHeight' => $this->heightProvider->getMaxPossibleBlockHeight(),
             'search' => $search,
-            'conversationId' => $generatedPrompt->conversation->id,
+            'conversationUlid' => $generatedPrompt->conversation->ulid,
             'html' => view('partials.conversation', [
                 'conversation' => $generatedPrompt->conversation,
                 'suggestions' => $this->generateSuggestions($search),

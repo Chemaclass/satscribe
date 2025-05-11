@@ -102,7 +102,7 @@
                         window.refreshLucideIcons?.();
 
                         const url = new URL(window.location);
-                        url.pathname = `/conversations/${data.conversationId}`;
+                        url.pathname = `/conversations/${data.conversationUlid}`;
                         window.history.pushState({}, '', url);
 
                         const searchInput = document.getElementById('search-input');
