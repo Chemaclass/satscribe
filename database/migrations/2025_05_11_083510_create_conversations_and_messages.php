@@ -12,13 +12,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('conversations', function (Blueprint $table) {
+        Schema::create('conversations', function (Blueprint $table): void {
             $table->id();
             $table->string('title')->nullable();
             $table->timestamps();
         });
 
-        Schema::create('messages', function (Blueprint $table) {
+        Schema::create('messages', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('conversation_id')->constrained()->onDelete('cascade');
             $table->enum('role', ['user', 'assistant']);
@@ -32,7 +32,7 @@ return new class extends Migration
 
         foreach ($descriptions as $desc) {
             $conversationId = DB::table('conversations')->insertGetId([
-                'title' => ucfirst($desc->type) . ':' . $desc->input,
+                'title' => ucfirst((string) $desc->type) . ':' . $desc->input,
                 'created_at' => $desc->created_at,
                 'updated_at' => $desc->updated_at,
             ]);

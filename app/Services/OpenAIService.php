@@ -152,12 +152,12 @@ TEXT;
 
         preg_match_all('/[.?!…](?=\s|$)/u', $text, $matches, PREG_OFFSET_CAPTURE);
 
-        if (!empty($matches[0])) {
+        if (isset($matches[0]) && $matches[0] !== []) {
             $last = end($matches[0]);
             $cutPos = $last[1] + mb_strlen($last[0]);
             $clean = mb_substr($text, 0, $cutPos);
 
-            return trim(preg_replace('/(\*\*|\*|_|\-)+$/u', '', $clean));
+            return trim((string) preg_replace('/(\*\*|\*|_|\-)+$/u', '', $clean));
         }
 
         return $text;

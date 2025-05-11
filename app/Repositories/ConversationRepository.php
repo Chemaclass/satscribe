@@ -26,7 +26,7 @@ final readonly class ConversationRepository
         string $question = '',
     ): ?Conversation {
         // Find an existing conversation by input type, input, persona, and question (legacy compatibility)
-        return Conversation::whereHas('messages', function ($q) use ($input, $persona, $question) {
+        return Conversation::whereHas('messages', function ($q) use ($input, $persona, $question): void {
             $q->where('role', 'user')
               ->where('content', $question)
               ->whereJsonContains('meta->type', $input->type->value)

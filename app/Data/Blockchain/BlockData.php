@@ -64,7 +64,7 @@ final readonly class BlockData implements BlockchainDataInterface
 
         // Extract readable ASCII characters
         $ascii = preg_replace('/[^[:print:]]/', '', $binary);
-        return trim($ascii);
+        return trim((string) $ascii);
     }
 
     public function getType(): string

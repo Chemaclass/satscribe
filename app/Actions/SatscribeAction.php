@@ -8,8 +8,6 @@ use App\Data\GeneratedPrompt;
 use App\Data\PromptInput;
 use App\Enums\PromptPersona;
 use App\Models\Conversation;
-use App\Models\Message;
-use App\Models\SatscribeDescription;
 use App\Repositories\ConversationRepository;
 use App\Services\BlockchainService;
 use App\Services\OpenAIService;

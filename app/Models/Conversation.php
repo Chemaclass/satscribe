@@ -18,6 +18,15 @@ final class Conversation extends Model
         return $this->hasMany(Message::class);
     }
 
+    public function getForceRefreshAttribute(): bool
+    {
+        $firstMsg = $this->relationLoaded('messages')
+            ? $this->messages->first()
+            : $this->messages()->first();
+
+        return (bool) ($firstMsg?->meta['force_refresh'] ?? false);
+    }
+
     public function getTypeAttribute(): string
     {
         $firstMsg = $this->relationLoaded('messages')
