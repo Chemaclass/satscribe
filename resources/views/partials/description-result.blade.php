@@ -1,3 +1,7 @@
+@php
+    use Illuminate\Support\Str;
+@endphp
+
 @props([
     'conversation',
     'question',
@@ -14,11 +18,11 @@
 
         <div class="section rounded p-4 shadow-sm mb-4">
             <h2 class="text-2xl font-bold mb-2 flex items-center">
-                <i data-lucide="{{ $message['role'] === 'assistant' ? 'bot' : 'user' }}" class="w-6 h-6"></i>
+                <i data-lucide="{{ $message['role'] === 'assistant' ? 'bot' : 'user' }}" class="w-6 h-6 mr-2"></i>
                 {{ ucfirst($message['role']) }}
             </h2>
             <div class="prose dark:prose-invert">
-                {!! \Illuminate\Support\Str::markdown($message['content']) !!}
+                {!! Str::markdown($message['content']) !!}
             </div>
 
             @if($message['role'] === 'assistant')

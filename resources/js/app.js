@@ -19,6 +19,7 @@ import {
     SlidersHorizontal,
     Zap,
     Shuffle,
+    User,
 } from 'lucide';
 
 const usedIcons = {
@@ -35,6 +36,7 @@ const usedIcons = {
     SlidersHorizontal,
     Zap,
     Shuffle,
+    User,
 };
 
 createIcons({ icons: usedIcons });
