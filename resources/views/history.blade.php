@@ -32,7 +32,7 @@
                     <li class="description-item">
                         <div class="description-header font-medium mb-1">
                             <div class="cursor-pointer w-full"
-                                 onclick="window.location.href='{{ route('conversation.show', ['conversation' => $conversation->id]) }}'">
+                                 onclick="window.location.href='{{ route('conversation.show', $conversation) }}'">
                                 <strong>{{ ucfirst($conversation->type) }}:</strong>
                                 <span class="truncate overflow-hidden text-ellipsis block link">
                                 {{ $conversation->input }}

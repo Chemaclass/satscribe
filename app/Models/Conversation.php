@@ -6,12 +6,30 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 
 final class Conversation extends Model
 {
     protected $fillable = [
         'title',
+        'ulid',
     ];
+
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        self::creating(function ($model): void {
+            if (empty($model->ulid)) {
+                $model->ulid = strtolower((string) Str::ulid());
+            }
+        });
+    }
+
+    public function getRouteKeyName(): string
+    {
+        return 'ulid';
+    }
 
     public function getFirstUserMessage(): Message
     {
