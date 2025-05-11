@@ -11,9 +11,9 @@ Route::redirect('generate', '/');
 Route::redirect('describe', '/');
 
 Route::get('/', [HomeController::class, 'index'])->name('home.index');
-Route::post('/', [HomeController::class, 'submit'])->name('home.submit')->middleware(IpRateLimiter::class);
 
-Route::get('/conversations/{conversation?}', [ConversationController::class, 'show'])->name('conversations.show');
+Route::get('conversations/{conversation?}', [ConversationController::class, 'show'])->name('conversation.show');
+Route::post('/', [ConversationController::class, 'submit'])->name('conversation.submit')->middleware(IpRateLimiter::class);
 
 Route::get('history', [HistoryController::class, 'index'])->name('history');
 Route::get('history/{id}/raw', [HistoryController::class, 'getRaw'])->name('history.get-raw');
