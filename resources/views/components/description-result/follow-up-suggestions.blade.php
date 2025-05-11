@@ -5,12 +5,12 @@
 ])
 
 @php
-    $suggestions = collect($suggestions)
+    $filteredSuggestions = collect($suggestions)
         ->filter(fn($s) => trim($s) !== trim($question))
         ->values();
 @endphp
 
-<div class="mt-6 follow-up-suggestions" x-data>
+<div class="mt-6 follow-up-suggestions">
     <h3 class="text-sm font-semibold mb-2">
         Ask a follow-up
     </h3>
@@ -35,20 +35,18 @@
         </button>
     </div>
 
-    @if ($suggestions->isNotEmpty())
-        <div class="mt-4">
-            <p class="text-sm font-medium mb-2">Or try one of these</p>
-            <div class="flex flex-wrap gap-2">
-                @foreach ($suggestions as $suggestion)
-                    <button
-                        type="button"
-                        class="suggested-question-prompt px-3 py-1 rounded-full text-sm transition"
-                        @click="resubmit({{ json_encode($input) }}, {{ json_encode($suggestion) }})"
-                    >
-                        {{ $suggestion }}
-                    </button>
-                @endforeach
-            </div>
+    <div class="mt-4">
+        <p class="text-sm font-medium mb-2">Or try one of these</p>
+        <div class="flex flex-wrap gap-2">
+            @foreach ($filteredSuggestions as $suggestion)
+                <button
+                    type="button"
+                    class="suggested-question-prompt px-3 py-1 rounded-full text-sm transition"
+                    @click="resubmit({{ json_encode($input) }}, {{ json_encode($suggestion) }})"
+                >
+                    {{ $suggestion }}
+                </button>
+            @endforeach
         </div>
-    @endif
+    </div>
 </div>

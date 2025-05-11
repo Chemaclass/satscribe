@@ -76,6 +76,7 @@ final readonly class ConversationRepository
                 'type' => $input->type->value,
                 'input' => $input->text,
                 'persona' => $persona->value,
+                'question' => $question,
                 'raw_data' => $raw,
                 'force_refresh' => $forceRefresh,
             ],

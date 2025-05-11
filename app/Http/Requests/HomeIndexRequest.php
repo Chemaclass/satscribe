@@ -9,6 +9,8 @@ use Illuminate\Foundation\Http\FormRequest;
 
 final class HomeIndexRequest extends FormRequest
 {
+    public const DEFAULT_USER_QUESTION = 'Give me a generic overview.';
+
     /**
      * @return array<string, ValidationRule|array<mixed>|string>
      */
@@ -43,7 +45,8 @@ final class HomeIndexRequest extends FormRequest
 
     public function getQuestionInput(): string
     {
-        return trim((string) $this->string('question'));
+        return trim((string) $this->string('question'))
+            ?: self::DEFAULT_USER_QUESTION;
     }
 
     public function getPersonaInput(): string

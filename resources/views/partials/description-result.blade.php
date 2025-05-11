@@ -1,5 +1,6 @@
 @props([
     'conversation',
+    'question',
     'suggestions',
 ])
 
