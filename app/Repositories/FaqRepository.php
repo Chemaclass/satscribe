@@ -28,7 +28,7 @@ final class FaqRepository
     {
         $query = Faq::query();
 
-        if (!empty($search)) {
+        if ($search !== '' && $search !== '0') {
             $query->where(function ($q) use ($search): void {
                 $q->where('title', 'like', "%{$search}%")
                     ->orWhere('description', 'like', "%{$search}%");

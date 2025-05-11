@@ -3,7 +3,10 @@
 @endphp
 
 @props([
+    'questionPlaceholder',
+    'persona',
     'search' => '',
+    'question' => '',
     'maxBitcoinBlockHeight' => 10_000_000,
     'suggestedPromptsGrouped'=> [],
     'personaDescriptions'=> '',
@@ -30,7 +33,7 @@
             <form
                 id="satscribe-form"
                 method="POST"
-                action="{{ route('home.submit') }}"
+                action="{{ route('conversation.submit') }}"
                 @submit.prevent="submitForm($event.target)"
                 aria-labelledby="form-heading"
                 data-turbo="false"
@@ -86,7 +89,7 @@
                             {{-- Persona selection --}}
                             <div
                                 x-data="{
-                                    selectedPersona: '{{ old('persona', $persona ?? PromptPersona::DEFAULT) }}',
+                                    selectedPersona: '{{ $persona ?? PromptPersona::DEFAULT }}',
                                     descriptions: {{$personaDescriptions}}
                                 }"
                                 class="space-y-2"
@@ -124,8 +127,8 @@
                                     type="text"
                                     id="question"
                                     name="question"
-                                    value="{{ old('question', $question ?? '') }}"
-                                    placeholder="{{ $questionPlaceholder ?? 'What is the total input value?' }}"
+                                    value="{{ $question }}"
+                                    placeholder="{{ $questionPlaceholder ?? 'Compare with the previous block' }}"
                                     class="form-input w-full"
                                     aria-describedby="questionHelp"
                                     autocomplete="off"
@@ -230,10 +233,10 @@
 
     {{-- Loading State --}}
     <template x-if="isSubmitting">
-        <section id="description-body-results" class="description-body w-full max-w-3xl mx-auto space-y-6">
+        <section id="description-body-results" class="description-body w-full max-w-3xl mx-auto space-y-6 mb-4">
             <div class="section rounded p-4 shadow-sm">
                 <h2 class="text-2xl font-bold mb-2 flex items-center">
-                    <i data-lucide="bot" class="w-6 h-6"></i> AI Summary
+                    <i data-lucide="bot" class="w-6 h-6 mr-2"></i> Assistant
                 </h2>
                 <div class="leading-relaxed prose dark:prose-invert">
                     <p class="flex items-center gap-2">

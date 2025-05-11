@@ -19,6 +19,7 @@ import {
     SlidersHorizontal,
     Zap,
     Shuffle,
+    User,
 } from 'lucide';
 
 const usedIcons = {
@@ -35,6 +36,7 @@ const usedIcons = {
     SlidersHorizontal,
     Zap,
     Shuffle,
+    User,
 };
 
 createIcons({ icons: usedIcons });
@@ -107,11 +109,18 @@ function setupDescriptionToggle() {
 const toggleRawBlockVisibility = (button, rawBlock, visible) => {
     rawBlock.style.display = visible ? 'block' : 'none';
     rawBlock.classList.toggle('hidden', !visible);
-    button.textContent = visible ? 'Hide raw data' : 'Show raw data';
+
+    // Update the text inside both spans inside the button
+    const fullSpan = button.querySelector('.full-label');
+    const shortSpan = button.querySelector('.short-label');
+
+    if (fullSpan) fullSpan.textContent = visible ? 'Hide raw data' : 'Show raw data';
+    if (shortSpan) shortSpan.textContent = visible ? 'Hide' : 'Raw';
 };
 
-const loadRawData = async (entryId) => {
-    const response = await fetch(`/history/${entryId}/raw`);
+const loadRawData = async (messageId) => {
+    console.log({entryId: messageId});
+    const response = await fetch(`/history/${messageId}/raw`);
     if (!response.ok) throw new Error('Failed to fetch raw data');
     return await response.json();
 };

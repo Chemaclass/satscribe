@@ -9,6 +9,7 @@ use App\Data\PromptInput;
 use App\Enums\PromptPersona;
 use App\Enums\PromptType;
 use App\Exceptions\OpenAIError;
+use App\Http\Requests\HomeIndexRequest;
 use Illuminate\Http\Client\Factory as HttpClient;
 use Psr\Log\LoggerInterface;
 
@@ -64,29 +65,16 @@ final readonly class OpenAIService
         PromptPersona $persona
     ): string {
         return implode("\n\n", array_filter([
-            $question !== ''
-                ? $this->buildQuestionPrompt($question)
-                : $this->buildInsightPrompt($type, $persona),
+            ($question === '' || $question === HomeIndexRequest::DEFAULT_USER_QUESTION)
+                ? $this->buildDefaultInsightPrompt($type, $persona)
+                : $this->buildQuestionPrompt($question),
 
             $this->buildWritingStyleInstructions(),
             $this->buildBlockchainContext($data),
         ]));
     }
 
-    private function buildQuestionPrompt(string $question): string
-    {
-        return <<<TEXT
-Task:
-The user may ask a general or abstract question (e.g., "Explain this like I'm five"). Unless the question is clearly unrelated to Bitcoin or blockchain, assume they are referring to the provided blockchain data context below.
-If the question is clearly unrelated to Bitcoin or blockchain (e.g., "What's the weather like?" or "Tell me a joke"), reply politely that this service only answers Bitcoin-related queries.
-Answer using only the blockchain data context. Be concise, relevant, and avoid adding unrelated analysis.
-
-User Question:
-{$question}
-TEXT;
-    }
-
-    private function buildInsightPrompt(PromptType $type, PromptPersona $persona): string
+    private function buildDefaultInsightPrompt(PromptType $type, PromptPersona $persona): string
     {
         return implode("\n\n", [
             <<<TEXT
@@ -104,6 +92,19 @@ TEXT,
             $this->getAdditionalTaskInstructions($type),
             $persona->instructions($type),
         ]);
+    }
+
+    private function buildQuestionPrompt(string $question): string
+    {
+        return <<<TEXT
+Task:
+The user may ask a general or abstract question (e.g., "Explain this like I'm five"). Unless the question is clearly unrelated to Bitcoin or blockchain, assume they are referring to the provided blockchain data context below.
+If the question is clearly unrelated to Bitcoin or blockchain (e.g., "What's the weather like?" or "Tell me a joke"), reply politely that this service only answers Bitcoin-related queries.
+Answer using only the blockchain data context. Be concise, relevant, and avoid adding unrelated analysis.
+
+User Question:
+{$question}
+TEXT;
     }
 
     private function buildWritingStyleInstructions(): string
@@ -151,12 +152,12 @@ TEXT;
 
         preg_match_all('/[.?!…](?=\s|$)/u', $text, $matches, PREG_OFFSET_CAPTURE);
 
-        if (!empty($matches[0])) {
+        if (isset($matches[0]) && $matches[0] !== []) {
             $last = end($matches[0]);
             $cutPos = $last[1] + mb_strlen($last[0]);
             $clean = mb_substr($text, 0, $cutPos);
 
-            return trim(preg_replace('/(\*\*|\*|_|\-)+$/u', '', $clean));
+            return trim((string) preg_replace('/(\*\*|\*|_|\-)+$/u', '', $clean));
         }
 
         return $text;

@@ -1,3 +1,7 @@
+@php
+    use App\Models\Conversation;use Illuminate\Support\Str;
+@endphp
+
 @extends('layouts.base')
 
 @section('title', 'Satscribe History')
@@ -14,104 +18,91 @@
             </div>
         </header>
 
-        @if ($descriptions->isEmpty())
-            <p>No descriptions found yet.</p>
+        @if ($conversations->isEmpty())
+            <p>Empty history.</p>
         @else
             <ul class="description-list">
-                @foreach($descriptions as $desc)
+                @php /** @var Conversation $conversation */@endphp
+                @foreach($conversations as $conversation)
                     @php
-                        $mempoolUrl = match ($desc->type) {
-                            'transaction' => "https://mempool.space/tx/{$desc->input}",
-                            'block' => "https://mempool.space/block/{$desc->input}",
-                            default => null,
-                        };
-                        $entryId = 'entry-' . $desc->id;
+                        $assistantMsg = $conversation->getFirstAssistantMessage();
+                        $entryId = 'entry-' . $assistantMsg->id;
                     @endphp
 
                     <li class="description-item">
                         <div class="description-header font-medium mb-1">
-                            <div class="w-full">
-                                <strong>{{ ucfirst($desc->type) }}:</strong>
-                                <p class="truncate overflow-hidden text-ellipsis">
-                                    @if ($mempoolUrl)
-                                        <a href="{{ $mempoolUrl }}" target="_blank" rel="noopener" class="mempool-link">
-                                            {{ $desc->input }}
-                                        </a>
-                                    @else
-                                        {{ $desc->input }}
-                                    @endif
-                                </p>
+                            <div class="cursor-pointer w-full"
+                                 onclick="window.location.href='{{ route('conversation.show', $conversation) }}'">
+                                <strong>{{ ucfirst($conversation->type) }}:</strong>
+                                <span class="truncate overflow-hidden text-ellipsis block link">
+                                {{ $conversation->input }}
+                            </span>
                             </div>
                         </div>
-                        {{-- Show Persona --}}
-                        @if ($desc->persona)
-                            <div class="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                                {{ $desc->persona->label() }}
-                            </div>
-                        @endif
-                        @if (!empty($desc->question))
-                        <div class="description-question">
-                            <strong>Question:</strong> {{ $desc->question }}
-                        </div>
-                        @endif
                         <div class="description-body relative collapsed" data-target="{{ $entryId }}">
-                            <div id="{{ $entryId }}" class="prose markdown-content overflow-hidden max-h-[8.5rem] transition-all duration-300">
-                                {!! Str::markdown($desc->ai_response) !!}
-                            </div>
+                            @if($assistantMsg)
+                                <div id="{{ $entryId }}"
+                                     class="prose markdown-content overflow-hidden max-h-[8.5rem] transition-all duration-300">
+                                    {!! Str::markdown($assistantMsg->content) !!}
+                                </div>
+                            @endif
                         </div>
                         <div class="description-meta mt-2 flex justify-between items-center text-sm text-gray-500">
-                            <span>{{ $desc->created_at->diffForHumans() }}</span>
-
+                            <span>{{ $conversation->created_at->diffForHumans() }}</span>
                             <div class="flex gap-4 items-center">
                                 <button type="button"
                                         class="toggle-description-btn link"
                                         data-target="{{ $entryId }}">
-                                    Show full response
+                                    <span class="full-label hidden sm:inline">Show full response</span>
+                                    <span class="short-label inline sm:hidden">Full</span>
                                 </button>
                                 <button type="button"
                                         class="toggle-history-raw-btn link"
-                                        data-target="raw-{{ $desc->id }}"
-                                        data-id="{{ $desc->id }}">
-                                    Show raw data
+                                        data-target="raw-{{ $assistantMsg->id }}"
+                                        data-id="{{ $assistantMsg->id }}">
+                                    <span class="full-label hidden sm:inline">Show raw data</span>
+                                    <span class="short-label inline sm:hidden">Raw</span>
                                 </button>
                             </div>
                         </div>
-                    <pre id="raw-{{ $desc->id }}"
-                         class="hidden bg-gray-100 text-xs p-3 rounded overflow-auto max-h-96 whitespace-pre-wrap"
-                         data-loaded="false">
+                        <pre id="raw-{{ $assistantMsg->id }}"
+                             class="hidden bg-gray-100 text-xs p-3 rounded overflow-auto max-h-96 whitespace-pre-wrap"
+                             data-loaded="false">
     <span class="loading">Loading...</span>
-</pre>
-                </li>
+                    </pre>
+                    </li>
                 @endforeach
             </ul>
 
             <div class="pagination flex justify-center items-center gap-4 mt-8">
-                @if ($descriptions->onFirstPage())
-                    <span class="px-6 py-3 text-white/60 font-semibold rounded-md cursor-not-allowed flex items-center gap-2">
-                        <i data-lucide="chevron-left" class="w-4 h-4"></i>
-                        Previous
-                    </span>
+                @if ($conversations->onFirstPage())
+                    <span
+                        class="px-6 py-3 text-white/60 font-semibold rounded-md cursor-not-allowed flex items-center gap-2">
+                    <i data-lucide="chevron-left" class="w-4 h-4"></i>
+                    Previous
+                </span>
                 @else
-                    <a href="{{ $descriptions->previousPageUrl() }}"
+                    <a href="{{ $conversations->previousPageUrl() }}"
                        class="px-6 py-3  text-white font-semibold rounded-md  transition flex items-center gap-2">
                         <i data-lucide="chevron-left" class="w-4 h-4"></i>
                         Previous
                     </a>
                 @endif
 
-                <span class="text-base font-semibold text-gray-400">Page {{ $descriptions->currentPage() }}</span>
+                <span class="text-base font-semibold text-gray-400">Page {{ $conversations->currentPage() }}</span>
 
-                @if ($descriptions->hasMorePages())
-                    <a href="{{ $descriptions->nextPageUrl() }}"
+                @if ($conversations->hasMorePages())
+                    <a href="{{ $conversations->nextPageUrl() }}"
                        class="px-6 py-3  text-white font-semibold rounded-md transition flex items-center gap-2">
                         Next
                         <i data-lucide="chevron-right" class="w-4 h-4"></i>
                     </a>
                 @else
-                    <span class="px-6 py-3  text-white/60 font-semibold rounded-md cursor-not-allowed flex items-center gap-2">
-                        Next
-                        <i data-lucide="chevron-right" class="w-4 h-4"></i>
-                    </span>
+                    <span
+                        class="px-6 py-3  text-white/60 font-semibold rounded-md cursor-not-allowed flex items-center gap-2">
+                    Next
+                    <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                </span>
                 @endif
             </div>
         @endif
@@ -128,8 +119,13 @@
                 const isNowCollapsed = body.classList.contains('collapsed');
                 content.classList.toggle('max-h-[8.5rem]', isNowCollapsed);
 
+                // Update labels inside the button, not the whole text content
                 if (button) {
-                    button.textContent = isNowCollapsed ? 'Show full response' : 'Hide full response';
+                    const fullLabel = button.querySelector('.full-label');
+                    const shortLabel = button.querySelector('.short-label');
+
+                    if (fullLabel) fullLabel.textContent = isNowCollapsed ? 'Show full response' : 'Hide full response';
+                    if (shortLabel) shortLabel.textContent = isNowCollapsed ? 'Full' : 'Hide';
                 }
             }
 

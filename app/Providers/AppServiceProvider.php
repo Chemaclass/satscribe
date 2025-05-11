@@ -7,7 +7,7 @@ namespace App\Providers;
 use App\Actions\AlbySettleWebhookAction;
 use App\Actions\SatscribeAction;
 use App\Http\Middleware\IpRateLimiter;
-use App\Repositories\SatscribeDescriptionRepository;
+use App\Repositories\ConversationRepository;
 use App\Services\Alby\AlbyClient;
 use App\Services\Alby\AlbyClientInterface;
 use App\Services\BlockHeightProvider;
@@ -64,7 +64,7 @@ final class AppServiceProvider extends ServiceProvider
             ->giveConfig('services.rate_limit.max_attempts');
 
         $this->app
-            ->when(SatscribeDescriptionRepository::class)
+            ->when(ConversationRepository::class)
             ->needs('$perPage')
             ->giveConfig('app.pagination.per_page');
 
