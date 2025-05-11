@@ -61,13 +61,6 @@ final readonly class HomeController
             'search' => $search,
             'html' => view('partials.description-result', [
                 'conversation' => $generatedPrompt->conversation,
-                'conversation_id' => $generatedPrompt->conversation->id,
-                'messages' => $generatedPrompt->conversation->messages,
-                'isFresh' => $generatedPrompt->isFresh,
-                'search' => $search->text,
-                'question' => $question,
-                'persona' => $persona->value,
-                'refreshed' => $refreshEnabled,
                 'suggestions' => $this->generateSuggestions($search),
             ])->render()
         ]);

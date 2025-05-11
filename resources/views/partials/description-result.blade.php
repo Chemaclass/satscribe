@@ -1,10 +1,10 @@
 @props([
-    'messages',
+    'conversation',
     'suggestions',
 ])
 
 <section id="description-body-results" class="description-body w-full max-w-3xl mx-auto space-y-6">
-    @foreach($messages as $message)
+    @foreach($conversation->messages as $message)
         @if(isset($message['meta']['force_refresh']) && $message['meta']['force_refresh'])
             <div class="alert-warning" role="alert">
                 ⚠️ This transaction is unconfirmed. You might want to refresh later to get the latest status.
