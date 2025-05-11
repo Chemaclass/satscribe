@@ -197,6 +197,8 @@
                 }
             }
 
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
             // Submit form programmatically
             form.dispatchEvent(new Event('submit', {bubbles: true}));
         }
