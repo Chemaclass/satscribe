@@ -4,8 +4,8 @@
 
 @props([
     'conversation',
-    'question',
-    'suggestions',
+    'question' => '',
+    'suggestions' => [],
 ])
 
 <section id="description-body-results" class="description-body w-full max-w-3xl mx-auto space-y-6">

@@ -5,17 +5,20 @@
     <x-home.header/>
     <x-home.form
         :search="old('search', $search ?? '')"
+        :question="old('question', $question ?? '')"
         :maxBitcoinBlockHeight="$maxBitcoinBlockHeight"
         :suggestedPromptsGrouped="$suggestedPromptsGrouped"
+        :persona="old('persona', $persona ?? '')"
         :personaDescriptions="$personaDescriptions"
     />
-    @if($conversation)
+
+    @if(isset($conversation))
         @include('partials.description-result', [
             'conversation' => $conversation,
-            'question' => null,
-            'suggestions' => [], // Pass real data as needed
+            'suggestions' => [],
         ])
     @endif
+
     <div id="results-container"></div>
 </section>
 <x-paywall-modal/>

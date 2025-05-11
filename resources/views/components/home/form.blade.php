@@ -3,7 +3,10 @@
 @endphp
 
 @props([
+    'questionPlaceholder',
     'search' => '',
+    'question' => '',
+    'persona' => '',
     'maxBitcoinBlockHeight' => 10_000_000,
     'suggestedPromptsGrouped'=> [],
     'personaDescriptions'=> '',
@@ -86,7 +89,7 @@
                             {{-- Persona selection --}}
                             <div
                                 x-data="{
-                                    selectedPersona: '{{ old('persona', $persona ?? PromptPersona::DEFAULT) }}',
+                                    selectedPersona: '{{ $persona ?? PromptPersona::DEFAULT }}',
                                     descriptions: {{$personaDescriptions}}
                                 }"
                                 class="space-y-2"
@@ -124,8 +127,8 @@
                                     type="text"
                                     id="question"
                                     name="question"
-                                    value="{{ old('question', $question ?? '') }}"
-                                    placeholder="{{ $questionPlaceholder ?? 'What is the total input value?' }}"
+                                    value="{{ $question }}"
+                                    placeholder="{{ $questionPlaceholder ?? 'Compare with the previous block' }}"
                                     class="form-input w-full"
                                     aria-describedby="questionHelp"
                                     autocomplete="off"
