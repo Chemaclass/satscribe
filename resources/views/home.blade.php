@@ -9,6 +9,13 @@
         :suggestedPromptsGrouped="$suggestedPromptsGrouped"
         :personaDescriptions="$personaDescriptions"
     />
+    @if($conversation)
+        @include('partials.description-result', [
+            'conversation' => $conversation,
+            'question' => null,
+            'suggestions' => [], // Pass real data as needed
+        ])
+    @endif
     <div id="results-container"></div>
 </section>
 <x-paywall-modal/>

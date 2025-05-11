@@ -13,7 +13,7 @@ final class HistoryController
     public function index(ConversationRepository $repository): View
     {
         return view('history', [
-            'descriptions' => $repository->getPagination(),
+            'conversations' => $repository->getPagination(),
         ]);
     }
 

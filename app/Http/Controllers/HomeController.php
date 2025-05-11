@@ -11,6 +11,7 @@ use App\Enums\PromptPersona;
 use App\Exceptions\BlockchainException;
 use App\Exceptions\OpenAIError;
 use App\Http\Requests\HomeIndexRequest;
+use App\Models\Conversation;
 use App\Services\BlockHeightProvider;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
@@ -24,13 +25,18 @@ final readonly class HomeController
     ) {
     }
 
-    public function index(): View
+    public function index(?Conversation $conversation = null): View
     {
+        if ($conversation) {
+            $conversation->load('messages');
+        }
+
         return view('home', [
             'questionPlaceholder' => QuestionPlaceholder::rand(),
             'suggestedPromptsGrouped' => QuestionPlaceholder::groupedPrompts(),
             'maxBitcoinBlockHeight' => $this->heightProvider->getMaxPossibleBlockHeight(),
             'personaDescriptions' => PromptPersona::descriptions()->toJson(),
+            'conversation' => $conversation,
         ]);
     }
 
@@ -59,6 +65,7 @@ final readonly class HomeController
         return response()->json([
             'maxBitcoinBlockHeight' => $this->heightProvider->getMaxPossibleBlockHeight(),
             'search' => $search,
+            'conversation_id' => $generatedPrompt->conversation->id,
             'html' => view('partials.description-result', [
                 'conversation' => $generatedPrompt->conversation,
                 'suggestions' => $this->generateSuggestions($search),
