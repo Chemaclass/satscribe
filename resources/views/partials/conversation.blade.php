@@ -26,13 +26,13 @@
             </div>
 
             @if($message['role'] === 'assistant')
-                <x-description-result.follow-up-suggestions
+                <x-conversation.follow-up-suggestions
                     :input="data_get($message['meta'], 'input')"
                     :question="data_get($message['meta'], 'question', '')"
                     :suggestions="$suggestions"
                 />
 
-                <x-description-result.raw-data-toggle-button
+                <x-conversation.raw-data-toggle-button
                     :id="data_get($message, 'id')"
                     :input="data_get($message['meta'], 'input')"
                     :question="data_get($message['meta'], 'question', '')"

@@ -17,7 +17,7 @@
         />
 
         @if(isset($conversation))
-            @include('partials.description-result', [
+            @include('partials.conversation', [
                 'conversation' => $conversation,
                 'suggestions' => [],
             ])
