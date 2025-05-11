@@ -7,8 +7,10 @@ namespace App\Actions;
 use App\Data\GeneratedPrompt;
 use App\Data\PromptInput;
 use App\Enums\PromptPersona;
+use App\Models\Conversation;
+use App\Models\Message;
 use App\Models\SatscribeDescription;
-use App\Repositories\SatscribeDescriptionRepository;
+use App\Repositories\ConversationRepository;
 use App\Services\BlockchainService;
 use App\Services\OpenAIService;
 use App\Services\UserInputSanitizer;
@@ -22,7 +24,7 @@ final readonly class SatscribeAction
     public function __construct(
         private BlockchainService $blockchain,
         private OpenAIService $openai,
-        private SatscribeDescriptionRepository $repository,
+        private ConversationRepository $repository,
         private UserInputSanitizer $userInputSanitizer,
         private string $ip,
         private int $maxOpenAIAttempts,
@@ -37,23 +39,23 @@ final readonly class SatscribeAction
     ): GeneratedPrompt {
         // Return a cached result unless forced to refresh
         if (!$refreshEnabled) {
-            $existing = $this->repository->findByCriteria($input, $persona, $question);
+            $conversation = $this->repository->findByCriteria($input, $persona, $question);
 
-            if ($existing instanceof SatscribeDescription && !$existing->force_refresh) {
-                return new GeneratedPrompt($existing, isFresh: false);
+            if ($conversation instanceof Conversation && !$conversation->force_refresh) {
+                return new GeneratedPrompt($conversation, isFresh: false);
             }
         }
 
-        $result = $this->generateFreshPrompt($input, $persona, $question);
+        $result = $this->generateFreshConversation($input, $persona, $question);
 
         return new GeneratedPrompt($result, isFresh: true);
     }
 
-    private function generateFreshPrompt(
+    private function generateFreshConversation(
         PromptInput $input,
         PromptPersona $persona,
         string $question = '',
-    ): SatscribeDescription {
+    ): Conversation {
         $this->enforceRateLimit();
 
         $blockchainData = $this->blockchain->getBlockchainData($input);

@@ -4,13 +4,13 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Models\SatscribeDescription;
-use App\Repositories\SatscribeDescriptionRepository;
+use App\Repositories\ConversationRepository;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 final class HistoryController
 {
-    public function index(SatscribeDescriptionRepository $repository): View
+    public function index(ConversationRepository $repository): View
     {
         return view('history', [
             'descriptions' => $repository->getPagination(),

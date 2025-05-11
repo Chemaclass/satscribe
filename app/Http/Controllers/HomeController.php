@@ -60,7 +60,9 @@ final readonly class HomeController
             'maxBitcoinBlockHeight' => $this->heightProvider->getMaxPossibleBlockHeight(),
             'search' => $search,
             'html' => view('partials.description-result', [
-                'result' => $generatedPrompt->result,
+                'conversation' => $generatedPrompt->conversation,
+                'conversation_id' => $generatedPrompt->conversation->id,
+                'messages' => $generatedPrompt->conversation->messages,
                 'isFresh' => $generatedPrompt->isFresh,
                 'search' => $search->text,
                 'question' => $question,
