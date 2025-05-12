@@ -71,6 +71,9 @@
                 async submitForm(form) {
                     if (this.isSubmitting) return;
 
+                    const loaderModal = document.getElementById('chat-loader-modal');
+                    if (loaderModal) loaderModal.classList.remove('hidden');
+
                     document.getElementById('description-body-results')?.style.setProperty('display', 'none');
                     this.loadingMessage = this.loadingMessages[Math.floor(Math.random() * this.loadingMessages.length)];
                     this.isSubmitting = true;
@@ -128,6 +131,7 @@
                         console.error('submitForm error:', error.message);
                     } finally {
                         this.isSubmitting = false;
+                        if (loaderModal) loaderModal.classList.add('hidden');
                     }
                 },
 
