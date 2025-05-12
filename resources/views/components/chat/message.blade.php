@@ -32,7 +32,7 @@
         />
 
         <x-chat.raw-data-toggle-button
-            :id="data_get($message, 'id')"
+            :id="data_get($message->chat->getFirstAssistantMessage(), 'id')"
             :input="data_get($message['meta'], 'input')"
             :question="data_get($message['meta'], 'question', '')"
             :createdAt="data_get($message, 'created_at')"
