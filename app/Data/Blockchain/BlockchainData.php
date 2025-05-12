@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace App\Data\Blockchain;
 
 use App\Data\BlockchainDataInterface;
-use App\Models\Message;
 
 final readonly class BlockchainData
 {
@@ -15,49 +14,6 @@ final readonly class BlockchainData
         public ?BlockData $nextBlock,
         public ?BlockData $transactionBlock,
     ) {
-    }
-
-    public static function fromMessage(Message $message): self
-    {
-        $data = data_get($message->meta, 'raw_data');
-
-        $transaction = null;
-        $block = null;
-
-        // Detect transaction data and instantiate
-        if (isset($data['txid'])) {
-            $transaction = new TransactionData(
-                txid: $data['txid'],
-                version: $data['version'],
-                locktime: $data['locktime'],
-                vin: $data['vin'],
-                vout: $data['vout'],
-                size: $data['size'],
-                weight: $data['weight'],
-                fee: $data['fee'],
-                confirmed: $data['status']['confirmed'],
-                blockHeight: $data['status']['block_height'] ?? null,
-                blockHash: $data['status']['block_hash'] ?? null,
-                blockTime: $data['status']['block_time'] ?? null,
-            );
-        }
-
-        // Detect block data and instantiate
-        if (isset($data['block'])) {
-            $blockData = $data['block'];
-            $block = BlockData::fromArray(
-                data: $blockData,
-                transactions: $blockData['transactions'] ?? []
-            );
-        }
-
-        return new self(
-            block: $block,
-            transaction: $transaction,
-            previousBlock: null,
-            nextBlock: null,
-            transactionBlock: $block // reuse if tx and block are related
-        );
     }
 
     public function current(): BlockchainDataInterface

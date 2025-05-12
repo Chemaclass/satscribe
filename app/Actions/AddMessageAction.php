@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
-use App\Data\Blockchain\BlockchainData;
 use App\Data\PromptInput;
 use App\Enums\PromptPersona;
 use App\Models\Conversation;
@@ -36,13 +35,12 @@ final readonly class AddMessageAction
         $this->enforceRateLimit();
         $firstUserMessage = $conversation->getFirstUserMessage();
 
+        $input = PromptInput::fromRaw($firstUserMessage->input);
         $cleanMsg = $this->userInputSanitizer->sanitize($message);
 
-        $blockchainData = BlockchainData::fromMessage($conversation->getFirstAssistantMessage());
-
         $aiResponse = $this->openai->generateText(
-            $blockchainData,
-            PromptInput::fromRaw($firstUserMessage->input),
+            $this->blockchain->getBlockchainData($input),
+            $input,
             PromptPersona::from($firstUserMessage->persona),
             $cleanMsg
         );
