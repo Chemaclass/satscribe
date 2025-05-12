@@ -178,7 +178,7 @@
             };
         }
 
-        async function sendMessageTochat(chatUlid, message) {
+        async function sendMessageToChat(chatUlid, message) {
             if (!chatUlid || !message.trim()) {
                 console.warn('Message is empty or chat ID missing.');
                 return;
