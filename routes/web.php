@@ -17,7 +17,7 @@ Route::post('/', [HomeController::class, 'createConversation'])
 
 Route::get('conversations/{conversation?}', [ConversationController::class, 'show'])->name('conversation.show');
 
-Route::get('history', [HistoryController::class, 'index'])->name('history');
+Route::get('history', [HistoryController::class, 'index'])->name('history.index');
 Route::get('history/{messageId}/raw', [HistoryController::class, 'getRaw'])->name('history.get-raw');
 
-Route::get('faq', [FaqController::class, 'index'])->name('faq');
+Route::get('faq', [FaqController::class, 'index'])->name('faq.index');

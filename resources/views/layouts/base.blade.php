@@ -31,11 +31,11 @@
     <a href="{{ url('/') }}" class="brand text-xl font-bold">Satscribe</a>
 
     <nav class="nav-links flex items-center">
-        <a href="{{ route('faq') }}" class="nav-link flex items-center gap-1">
+        <a href="{{ route('faq.index') }}" class="nav-link flex items-center gap-1">
             <svg data-lucide="lightbulb" class="w-5 h-5"></svg>
             <span class="link-text">FAQ</span>
         </a>
-        <a href="{{ url('/history') }}" class="nav-link flex items-center gap-1">
+        <a href="{{ route('history.index') }}" class="nav-link flex items-center gap-1">
             <svg data-lucide="scroll" class="w-5 h-5"></svg>
             <span class="link-text">History</span>
         </a>
