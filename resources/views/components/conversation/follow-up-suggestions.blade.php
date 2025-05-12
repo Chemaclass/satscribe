@@ -31,7 +31,7 @@
             class="form-button"
             @click="resubmit({{ json_encode($input) }}, $refs.customFollowUp.value)"
         >
-            Submit
+            Send
         </button>
     </div>
 

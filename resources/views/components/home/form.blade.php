@@ -204,9 +204,9 @@
                         >
                             <i data-lucide="loader-2" class="animate-spin mr-2" x-show="isSubmitting" x-cloak></i>
                             <span id="submit-icon" x-show="!isSubmitting" x-cloak class="sm-2">
-                    <i data-lucide="zap" class="w-4 h-4"></i>
-                </span>
-                            <span id="submit-text" x-show="!isSubmitting" x-cloak>Submit</span>
+                                <i data-lucide="zap" class="w-4 h-4"></i>
+                            </span>
+                            <span id="submit-text" x-show="!isSubmitting" x-cloak> New Chat</span>
                         </button>
 
                         <button
