@@ -9,6 +9,8 @@
     $filteredSuggestions = collect($suggestions)
         ->filter(fn($s) => trim($s) !== trim($question))
         ->values();
+
+    $conversation = $message->conversation;
 @endphp
 
 <div class="mt-6 follow-up-suggestions">
@@ -17,7 +19,7 @@
     </h3>
 
     <div x-data="{ message: '' }" class="w-full">
-        <form @submit.prevent="sendMessageToConversation('{{ $message->conversation->ulid }}', message)" class="flex w-full gap-2">
+        <form @submit.prevent="sendMessageToConversation('{{ $conversation->ulid }}', message)" class="flex w-full gap-2">
             <input
                 id="customFollowUp"
                 type="text"
@@ -42,14 +44,18 @@
     <div class="mt-4">
         <p class="text-sm font-medium mb-2">Or try one of these</p>
         <div class="flex flex-wrap gap-2">
-            @foreach ($filteredSuggestions as $suggestion)
-                <button
-                    type="button"
-                    class="suggested-question-prompt px-3 py-1 rounded-full text-sm transition"
-                    @click="resubmit({{ json_encode($input) }}, {{ json_encode($suggestion) }})"
+            @foreach($filteredSuggestions as $suggestion)
+                <form
+                    @submit.prevent="sendMessageToConversation('{{ $conversation->ulid }}', '{{ addslashes($suggestion) }}')"
+                    class="inline"
                 >
-                    {{ $suggestion }}
-                </button>
+                    <button
+                        type="submit"
+                        class="suggested-question-prompt"
+                    >
+                        {{ $suggestion }}
+                    </button>
+                </form>
             @endforeach
         </div>
     </div>
