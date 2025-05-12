@@ -19,12 +19,7 @@ final readonly class BlockchainData
 
     public static function fromMessage(Message $message): self
     {
-        $inputJson = data_get($message->meta, 'input');
-        if (!$inputJson || !is_string($inputJson)) {
-            throw new \InvalidArgumentException("Missing or invalid input metadata for blockchain data");
-        }
-
-        $data = json_decode($inputJson, true, 512, JSON_THROW_ON_ERROR);
+        $data = data_get($message->meta, 'raw_data');
 
         $transaction = null;
         $block = null;

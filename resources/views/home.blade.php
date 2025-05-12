@@ -185,14 +185,17 @@
             }
 
             const inputField = document.getElementById('customFollowUp');
-            const sendButton = document.querySelector('button[type="submit"]');
+            const sendButtons = document.querySelectorAll('button[type="submit"]');
 
             try {
-                // Disable input and button
+                inputField.value = message;
                 inputField.disabled = true;
                 inputField.classList.add('opacity-50', 'cursor-not-allowed');
-                sendButton.disabled = true;
-                sendButton.classList.add('opacity-50', 'cursor-not-allowed');
+
+                sendButtons.forEach(btn => {
+                    btn.disabled = true;
+                    btn.classList.add('opacity-50', 'cursor-not-allowed');
+                });
 
                 const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 
@@ -223,10 +226,15 @@
             } finally {
                 // Restore input/button
                 inputField.disabled = false;
-                sendButton.disabled = false;
-                sendButton.classList.remove('opacity-50', 'cursor-not-allowed');
+                inputField.classList.remove('opacity-50', 'cursor-not-allowed');
                 inputField.value = '';
                 inputField.focus();
+
+                sendButtons.forEach(btn => {
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                });
+
             }
         }
 
