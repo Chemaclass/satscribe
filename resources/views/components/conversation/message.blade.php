@@ -2,7 +2,7 @@
     use Illuminate\Support\Str;
 @endphp
 
-@props(['message', 'suggestions' => []])
+@props(['message', 'loop', 'suggestions' => []])
 
 @if(isset($message['meta']['force_refresh']) && $message['meta']['force_refresh'])
     <div class="alert-warning" role="alert">
@@ -20,11 +20,12 @@
         {!! Str::markdown($message['content']) !!}
     </div>
 
-    @if($message['role'] === 'assistant')
+    @if($message['role'] === 'assistant' && $loop->last)
         <x-conversation.follow-up-suggestions
             :input="data_get($message['meta'], 'input')"
             :question="data_get($message['meta'], 'question', '')"
             :suggestions="$suggestions"
+            :message="$message"
         />
 
         <x-conversation.raw-data-toggle-button

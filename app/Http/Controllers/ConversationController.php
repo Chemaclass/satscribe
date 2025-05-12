@@ -4,25 +4,21 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Actions\SatscribeAction;
-use App\Data\PromptInput;
+use App\Actions\AddMessageAction;
 use App\Data\QuestionPlaceholder;
 use App\Enums\PromptPersona;
-use App\Exceptions\BlockchainException;
-use App\Exceptions\OpenAIError;
-use App\Http\Requests\HomeIndexRequest;
 use App\Models\Conversation;
 use App\Models\Message;
 use App\Services\BlockHeightProvider;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Response;
 
 final readonly class ConversationController
 {
     public function __construct(
         private BlockHeightProvider $heightProvider,
+        private AddMessageAction $addMessageAction,
     ) {
     }
 
@@ -43,6 +39,20 @@ final readonly class ConversationController
             'conversation' => $conversation,
             'search' => $firstMsg->meta['input'] ?? '',
             'persona' => $firstMsg->meta['persona'] ?? '',
+        ]);
+    }
+
+    public function addMessage(Request $request, Conversation $conversation): JsonResponse
+    {
+        $this->addMessageAction->execute($conversation, (string) $request->input('message'));
+
+        $conversation->load('messages');
+
+        return response()->json([
+            'html' => view('partials.conversation', [
+                'conversation' => $conversation,
+                'suggestions' => $conversation->isBlock() ? QuestionPlaceholder::forBlock() : QuestionPlaceholder::forTx(),
+            ])->render(),
         ]);
     }
 }

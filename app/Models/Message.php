@@ -29,4 +29,34 @@ final class Message extends Model
     {
         return $this->meta['type'] === 'block';
     }
+
+    public function getTypeAttribute(): ?string
+    {
+        return $this->meta['type'] ?? null;
+    }
+
+    public function getInputAttribute(): ?string
+    {
+        return $this->meta['input'] ?? null;
+    }
+
+    public function getPersonaAttribute(): ?string
+    {
+        return $this->meta['persona'] ?? null;
+    }
+
+    public function getRawDataAttribute(): mixed
+    {
+        return $this->meta['raw_data'] ?? null;
+    }
+
+    public function getForceRefreshAttribute(): bool
+    {
+        return $this->meta['force_refresh'] ?? false;
+    }
+
+    public function getQuestionAttribute(): ?string
+    {
+        return $this->meta['question'] ?? null;
+    }
 }

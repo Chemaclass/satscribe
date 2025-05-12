@@ -178,6 +178,43 @@
             };
         }
 
+        async function sendMessageToConversation(conversationUlid, message) {
+            if (!conversationUlid || !message.trim()) {
+                console.error('empty message not allowed!')
+                return;
+            }
+
+            try {
+                // Optionally: Show loading indicator here
+
+                const response = await axios.post(`/conversations/${conversationUlid}/messages`, {
+                    message: message,
+                    // CSRF and any other necessary headers
+                }, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json',
+                        // 'X-CSRF-TOKEN': yourCsrfToken (if needed)
+                    }
+                });
+
+                // Assuming the server returns the rendered HTML for the new message:
+                const chatArea = document.getElementById('chat-messages');
+                if (chatArea && response.data.html) {
+                    chatArea.innerHTML += response.data.html;
+                }
+
+                // Optionally: Scroll to bottom and clear input field
+                document.getElementById('customFollowUp').value = '';
+                chatArea.scrollTop = chatArea.scrollHeight;
+            } catch (error) {
+                // Handle errors
+                console.error('Error sending message:', error);
+            } finally {
+                // Optionally: Hide loading indicator
+            }
+        }
+
         function resubmit(searchValue, questionValue = '') {
             const form = document.getElementById('satscribe-form');
             if (!form) return;

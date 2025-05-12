@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Actions\AddMessageAction;
 use App\Actions\AlbySettleWebhookAction;
 use App\Actions\SatscribeAction;
 use App\Http\Middleware\IpRateLimiter;
@@ -35,6 +36,16 @@ final class AppServiceProvider extends ServiceProvider
 
         $this->app
             ->when(SatscribeAction::class)
+            ->needs('$maxOpenAIAttempts')
+            ->giveConfig('services.openai.max_attempts');
+
+        $this->app
+            ->when(AddMessageAction::class)
+            ->needs('$ip')
+            ->give(request()->ip());
+
+        $this->app
+            ->when(AddMessageAction::class)
             ->needs('$maxOpenAIAttempts')
             ->giveConfig('services.openai.max_attempts');
 

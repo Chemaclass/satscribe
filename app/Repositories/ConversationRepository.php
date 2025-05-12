@@ -28,10 +28,10 @@ final readonly class ConversationRepository
         // Find an existing conversation by input type, input, persona, and question (legacy compatibility)
         return Conversation::whereHas('messages', function ($q) use ($input, $persona, $question): void {
             $q->where('role', 'user')
-              ->where('content', $question)
-              ->whereJsonContains('meta->type', $input->type->value)
-              ->whereJsonContains('meta->input', $input->text)
-              ->whereJsonContains('meta->persona', $persona->value);
+                ->where('content', $question)
+                ->whereJsonContains('meta->type', $input->type->value)
+                ->whereJsonContains('meta->input', $input->text)
+                ->whereJsonContains('meta->persona', $persona->value);
         })->first();
     }
 
@@ -51,10 +51,9 @@ final readonly class ConversationRepository
             && isset($raw['status']['confirmed'])
             && $raw['status']['confirmed'] === false;
 
-        // Create conversation
         /** @var Conversation $conversation */
         $conversation = Conversation::create([
-            'title' => ucfirst($input->type->value) . ':' . $input->text,
+            'title' => ucfirst($input->type->value).':'.$input->text,
         ]);
 
         $conversation->addUserMessage($question, [
@@ -73,6 +72,30 @@ final readonly class ConversationRepository
         ]);
 
         return $conversation;
+    }
+
+    public function addMessageToConversation(
+        Conversation $conversation,
+        string $userMessage,
+        string $assistantResponse,
+    ): void {
+        $firstUserMsg = $conversation->getFirstUserMessage();
+        $firstAssistantMsg = $conversation->getFirstAssistantMessage();
+
+        $conversation->addUserMessage($userMessage, [
+            'type' => $firstUserMsg->type,
+            'persona' => $firstUserMsg->persona,
+            'input' => $userMessage,
+        ]);
+
+        $conversation->addAssistantMessage($assistantResponse, [
+            'type' => $firstAssistantMsg->type,
+            'input' => $firstAssistantMsg->input,
+            'persona' => $firstAssistantMsg->persona,
+            'raw_data' => [],
+            'force_refresh' => false,
+            'question' => $userMessage,
+        ]);
     }
 
     /**

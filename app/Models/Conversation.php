@@ -96,4 +96,9 @@ final class Conversation extends Model
             'meta' => $meta,
         ]);
     }
+
+    public function isBlock(): bool
+    {
+        return $this->messages()->first()->isBlock();
+    }
 }
