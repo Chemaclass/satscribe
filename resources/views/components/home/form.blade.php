@@ -33,7 +33,7 @@
             <form
                 id="satscribe-form"
                 method="POST"
-                action="{{ route('conversation.submit') }}"
+                action="{{ route('home.create-conversation') }}"
                 @submit.prevent="submitForm($event.target)"
                 aria-labelledby="form-heading"
                 data-turbo="false"
