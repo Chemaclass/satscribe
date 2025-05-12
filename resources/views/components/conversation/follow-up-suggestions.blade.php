@@ -19,10 +19,12 @@
     <div x-data="{ message: '' }" class="w-full">
         <form @submit.prevent="sendMessageToConversation('{{ $message->conversation->ulid }}', message)" class="flex w-full gap-2">
             <input
+                id="customFollowUp"
                 type="text"
                 x-model="message"
+                class="w-3/4 p-2 border rounded"
                 placeholder="Ask a follow-up question..."
-                class="w-3/4 p-2 border border-gray-300 rounded"
+                autocomplete="off"
             />
 
             <button

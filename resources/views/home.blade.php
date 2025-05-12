@@ -180,38 +180,53 @@
 
         async function sendMessageToConversation(conversationUlid, message) {
             if (!conversationUlid || !message.trim()) {
-                console.error('empty message not allowed!')
+                console.warn('Message is empty or conversation ID missing.');
                 return;
             }
 
+            const inputField = document.getElementById('customFollowUp');
+            const sendButton = document.querySelector('button[type="submit"]');
+
             try {
-                // Optionally: Show loading indicator here
+                // Disable input and button
+                inputField.disabled = true;
+                inputField.classList.add('opacity-50', 'cursor-not-allowed');
+                sendButton.disabled = true;
+                sendButton.classList.add('opacity-50', 'cursor-not-allowed');
+
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 
                 const response = await axios.post(`/conversations/${conversationUlid}/messages`, {
                     message: message,
-                    // CSRF and any other necessary headers
                 }, {
                     headers: {
                         'X-Requested-With': 'XMLHttpRequest',
                         'Accept': 'application/json',
-                        // 'X-CSRF-TOKEN': yourCsrfToken (if needed)
+                        ...(csrfToken && { 'X-CSRF-TOKEN': csrfToken }),
                     }
                 });
 
-                // Assuming the server returns the rendered HTML for the new message:
-                const chatArea = document.getElementById('chat-messages');
-                if (chatArea && response.data.html) {
-                    chatArea.innerHTML += response.data.html;
+                // Reload the page to fetch all updated messages
+                if (response.status === 200) {
+                    window.location.reload();
+                    const lastMessage = document.getElementById('last-message');
+                    if (lastMessage) {
+                        lastMessage.scrollIntoView(true);
+                    }
+                } else {
+                    console.warn('Unexpected response status:', response.status);
                 }
 
-                // Optionally: Scroll to bottom and clear input field
-                document.getElementById('customFollowUp').value = '';
-                chatArea.scrollTop = chatArea.scrollHeight;
             } catch (error) {
-                // Handle errors
-                console.error('Error sending message:', error);
+                console.error('Error sending message:', error?.response?.data || error.message);
+                alert('Failed to send your message. Please try again.');
             } finally {
-                // Optionally: Hide loading indicator
+                // Restore input/button
+                inputField.disabled = false;
+                sendButton.disabled = false;
+                sendButton.classList.remove('opacity-50', 'cursor-not-allowed');
+                inputField.value = '';
+                inputField.focus();
             }
         }
 
