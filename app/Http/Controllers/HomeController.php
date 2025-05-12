@@ -34,7 +34,7 @@ final readonly class HomeController
         ]);
     }
 
-    public function createchat(HomeIndexRequest $request, SatscribeAction $action): JsonResponse
+    public function createChat(HomeIndexRequest $request, SatscribeAction $action): JsonResponse
     {
         $search = $this->getPromptInput($request);
         $persona = $this->getPromptPersona($request);
