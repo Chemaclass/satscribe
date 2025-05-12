@@ -54,6 +54,7 @@ final readonly class ChatRepository
         /** @var Chat $chat */
         $chat = Chat::create([
             'title' => ucfirst($input->type->value).':'.$input->text,
+            'creator_ip' => request()->ip(),
         ]);
 
         $chat->addUserMessage($question, [

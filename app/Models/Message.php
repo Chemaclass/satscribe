@@ -25,6 +25,11 @@ final class Message extends Model
         return $this->belongsTo(Chat::class);
     }
 
+    public function getCreatorIpAttribute(): ?string
+    {
+        return $this->chat->creator_ip;
+    }
+
     public function isBlock(): bool
     {
         return $this->meta['type'] === 'block';

@@ -15,6 +15,7 @@ final class Chat extends Model
     protected $fillable = [
         'title',
         'ulid',
+        'creator_ip',
     ];
 
     protected static function boot(): void
