@@ -31,7 +31,10 @@
             class="form-button"
             @click="resubmit({{ json_encode($input) }}, $refs.customFollowUp.value)"
         >
-            Send
+            <span id="submit-icon" x-cloak class="sm-2">
+                <i data-lucide="plus" class="w-4 h-4"></i>
+            </span>
+            <span id="submit-text" x-cloak> Send</span>
         </button>
     </div>
 
