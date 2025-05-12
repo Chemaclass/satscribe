@@ -4,16 +4,16 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Models\Message;
-use App\Repositories\ConversationRepository;
+use App\Repositories\ChatRepository;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 final class HistoryController
 {
-    public function index(ConversationRepository $repository): View
+    public function index(ChatRepository $repository): View
     {
         return view('history', [
-            'conversations' => $repository->getPagination(),
+            'chats' => $repository->getPagination(),
         ]);
     }
 

@@ -5,6 +5,19 @@
 @extends('layouts.base')
 
 @section('content')
+    <div
+        id="chat-loader-modal"
+        class="hidden fixed inset-0 z-50 flex items-center justify-center bg-[rgba(var(--body-bg-rgb),0.6)] backdrop-blur-[2px]"
+    >
+        <div class="bg-white dark:bg-[var(--btc-bg-lighter-dark)] px-6 py-4 rounded-lg shadow-lg flex flex-col items-center gap-2 border border-gray-200 dark:border-[var(--btc-border-dark)]">
+            <svg class="h-6 w-6 text-[var(--btc-orange)] animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+            </svg>
+            <p class="text-sm text-[var(--btc-text-dark)] dark:text-[var(--btc-text-light)]">Sending your message…</p>
+        </div>
+    </div>
+
     <section class="satscribe-home px-4 sm:px-6 lg:px-8 py-6">
         <x-home.header/>
         <x-home.form
@@ -16,9 +29,9 @@
             :personaDescriptions="$personaDescriptions"
         />
 
-        @if(isset($conversation))
-            @include('partials.conversation', [
-                'conversation' => $conversation,
+        @if(isset($chat))
+            @include('partials.chat', [
+                'chat' => $chat,
                 'suggestions' => $suggestions,
             ])
         @endif
@@ -57,6 +70,9 @@
 
                 async submitForm(form) {
                     if (this.isSubmitting) return;
+
+                    const loaderModal = document.getElementById('chat-loader-modal');
+                    if (loaderModal) loaderModal.classList.remove('hidden');
 
                     document.getElementById('description-body-results')?.style.setProperty('display', 'none');
                     this.loadingMessage = this.loadingMessages[Math.floor(Math.random() * this.loadingMessages.length)];
@@ -102,7 +118,7 @@
                         window.refreshLucideIcons?.();
 
                         const url = new URL(window.location);
-                        url.pathname = `/conversations/${data.conversationUlid}`;
+                        url.pathname = `/chats/${data.chatUlid}`;
                         window.history.pushState({}, '', url);
 
                         const searchInput = document.getElementById('search-input');
@@ -115,6 +131,7 @@
                         console.error('submitForm error:', error.message);
                     } finally {
                         this.isSubmitting = false;
+                        if (loaderModal) loaderModal.classList.add('hidden');
                     }
                 },
 
@@ -176,6 +193,70 @@
                     }
                 },
             };
+        }
+
+        async function sendMessageToChat(chatUlid, message) {
+            if (!chatUlid || !message.trim()) {
+                console.warn('Message is empty or chat ID missing.');
+                return;
+            }
+
+            const loaderModal = document.getElementById('chat-loader-modal');
+            const inputField = document.getElementById('customFollowUp');
+            const sendButtons = document.querySelectorAll('button[type="submit"]');
+
+            try {
+                if (loaderModal) loaderModal.classList.remove('hidden');
+
+                inputField.value = message;
+                inputField.disabled = true;
+                inputField.classList.add('opacity-50', 'cursor-not-allowed');
+
+                sendButtons.forEach(btn => {
+                    btn.disabled = true;
+                    btn.classList.add('opacity-50', 'cursor-not-allowed');
+                });
+
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+
+                const response = await axios.post(`/chats/${chatUlid}/messages`, {
+                    message: message,
+                }, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json',
+                        ...(csrfToken && { 'X-CSRF-TOKEN': csrfToken }),
+                    }
+                });
+
+                // Reload the page to fetch all updated messages
+                if (response.status === 200) {
+                    window.location.reload();
+                    const lastMessage = document.getElementById('last-message');
+                    if (lastMessage) {
+                        lastMessage.scrollIntoView(true);
+                    }
+                } else {
+                    console.warn('Unexpected response status:', response.status);
+                }
+
+            } catch (error) {
+                console.error('Error sending message:', error?.response?.data || error.message);
+                alert('Failed to send your message. Please try again.');
+            } finally {
+                if (loaderModal) loaderModal.classList.add('hidden');
+
+                inputField.disabled = false;
+                inputField.classList.remove('opacity-50', 'cursor-not-allowed');
+                inputField.value = '';
+                inputField.focus();
+
+                sendButtons.forEach(btn => {
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                });
+
+            }
         }
 
         function resubmit(searchValue, questionValue = '') {

@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Actions\AddMessageAction;
 use App\Actions\AlbySettleWebhookAction;
 use App\Actions\SatscribeAction;
 use App\Http\Middleware\IpRateLimiter;
-use App\Repositories\ConversationRepository;
+use App\Repositories\ChatRepository;
 use App\Services\Alby\AlbyClient;
 use App\Services\Alby\AlbyClientInterface;
 use App\Services\BlockHeightProvider;
@@ -39,6 +40,16 @@ final class AppServiceProvider extends ServiceProvider
             ->giveConfig('services.openai.max_attempts');
 
         $this->app
+            ->when(AddMessageAction::class)
+            ->needs('$ip')
+            ->give(request()->ip());
+
+        $this->app
+            ->when(AddMessageAction::class)
+            ->needs('$maxOpenAIAttempts')
+            ->giveConfig('services.openai.max_attempts');
+
+        $this->app
             ->when(OpenAIService::class)
             ->needs('$openAiApiKey')
             ->giveConfig('services.openai.key');
@@ -64,7 +75,7 @@ final class AppServiceProvider extends ServiceProvider
             ->giveConfig('services.rate_limit.max_attempts');
 
         $this->app
-            ->when(ConversationRepository::class)
+            ->when(ChatRepository::class)
             ->needs('$perPage')
             ->giveConfig('app.pagination.per_page');
 

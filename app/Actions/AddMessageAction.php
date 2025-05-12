@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
-use App\Data\GeneratedPrompt;
 use App\Data\PromptInput;
 use App\Enums\PromptPersona;
 use App\Models\Chat;
@@ -15,7 +14,7 @@ use App\Services\UserInputSanitizer;
 use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Support\Facades\RateLimiter;
 
-final readonly class SatscribeAction
+final readonly class AddMessageAction
 {
     private const RATE_LIMIT_SECONDS = 86400; // 24 hours
 
@@ -30,37 +29,23 @@ final readonly class SatscribeAction
     }
 
     public function execute(
-        PromptInput $input,
-        PromptPersona $persona,
-        bool $refreshEnabled = false,
-        string $question = '',
-    ): GeneratedPrompt {
-        // Return a cached result unless forced to refresh
-        if (!$refreshEnabled) {
-            $chat = $this->repository->findByCriteria($input, $persona, $question);
-
-            if ($chat instanceof Chat && !$chat->force_refresh) {
-                return new GeneratedPrompt($chat, isFresh: false);
-            }
-        }
-
-        $result = $this->createNewchat($input, $persona, $question);
-
-        return new GeneratedPrompt($result, isFresh: true);
-    }
-
-    private function createNewchat(
-        PromptInput $input,
-        PromptPersona $persona,
-        string $question = '',
-    ): Chat {
+        Chat $chat,
+        string $message,
+    ): void {
         $this->enforceRateLimit();
+        $firstUserMessage = $chat->getFirstUserMessage();
 
-        $blockchainData = $this->blockchain->getBlockchainData($input);
-        $cleanQuestion = $this->userInputSanitizer->sanitize($question);
-        $aiResponse = $this->openai->generateText($blockchainData, $input, $persona, $cleanQuestion);
+        $input = PromptInput::fromRaw($firstUserMessage->input);
+        $cleanMsg = $this->userInputSanitizer->sanitize($message);
 
-        return $this->repository->createchat($input, $aiResponse, $blockchainData->current(), $persona, $cleanQuestion);
+        $aiResponse = $this->openai->generateText(
+            $this->blockchain->getBlockchainData($input),
+            $input,
+            PromptPersona::from($firstUserMessage->persona),
+            $cleanMsg
+        );
+
+        $this->repository->addMessageTochat($chat, $cleanMsg, $aiResponse);
     }
 
     private function enforceRateLimit(): void
