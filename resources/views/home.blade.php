@@ -5,6 +5,19 @@
 @extends('layouts.base')
 
 @section('content')
+    <div
+        id="chat-loader-modal"
+        class="hidden fixed inset-0 z-50 flex items-center justify-center bg-[rgba(var(--body-bg-rgb),0.6)] backdrop-blur-[2px]"
+    >
+        <div class="bg-white dark:bg-[var(--btc-bg-lighter-dark)] px-6 py-4 rounded-lg shadow-lg flex flex-col items-center gap-2 border border-gray-200 dark:border-[var(--btc-border-dark)]">
+            <svg class="h-6 w-6 text-[var(--btc-orange)] animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+            </svg>
+            <p class="text-sm text-[var(--btc-text-dark)] dark:text-[var(--btc-text-light)]">Sending your message…</p>
+        </div>
+    </div>
+
     <section class="satscribe-home px-4 sm:px-6 lg:px-8 py-6">
         <x-home.header/>
         <x-home.form
@@ -184,10 +197,13 @@
                 return;
             }
 
+            const loaderModal = document.getElementById('chat-loader-modal');
             const inputField = document.getElementById('customFollowUp');
             const sendButtons = document.querySelectorAll('button[type="submit"]');
 
             try {
+                if (loaderModal) loaderModal.classList.remove('hidden');
+
                 inputField.value = message;
                 inputField.disabled = true;
                 inputField.classList.add('opacity-50', 'cursor-not-allowed');
@@ -224,7 +240,8 @@
                 console.error('Error sending message:', error?.response?.data || error.message);
                 alert('Failed to send your message. Please try again.');
             } finally {
-                // Restore input/button
+                if (loaderModal) loaderModal.classList.add('hidden');
+
                 inputField.disabled = false;
                 inputField.classList.remove('opacity-50', 'cursor-not-allowed');
                 inputField.value = '';
