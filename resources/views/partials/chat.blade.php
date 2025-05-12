@@ -1,12 +1,12 @@
 @props([
-    'conversation',
+    'chat',
     'question' => '',
     'suggestions' => [],
 ])
 
 <section id="description-body-results" class="description-body w-full max-w-3xl mx-auto space-y-6">
-    @foreach($conversation->messages as $message)
-        <x-conversation.message
+    @foreach($chat->messages as $message)
+        <x-chat.message
             :message="$message"
             :suggestions="$suggestions"
             :loop="$loop"

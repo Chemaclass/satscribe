@@ -16,9 +16,9 @@
             :personaDescriptions="$personaDescriptions"
         />
 
-        @if(isset($conversation))
-            @include('partials.conversation', [
-                'conversation' => $conversation,
+        @if(isset($chat))
+            @include('partials.chat', [
+                'chat' => $chat,
                 'suggestions' => $suggestions,
             ])
         @endif
@@ -102,7 +102,7 @@
                         window.refreshLucideIcons?.();
 
                         const url = new URL(window.location);
-                        url.pathname = `/conversations/${data.conversationUlid}`;
+                        url.pathname = `/chats/${data.chatUlid}`;
                         window.history.pushState({}, '', url);
 
                         const searchInput = document.getElementById('search-input');
@@ -178,9 +178,9 @@
             };
         }
 
-        async function sendMessageToConversation(conversationUlid, message) {
-            if (!conversationUlid || !message.trim()) {
-                console.warn('Message is empty or conversation ID missing.');
+        async function sendMessageTochat(chatUlid, message) {
+            if (!chatUlid || !message.trim()) {
+                console.warn('Message is empty or chat ID missing.');
                 return;
             }
 
@@ -199,7 +199,7 @@
 
                 const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 
-                const response = await axios.post(`/conversations/${conversationUlid}/messages`, {
+                const response = await axios.post(`/chats/${chatUlid}/messages`, {
                     message: message,
                 }, {
                     headers: {

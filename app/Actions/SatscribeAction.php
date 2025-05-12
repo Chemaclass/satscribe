@@ -7,8 +7,8 @@ namespace App\Actions;
 use App\Data\GeneratedPrompt;
 use App\Data\PromptInput;
 use App\Enums\PromptPersona;
-use App\Models\Conversation;
-use App\Repositories\ConversationRepository;
+use App\Models\Chat;
+use App\Repositories\ChatRepository;
 use App\Services\BlockchainService;
 use App\Services\OpenAIService;
 use App\Services\UserInputSanitizer;
@@ -22,7 +22,7 @@ final readonly class SatscribeAction
     public function __construct(
         private BlockchainService $blockchain,
         private OpenAIService $openai,
-        private ConversationRepository $repository,
+        private ChatRepository $repository,
         private UserInputSanitizer $userInputSanitizer,
         private string $ip,
         private int $maxOpenAIAttempts,
@@ -37,30 +37,30 @@ final readonly class SatscribeAction
     ): GeneratedPrompt {
         // Return a cached result unless forced to refresh
         if (!$refreshEnabled) {
-            $conversation = $this->repository->findByCriteria($input, $persona, $question);
+            $chat = $this->repository->findByCriteria($input, $persona, $question);
 
-            if ($conversation instanceof Conversation && !$conversation->force_refresh) {
-                return new GeneratedPrompt($conversation, isFresh: false);
+            if ($chat instanceof Chat && !$chat->force_refresh) {
+                return new GeneratedPrompt($chat, isFresh: false);
             }
         }
 
-        $result = $this->createNewConversation($input, $persona, $question);
+        $result = $this->createNewchat($input, $persona, $question);
 
         return new GeneratedPrompt($result, isFresh: true);
     }
 
-    private function createNewConversation(
+    private function createNewchat(
         PromptInput $input,
         PromptPersona $persona,
         string $question = '',
-    ): Conversation {
+    ): Chat {
         $this->enforceRateLimit();
 
         $blockchainData = $this->blockchain->getBlockchainData($input);
         $cleanQuestion = $this->userInputSanitizer->sanitize($question);
         $aiResponse = $this->openai->generateText($blockchainData, $input, $persona, $cleanQuestion);
 
-        return $this->repository->createConversation($input, $aiResponse, $blockchainData->current(), $persona, $cleanQuestion);
+        return $this->repository->createchat($input, $aiResponse, $blockchainData->current(), $persona, $cleanQuestion);
     }
 
     private function enforceRateLimit(): void

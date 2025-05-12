@@ -6,8 +6,8 @@ namespace App\Actions;
 
 use App\Data\PromptInput;
 use App\Enums\PromptPersona;
-use App\Models\Conversation;
-use App\Repositories\ConversationRepository;
+use App\Models\Chat;
+use App\Repositories\ChatRepository;
 use App\Services\BlockchainService;
 use App\Services\OpenAIService;
 use App\Services\UserInputSanitizer;
@@ -21,7 +21,7 @@ final readonly class AddMessageAction
     public function __construct(
         private BlockchainService $blockchain,
         private OpenAIService $openai,
-        private ConversationRepository $repository,
+        private ChatRepository $repository,
         private UserInputSanitizer $userInputSanitizer,
         private string $ip,
         private int $maxOpenAIAttempts,
@@ -29,11 +29,11 @@ final readonly class AddMessageAction
     }
 
     public function execute(
-        Conversation $conversation,
+        Chat $chat,
         string $message,
     ): void {
         $this->enforceRateLimit();
-        $firstUserMessage = $conversation->getFirstUserMessage();
+        $firstUserMessage = $chat->getFirstUserMessage();
 
         $input = PromptInput::fromRaw($firstUserMessage->input);
         $cleanMsg = $this->userInputSanitizer->sanitize($message);
@@ -45,7 +45,7 @@ final readonly class AddMessageAction
             $cleanMsg
         );
 
-        $this->repository->addMessageToConversation($conversation, $cleanMsg, $aiResponse);
+        $this->repository->addMessageTochat($chat, $cleanMsg, $aiResponse);
     }
 
     private function enforceRateLimit(): void

@@ -8,8 +8,10 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
-final class Conversation extends Model
+final class Chat extends Model
 {
+    protected $table = 'chats';
+
     protected $fillable = [
         'title',
         'ulid',

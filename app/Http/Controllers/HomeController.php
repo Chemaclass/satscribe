@@ -34,7 +34,7 @@ final readonly class HomeController
         ]);
     }
 
-    public function createConversation(HomeIndexRequest $request, SatscribeAction $action): JsonResponse
+    public function createchat(HomeIndexRequest $request, SatscribeAction $action): JsonResponse
     {
         $search = $this->getPromptInput($request);
         $persona = $this->getPromptPersona($request);
@@ -59,9 +59,9 @@ final readonly class HomeController
         return response()->json([
             'maxBitcoinBlockHeight' => $this->heightProvider->getMaxPossibleBlockHeight(),
             'search' => $search,
-            'conversationUlid' => $generatedPrompt->conversation->ulid,
-            'html' => view('partials.conversation', [
-                'conversation' => $generatedPrompt->conversation,
+            'chatUlid' => $generatedPrompt->chat->ulid,
+            'html' => view('partials.chat', [
+                'chat' => $generatedPrompt->chat,
                 'suggestions' => $this->generateSuggestions($search),
             ])->render()
         ]);

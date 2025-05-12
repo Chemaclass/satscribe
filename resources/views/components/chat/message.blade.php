@@ -24,14 +24,14 @@
     </div>
 
     @if($message['role'] === 'assistant' && $loop->last)
-        <x-conversation.follow-up-suggestions
+        <x-chat.follow-up-suggestions
             :input="data_get($message['meta'], 'input')"
             :question="data_get($message['meta'], 'question', '')"
             :suggestions="$suggestions"
             :message="$message"
         />
 
-        <x-conversation.raw-data-toggle-button
+        <x-chat.raw-data-toggle-button
             :id="data_get($message, 'id')"
             :input="data_get($message['meta'], 'input')"
             :question="data_get($message['meta'], 'question', '')"

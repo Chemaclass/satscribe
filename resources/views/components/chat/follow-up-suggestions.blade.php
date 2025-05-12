@@ -10,7 +10,7 @@
         ->filter(fn($s) => trim($s) !== trim($question))
         ->values();
 
-    $conversation = $message->conversation;
+    $chat = $message->chat;
 @endphp
 
 <div class="mt-6 follow-up-suggestions">
@@ -19,7 +19,7 @@
     </h3>
 
     <div x-data="{ message: '' }" class="w-full">
-        <form @submit.prevent="sendMessageToConversation('{{ $conversation->ulid }}', message)" class="flex w-full gap-2">
+        <form @submit.prevent="sendMessageTochat('{{ $chat->ulid }}', message)" class="flex w-full gap-2">
             <input
                 id="customFollowUp"
                 type="text"
@@ -46,7 +46,7 @@
         <div class="flex flex-wrap gap-2">
             @foreach($filteredSuggestions as $suggestion)
                 <form
-                    @submit.prevent="sendMessageToConversation('{{ $conversation->ulid }}', '{{ addslashes($suggestion) }}')"
+                    @submit.prevent="sendMessageTochat('{{ $chat->ulid }}', '{{ addslashes($suggestion) }}')"
                     class="inline"
                 >
                     <button

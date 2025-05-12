@@ -7,10 +7,10 @@ use App\Data\BlockchainDataInterface;
 use App\Data\PromptInput;
 use App\Enums\PromptPersona;
 use App\Enums\PromptType;
-use App\Models\Conversation;
+use App\Models\Chat;
 use Illuminate\Pagination\Paginator;
 
-final readonly class ConversationRepository
+final readonly class ChatRepository
 {
     public function __construct(
         private int $perPage
@@ -18,15 +18,15 @@ final readonly class ConversationRepository
     }
 
     /**
-     * Find a conversation matching given details or return null.
+     * Find a chat matching given details or return null.
      */
     public function findByCriteria(
         PromptInput $input,
         PromptPersona $persona,
         string $question = '',
-    ): ?Conversation {
-        // Find an existing conversation by input type, input, persona, and question (legacy compatibility)
-        return Conversation::whereHas('messages', function ($q) use ($input, $persona, $question): void {
+    ): ?Chat {
+        // Find an existing chat by input type, input, persona, and question (legacy compatibility)
+        return Chat::whereHas('messages', function ($q) use ($input, $persona, $question): void {
             $q->where('role', 'user')
                 ->where('content', $question)
                 ->whereJsonContains('meta->type', $input->type->value)
@@ -36,33 +36,33 @@ final readonly class ConversationRepository
     }
 
     /**
-     * Create a conversation and attach user & assistant messages using the legacy pattern.
+     * Create a chat and attach user & assistant messages using the legacy pattern.
      */
-    public function createConversation(
+    public function createchat(
         PromptInput $input,
         string $aiResponse,
         BlockchainDataInterface $blockchainData,
         PromptPersona $persona,
         string $question = ''
-    ): Conversation {
+    ): Chat {
         $raw = $blockchainData->toArray();
 
         $forceRefresh = $input->type->value === PromptType::Transaction->value
             && isset($raw['status']['confirmed'])
             && $raw['status']['confirmed'] === false;
 
-        /** @var Conversation $conversation */
-        $conversation = Conversation::create([
+        /** @var Chat $chat */
+        $chat = Chat::create([
             'title' => ucfirst($input->type->value).':'.$input->text,
         ]);
 
-        $conversation->addUserMessage($question, [
+        $chat->addUserMessage($question, [
             'type' => $input->type->value,
             'input' => $input->text,
             'persona' => $persona->value,
         ]);
 
-        $conversation->addAssistantMessage($aiResponse, [
+        $chat->addAssistantMessage($aiResponse, [
             'type' => $input->type->value,
             'input' => $input->text,
             'persona' => $persona->value,
@@ -71,24 +71,24 @@ final readonly class ConversationRepository
             'force_refresh' => $forceRefresh,
         ]);
 
-        return $conversation;
+        return $chat;
     }
 
-    public function addMessageToConversation(
-        Conversation $conversation,
+    public function addMessageTochat(
+        Chat $chat,
         string $userMessage,
         string $assistantResponse,
     ): void {
-        $firstUserMsg = $conversation->getFirstUserMessage();
-        $firstAssistantMsg = $conversation->getFirstAssistantMessage();
+        $firstUserMsg = $chat->getFirstUserMessage();
+        $firstAssistantMsg = $chat->getFirstAssistantMessage();
 
-        $conversation->addUserMessage($userMessage, [
+        $chat->addUserMessage($userMessage, [
             'type' => $firstUserMsg->type,
             'persona' => $firstUserMsg->persona,
             'input' => $userMessage,
         ]);
 
-        $conversation->addAssistantMessage($assistantResponse, [
+        $chat->addAssistantMessage($assistantResponse, [
             'type' => $firstAssistantMsg->type,
             'input' => $firstAssistantMsg->input,
             'persona' => $firstAssistantMsg->persona,
@@ -99,11 +99,11 @@ final readonly class ConversationRepository
     }
 
     /**
-     * Paginate conversations, newest first.
+     * Paginate chats, newest first.
      */
     public function getPagination(): Paginator
     {
-        return Conversation::latest()
+        return Chat::latest()
             ->simplePaginate($this->perPage);
     }
 }

@@ -1,5 +1,5 @@
 @php
-    use App\Models\Conversation;use Illuminate\Support\Str;
+    use App\Models\Chat;use Illuminate\Support\Str;
 @endphp
 
 @extends('layouts.base')
@@ -18,24 +18,24 @@
             </div>
         </header>
 
-        @if ($conversations->isEmpty())
+        @if ($chats->isEmpty())
             <p>Empty history.</p>
         @else
             <ul class="description-list">
-                @php /** @var Conversation $conversation */@endphp
-                @foreach($conversations as $conversation)
+                @php /** @var Chat $chat */@endphp
+                @foreach($chats as $chat)
                     @php
-                        $assistantMsg = $conversation->getFirstAssistantMessage();
+                        $assistantMsg = $chat->getFirstAssistantMessage();
                         $entryId = 'entry-' . $assistantMsg->id;
                     @endphp
 
                     <li class="description-item">
                         <div class="description-header font-medium mb-1">
                             <div class="cursor-pointer w-full"
-                                 onclick="window.location.href='{{ route('conversation.show', $conversation) }}'">
-                                <strong>{{ ucfirst($conversation->type) }}:</strong>
+                                 onclick="window.location.href='{{ route('chat.show', $chat) }}'">
+                                <strong>{{ ucfirst($chat->type) }}:</strong>
                                 <span class="truncate overflow-hidden text-ellipsis block link">
-                                {{ $conversation->input }}
+                                {{ $chat->input }}
                             </span>
                             </div>
                         </div>
@@ -48,7 +48,7 @@
                             @endif
                         </div>
                         <div class="description-meta mt-2 flex justify-between items-center text-sm text-gray-500">
-                            <span>{{ $conversation->created_at->diffForHumans() }}</span>
+                            <span>{{ $chat->created_at->diffForHumans() }}</span>
                             <div class="flex gap-4 items-center">
                                 <button type="button"
                                         class="toggle-description-btn link"
@@ -75,24 +75,24 @@
             </ul>
 
             <div class="pagination flex justify-center items-center gap-4 mt-8">
-                @if ($conversations->onFirstPage())
+                @if ($chats->onFirstPage())
                     <span
                         class="px-6 py-3 text-white/60 font-semibold rounded-md cursor-not-allowed flex items-center gap-2">
                     <i data-lucide="chevron-left" class="w-4 h-4"></i>
                     Previous
                 </span>
                 @else
-                    <a href="{{ $conversations->previousPageUrl() }}"
+                    <a href="{{ $chats->previousPageUrl() }}"
                        class="px-6 py-3  text-white font-semibold rounded-md  transition flex items-center gap-2">
                         <i data-lucide="chevron-left" class="w-4 h-4"></i>
                         Previous
                     </a>
                 @endif
 
-                <span class="text-base font-semibold text-gray-400">Page {{ $conversations->currentPage() }}</span>
+                <span class="text-base font-semibold text-gray-400">Page {{ $chats->currentPage() }}</span>
 
-                @if ($conversations->hasMorePages())
-                    <a href="{{ $conversations->nextPageUrl() }}"
+                @if ($chats->hasMorePages())
+                    <a href="{{ $chats->nextPageUrl() }}"
                        class="px-6 py-3  text-white font-semibold rounded-md transition flex items-center gap-2">
                         Next
                         <i data-lucide="chevron-right" class="w-4 h-4"></i>
