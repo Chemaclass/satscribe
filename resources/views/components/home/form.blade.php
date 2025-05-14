@@ -211,7 +211,7 @@
                             <span id="submit-icon" x-cloak class="sm-2">
                                 <i data-lucide="zap" class="w-4 h-4"></i>
                             </span>
-                            <span id="submit-text" x-cloak> New Chat</span>
+                            <span id="submit-text" x-cloak> Satscribe</span>
                         </button>
 
                         <button
@@ -223,7 +223,7 @@
                             title="Get a random block"
                         >
                             <i data-lucide="shuffle" class="w-4 h-4"></i>
-                            <span class="hidden md:inline">Surprise</span>
+                            <span class="hidden md:inline"> Random</span>
                         </button>
                     </div>
                 </fieldset>

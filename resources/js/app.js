@@ -20,7 +20,7 @@ import {
     Zap,
     Shuffle,
     User,
-    Plus,
+    Send,
 } from 'lucide';
 
 const usedIcons = {
@@ -38,7 +38,7 @@ const usedIcons = {
     Zap,
     Shuffle,
     User,
-    Plus,
+    Send,
 };
 
 createIcons({ icons: usedIcons });
