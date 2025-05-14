@@ -615,15 +615,11 @@ a:hover,
     font-size: 0.75rem;
     padding: 0.15rem 0.5rem;
     border-radius: 9999px;
+    cursor: pointer;
+    transition: background-color 0.05s ease, color 0.05s ease;
+
     background-color: var(--btc-text-light);
     color: var(--btc-text-dark);
-    transition: background-color 0.05s ease, color 0.05s ease;
-    cursor: pointer;
-}
-
-.suggested-question-prompt:hover {
-    color: var(--btc-text-dark);
-    background-color: var(--btc-orange-light);
 }
 
 .dark .suggested-question-prompt {
@@ -631,7 +627,7 @@ a:hover,
     color: var(--btc-text-light);
 }
 
-.dark .suggested-question-prompt:hover {
+.suggested-question-prompt:not(:disabled):hover {
     background-color: var(--btc-orange-light);
     color: var(--btc-text-dark);
 }
