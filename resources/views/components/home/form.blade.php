@@ -16,16 +16,7 @@
     window.suggestedPromptsGrouped = @json($suggestedPromptsGrouped);
 </script>
 
-<div x-data="searchInputValidator('{{ $search }}', {{ $maxBitcoinBlockHeight }})"
-     x-init="
-            validate();
-            $watch('isSubmitting', value => {
-                if (value) {
-                    window.refreshLucideIcons?.();
-                }
-            });
-        "
->
+<div>
     {{-- Form + Icon Side-by-Side --}}
     <div class="flex flex-col sm:flex-row sm:justify-between items-start sm:items-start gap-6 max-w-5xl">
         {{-- Left: Form --}}
@@ -238,7 +229,7 @@
 
     {{-- Loading State --}}
     <template x-if="isSubmitting">
-        <section id="chat-container" class="description-body w-full max-w-3xl mx-auto space-y-6 mb-4">
+        <section id="chat-container" class="description-body w-full max-w-3xl mx-auto mb-4">
             <div class="section rounded p-4 shadow-sm">
                 <h2 class="text-2xl font-bold mb-2 flex items-center">
                     <i data-lucide="bot" class="w-6 h-6 mr-2"></i> Assistant

@@ -5,7 +5,17 @@
 @extends('layouts.base')
 
 @section('content')
-    <section class="satscribe-home px-4 sm:px-6 lg:px-8 py-6">
+    <section
+        class="satscribe-home px-4 py-6"
+        x-data="searchInputValidator('{{ old('search', $search ?? '') }}', {{ $maxBitcoinBlockHeight }})"
+        x-init="
+            validate();
+            $watch('isSubmitting', value => {
+                if (value) {
+                    window.refreshLucideIcons?.();
+                }
+            });
+        ">
         <x-home.header/>
         <x-home.form
             :search="old('search', $search ?? '')"
@@ -24,6 +34,19 @@
         @endif
 
         <div id="results-container"></div>
+
+        <div id="loading-container" class="hidden rounded p-4 shadow-sm">
+            <h2 class="text-2xl font-bold mb-2 flex items-center">
+                <i data-lucide="bot" class="w-6 h-6 mr-2"></i> Assistant
+            </h2>
+            <div class="leading-relaxed prose dark:prose-invert">
+                <p class="flex items-center gap-2">
+                    <i data-lucide="loader-2" class="w-5 h-5 animate-spin text-orange-400"></i>
+                    <span x-text="loadingMessage"></span>
+                </p>
+            </div>
+        </div>
+
     </section>
     <x-paywall-modal/>
 @endsection
@@ -168,69 +191,83 @@
                         personaSelect.selectedIndex = Math.floor(Math.random() * personaSelect.options.length);
                     }
 
+                    this.loadingMessage = this.loadingMessages[Math.floor(Math.random() * this.loadingMessages.length)];
+
                     this.validate();
+
 
                     const form = document.querySelector('form');
                     if (form) {
                         await this.submitForm(form);
                     }
                 },
-            };
-        }
 
-        async function sendMessageToChat(chatUlid, message) {
-            if (!chatUlid || !message.trim()) {
-                console.warn('Message is empty or chat ID missing.');
-                return;
-            }
-
-            const inputField = document.getElementById('customFollowUp');
-            const sendButtons = document.querySelectorAll('button[type="submit"]');
-            disableAllButtons()
-
-            try {
-                inputField.value = message;
-                inputField.disabled = true;
-                inputField.classList.add('opacity-50', 'cursor-not-allowed');
-
-                sendButtons.forEach(btn => {
-                    btn.disabled = true;
-                    btn.classList.add('opacity-50', 'cursor-not-allowed');
-                });
-
-                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-
-                const response = await axios.post(`/chats/${chatUlid}/messages`, { message }, {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'Accept': 'application/json',
-                    ...(csrfToken && {'X-CSRF-TOKEN': csrfToken}),
-                });
-
-                if (response.status === 200 && response.data?.html) {
-                    const chatContainer = document.getElementById('chat-container');
-                    if (chatContainer) {
-                        chatContainer.innerHTML = response.data.html;
-                        chatContainer.scrollIntoView({ behavior: 'smooth' });
+                async sendMessageToChat(chatUlid, message) {
+                    if (!chatUlid || !message.trim()) {
+                        console.warn('Message is empty or chat ID missing.');
+                        return;
                     }
-                    const lastMessage = document.getElementById('last-message');
-                    if (lastMessage) {
-                        lastMessage.scrollIntoView(true);
+                    this.loadingMessage = this.loadingMessages[Math.floor(Math.random() * this.loadingMessages.length)];
+
+                    disableAllButtons()
+                    const inputField = document.getElementById('customFollowUp');
+                    const sendButtons = document.querySelectorAll('button[type="submit"]');
+                    const loadingContainer = document.getElementById('loading-container');
+
+                    // Show loading indicator
+                    if (loadingContainer) {
+                        loadingContainer.classList.remove('hidden');
                     }
-                    window.refreshLucideIcons?.();
+
+                    try {
+                        inputField.value = message;
+                        inputField.disabled = true;
+                        inputField.classList.add('opacity-50', 'cursor-not-allowed');
+
+                        sendButtons.forEach(btn => {
+                            btn.disabled = true;
+                            btn.classList.add('opacity-50', 'cursor-not-allowed');
+                        });
+
+                        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+
+                        const response = await axios.post(`/chats/${chatUlid}/messages`, {message}, {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Accept': 'application/json',
+                            ...(csrfToken && {'X-CSRF-TOKEN': csrfToken}),
+                        });
+
+                        if (response.status === 200 && response.data?.html) {
+                            const chatContainer = document.getElementById('chat-container');
+                            if (chatContainer) {
+                                chatContainer.innerHTML = response.data.html;
+                                chatContainer.scrollIntoView({behavior: 'smooth'});
+                            }
+                            const lastMessage = document.getElementById('last-message');
+                            if (lastMessage) {
+                                lastMessage.scrollIntoView(true);
+                            }
+                            window.refreshLucideIcons?.();
+                        }
+
+                    } catch (error) {
+                        console.error('Error sending message:', error?.response?.data || error.message);
+                        alert('Failed to send your message. Please try again.');
+                    } finally {
+                        // Hide loading container
+                        if (loadingContainer) {
+                            loadingContainer.classList.add('hidden');
+                        }
+
+                        inputField.disabled = false;
+                        inputField.classList.remove('opacity-50', 'cursor-not-allowed');
+                        inputField.value = '';
+                        inputField.focus();
+
+                        enableAllButtons();
+                    }
                 }
-
-            } catch (error) {
-                console.error('Error sending message:', error?.response?.data || error.message);
-                alert('Failed to send your message. Please try again.');
-            } finally {
-
-                inputField.disabled = false;
-                inputField.classList.remove('opacity-50', 'cursor-not-allowed');
-                inputField.value = '';
-                inputField.focus();
-
-                enableAllButtons();
-            }
+            };
         }
 
         function disableAllButtons() {
