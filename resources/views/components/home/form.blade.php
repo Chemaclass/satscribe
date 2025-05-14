@@ -215,7 +215,7 @@
                         </button>
 
                         <button
-                            id="surprise-button"
+                            id="random-button"
                             type="button"
                             @click="fetchRandomBlock()"
                             :disabled="isSubmitting"

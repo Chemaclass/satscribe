@@ -242,12 +242,12 @@
         }
 
         function disableAllButtons() {
-            const submitButtons = document.querySelectorAll('button[type="submit"]');
+            const submitButtons = document.querySelectorAll('button[type="submit"],#random-button');
             submitButtons.forEach(btn => btn.disabled = true);
         }
 
         function enableAllButtons() {
-            const submitButtons = document.querySelectorAll('button[type="submit"]');
+            const submitButtons = document.querySelectorAll('button[type="submit"],#random-button');
             submitButtons.forEach(btn => btn.disabled = false);
         }
 
