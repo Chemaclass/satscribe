@@ -6,7 +6,7 @@
 
 @section('content')
     <section
-        class="satscribe-home px-4 py-6"
+        class="satscribe-home px-2 py-6"
         x-data="searchInputValidator('{{ old('search', $search ?? '') }}', {{ $maxBitcoinBlockHeight }})"
         x-init="
             validate();
@@ -35,7 +35,7 @@
 
         <div id="results-container"></div>
 
-        <div id="loading-container" class="hidden rounded p-4 shadow-sm">
+        <div id="loading-container" class="p-4 hidden rounded shadow-sm">
             <h2 class="text-2xl font-bold mb-2 flex items-center">
                 <i data-lucide="bot" class="w-6 h-6 mr-2"></i> Assistant
             </h2>
