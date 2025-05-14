@@ -58,7 +58,7 @@
                 async submitForm(form) {
                     if (this.isSubmitting) return;
 
-                    document.getElementById('description-body-results')?.style.setProperty('display', 'none');
+                    document.getElementById('chat-container')?.style.setProperty('display', 'none');
                     this.loadingMessage = this.loadingMessages[Math.floor(Math.random() * this.loadingMessages.length)];
                     this.isSubmitting = true;
 
@@ -184,10 +184,9 @@
                 return;
             }
 
-            disableAllButtons()
-
             const inputField = document.getElementById('customFollowUp');
             const sendButtons = document.querySelectorAll('button[type="submit"]');
+            disableAllButtons()
 
             try {
                 inputField.value = message;
@@ -201,25 +200,23 @@
 
                 const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 
-                const response = await axios.post(`/chats/${chatUlid}/messages`, {
-                    message: message,
-                }, {
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'Accept': 'application/json',
-                        ...(csrfToken && {'X-CSRF-TOKEN': csrfToken}),
-                    }
+                const response = await axios.post(`/chats/${chatUlid}/messages`, { message }, {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json',
+                    ...(csrfToken && {'X-CSRF-TOKEN': csrfToken}),
                 });
 
-                // Reload the page to fetch all updated messages
-                if (response.status === 200) {
-                    window.location.reload();
+                if (response.status === 200 && response.data?.html) {
+                    const chatContainer = document.getElementById('chat-container');
+                    if (chatContainer) {
+                        chatContainer.innerHTML = response.data.html;
+                        chatContainer.scrollIntoView({ behavior: 'smooth' });
+                    }
                     const lastMessage = document.getElementById('last-message');
                     if (lastMessage) {
                         lastMessage.scrollIntoView(true);
                     }
-                } else {
-                    console.warn('Unexpected response status:', response.status);
+                    window.refreshLucideIcons?.();
                 }
 
             } catch (error) {
@@ -232,23 +229,24 @@
                 inputField.value = '';
                 inputField.focus();
 
-                sendButtons.forEach(btn => {
-                    btn.disabled = false;
-                    btn.classList.remove('opacity-50', 'cursor-not-allowed');
-                });
-
                 enableAllButtons();
             }
         }
 
         function disableAllButtons() {
             const submitButtons = document.querySelectorAll('button[type="submit"],#random-button');
-            submitButtons.forEach(btn => btn.disabled = true);
+            submitButtons.forEach(btn => {
+                btn.disabled = true
+                btn.classList.add('opacity-50', 'cursor-not-allowed');
+            });
         }
 
         function enableAllButtons() {
             const submitButtons = document.querySelectorAll('button[type="submit"],#random-button');
-            submitButtons.forEach(btn => btn.disabled = false);
+            submitButtons.forEach(btn => {
+                btn.disabled = false
+                btn.classList.remove('opacity-50', 'cursor-not-allowed');
+            });
         }
 
         function resubmit(searchValue, questionValue = '') {

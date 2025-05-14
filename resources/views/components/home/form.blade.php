@@ -238,7 +238,7 @@
 
     {{-- Loading State --}}
     <template x-if="isSubmitting">
-        <section id="description-body-results" class="description-body w-full max-w-3xl mx-auto space-y-6 mb-4">
+        <section id="chat-container" class="description-body w-full max-w-3xl mx-auto space-y-6 mb-4">
             <div class="section rounded p-4 shadow-sm">
                 <h2 class="text-2xl font-bold mb-2 flex items-center">
                     <i data-lucide="bot" class="w-6 h-6 mr-2"></i> Assistant
