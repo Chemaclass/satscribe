@@ -28,40 +28,40 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            function toggleDescription(targetId) {
+            const toggleDescription = (targetId) => {
                 const body = document.querySelector(`.chat-body[data-target="${targetId}"]`);
                 const content = document.getElementById(targetId);
                 const button = document.querySelector(`.toggle-chat-btn[data-target="${targetId}"]`);
 
-                body.classList.toggle('collapsed');
-                const isNowCollapsed = body.classList.contains('collapsed');
-                content.classList.toggle('max-h-[8.5rem]', isNowCollapsed);
+                if (!body || !content) return;
 
-                // Update labels inside the button, not the whole text content
+                const isCollapsed = body.classList.toggle('collapsed');
+                content.classList.toggle('max-h-[8.5rem]', isCollapsed);
+
                 if (button) {
                     const fullLabel = button.querySelector('.full-label');
                     const shortLabel = button.querySelector('.short-label');
 
-                    if (fullLabel) fullLabel.textContent = isNowCollapsed ? 'Show full response' : 'Hide full response';
-                    if (shortLabel) shortLabel.textContent = isNowCollapsed ? 'Full' : 'Hide';
+                    if (fullLabel) fullLabel.textContent = isCollapsed ? 'Show full response' : 'Hide full response';
+                    if (shortLabel) shortLabel.textContent = isCollapsed ? 'Full' : 'Hide';
                 }
-            }
+            };
 
-            // Click on .chat-body
-            document.querySelectorAll('.chat-body').forEach(body => {
-                body.addEventListener('click', () => {
-                    const targetId = body.dataset.target;
-                    toggleDescription(targetId);
-                });
-            });
+            // Event delegation for better performance (especially on pagination)
+            const historySection = document.getElementById('history');
 
-            // Click on button
-            document.querySelectorAll('.toggle-chat-btn').forEach(button => {
-                button.addEventListener('click', (e) => {
-                    e.stopPropagation(); // prevent also triggering the body click
+            historySection.addEventListener('click', (event) => {
+                const body = event.target.closest('.chat-body');
+                const button = event.target.closest('.toggle-chat-btn');
+
+                if (button) {
+                    event.stopPropagation();
                     const targetId = button.dataset.target;
-                    toggleDescription(targetId);
-                });
+                    if (targetId) toggleDescription(targetId);
+                } else if (body) {
+                    const targetId = body.dataset.target;
+                    if (targetId) toggleDescription(targetId);
+                }
             });
         });
     </script>
