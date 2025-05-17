@@ -19,7 +19,10 @@
         @else
             <ul class="chat-list">
                 @foreach($chats as $chat)
-                    <x-history.item :chat="$chat"/>
+                    <x-history.item
+                        :chat="$chat"
+                        :owned="($chat->creator_ip === request()->ip())"
+                    />
                 @endforeach
             </ul>
             <x-history.pagination :paginator="$chats"/>

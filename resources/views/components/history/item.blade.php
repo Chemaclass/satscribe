@@ -1,3 +1,5 @@
+@props(['chat', 'owned'])
+
 @php
     use Illuminate\Support\Str;
     /** @var \App\Models\Chat $chat */
@@ -6,7 +8,7 @@
 @endphp
 
 <li class="chat-item">
-    <div class="chat-header font-medium mb-1">
+    <div class="chat-header font-medium mb-1 flex justify-between items-start gap-2">
         <div class="cursor-pointer w-full"
              onclick="window.location.href='{{ route('chat.show', $chat) }}'">
             <strong>{{ ucfirst($chat->type) }}:</strong>
@@ -14,6 +16,9 @@
                 {{ $chat->input }}
             </span>
         </div>
+        @if($owned)
+            <i data-lucide="bookmark" class="text-orange-500 w-6 h-6"></i>
+        @endif
     </div>
     <div class="chat-body relative collapsed" data-target="{{ $entryId }}">
         @if($assistantMsg)

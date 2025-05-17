@@ -21,6 +21,7 @@ import {
     Shuffle,
     User,
     Send,
+    Bookmark,
 } from 'lucide';
 
 const usedIcons = {
@@ -39,6 +40,7 @@ const usedIcons = {
     Shuffle,
     User,
     Send,
+    Bookmark,
 };
 
 createIcons({ icons: usedIcons });
