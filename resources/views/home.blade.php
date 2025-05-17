@@ -209,6 +209,7 @@
                     if (!message || !message.trim()) return;
 
                     const chatGroups = document.getElementById('chat-message-groups');
+                    const assistantMsgCount = document.querySelectorAll('.assistant-message').length;
 
                     // 1. Add the user message
                     const userHtml = `
@@ -220,7 +221,8 @@
                     </div>
                 </div>
                 <!-- Assistant will be appended here -->
-                <div class="assistant-message loading-spinner-group text-left">
+                <div id="assistant-message-${assistantMsgCount}"
+                     class="assistant-message loading-spinner-group text-left">
                     <span class="font-semibold">Assistant:</span>
                     <div class="inline-block rounded px-3 py-2">
                         <span class="spinner-border w-4 h-4 inline-block animate-spin border-2 border-yellow-600 border-t-transparent rounded-full"></span>
@@ -245,35 +247,32 @@
                     })
                         .then(r => r.json())
                         .then(data => {
-                            // Remove spinner and add assistant response
-                            const spinners = document.getElementsByClassName('loading-spinner-group');
-                            const spinner = spinners[spinners.length - 1];
+                            const spinner = document.getElementById(`assistant-message-${assistantMsgCount}`);
                             if (spinner) {
-                                const mdContent = data.content ? marked.parse(data.content) : 'No response.';
                                 spinner.innerHTML = `
-                    <span class="font-semibold">Assistant:</span>
-                    <div class="inline-block rounded px-3 py-2 prose">
-                        ${mdContent}
-                    </div>
-                `;
+                                    <span class="font-semibold">Assistant:</span>
+                                    <div class="inline-block rounded px-3 py-2 prose">
+                                        ${data.content ? marked.parse(data.content) : 'No response.'}
+                                    </div>
+                                `;
+                                spinner.scrollIntoView({ behavior: 'smooth', block: 'start' });
                             }
                             if (data.suggestions) {
                                 this.updateSuggestionsList(chatUlid, data.suggestions);
                             }
                         }).catch((e) => {
-                        console.error(e)
-                        // On error, notify user
-                        const spinners = document.getElementsByClassName('loading-spinner-group');
-                        const spinner = spinners[spinners.length - 1];
-                        if (spinner) {
-                            spinner.innerHTML = `
-                    <span class="font-semibold text-yellow-700">Assistant:</span>
-                    <div class="inline-block rounded px-3 py-2 text-red-700">
-                        Error fetching assistant response.
-                    </div>
-                `;
+                            console.error(e)
+                            const spinner = document.getElementById(`assistant-message-${assistantMsgCount}`);
+                            if (spinner) {
+                                spinner.innerHTML = `
+                                    <span class="font-semibold text-yellow-700">Assistant:</span>
+                                    <div class="inline-block rounded px-3 py-2 text-red-700">
+                                        Error fetching assistant response.
+                                    </div>
+                                `;
+                            }
                         }
-                    });
+                    );
                 },
 
                 updateSuggestionsList(chatUlid, newSuggestions) {
