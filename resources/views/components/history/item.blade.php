@@ -3,6 +3,7 @@
 @php
     use Illuminate\Support\Str;
     /** @var \App\Models\Chat $chat */
+    $userMsg = $chat->getFirstUserMessage();
     $assistantMsg = $chat->getFirstAssistantMessage();
     $entryId = 'entry-' . $assistantMsg->id;
 @endphp
@@ -34,12 +35,16 @@
         @endif
     </div>
     <div class="chat-body relative collapsed" data-target="{{ $entryId }}">
-        @if($assistantMsg)
-            <div id="{{ $entryId }}"
-                 class="prose markdown-content overflow-hidden max-h-[8.5rem] transition-all duration-300">
-                {!! Str::markdown($assistantMsg->content) !!}
+        <div class="user-message mb-2 text-right">
+            <div class="inline-block rounded px-3 py-2">
+                <i>"{{ $userMsg->content }}"</i>
             </div>
-        @endif
+        </div>
+
+        <div id="{{ $entryId }}"
+             class="prose markdown-content overflow-hidden max-h-[8.5rem] transition-all duration-300">
+            {!! Str::markdown($assistantMsg->content) !!}
+        </div>
     </div>
     <div class="chat-meta mt-2 flex justify-between items-center text-sm text-gray-500">
         <span>{{ $chat->created_at->diffForHumans() }}</span>
