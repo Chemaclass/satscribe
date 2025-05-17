@@ -62,6 +62,7 @@
                 isBlockHash: false,
                 isSubmitting: false,
                 maxBitcoinBlockHeight: initialMaxHeight,
+                errorFollowUpQuestion: '',
                 loadingMessage: '',
                 loadingMessages: [
                     "Just a sec — I'm working on your request and putting everything together for you!",
@@ -204,7 +205,7 @@
 
                 async sendMessageToChat(chatUlid, message) {
                     if (!chatUlid || !message.trim()) {
-                        console.warn('Message is empty or chat ID missing.');
+                        this.errorFollowUpQuestion = 'Message cannot be empty';
                         return;
                     }
                     this.loadingMessage = this.loadingMessages[Math.floor(Math.random() * this.loadingMessages.length)];

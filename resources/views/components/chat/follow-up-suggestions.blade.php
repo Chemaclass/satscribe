@@ -24,11 +24,11 @@
                 id="customFollowUp"
                 type="text"
                 x-model="message"
+                @input="errorFollowUpQuestion = ''"
                 class="w-3/4 p-2 border rounded"
                 placeholder="Ask a follow-up question..."
                 autocomplete="off"
             />
-
             <button
                 type="submit"
                 class="w-1/4 form-button flex items-center justify-center"
@@ -39,6 +39,10 @@
                 <span id="submit-text" x-cloak>Send</span>
             </button>
         </form>
+
+        <template x-if="errorFollowUpQuestion">
+            <span class="block text-sm text-red-600 mt-1" x-text="errorFollowUpQuestion"></span>
+        </template>
     </div>
 
     <div class="mt-4">
