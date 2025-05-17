@@ -10,15 +10,32 @@
                 <h1 class="text-3xl sm:text-4xl font-bold leading-tight">
                     History
                 </h1>
-                <p class="text-lg">
-                    Explore the collective history of Bitcoin analyses shared on Satscribe — from individual transaction
-                    breakdowns to full block summaries. Discover insights contributed by users across the network.
+                <p class="text-lg mt-2">
+                    From detailed tx investigations to high-level block summaries.
+                    <br class="hidden sm:block">
+                    <small>
+                        Dive into personal insights or
+                        <a href="{{ route('history.index', ['all' => 1]) }}">browse the archive</a>
+                        of the community. Discover how others interpret txs and blocks.
+                    </small>
                 </p>
             </div>
         </header>
 
         @if ($chats->isEmpty())
-            <p>Empty history.</p>
+            <div class="mt-10 flex flex-col items-center text-center">
+                <svg class="w-16 h-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 48 48">
+                    <circle cx="24" cy="24" r="22" stroke-width="2" class="text-gray-300" />
+                    <path d="M12 29c1.5-4 7-6 12-6s10.5 2 12 6" stroke-width="2" stroke-linecap="round" />
+                    <circle cx="17" cy="21" r="2" fill="currentColor"/>
+                    <circle cx="31" cy="21" r="2" fill="currentColor"/>
+                </svg>
+                <h2 class="text-xl font-semibold mb-2">No history yet!</h2>
+                <p class="mb-4">Your history is empty — start your first Bitcoin analysis and be part of the collective knowledge.</p>
+                <a href="{{ url('/') }}" class="form-button">
+                    Start Satscribing
+                </a>
+            </div>
         @else
             <ul class="chat-list">
                 @foreach($chats as $chat)
