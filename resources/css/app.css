@@ -517,6 +517,11 @@ a:hover,
 }
 
 #chat-container pre {
+    background-color: #f3f4f6;
+    color: #111827;
+}
+
+.dark #chat-container pre {
     background-color: #1a1a1a;
     color: #f8f8f8;
     padding: 1em;
@@ -632,9 +637,6 @@ a:hover,
     color: var(--btc-text-dark);
 }
 
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
 .spinner-border {
     border-radius: 50%;
     border-top-color: transparent;
