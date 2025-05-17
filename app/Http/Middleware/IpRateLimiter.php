@@ -44,7 +44,6 @@ final readonly class IpRateLimiter
 
         $key = self::createRateLimitKey($ip);
         $shortHash = substr(md5($key), 0, 8);
-        $memo = sprintf('Zap to keep Satscribe flowing ⚡️ #%s', $shortHash);
 
         $this->cache->put(self::createCacheKey($shortHash), $ip, now()->addHour());
 
@@ -57,7 +56,7 @@ final readonly class IpRateLimiter
                 'invoice' => $this->albyClient->createInvoice(
                     new InvoiceData(
                         amount: $this->lnInvoiceAmountInSats,
-                        memo: $memo,
+                        memo: sprintf('Zap to keep Satscribe alive ⚡️ #%s', $shortHash),
                         expiry: $this->lnInvoiceExpirySeconds,
                     )
                 ),
