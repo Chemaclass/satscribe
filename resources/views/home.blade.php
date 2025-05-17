@@ -93,14 +93,8 @@
                         </div>
                     </div>
                 </div>
-                <div id="assistant-message-${assistantMsgCount}"
-                     class="assistant-message loading-spinner-group text-left">
-                    <span class="flex items-center gap-1">
-                        <i data-lucide="bot" class="w-6 h-6 font-semibold"></i>
-                        <span class="font-semibold">Scribe</span>
-                        <span class="spinner-border w-4 h-4 inline-block animate-spin border-2 border-yellow-600 border-t-transparent rounded-full"></span>
-                        <span class="ml-2">Thinking…</span>
-                    </span>
+                <div id="assistant-message-${assistantMsgCount}" class="assistant-message loading-spinner-group text-left">
+                    <x-chat.scribe-prompt/>
                 </div>
             </div>
         `;
@@ -258,14 +252,8 @@
                     </div>
                 </div>
                 <!-- Assistant will be appended here -->
-                <div id="assistant-message-${assistantMsgCount}"
-                     class="assistant-message loading-spinner-group text-left">
-                    <div class="flex items-center gap-2">
-                        <i data-lucide="bot" class="w-6 h-6 font-semibold"></i>
-                        <span class="font-semibold">Scribe</span>
-                        <span class="spinner-border w-4 h-4 animate-spin border-2 border-yellow-600 border-t-transparent rounded-full"></span>
-                        <span>Thinking…</span>
-                    </div>
+                <div id="assistant-message-${assistantMsgCount}" class="assistant-message loading-spinner-group text-left">
+                    <x-chat.scribe-prompt/>
                 </div>
             </div>
         `;
