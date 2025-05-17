@@ -1,28 +1,29 @@
 import './bootstrap';
 import Alpine from 'alpinejs';
+import {
+    BadgeCheck,
+    Bitcoin,
+    Bot,
+    ChevronLeft,
+    ChevronRight,
+    createIcons,
+    Github,
+    Lightbulb,
+    Loader2,
+    Moon,
+    Scroll,
+    Send,
+    Shuffle,
+    SlidersHorizontal,
+    Sun,
+    User,
+    Zap,
+    ArrowUp,
+} from 'lucide';
+import { marked } from 'marked';
 
 window.Alpine = Alpine;
 Alpine.start();
-
-import { createIcons } from 'lucide';
-import {
-    ChevronLeft,
-    ChevronRight,
-    Bitcoin,
-    Bot,
-    Loader2,
-    Lightbulb,
-    Scroll,
-    Sun,
-    Moon,
-    Github,
-    SlidersHorizontal,
-    Zap,
-    Shuffle,
-    User,
-    Send,
-    BadgeCheck,
-} from 'lucide';
 
 const usedIcons = {
     ChevronLeft,
@@ -41,13 +42,14 @@ const usedIcons = {
     User,
     Send,
     BadgeCheck,
+    ArrowUp,
 };
 
-createIcons({ icons: usedIcons });
+createIcons({icons: usedIcons});
 
 // ---------- DOM READY ----------
 document.addEventListener('DOMContentLoaded', () => {
-    createIcons({ icons: usedIcons });
+    createIcons({icons: usedIcons});
 
     setupFormSubmissionUI();
     setupBlockchainToggle();
@@ -188,4 +190,24 @@ document.addEventListener('alpine:init', () => {
             });
         }
     }));
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    const scrollBtn = document.getElementById('scroll-to-top');
+
+    // Show/hide the button based on scroll position
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 200) {
+            scrollBtn.classList.remove('opacity-0', 'pointer-events-none');
+            scrollBtn.classList.add('opacity-100');
+        } else {
+            scrollBtn.classList.add('opacity-0', 'pointer-events-none');
+            scrollBtn.classList.remove('opacity-100');
+        }
+    });
+
+    // On click, scroll up smoothly
+    scrollBtn.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
 });

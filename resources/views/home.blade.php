@@ -26,6 +26,8 @@
             :personaDescriptions="$personaDescriptions"
         />
 
+        <div id="results-container"></div>
+
         @if(isset($chat))
             @include('partials.chat', [
                 'chat' => $chat,
@@ -33,25 +35,13 @@
             ])
         @endif
 
-        <div id="results-container"></div>
-
-        <div id="loading-container" class="p-4 hidden rounded shadow-sm">
-            <h2 class="text-2xl font-bold mb-2 flex items-center">
-                <i data-lucide="bot" class="w-6 h-6 mr-2"></i> Assistant
-            </h2>
-            <div class="leading-relaxed prose dark:prose-invert">
-                <p class="flex items-center gap-2">
-                    <i data-lucide="loader-2" class="w-5 h-5 animate-spin text-orange-400"></i>
-                    <span x-text="loadingMessage"></span>
-                </p>
-            </div>
-        </div>
-
     </section>
     <x-paywall-modal/>
 @endsection
 
 @push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
     <script>
         function searchInputValidator(initial = '', initialMaxHeight = 10_000_000) {
             return {
@@ -82,21 +72,41 @@
                 async submitForm(form) {
                     if (this.isSubmitting) return;
 
-                    document.getElementById('chat-container')?.style.setProperty('display', 'none');
                     this.loadingMessage = this.loadingMessages[Math.floor(Math.random() * this.loadingMessages.length)];
                     this.isSubmitting = true;
 
                     try {
                         const formData = new FormData(form);
+                        const rawQuestion = formData.get('question');
+                        const userMessage = rawQuestion?.trim() ? rawQuestion.trim() : 'Give me a generic overview.';
+                        const resultsContainer = document.getElementById('results-container');
 
-                        const {data} = await axios.post(form.action, formData, {
+                        // Render user input
+                        const assistantMsgCount = document.querySelectorAll('.assistant-message').length;
+                        const userHtml = `
+            <div class="chat-message-group mb-6">
+                <div class="user-message mb-2 text-right">
+                    <div class="flex items-center gap-1 justify-end">
+                        <i data-lucide="user" class="w-6 h-6"></i>
+                        <div class="inline-block rounded px-3 py-2">
+                            ${this.escapeHtml(userMessage)}
+                        </div>
+                    </div>
+                </div>
+                <div id="assistant-message-${assistantMsgCount}" class="assistant-message loading-spinner-group text-left">
+                    <x-chat.scribe-prompt/>
+                </div>
+            </div>
+        `;
+                        resultsContainer.insertAdjacentHTML('beforeend', userHtml);
+                        window.refreshLucideIcons?.();
+
+                        // Send to backend
+                        const { data } = await axios.post(form.action, formData, {
                             headers: {
                                 'X-Requested-With': 'XMLHttpRequest',
                                 'Accept': 'application/json',
                             },
-                            validateStatus: function (status) {
-                                return true;
-                            }
                         });
 
                         if (data.maxBitcoinBlockHeight) {
@@ -120,23 +130,44 @@
                             return;
                         }
 
-                        const resultsContainer = document.getElementById('results-container');
-                        resultsContainer.innerHTML = data.html || data.error || '';
+                        const assistantDiv = document.getElementById(`assistant-message-${assistantMsgCount}`);
+                        if (assistantDiv) {
+                            assistantDiv.innerHTML = `
+                <span class="font-semibold flex items-center gap-1">
+                    <i data-lucide="bot" class="w-6 h-6"></i>
+                    <span class="font-semibold">Scribe</span>
+                </span>
 
-                        window.refreshLucideIcons?.();
+                ${data.html || '<p>No response was received.</p>'}
+            `;
+                        }
 
-                        const url = new URL(window.location);
-                        url.pathname = `/chats/${data.chatUlid}`;
-                        window.history.pushState({}, '', url);
+                        // PushState to chat URL
+                        if (data.chatUlid) {
+                            const url = new URL(window.location);
+                            url.pathname = `/chats/${data.chatUlid}`;
+                            window.history.pushState({}, '', url);
+                        }
 
+                        // Update search field
                         const searchInput = document.getElementById('search-input');
                         if (searchInput && data.search?.text) {
                             searchInput.value = data.search.text;
                             this.input = data.search.text;
                             this.validate();
                         }
+
+                        window.refreshLucideIcons?.();
                     } catch (error) {
                         console.error('submitForm error:', error.message);
+                        const assistantDiv = document.getElementById(`assistant-message-${assistantMsgCount}`);
+                        if (assistantDiv) {
+                            assistantDiv.innerHTML = `
+                <div class="inline-block rounded px-3 py-2 text-red-700">
+                    Error fetching assistant response.
+                </div>
+            `;
+                        }
                     } finally {
                         this.isSubmitting = false;
                     }
@@ -204,69 +235,116 @@
                 },
 
                 async sendMessageToChat(chatUlid, message) {
-                    if (!chatUlid || !message.trim()) {
-                        this.errorFollowUpQuestion = 'Message cannot be empty';
-                        return;
-                    }
-                    this.loadingMessage = this.loadingMessages[Math.floor(Math.random() * this.loadingMessages.length)];
+                    if (!message || !message.trim()) return;
 
-                    disableAllButtons()
-                    const inputField = document.getElementById('customFollowUp');
-                    const sendButtons = document.querySelectorAll('button[type="submit"]');
-                    const loadingContainer = document.getElementById('loading-container');
+                    const chatGroups = document.getElementById('chat-message-groups');
+                    const assistantMsgCount = document.querySelectorAll('.assistant-message').length;
 
-                    // Show loading indicator
-                    if (loadingContainer) {
-                        loadingContainer.classList.remove('hidden');
-                    }
+                    // 1. Add the user message
+                    const userHtml = `
+            <div class="chat-message-group mb-6">
+                <div class="user-message mb-2 text-right">
+                    <div class="flex items-center gap-1 justify-end">
+                        <i data-lucide="user" class="w-6 h-6"></i>
+                        <div class="inline-block rounded px-3 py-2">
+                            ${this.escapeHtml(message)}
+                        </div>
+                    </div>
+                </div>
+                <!-- Assistant will be appended here -->
+                <div id="assistant-message-${assistantMsgCount}" class="assistant-message loading-spinner-group text-left">
+                    <x-chat.scribe-prompt/>
+                </div>
+            </div>
+        `;
+                    chatGroups.insertAdjacentHTML('beforeend', userHtml);
+                    window.refreshLucideIcons?.();
 
-                    try {
-                        inputField.value = message;
-                        inputField.disabled = true;
-                        inputField.classList.add('opacity-50', 'cursor-not-allowed');
+                    // 2. Clear the input
+                    document.getElementById('customFollowUp').value = "";
 
-                        sendButtons.forEach(btn => {
-                            btn.disabled = true;
-                            btn.classList.add('opacity-50', 'cursor-not-allowed');
-                        });
-
-                        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-
-                        const response = await axios.post(`/chats/${chatUlid}/messages`, {message}, {
-                            'X-Requested-With': 'XMLHttpRequest',
-                            'Accept': 'application/json',
-                            ...(csrfToken && {'X-CSRF-TOKEN': csrfToken}),
-                        });
-
-                        if (response.status === 200 && response.data?.html) {
-                            const chatContainer = document.getElementById('chat-container');
-                            if (chatContainer) {
-                                chatContainer.innerHTML = response.data.html;
-                                chatContainer.scrollIntoView({behavior: 'smooth'});
+                    // 3. Send AJAX to backend
+                    fetch(`/chats/${chatUlid}/messages`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                        },
+                        body: JSON.stringify({message: message})
+                    })
+                        .then(r => r.json())
+                        .then(data => {
+                            const spinner = document.getElementById(`assistant-message-${assistantMsgCount}`);
+                            if (spinner) {
+                                spinner.innerHTML = `
+                                    <span class="font-semibold flex items-center gap-1">
+                                        <i data-lucide="bot" class="w-6 h-6"></i>
+                                        <span class="font-semibold">Scribe</span>
+                                    </span>
+                                    <div class="inline-block rounded px-3 py-2 prose">
+                                        ${data.content ? marked.parse(data.content) : 'No response.'}
+                                    </div>
+                                `;
+                                spinner.scrollIntoView({ behavior: 'smooth', block: 'start' });
                             }
-                            const lastMessage = document.getElementById('last-message');
-                            if (lastMessage) {
-                                lastMessage.scrollIntoView(true);
+                            if (data.suggestions) {
+                                this.updateSuggestionsList(chatUlid, data.suggestions);
                             }
                             window.refreshLucideIcons?.();
+                        }).catch((e) => {
+                            console.error(e)
+                            const spinner = document.getElementById(`assistant-message-${assistantMsgCount}`);
+                            if (spinner) {
+                                spinner.innerHTML = `
+                                    <span class="font-semibold text-yellow-700">Scribe:</span>
+                                    <div class="inline-block rounded px-3 py-2 text-red-700">
+                                        Error fetching response.
+                                    </div>
+                                `;
+                            }
                         }
+                    );
+                },
 
-                    } catch (error) {
-                        console.error('Error sending message:', error?.response?.data || error.message);
-                        alert('Failed to send your message. Please try again.');
-                    } finally {
-                        // Hide loading container
-                        if (loadingContainer) {
-                            loadingContainer.classList.add('hidden');
-                        }
+                updateSuggestionsList(chatUlid, newSuggestions) {
+                    const suggestionsContainer = document.getElementById('follow-up-suggestions');
+                    if (!suggestionsContainer) return;
 
-                        inputField.disabled = false;
-                        inputField.classList.remove('opacity-50', 'cursor-not-allowed');
-                        inputField.value = '';
-                        inputField.focus();
+                    suggestionsContainer.innerHTML = `
+        <div class="mt-4">
+            <p class="text-sm font-medium mb-2">Or try one of these</p>
+            <div class="flex flex-wrap gap-2">
+                ${newSuggestions.map((s, i) => `
+                    <button
+                        type="button"
+                        class="suggested-question-prompt"
+                        data-suggestion="${s.replace(/"/g, '&quot;')}"
+                        data-chat-ulid="${chatUlid}"
+                    >
+                        ${s}
+                    </button>
+                `).join('')}
+            </div>
+        </div>
+    `;
+                    // Re-attach event listeners
+                    const buttons = suggestionsContainer.querySelectorAll('button[data-suggestion]');
+                    buttons.forEach(button => {
+                        button.addEventListener('click', () => {
+                            const suggestion = button.getAttribute('data-suggestion');
+                            const ulid = button.getAttribute('data-chat-ulid');
+                            this.sendMessageToChat(ulid, suggestion);
+                        });
+                    });
+                },
 
-                        enableAllButtons();
-                    }
+                escapeHtml(text) {
+                    return text.replace(/[\"&'\/<>]/g, function (a) {
+                        return {
+                            '"': '&quot;', '&': '&amp;', "'": '&#39;',
+                            '/': '&#47;', '<': '&lt;', '>': '&gt;'
+                        }[a];
+                    });
                 }
             };
         }

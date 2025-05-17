@@ -42,12 +42,28 @@ final class Chat extends Model
             ->firstOrFail();
     }
 
+    public function getLastUserMessage(): Message
+    {
+        return $this->messages()
+            ->where('role', 'user')
+            ->orderBy('id', 'desc')
+            ->first();
+    }
+
     public function getFirstAssistantMessage(): Message
     {
         return $this->messages()
             ->where('role', 'assistant')
             ->orderBy('id')
             ->firstOrFail();
+    }
+
+    public function getLastAssistantMessage(): Message
+    {
+        return $this->messages()
+            ->where('role', 'assistant')
+            ->orderBy('id', 'desc')
+            ->first();
     }
 
     public function messages(): HasMany
@@ -103,5 +119,32 @@ final class Chat extends Model
     public function isBlock(): bool
     {
         return $this->messages()->first()->isBlock();
+    }
+
+    public function messageGroups(): array
+    {
+        $messages = $this->messages->values();
+        $groups = [];
+
+        for ($i = 0; $i < $messages->count() - 1; $i++) {
+            if ($messages[$i]->role === 'user' && $messages[$i + 1]->role === 'assistant') {
+                $groups[] = [
+                    'userMsg' => $messages[$i],
+                    'assistantMsg' => $messages[$i + 1],
+                ];
+                $i++;
+            }
+        }
+
+        // Handle last message if odd count
+        if ($i < $messages->count()) {
+            if ($messages[$i]->role === 'user') {
+                $groups[] = ['userMsg' => $messages[$i], 'assistantMsg' => null];
+            } else {
+                $groups[] = ['userMsg' => null, 'assistantMsg' => $messages[$i]];
+            }
+        }
+
+        return $groups;
     }
 }

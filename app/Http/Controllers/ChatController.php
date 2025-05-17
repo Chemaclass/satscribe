@@ -50,13 +50,9 @@ final readonly class ChatController
 
         $this->addMessageAction->execute($chat, (string) $request->input('message'));
 
-        $chat->load('messages');
-
         return response()->json([
-            'html' => view('partials.chat', [
-                'chat' => $chat,
-                'suggestions' => $chat->isBlock() ? QuestionPlaceholder::forBlock() : QuestionPlaceholder::forTx(),
-            ])->render(),
+            'content' => $chat->getLastAssistantMessage()->content,
+            'suggestions' => $chat->isBlock() ? QuestionPlaceholder::forBlock() : QuestionPlaceholder::forTx(),
         ]);
     }
 }
