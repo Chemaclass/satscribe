@@ -8,7 +8,7 @@ use App\Data\PromptInput;
 use App\Enums\PromptPersona;
 use App\Enums\PromptType;
 use App\Models\Chat;
-use Illuminate\Pagination\Paginator;
+use Illuminate\Contracts\Pagination\Paginator;
 
 final readonly class ChatRepository
 {
@@ -100,10 +100,15 @@ final readonly class ChatRepository
         ]);
     }
 
-    public function getPagination(): Paginator
+    public function getPagination(bool $showAll): Paginator
     {
-        return Chat::where('creator_ip', $this->ip)
-            ->latest()
+        $query = Chat::query();
+
+        if (!$showAll) {
+            $query->where('creator_ip', $this->ip);
+        }
+
+        return $query->latest()
             ->simplePaginate($this->perPage);
     }
 }
