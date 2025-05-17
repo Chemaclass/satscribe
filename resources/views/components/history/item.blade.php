@@ -48,6 +48,7 @@
         <div class="assistant-message text-left">
             <span class="font-semibold flex items-center gap-1">
                 <i data-lucide="bot" class="w-6 h-6"></i>
+                <span class="font-semibold">Scribe</span>
             </span>
 
             <div  id="{{ $entryId }}" class="inline-block rounded prose markdown-content overflow-hidden max-h-[8.5rem] transition-all duration-300">

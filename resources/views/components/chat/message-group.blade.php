@@ -32,7 +32,7 @@
         <div class="assistant-message text-left">
             <div class="flex items-center gap-1 group relative">
                 <i data-lucide="bot" class="w-6 h-6"></i>
-                <span class="font-semibold">Assistant</span>
+                <span class="font-semibold">Scribe</span>
                 @php
                     $assistantCreatedAt = $assistantMsg->created_at;
                     $assistantOlderThan5Min = $assistantCreatedAt && $assistantCreatedAt->lt(now()->subMinutes(5));

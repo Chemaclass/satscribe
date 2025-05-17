@@ -26,26 +26,14 @@
             :personaDescriptions="$personaDescriptions"
         />
 
+        <div id="results-container"></div>
+
         @if(isset($chat))
             @include('partials.chat', [
                 'chat' => $chat,
                 'suggestions' => $suggestions,
             ])
         @endif
-
-        <div id="results-container"></div>
-
-        <div id="loading-container" class="p-4 hidden rounded shadow-sm">
-            <h2 class="text-2xl font-bold mb-2 flex items-center">
-                <i data-lucide="bot" class="w-6 h-6 mr-2"></i> Scribe
-            </h2>
-            <div class="leading-relaxed prose dark:prose-invert">
-                <p class="flex items-center gap-2">
-                    <i data-lucide="loader-2" class="w-5 h-5 animate-spin text-orange-400"></i>
-                    <span x-text="loadingMessage"></span>
-                </p>
-            </div>
-        </div>
 
     </section>
     <x-paywall-modal/>
@@ -84,21 +72,47 @@
                 async submitForm(form) {
                     if (this.isSubmitting) return;
 
-                    document.getElementById('chat-container')?.style.setProperty('display', 'none');
                     this.loadingMessage = this.loadingMessages[Math.floor(Math.random() * this.loadingMessages.length)];
                     this.isSubmitting = true;
 
                     try {
                         const formData = new FormData(form);
+                        const rawQuestion = formData.get('question');
+                        const userMessage = rawQuestion?.trim() ? rawQuestion.trim() : 'Give me a generic overview.';
+                        const resultsContainer = document.getElementById('results-container');
 
-                        const {data} = await axios.post(form.action, formData, {
+                        // Render user input
+                        const assistantMsgCount = document.querySelectorAll('.assistant-message').length;
+                        const userHtml = `
+            <div class="chat-message-group mb-6">
+                <div class="user-message mb-2 text-right">
+                    <div class="flex items-center gap-1 justify-end">
+                        <i data-lucide="user" class="w-6 h-6"></i>
+                        <div class="inline-block rounded px-3 py-2">
+                            ${this.escapeHtml(userMessage)}
+                        </div>
+                    </div>
+                </div>
+                <div id="assistant-message-${assistantMsgCount}"
+                     class="assistant-message loading-spinner-group text-left">
+                    <span class="flex items-center gap-1">
+                        <i data-lucide="bot" class="w-6 h-6 font-semibold"></i>
+                        <span class="font-semibold">Scribe</span>
+                        <span class="spinner-border w-4 h-4 inline-block animate-spin border-2 border-yellow-600 border-t-transparent rounded-full"></span>
+                        <span class="ml-2">Thinking…</span>
+                    </span>
+                </div>
+            </div>
+        `;
+                        resultsContainer.insertAdjacentHTML('beforeend', userHtml);
+                        window.refreshLucideIcons?.();
+
+                        // Send to backend
+                        const { data } = await axios.post(form.action, formData, {
                             headers: {
                                 'X-Requested-With': 'XMLHttpRequest',
                                 'Accept': 'application/json',
                             },
-                            validateStatus: function (status) {
-                                return true;
-                            }
                         });
 
                         if (data.maxBitcoinBlockHeight) {
@@ -122,23 +136,44 @@
                             return;
                         }
 
-                        const resultsContainer = document.getElementById('results-container');
-                        resultsContainer.innerHTML = data.html || data.error || '';
+                        const assistantDiv = document.getElementById(`assistant-message-${assistantMsgCount}`);
+                        if (assistantDiv) {
+                            assistantDiv.innerHTML = `
+                <span class="font-semibold flex items-center gap-1">
+                    <i data-lucide="bot" class="w-6 h-6"></i>
+                    <span class="font-semibold">Scribe</span>
+                </span>
 
-                        window.refreshLucideIcons?.();
+                ${data.html || '<p>No response was received.</p>'}
+            `;
+                        }
 
-                        const url = new URL(window.location);
-                        url.pathname = `/chats/${data.chatUlid}`;
-                        window.history.pushState({}, '', url);
+                        // PushState to chat URL
+                        if (data.chatUlid) {
+                            const url = new URL(window.location);
+                            url.pathname = `/chats/${data.chatUlid}`;
+                            window.history.pushState({}, '', url);
+                        }
 
+                        // Update search field
                         const searchInput = document.getElementById('search-input');
                         if (searchInput && data.search?.text) {
                             searchInput.value = data.search.text;
                             this.input = data.search.text;
                             this.validate();
                         }
+
+                        window.refreshLucideIcons?.();
                     } catch (error) {
                         console.error('submitForm error:', error.message);
+                        const assistantDiv = document.getElementById(`assistant-message-${assistantMsgCount}`);
+                        if (assistantDiv) {
+                            assistantDiv.innerHTML = `
+                <div class="inline-block rounded px-3 py-2 text-red-700">
+                    Error fetching assistant response.
+                </div>
+            `;
+                        }
                     } finally {
                         this.isSubmitting = false;
                     }
@@ -225,12 +260,11 @@
                 <!-- Assistant will be appended here -->
                 <div id="assistant-message-${assistantMsgCount}"
                      class="assistant-message loading-spinner-group text-left">
-                    <span class="font-semibold flex items-center gap-1">
-                        <i data-lucide="bot" class="w-6 h-6"></i>
-                    </span>
-                    <div class="inline-block rounded px-3 py-2">
-                        <span class="spinner-border w-4 h-4 inline-block animate-spin border-2 border-yellow-600 border-t-transparent rounded-full"></span>
-                        <span class="ml-2">Thinking…</span>
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="bot" class="w-6 h-6 font-semibold"></i>
+                        <span class="font-semibold">Scribe</span>
+                        <span class="spinner-border w-4 h-4 animate-spin border-2 border-yellow-600 border-t-transparent rounded-full"></span>
+                        <span>Thinking…</span>
                     </div>
                 </div>
             </div>
@@ -257,6 +291,7 @@
                                 spinner.innerHTML = `
                                     <span class="font-semibold flex items-center gap-1">
                                         <i data-lucide="bot" class="w-6 h-6"></i>
+                                        <span class="font-semibold">Scribe</span>
                                     </span>
                                     <div class="inline-block rounded px-3 py-2 prose">
                                         ${data.content ? marked.parse(data.content) : 'No response.'}
@@ -275,7 +310,7 @@
                                 spinner.innerHTML = `
                                     <span class="font-semibold text-yellow-700">Scribe:</span>
                                     <div class="inline-block rounded px-3 py-2 text-red-700">
-                                        Error fetching assistant response.
+                                        Error fetching response.
                                     </div>
                                 `;
                             }
