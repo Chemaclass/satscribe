@@ -42,12 +42,28 @@ final class Chat extends Model
             ->firstOrFail();
     }
 
+    public function getLastUserMessage(): Message
+    {
+        return $this->messages()
+            ->where('role', 'user')
+            ->orderBy('id', 'desc')
+            ->first();
+    }
+
     public function getFirstAssistantMessage(): Message
     {
         return $this->messages()
             ->where('role', 'assistant')
             ->orderBy('id')
             ->firstOrFail();
+    }
+
+    public function getLastAssistantMessage(): Message
+    {
+        return $this->messages()
+            ->where('role', 'assistant')
+            ->orderBy('id', 'desc')
+            ->first();
     }
 
     public function messages(): HasMany
@@ -130,13 +146,5 @@ final class Chat extends Model
         }
 
         return $groups;
-    }
-
-    public function getLastAssistantMessage(): Message
-    {
-        return $this->messages()
-            ->where('role', 'assistant')
-            ->orderBy('id', 'desc')
-            ->first();
     }
 }

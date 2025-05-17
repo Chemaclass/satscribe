@@ -4,6 +4,15 @@
     'suggestions' => [],
 ])
 
+@php
+    $filteredSuggestions = collect($suggestions)
+        ->filter(fn($s) => trim($s) !== trim($question))
+        ->values();
+
+    /** @var \App\Models\Chat $chat */
+    $message = $chat->getLastUserMessage();
+@endphp
+
 <section id="chat-container" class="chat-body w-full p-2">
     <div id="chat-message-groups">
         @foreach($chat->messageGroups() as $group)
@@ -41,4 +50,19 @@
         </template>
     </div>
 
+    @if (client_ip() === $chat->creator_ip)
+        <x-chat.follow-up-suggestions
+            :input="data_get($message['meta'], 'input')"
+            :question="data_get($message['meta'], 'question', '')"
+            :suggestions="$suggestions"
+            :message="$message"
+        />
+
+        <x-chat.raw-data-toggle-button
+            :id="data_get($chat->getFirstAssistantMessage(), 'id')"
+            :input="data_get($message['meta'], 'input')"
+            :question="data_get($message['meta'], 'question', '')"
+            :createdAt="data_get($message, 'created_at')"
+        />
+    @endif
 </section>

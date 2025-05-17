@@ -221,7 +221,7 @@
                 </div>
                 <!-- Assistant will be appended here -->
                 <div class="assistant-message text-left" id="loading-spinner-group">
-                    <span class="font-semibold text-yellow-700">Assistant:</span>
+                    <span class="font-semibold">Assistant:</span>
                     <div class="inline-block rounded px-3 py-2">
                         <span class="spinner-border w-4 h-4 inline-block animate-spin border-2 border-yellow-600 border-t-transparent rounded-full"></span>
                         <span class="ml-2">Thinking…</span>

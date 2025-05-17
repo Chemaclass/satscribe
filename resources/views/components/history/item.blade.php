@@ -2,6 +2,7 @@
 
 @php
     use Illuminate\Support\Str;
+
     /** @var \App\Models\Chat $chat */
     $userMsg = $chat->getFirstUserMessage();
     $assistantMsg = $chat->getFirstAssistantMessage();
