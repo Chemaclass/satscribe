@@ -631,3 +631,12 @@ a:hover,
     background-color: var(--btc-orange-light);
     color: var(--btc-text-dark);
 }
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+.spinner-border {
+    border-radius: 50%;
+    border-top-color: transparent;
+    animation: spin 0.75s linear infinite;
+}

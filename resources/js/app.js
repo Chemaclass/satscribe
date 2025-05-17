@@ -1,28 +1,28 @@
 import './bootstrap';
 import Alpine from 'alpinejs';
+import {
+    BadgeCheck,
+    Bitcoin,
+    Bot,
+    ChevronLeft,
+    ChevronRight,
+    createIcons,
+    Github,
+    Lightbulb,
+    Loader2,
+    Moon,
+    Scroll,
+    Send,
+    Shuffle,
+    SlidersHorizontal,
+    Sun,
+    User,
+    Zap
+} from 'lucide';
+import { marked } from 'marked';
 
 window.Alpine = Alpine;
 Alpine.start();
-
-import { createIcons } from 'lucide';
-import {
-    ChevronLeft,
-    ChevronRight,
-    Bitcoin,
-    Bot,
-    Loader2,
-    Lightbulb,
-    Scroll,
-    Sun,
-    Moon,
-    Github,
-    SlidersHorizontal,
-    Zap,
-    Shuffle,
-    User,
-    Send,
-    BadgeCheck,
-} from 'lucide';
 
 const usedIcons = {
     ChevronLeft,
@@ -43,11 +43,11 @@ const usedIcons = {
     BadgeCheck,
 };
 
-createIcons({ icons: usedIcons });
+createIcons({icons: usedIcons});
 
 // ---------- DOM READY ----------
 document.addEventListener('DOMContentLoaded', () => {
-    createIcons({ icons: usedIcons });
+    createIcons({icons: usedIcons});
 
     setupFormSubmissionUI();
     setupBlockchainToggle();

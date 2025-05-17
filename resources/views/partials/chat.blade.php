@@ -5,12 +5,14 @@
 ])
 
 <section id="chat-container" class="chat-body w-full p-2">
-    @foreach($chat->messageGroups() as $group)
-        <x-chat.message-group
-            :userMsg="$group['userMsg']"
-            :assistantMsg="$group['assistantMsg']"
-        />
-    @endforeach
+    <div id="chat-message-groups">
+        @foreach($chat->messageGroups() as $group)
+            <x-chat.message-group
+                :userMsg="$group['userMsg']"
+                :assistantMsg="$group['assistantMsg']"
+            />
+        @endforeach
+    </div>
 
     <div x-data="{ message: '' }" class="w-full">
         <form @submit.prevent="sendMessageToChat('{{ $chat->ulid }}', message)" class="flex w-full gap-2">
@@ -27,9 +29,9 @@
                 type="submit"
                 class="w-1/4 form-button flex items-center justify-center"
             >
-        <span id="submit-icon" x-cloak class="mr-2">
-            <i data-lucide="send" class="w-4 h-4"></i>
-        </span>
+                <span id="submit-icon" x-cloak class="mr-2">
+                    <i data-lucide="send" class="w-4 h-4"></i>
+                </span>
                 <span id="submit-text" x-cloak>Send</span>
             </button>
         </form>

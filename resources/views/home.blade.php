@@ -52,6 +52,8 @@
 @endsection
 
 @push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
     <script>
         function searchInputValidator(initial = '', initialMaxHeight = 10_000_000) {
             return {
@@ -204,69 +206,78 @@
                 },
 
                 async sendMessageToChat(chatUlid, message) {
-                    if (!chatUlid || !message.trim()) {
-                        this.errorFollowUpQuestion = 'Message cannot be empty';
-                        return;
-                    }
-                    this.loadingMessage = this.loadingMessages[Math.floor(Math.random() * this.loadingMessages.length)];
+                    if (!message || !message.trim()) return;
 
-                    disableAllButtons()
-                    const inputField = document.getElementById('customFollowUp');
-                    const sendButtons = document.querySelectorAll('button[type="submit"]');
-                    const loadingContainer = document.getElementById('loading-container');
+                    const chatGroups = document.getElementById('chat-message-groups');
 
-                    // Show loading indicator
-                    if (loadingContainer) {
-                        loadingContainer.classList.remove('hidden');
-                    }
+                    // 1. Add the user message
+                    const userHtml = `
+            <div class="chat-message-group mb-6">
+                <div class="user-message mb-2 text-right">
+                    <span class="font-semibold">You:</span>
+                    <div class="inline-block rounded px-3 py-2">
+                        ${this.escapeHtml(message)}
+                    </div>
+                </div>
+                <!-- Assistant will be appended here -->
+                <div class="assistant-message text-left" id="loading-spinner-group">
+                    <span class="font-semibold text-yellow-700">Assistant:</span>
+                    <div class="inline-block rounded px-3 py-2">
+                        <span class="spinner-border w-4 h-4 inline-block animate-spin border-2 border-yellow-600 border-t-transparent rounded-full"></span>
+                        <span class="ml-2">Thinking…</span>
+                    </div>
+                </div>
+            </div>
+        `;
+                    chatGroups.insertAdjacentHTML('beforeend', userHtml);
 
-                    try {
-                        inputField.value = message;
-                        inputField.disabled = true;
-                        inputField.classList.add('opacity-50', 'cursor-not-allowed');
+                    // 2. Clear the input
+                    document.getElementById('customFollowUp').value = "";
 
-                        sendButtons.forEach(btn => {
-                            btn.disabled = true;
-                            btn.classList.add('opacity-50', 'cursor-not-allowed');
-                        });
-
-                        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-
-                        const response = await axios.post(`/chats/${chatUlid}/messages`, {message}, {
-                            'X-Requested-With': 'XMLHttpRequest',
-                            'Accept': 'application/json',
-                            ...(csrfToken && {'X-CSRF-TOKEN': csrfToken}),
-                        });
-
-                        if (response.status === 200 && response.data?.html) {
-                            const chatContainer = document.getElementById('chat-container');
-                            if (chatContainer) {
-                                chatContainer.innerHTML = response.data.html;
-                                chatContainer.scrollIntoView({behavior: 'smooth'});
-                            }
-                            const lastMessage = document.getElementById('last-message');
-                            if (lastMessage) {
-                                lastMessage.scrollIntoView(true);
-                            }
-                            window.refreshLucideIcons?.();
+                    // 3. Send AJAX to backend
+                    fetch(`/chats/${chatUlid}/messages`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                        },
+                        body: JSON.stringify({content: message})
+                    })
+                        .then(r => r.json())
+                        .then(data => {
+                            // Remove spinner and add assistant response
+                            const spinner = document.getElementById('loading-spinner-group');
+                            if (spinner) {
+                                const mdContent = data.content ? marked.parse(data.content) : 'No response.';
+                                spinner.innerHTML = `
+                    <span class="font-semibold">Assistant:</span>
+                    <div class="inline-block rounded px-3 py-2 prose">
+                        ${mdContent}
+                    </div>
+                `;
+                            }  // todo: make sure to render the data.content with MD format
+                        }).catch((e) => {
+                        console.log(e)
+                        // On error, notify user
+                        const spinner = document.getElementById('loading-spinner-group');
+                        if (spinner) {
+                            spinner.innerHTML = `
+                    <span class="font-semibold text-yellow-700">Assistant:</span>
+                    <div class="inline-block rounded px-3 py-2 text-red-700">
+                        Error fetching assistant response.
+                    </div>
+                `;
                         }
+                    });
+                },
 
-                    } catch (error) {
-                        console.error('Error sending message:', error?.response?.data || error.message);
-                        alert('Failed to send your message. Please try again.');
-                    } finally {
-                        // Hide loading container
-                        if (loadingContainer) {
-                            loadingContainer.classList.add('hidden');
-                        }
-
-                        inputField.disabled = false;
-                        inputField.classList.remove('opacity-50', 'cursor-not-allowed');
-                        inputField.value = '';
-                        inputField.focus();
-
-                        enableAllButtons();
-                    }
+                escapeHtml(text) {
+                    return text.replace(/[\"&'\/<>]/g, function (a) {
+                        return {
+                            '"': '&quot;', '&': '&amp;', "'": '&#39;',
+                            '/': '&#47;', '<': '&lt;', '>': '&gt;'
+                        }[a];
+                    });
                 }
             };
         }

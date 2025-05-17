@@ -131,4 +131,12 @@ final class Chat extends Model
 
         return $groups;
     }
+
+    public function getLastAssistantMessage(): Message
+    {
+        return $this->messages()
+            ->where('role', 'assistant')
+            ->orderBy('id', 'desc')
+            ->first();
+    }
 }
