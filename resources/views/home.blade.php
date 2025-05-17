@@ -26,13 +26,13 @@
             :personaDescriptions="$personaDescriptions"
         />
 
-        <div id="results-container"></div>
-
         @if(isset($chat))
             @include('partials.chat', [
                 'chat' => $chat,
                 'suggestions' => $suggestions,
             ])
+        @else
+            <section id="chat-container"></section>
         @endif
 
     </section>
@@ -76,9 +76,9 @@
                     this.isSubmitting = true;
 
                     // if existing chat exists then remove
-                    const resultsContainer = document.getElementById('results-container');
-                    if (resultsContainer) {
-                        resultsContainer.innerHTML = '';
+                    const chatContainer = document.getElementById('chat-container');
+                    if (chatContainer) {
+                        chatContainer.innerHTML = '';
                     }
 
                     try {
@@ -103,7 +103,7 @@
                 </div>
             </div>
         `;
-                        resultsContainer.insertAdjacentHTML('beforeend', userHtml);
+                        chatContainer.insertAdjacentHTML('beforeend', userHtml);
                         window.refreshLucideIcons?.();
 
                         // Send to backend

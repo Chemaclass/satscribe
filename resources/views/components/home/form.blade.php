@@ -192,11 +192,6 @@
                         :disabled="isSubmitting"
                         class="form-button w-3/4"
                     >
-                        <template x-if="isSubmitting">
-                            <!-- spinner icon here -->
-                            <svg class="animate-spin h-5 w-5 mr-2"> ... </svg>
-                        </template>
-
                         <span id="submit-icon" x-cloak class="sm-2">
                             <i data-lucide="zap" class="w-4 h-4"></i>
                         </span>
