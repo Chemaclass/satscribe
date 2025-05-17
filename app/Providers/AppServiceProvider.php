@@ -15,6 +15,7 @@ use App\Services\BlockHeightProvider;
 use App\Services\OpenAIService;
 use App\Services\PriceService;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -104,6 +105,10 @@ final class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        if (app()->environment('production')) {
+            URL::forceScheme('https');
+        }
+
         Paginator::useTailwind();
 
         View::share('cronitorClientKey', config('app.cronitorClientKey'));
