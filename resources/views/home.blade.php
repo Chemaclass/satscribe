@@ -75,11 +75,16 @@
                     this.loadingMessage = this.loadingMessages[Math.floor(Math.random() * this.loadingMessages.length)];
                     this.isSubmitting = true;
 
+                    // if existing chat exists then remove
+                    const resultsContainer = document.getElementById('results-container');
+                    if (resultsContainer) {
+                        resultsContainer.innerHTML = '';
+                    }
+
                     try {
                         const formData = new FormData(form);
                         const rawQuestion = formData.get('question');
                         const userMessage = rawQuestion?.trim() ? rawQuestion.trim() : 'Give me a generic overview.';
-                        const resultsContainer = document.getElementById('results-container');
 
                         // Render user input
                         const assistantMsgCount = document.querySelectorAll('.assistant-message').length;
