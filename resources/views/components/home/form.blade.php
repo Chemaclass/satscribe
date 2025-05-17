@@ -172,7 +172,6 @@
                                 name="refresh"
                                 value="true"
                                 class="checkbox-input mt-1 cursor-pointer"
-                                checked
                             >
                             <label for="refresh"
                                    class="block text-sm font-medium text-gray-900 mb-1 cursor-pointer">

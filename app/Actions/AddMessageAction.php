@@ -45,7 +45,7 @@ final readonly class AddMessageAction
             $cleanMsg
         );
 
-        $this->repository->addMessageTochat($chat, $cleanMsg, $aiResponse);
+        $this->repository->addMessageToChat($chat, $cleanMsg, $aiResponse);
     }
 
     private function enforceRateLimit(): void

@@ -27,13 +27,15 @@ final readonly class ChatRepository
         string $question = '',
     ): ?Chat {
         // Find an existing chat by input type, input, persona, and question (legacy compatibility)
-        return Chat::whereHas('messages', function ($q) use ($input, $persona, $question): void {
-            $q->where('role', 'user')
-                ->where('content', $question)
-                ->whereJsonContains('meta->type', $input->type->value)
-                ->whereJsonContains('meta->input', $input->text)
-                ->whereJsonContains('meta->persona', $persona->value);
-        })->first();
+        return Chat::query()
+            ->where('creator_ip', '=', $this->ip)
+            ->whereHas('messages', function ($q) use ($input, $persona, $question): void {
+                $q->where('role', 'user')
+                    ->where('content', $question)
+                    ->whereJsonContains('meta->type', $input->type->value)
+                    ->whereJsonContains('meta->input', $input->text)
+                    ->whereJsonContains('meta->persona', $persona->value);
+            })->first();
     }
 
     /**
@@ -55,7 +57,7 @@ final readonly class ChatRepository
         /** @var Chat $chat */
         $chat = Chat::create([
             'title' => ucfirst($input->type->value).':'.$input->text,
-            'creator_ip' => client_ip(),
+            'creator_ip' => $this->ip,
         ]);
 
         $chat->addUserMessage($question, [
@@ -76,7 +78,7 @@ final readonly class ChatRepository
         return $chat;
     }
 
-    public function addMessageTochat(
+    public function addMessageToChat(
         Chat $chat,
         string $userMessage,
         string $assistantResponse,
