@@ -215,15 +215,19 @@
                     const userHtml = `
             <div class="chat-message-group mb-6">
                 <div class="user-message mb-2 text-right">
-                    <span class="font-semibold">You:</span>
-                    <div class="inline-block rounded px-3 py-2">
-                        ${this.escapeHtml(message)}
+                    <div class="flex items-center gap-1 justify-end">
+                        <i data-lucide="user" class="w-6 h-6"></i>
+                        <div class="inline-block rounded px-3 py-2">
+                            ${this.escapeHtml(message)}
+                        </div>
                     </div>
                 </div>
                 <!-- Assistant will be appended here -->
                 <div id="assistant-message-${assistantMsgCount}"
                      class="assistant-message loading-spinner-group text-left">
-                    <span class="font-semibold">Scribe:</span>
+                    <span class="font-semibold flex items-center gap-1">
+                        <i data-lucide="bot" class="w-6 h-6"></i>
+                    </span>
                     <div class="inline-block rounded px-3 py-2">
                         <span class="spinner-border w-4 h-4 inline-block animate-spin border-2 border-yellow-600 border-t-transparent rounded-full"></span>
                         <span class="ml-2">Thinking…</span>
@@ -232,6 +236,7 @@
             </div>
         `;
                     chatGroups.insertAdjacentHTML('beforeend', userHtml);
+                    window.refreshLucideIcons?.();
 
                     // 2. Clear the input
                     document.getElementById('customFollowUp').value = "";
@@ -250,7 +255,9 @@
                             const spinner = document.getElementById(`assistant-message-${assistantMsgCount}`);
                             if (spinner) {
                                 spinner.innerHTML = `
-                                    <span class="font-semibold">Scribe:</span>
+                                    <span class="font-semibold flex items-center gap-1">
+                                        <i data-lucide="bot" class="w-6 h-6"></i>
+                                    </span>
                                     <div class="inline-block rounded px-3 py-2 prose">
                                         ${data.content ? marked.parse(data.content) : 'No response.'}
                                     </div>
@@ -260,6 +267,7 @@
                             if (data.suggestions) {
                                 this.updateSuggestionsList(chatUlid, data.suggestions);
                             }
+                            window.refreshLucideIcons?.();
                         }).catch((e) => {
                             console.error(e)
                             const spinner = document.getElementById(`assistant-message-${assistantMsgCount}`);
