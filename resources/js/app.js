@@ -20,7 +20,6 @@ import {
     Zap,
     ArrowUp,
 } from 'lucide';
-import { marked } from 'marked';
 
 window.Alpine = Alpine;
 Alpine.start();
