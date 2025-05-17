@@ -1,7 +1,3 @@
-@php
-    use App\Models\Chat;use Illuminate\Support\Str;
-@endphp
-
 @extends('layouts.base')
 
 @section('title', 'Satscribe History')
@@ -26,38 +22,7 @@
                     <x-history.item :chat="$chat"/>
                 @endforeach
             </ul>
-
-            <div class="pagination flex justify-center items-center gap-4 mt-8">
-                @if ($chats->onFirstPage())
-                    <span
-                        class="px-6 py-3 text-white/60 font-semibold rounded-md cursor-not-allowed flex items-center gap-2">
-                    <i data-lucide="chevron-left" class="w-4 h-4"></i>
-                    Previous
-                </span>
-                @else
-                    <a href="{{ $chats->previousPageUrl() }}"
-                       class="px-6 py-3  text-white font-semibold rounded-md  transition flex items-center gap-2">
-                        <i data-lucide="chevron-left" class="w-4 h-4"></i>
-                        Previous
-                    </a>
-                @endif
-
-                <span class="text-base font-semibold text-gray-400">Page {{ $chats->currentPage() }}</span>
-
-                @if ($chats->hasMorePages())
-                    <a href="{{ $chats->nextPageUrl() }}"
-                       class="px-6 py-3  text-white font-semibold rounded-md transition flex items-center gap-2">
-                        Next
-                        <i data-lucide="chevron-right" class="w-4 h-4"></i>
-                    </a>
-                @else
-                    <span
-                        class="px-6 py-3  text-white/60 font-semibold rounded-md cursor-not-allowed flex items-center gap-2">
-                    Next
-                    <i data-lucide="chevron-right" class="w-4 h-4"></i>
-                </span>
-                @endif
-            </div>
+            <x-history.pagination :paginator="$chats"/>
         @endif
     </section>
 
