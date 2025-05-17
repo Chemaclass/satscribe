@@ -220,7 +220,7 @@
                     </div>
                 </div>
                 <!-- Assistant will be appended here -->
-                <div class="assistant-message text-left" id="loading-spinner-group">
+                <div class="assistant-message loading-spinner-group text-left">
                     <span class="font-semibold">Assistant:</span>
                     <div class="inline-block rounded px-3 py-2">
                         <span class="spinner-border w-4 h-4 inline-block animate-spin border-2 border-yellow-600 border-t-transparent rounded-full"></span>
@@ -241,12 +241,13 @@
                             'Content-Type': 'application/json',
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                         },
-                        body: JSON.stringify({content: message})
+                        body: JSON.stringify({message: message})
                     })
                         .then(r => r.json())
                         .then(data => {
                             // Remove spinner and add assistant response
-                            const spinner = document.getElementById('loading-spinner-group');
+                            const spinners = document.getElementsByClassName('loading-spinner-group');
+                            const spinner = spinners[spinners.length - 1];
                             if (spinner) {
                                 const mdContent = data.content ? marked.parse(data.content) : 'No response.';
                                 spinner.innerHTML = `
@@ -255,11 +256,15 @@
                         ${mdContent}
                     </div>
                 `;
-                            }  // todo: make sure to render the data.content with MD format
+                            }
+                            if (data.suggestions) {
+                                this.updateSuggestionsList(chatUlid, data.suggestions);
+                            }
                         }).catch((e) => {
-                        console.log(e)
+                        console.error(e)
                         // On error, notify user
-                        const spinner = document.getElementById('loading-spinner-group');
+                        const spinners = document.getElementsByClassName('loading-spinner-group');
+                        const spinner = spinners[spinners.length - 1];
                         if (spinner) {
                             spinner.innerHTML = `
                     <span class="font-semibold text-yellow-700">Assistant:</span>
@@ -268,6 +273,38 @@
                     </div>
                 `;
                         }
+                    });
+                },
+
+                updateSuggestionsList(chatUlid, newSuggestions) {
+                    const suggestionsContainer = document.getElementById('follow-up-suggestions');
+                    if (!suggestionsContainer) return;
+
+                    suggestionsContainer.innerHTML = `
+        <div class="mt-4">
+            <p class="text-sm font-medium mb-2">Or try one of these</p>
+            <div class="flex flex-wrap gap-2">
+                ${newSuggestions.map((s, i) => `
+                    <button
+                        type="button"
+                        class="suggested-question-prompt"
+                        data-suggestion="${s.replace(/"/g, '&quot;')}"
+                        data-chat-ulid="${chatUlid}"
+                    >
+                        ${s}
+                    </button>
+                `).join('')}
+            </div>
+        </div>
+    `;
+                    // Re-attach event listeners
+                    const buttons = suggestionsContainer.querySelectorAll('button[data-suggestion]');
+                    buttons.forEach(button => {
+                        button.addEventListener('click', () => {
+                            const suggestion = button.getAttribute('data-suggestion');
+                            const ulid = button.getAttribute('data-chat-ulid');
+                            this.sendMessageToChat(ulid, suggestion);
+                        });
                     });
                 },
 

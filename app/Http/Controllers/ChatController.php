@@ -52,6 +52,7 @@ final readonly class ChatController
 
         return response()->json([
             'content' => $chat->getLastAssistantMessage()->content,
+            'suggestions' => $chat->isBlock() ? QuestionPlaceholder::forBlock() : QuestionPlaceholder::forTx(),
         ]);
     }
 }

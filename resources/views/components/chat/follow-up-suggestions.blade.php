@@ -13,20 +13,18 @@
     $chat = $message->chat;
 @endphp
 
-<div class="mt-6 follow-up-suggestions">
+<div
+    id="follow-up-suggestions"
+    x-data="{ suggestions: @js($filteredSuggestions ?? []) }"
+>
     <div class="mt-4">
         <p class="text-sm font-medium mb-2">Or try one of these</p>
         <div class="flex flex-wrap gap-2">
-            @foreach($filteredSuggestions as $suggestion)
-                <form
-                    @submit.prevent="sendMessageToChat('{{ $chat->ulid }}', '{{ addslashes($suggestion) }}')"
-                    class="inline"
-                >
-                    <button type="submit" class="suggested-question-prompt">
-                        {{ $suggestion }}
-                    </button>
+            <template x-for="suggestion in suggestions" :key="suggestion">
+                <form @submit.prevent="sendMessageToChat('{{ $chat->ulid }}', suggestion)" class="inline">
+                    <button type="submit" class="suggested-question-prompt" x-text="suggestion"></button>
                 </form>
-            @endforeach
+            </template>
         </div>
     </div>
 </div>
