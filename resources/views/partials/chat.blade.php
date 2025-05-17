@@ -58,11 +58,6 @@
             :message="$message"
         />
 
-        <x-chat.raw-data-toggle-button
-            :id="data_get($chat->getFirstAssistantMessage(), 'id')"
-            :input="data_get($message['meta'], 'input')"
-            :question="data_get($message['meta'], 'question', '')"
-            :createdAt="data_get($message, 'created_at')"
-        />
+        <x-chat.raw-data-toggle-button :chat="$chat" />
     @endif
 </section>
