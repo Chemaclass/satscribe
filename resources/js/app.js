@@ -17,7 +17,8 @@ import {
     SlidersHorizontal,
     Sun,
     User,
-    Zap
+    Zap,
+    ArrowUp,
 } from 'lucide';
 import { marked } from 'marked';
 
@@ -41,6 +42,7 @@ const usedIcons = {
     User,
     Send,
     BadgeCheck,
+    ArrowUp,
 };
 
 createIcons({icons: usedIcons});
@@ -188,4 +190,24 @@ document.addEventListener('alpine:init', () => {
             });
         }
     }));
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    const scrollBtn = document.getElementById('scroll-to-top');
+
+    // Show/hide the button based on scroll position
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 200) {
+            scrollBtn.classList.remove('opacity-0', 'pointer-events-none');
+            scrollBtn.classList.add('opacity-100');
+        } else {
+            scrollBtn.classList.add('opacity-0', 'pointer-events-none');
+            scrollBtn.classList.remove('opacity-100');
+        }
+    });
+
+    // On click, scroll up smoothly
+    scrollBtn.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
 });
