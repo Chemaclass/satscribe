@@ -10,7 +10,8 @@
 <li class="chat-item">
     <div class="chat-header font-medium mb-1 flex justify-between items-start gap-2">
         <div class="cursor-pointer w-full"
-             onclick="window.location.href='{{ route('chat.show', $chat) }}'">
+             onclick="window.location.href='{{ route('chat.show', $chat) }}'"
+        >
             <strong>{{ ucfirst($chat->type) }}:</strong>
             <span class="truncate overflow-hidden text-ellipsis block link">
                 {{ $chat->input }}

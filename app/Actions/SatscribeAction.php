@@ -60,7 +60,7 @@ final readonly class SatscribeAction
         $cleanQuestion = $this->userInputSanitizer->sanitize($question);
         $aiResponse = $this->openai->generateText($blockchainData, $input, $persona, $cleanQuestion);
 
-        return $this->repository->createchat($input, $aiResponse, $blockchainData->current(), $persona, $cleanQuestion);
+        return $this->repository->createChat($input, $aiResponse, $blockchainData->current(), $persona, $cleanQuestion);
     }
 
     private function enforceRateLimit(): void

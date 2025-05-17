@@ -38,7 +38,7 @@ final readonly class ChatRepository
     /**
      * Create a chat and attach user & assistant messages using the legacy pattern.
      */
-    public function createchat(
+    public function createChat(
         PromptInput $input,
         string $aiResponse,
         BlockchainDataInterface $blockchainData,
@@ -54,7 +54,7 @@ final readonly class ChatRepository
         /** @var Chat $chat */
         $chat = Chat::create([
             'title' => ucfirst($input->type->value).':'.$input->text,
-            'creator_ip' => request()->ip(),
+            'creator_ip' => client_ip(),
         ]);
 
         $chat->addUserMessage($question, [
