@@ -6,10 +6,13 @@
     <section id="history" class="sm:px-6 lg:px-8 px-4 py-6">
         {{-- Header --}}
         <header class="section-header">
-            <div class="flex flex-col max-w-2xl">
-                <h1 class="text-2xl sm:text-3xl font-bold leading-tight">History</h1>
-                <p class="subtitle text-base sm:text-lg text-gray-700 dark:text-gray-300">
-                    Browse your past Bitcoin transaction or block analyses.
+            <div class="flex flex-col">
+                <h1 class="text-3xl sm:text-4xl font-bold leading-tight">
+                    History
+                </h1>
+                <p class="text-lg">
+                    Explore the collective history of Bitcoin analyses shared on Satscribe — from individual transaction
+                    breakdowns to full block summaries. Discover insights contributed by users across the network.
                 </p>
             </div>
         </header>
