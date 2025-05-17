@@ -489,13 +489,13 @@ a:hover,
 /* =============================================================================
    Prose Styling (Markdown / Rich Text)
 ============================================================================= */
-.prose ul > li {
+#chat-container ul > li {
     position: relative;
     padding-left: 1.5em;
     margin-bottom: 0.5em;
 }
 
-.prose ul > li::before {
+#chat-container ul > li::before {
     content: '•';
     position: absolute;
     left: 0;
@@ -503,20 +503,20 @@ a:hover,
     font-weight: bold;
 }
 
-.prose ol {
+#chat-container ol {
     list-style: decimal inside;
 }
 
-.prose ol > li {
+#chat-container ol > li {
     padding-left: 0.5em;
     margin-bottom: 0.5em;
 }
 
-.prose p {
+#chat-container p {
     margin-bottom: 1rem;
 }
 
-.prose pre {
+#chat-container pre {
     background-color: #1a1a1a;
     color: #f8f8f8;
     padding: 1em;
@@ -525,47 +525,47 @@ a:hover,
     font-size: 0.875rem;
 }
 
-.prose blockquote {
+#chat-container blockquote {
     border-left: 4px solid var(--btc-orange, orange);
     padding-left: 1em;
     font-style: italic;
     color: #555;
 }
 
-.prose hr {
+#chat-container hr {
     border: none;
     border-top: 2px solid var(--btc-orange, orange);
     margin: 2rem 0;
 }
 
-.prose table {
+#chat-container table {
     width: 100%;
     border-collapse: collapse;
 }
 
-.prose th,
-.prose td {
+#chat-container th,
+#chat-container td {
     border: 1px solid #ccc;
     padding: 0.5em;
     text-align: left;
 }
 
-.prose h2, .prose h3, .prose h4 {
+#chat-container h2, #chat-container h3, #chat-container h4 {
     font-weight: 700;
     line-height: 1.2;
     margin-top: 1.5rem;
     margin-bottom: 1rem;
 }
 
-.prose h2 {
+#chat-container h2 {
     font-size: 1.5rem;
 }
 
-.prose h3 {
+#chat-container h3 {
     font-size: 1.25rem;
 }
 
-.prose h4 {
+#chat-container h4 {
     font-size: 1.125rem;
 }
 
