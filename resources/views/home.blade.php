@@ -37,7 +37,7 @@
 
         <div id="loading-container" class="p-4 hidden rounded shadow-sm">
             <h2 class="text-2xl font-bold mb-2 flex items-center">
-                <i data-lucide="bot" class="w-6 h-6 mr-2"></i> Assistant
+                <i data-lucide="bot" class="w-6 h-6 mr-2"></i> Scribe
             </h2>
             <div class="leading-relaxed prose dark:prose-invert">
                 <p class="flex items-center gap-2">
@@ -223,7 +223,7 @@
                 <!-- Assistant will be appended here -->
                 <div id="assistant-message-${assistantMsgCount}"
                      class="assistant-message loading-spinner-group text-left">
-                    <span class="font-semibold">Assistant:</span>
+                    <span class="font-semibold">Scribe:</span>
                     <div class="inline-block rounded px-3 py-2">
                         <span class="spinner-border w-4 h-4 inline-block animate-spin border-2 border-yellow-600 border-t-transparent rounded-full"></span>
                         <span class="ml-2">Thinking…</span>
@@ -250,7 +250,7 @@
                             const spinner = document.getElementById(`assistant-message-${assistantMsgCount}`);
                             if (spinner) {
                                 spinner.innerHTML = `
-                                    <span class="font-semibold">Assistant:</span>
+                                    <span class="font-semibold">Scribe:</span>
                                     <div class="inline-block rounded px-3 py-2 prose">
                                         ${data.content ? marked.parse(data.content) : 'No response.'}
                                     </div>
@@ -265,7 +265,7 @@
                             const spinner = document.getElementById(`assistant-message-${assistantMsgCount}`);
                             if (spinner) {
                                 spinner.innerHTML = `
-                                    <span class="font-semibold text-yellow-700">Assistant:</span>
+                                    <span class="font-semibold text-yellow-700">Scribe:</span>
                                     <div class="inline-block rounded px-3 py-2 text-red-700">
                                         Error fetching assistant response.
                                     </div>

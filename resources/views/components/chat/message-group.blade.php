@@ -15,7 +15,7 @@
 
     @if($assistantMsg)
         <div class="assistant-message text-left">
-            <span class="font-semibold">Assistant:</span>
+            <span class="font-semibold">Scribe:</span>
             <div class="inline-block rounded px-3 py-2">
                 {!! Str::markdown($assistantMsg->content) !!}
             </div>
