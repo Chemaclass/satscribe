@@ -81,6 +81,11 @@ final class AppServiceProvider extends ServiceProvider
             ->giveConfig('app.pagination.per_page');
 
         $this->app
+            ->when(ChatRepository::class)
+            ->needs('$ip')
+            ->give(client_ip());
+
+        $this->app
             ->when(IpRateLimiter::class)
             ->needs('$lnInvoiceAmountInSats')
             ->giveConfig('services.rate_limit.invoice_amount');

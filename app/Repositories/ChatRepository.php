@@ -13,7 +13,8 @@ use Illuminate\Pagination\Paginator;
 final readonly class ChatRepository
 {
     public function __construct(
-        private int $perPage
+        private int $perPage,
+        private string $ip,
     ) {
     }
 
@@ -99,12 +100,10 @@ final readonly class ChatRepository
         ]);
     }
 
-    /**
-     * Paginate chats, newest first.
-     */
     public function getPagination(): Paginator
     {
-        return Chat::latest()
+        return Chat::where('creator_ip', $this->ip)
+            ->latest()
             ->simplePaginate($this->perPage);
     }
 }

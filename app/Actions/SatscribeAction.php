@@ -44,12 +44,12 @@ final readonly class SatscribeAction
             }
         }
 
-        $result = $this->createNewchat($input, $persona, $question);
+        $result = $this->createNewChat($input, $persona, $question);
 
         return new GeneratedPrompt($result, isFresh: true);
     }
 
-    private function createNewchat(
+    private function createNewChat(
         PromptInput $input,
         PromptPersona $persona,
         string $question = '',
