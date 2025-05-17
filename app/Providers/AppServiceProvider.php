@@ -9,6 +9,7 @@ use App\Actions\AlbySettleWebhookAction;
 use App\Actions\SatscribeAction;
 use App\Http\Middleware\IpRateLimiter;
 use App\Repositories\ChatRepository;
+use App\Repositories\MessageRepository;
 use App\Services\Alby\AlbyClient;
 use App\Services\Alby\AlbyClientInterface;
 use App\Services\BlockHeightProvider;
@@ -82,6 +83,11 @@ final class AppServiceProvider extends ServiceProvider
 
         $this->app
             ->when(ChatRepository::class)
+            ->needs('$ip')
+            ->give(client_ip());
+
+        $this->app
+            ->when(MessageRepository::class)
             ->needs('$ip')
             ->give(client_ip());
 

@@ -8,6 +8,7 @@ use App\Data\PromptInput;
 use App\Enums\PromptPersona;
 use App\Models\Chat;
 use App\Repositories\ChatRepository;
+use App\Repositories\MessageRepository;
 use App\Services\BlockchainService;
 use App\Services\OpenAIService;
 use App\Services\UserInputSanitizer;
@@ -21,7 +22,8 @@ final readonly class AddMessageAction
     public function __construct(
         private BlockchainService $blockchain,
         private OpenAIService $openai,
-        private ChatRepository $repository,
+        private ChatRepository $chatRepository,
+        private MessageRepository $messageRepository,
         private UserInputSanitizer $userInputSanitizer,
         private string $ip,
         private int $maxOpenAIAttempts,
@@ -37,15 +39,11 @@ final readonly class AddMessageAction
 
         $input = PromptInput::fromRaw($firstUserMessage->input);
         $cleanMsg = $this->userInputSanitizer->sanitize($message);
+        $persona = PromptPersona::from($firstUserMessage->persona);
 
-        $aiResponse = $this->openai->generateText(
-            $this->blockchain->getBlockchainData($input),
-            $input,
-            PromptPersona::from($firstUserMessage->persona),
-            $cleanMsg
-        );
+        $aiResponse = $this->generateAiResponse($input, $persona, $cleanMsg);
 
-        $this->repository->addMessageToChat($chat, $cleanMsg, $aiResponse);
+        $this->chatRepository->addMessageToChat($chat, $cleanMsg, $aiResponse);
     }
 
     private function enforceRateLimit(): void
@@ -59,5 +57,23 @@ final readonly class AddMessageAction
         }
 
         RateLimiter::hit($key, self::RATE_LIMIT_SECONDS);
+    }
+
+    private function generateAiResponse(
+        PromptInput $input,
+        PromptPersona $persona,
+        string $cleanMsg,
+    ): string {
+        $message = $this->messageRepository->findByCriteria($input, $persona);
+        if ($message !== null) {
+            return $message->content;
+        }
+
+        return $this->openai->generateText(
+            $this->blockchain->getBlockchainData($input),
+            $input,
+            $persona,
+            $cleanMsg
+        );
     }
 }
