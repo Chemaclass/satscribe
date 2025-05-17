@@ -23,7 +23,7 @@
         {!! Str::markdown($message['content']) !!}
     </div>
 
-    @if($loop->last && $message['role'] === 'assistant' && request()->ip() === $message->creator_ip)
+    @if($loop->last && $message['role'] === 'assistant' && client_ip() === $message->creator_ip)
         <x-chat.follow-up-suggestions
             :input="data_get($message['meta'], 'input')"
             :question="data_get($message['meta'], 'question', '')"
