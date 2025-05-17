@@ -21,7 +21,7 @@ import {
     Shuffle,
     User,
     Send,
-    Bookmark,
+    BadgeCheck,
 } from 'lucide';
 
 const usedIcons = {
@@ -40,7 +40,7 @@ const usedIcons = {
     Shuffle,
     User,
     Send,
-    Bookmark,
+    BadgeCheck,
 };
 
 createIcons({ icons: usedIcons });

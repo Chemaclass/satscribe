@@ -17,7 +17,9 @@
             </span>
         </div>
         @if($owned)
-            <i data-lucide="bookmark" class="text-orange-500 w-6 h-6"></i>
+            <i data-lucide="badge-check"
+               class="text-orange-500 w-6 h-6"
+               title="This chat belongs to you"></i>
         @endif
     </div>
     <div class="chat-body relative collapsed" data-target="{{ $entryId }}">
