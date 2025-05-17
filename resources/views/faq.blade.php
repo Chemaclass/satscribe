@@ -4,7 +4,7 @@
     <section class="faq-section px-4 sm:px-6 lg:px-8 py-6" x-data="faqSection()">
         {{-- Header --}}
         <header class="section-header mb-6">
-            <div class="flex flex-col max-w-2xl">
+            <div class="flex flex-col">
                 <h1 class="text-2xl sm:text-3xl font-bold leading-tight">Frequently Asked Questions</h1>
 
                 <p class="mt-3 text-base sm:text-lg subtitle leading-relaxed">
