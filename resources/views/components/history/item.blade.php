@@ -5,8 +5,8 @@
     $entryId = 'entry-' . $assistantMsg->id;
 @endphp
 
-<li class="description-item">
-    <div class="description-header font-medium mb-1">
+<li class="chat-item">
+    <div class="chat-header font-medium mb-1">
         <div class="cursor-pointer w-full"
              onclick="window.location.href='{{ route('chat.show', $chat) }}'">
             <strong>{{ ucfirst($chat->type) }}:</strong>
@@ -15,7 +15,7 @@
             </span>
         </div>
     </div>
-    <div class="description-body relative collapsed" data-target="{{ $entryId }}">
+    <div class="chat-body relative collapsed" data-target="{{ $entryId }}">
         @if($assistantMsg)
             <div id="{{ $entryId }}"
                  class="prose markdown-content overflow-hidden max-h-[8.5rem] transition-all duration-300">
@@ -23,11 +23,11 @@
             </div>
         @endif
     </div>
-    <div class="description-meta mt-2 flex justify-between items-center text-sm text-gray-500">
+    <div class="chat-meta mt-2 flex justify-between items-center text-sm text-gray-500">
         <span>{{ $chat->created_at->diffForHumans() }}</span>
         <div class="flex gap-4 items-center">
             <button type="button"
-                    class="toggle-description-btn link"
+                    class="toggle-chat-btn link"
                     data-target="{{ $entryId }}">
                 <span class="full-label hidden sm:inline">Show full response</span>
                 <span class="short-label inline sm:hidden">Full</span>

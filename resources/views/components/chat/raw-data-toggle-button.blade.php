@@ -1,6 +1,6 @@
 @props(['input', 'question', 'createdAt', 'id'])
 
-<div class="description-meta mt-4 flex justify-between items-center text-sm text-gray-500">
+<div class="chat-meta mt-4 flex justify-between items-center text-sm text-gray-500">
     @if ($createdAt->diffInMinutes(now()) > 1)
         <button
             type="button"

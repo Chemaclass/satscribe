@@ -4,7 +4,7 @@
     'suggestions' => [],
 ])
 
-<section id="chat-container" class="description-body w-full p-2">
+<section id="chat-container" class="chat-body w-full p-2">
     @foreach($chat->messages as $message)
         <x-chat.message
             :message="$message"

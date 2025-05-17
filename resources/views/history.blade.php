@@ -17,7 +17,7 @@
         @if ($chats->isEmpty())
             <p>Empty history.</p>
         @else
-            <ul class="description-list">
+            <ul class="chat-list">
                 @foreach($chats as $chat)
                     <x-history.item :chat="$chat"/>
                 @endforeach
@@ -29,9 +29,9 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             function toggleDescription(targetId) {
-                const body = document.querySelector(`.description-body[data-target="${targetId}"]`);
+                const body = document.querySelector(`.chat-body[data-target="${targetId}"]`);
                 const content = document.getElementById(targetId);
-                const button = document.querySelector(`.toggle-description-btn[data-target="${targetId}"]`);
+                const button = document.querySelector(`.toggle-chat-btn[data-target="${targetId}"]`);
 
                 body.classList.toggle('collapsed');
                 const isNowCollapsed = body.classList.contains('collapsed');
@@ -47,8 +47,8 @@
                 }
             }
 
-            // Click on .description-body
-            document.querySelectorAll('.description-body').forEach(body => {
+            // Click on .chat-body
+            document.querySelectorAll('.chat-body').forEach(body => {
                 body.addEventListener('click', () => {
                     const targetId = body.dataset.target;
                     toggleDescription(targetId);
@@ -56,7 +56,7 @@
             });
 
             // Click on button
-            document.querySelectorAll('.toggle-description-btn').forEach(button => {
+            document.querySelectorAll('.toggle-chat-btn').forEach(button => {
                 button.addEventListener('click', (e) => {
                     e.stopPropagation(); // prevent also triggering the body click
                     const targetId = button.dataset.target;

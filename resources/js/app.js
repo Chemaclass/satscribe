@@ -95,7 +95,7 @@ function setupBlockchainToggle() {
 }
 
 function setupDescriptionToggle() {
-    document.querySelectorAll('.description-body').forEach(body => {
+    document.querySelectorAll('.chat-body').forEach(body => {
         const collapsible = body.querySelector('.collapsed-response');
         if (!collapsible) return;
 
