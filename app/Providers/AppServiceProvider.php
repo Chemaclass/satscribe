@@ -33,7 +33,7 @@ final class AppServiceProvider extends ServiceProvider
         $this->app
             ->when(SatscribeAction::class)
             ->needs('$ip')
-            ->give(request()->ip());
+            ->give(client_ip());
 
         $this->app
             ->when(SatscribeAction::class)
@@ -43,7 +43,7 @@ final class AppServiceProvider extends ServiceProvider
         $this->app
             ->when(AddMessageAction::class)
             ->needs('$ip')
-            ->give(request()->ip());
+            ->give(client_ip());
 
         $this->app
             ->when(AddMessageAction::class)

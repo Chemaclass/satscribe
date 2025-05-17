@@ -40,7 +40,7 @@ final readonly class IpRateLimiter
 
     public function handle(Request $request, Closure $next): Response
     {
-        $ip = $request->ip();
+        $ip = client_ip();
 
         $key = self::createRateLimitKey($ip);
         $shortHash = substr(md5($key), 0, 8);
