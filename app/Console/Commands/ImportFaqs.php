@@ -45,9 +45,17 @@ final class ImportFaqs extends Command
     {
         $handle = fopen($filePath, 'r');
         $header = fgetcsv($handle);
+
         while (($line = fgetcsv($handle)) !== false) {
+            if (count($line) !== count($header)) {
+                $lineNumber = ftell($handle);
+                $this->warn("Skipping malformed line at byte $lineNumber", compact('line'));
+                continue;
+            }
+
             yield array_combine($header, $line);
         }
+
         fclose($handle);
     }
 
