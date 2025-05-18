@@ -6,6 +6,7 @@
     'questionPlaceholder',
     'persona',
     'suggestedPromptsGrouped',
+    'isChat',
     'search' => '',
     'question' => '',
     'maxBitcoinBlockHeight' => 10_000_000,
@@ -24,7 +25,7 @@
             id="satscribe-form"
             method="POST"
             action="{{ route('home.create-chat') }}"
-            @submit.prevent="submitForm($event.target)"
+            @submit.prevent="submitForm($event.target); hasSubmitted = true;"
             aria-labelledby="form-heading"
             data-turbo="false"
         >
@@ -192,10 +193,14 @@
                         :disabled="isSubmitting"
                         class="form-button w-3/4"
                     >
-                        <span id="submit-icon" x-cloak class="sm-2">
+                        <span x-cloak class="submit-icon sm-2">
                             <i data-lucide="zap" class="w-4 h-4"></i>
                         </span>
-                        <span id="submit-text" x-cloak> Satscribe</span>
+                        @if($isChat)
+                            <span>Start a new chat</span>
+                        @else
+                            <span x-text="hasSubmitted ? 'Start a new chat' : 'Satscribe'"></span>
+                        @endif
                     </button>
 
                     <button

@@ -24,6 +24,7 @@
             :suggestedPromptsGrouped="$suggestedPromptsGrouped"
             :persona="old('persona', $persona ?? PromptPersona::DEFAULT)"
             :personaDescriptions="$personaDescriptions"
+            :isChat="isset($chat)"
         />
 
         @if(isset($chat))
@@ -53,6 +54,7 @@
                 isSubmitting: false,
                 maxBitcoinBlockHeight: initialMaxHeight,
                 errorFollowUpQuestion: '',
+                hasSubmitted: false,
                 loadingMessage: '',
                 loadingMessages: [
                     "Just a sec — I'm working on your request and putting everything together for you!",
@@ -176,6 +178,7 @@
                         }
                     } finally {
                         this.isSubmitting = false;
+                        this.hasSubmitted = true;
                     }
                 },
 

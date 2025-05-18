@@ -54,7 +54,6 @@ createIcons({icons: usedIcons});
 document.addEventListener('DOMContentLoaded', () => {
     createIcons({icons: usedIcons});
 
-    setupFormSubmissionUI();
     setupBlockchainToggle();
     setupDescriptionToggle();
 
@@ -71,25 +70,6 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ---------- UI SETUP ----------
-function setupFormSubmissionUI() {
-    const form = document.querySelector('.describe-form');
-    const button = document.getElementById('submit-button');
-    const icon = document.getElementById('submit-icon');
-    const submitText = document.getElementById('submit-text');
-    const spinner = document.getElementById('submit-spinner');
-    const infoStatus = document.getElementById('submit-btn-info-status');
-
-    if (!form || !button) return;
-
-    form.addEventListener('submit', () => {
-        button.disabled = true;
-        icon.style.display = 'none';
-        submitText.textContent = 'Loading...';
-        infoStatus.textContent = '';
-        spinner.style.display = 'inline-block';
-    });
-}
-
 function setupBlockchainToggle() {
     const rawBlock = document.getElementById('blockchain-data');
     const toggleBtn = document.getElementById('toggle-raw');

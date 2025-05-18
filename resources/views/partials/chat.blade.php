@@ -39,10 +39,10 @@
                     type="submit"
                     class="w-1/4 form-button flex items-center justify-center"
                 >
-                    <span id="submit-icon" x-cloak class="mr-2">
+                    <span class="submit-icon" x-cloak class="mr-2">
                         <i data-lucide="send" class="w-4 h-4"></i>
                     </span>
-                    <span id="submit-text" x-cloak>Send</span>
+                    <span class="submit-text" x-cloak>Send</span>
                 </button>
             </form>
 
