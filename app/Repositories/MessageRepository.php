@@ -20,4 +20,15 @@ final readonly class MessageRepository
             ->whereJsonContains('meta->persona', $persona->value)
             ->first();
     }
+
+    public function findAiResponse(PromptInput $input, PromptPersona $persona, string $question): ?string
+    {
+        return Message::query()
+            ->where('role', 'assistant')
+            ->whereJsonContains('meta->type', $input->type->value)
+            ->whereJsonContains('meta->input', $input->text)
+            ->whereJsonContains('meta->persona', $persona->value)
+            ->whereJsonContains('meta->question', $question)
+            ->first();
+    }
 }

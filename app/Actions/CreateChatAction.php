@@ -9,6 +9,7 @@ use App\Data\PromptInput;
 use App\Enums\PromptPersona;
 use App\Models\Chat;
 use App\Repositories\ChatRepository;
+use App\Repositories\MessageRepository;
 use App\Services\BlockchainService;
 use App\Services\OpenAIService;
 use App\Services\UserInputSanitizer;
@@ -23,6 +24,7 @@ final readonly class CreateChatAction
         private BlockchainService $blockchain,
         private OpenAIService $openai,
         private ChatRepository $repository,
+        private MessageRepository $messageRepository,
         private UserInputSanitizer $userInputSanitizer,
         private string $ip,
         private int $maxOpenAIAttempts,
@@ -32,8 +34,8 @@ final readonly class CreateChatAction
     public function execute(
         PromptInput $input,
         PromptPersona $persona,
+        string $question,
         bool $refreshEnabled = false,
-        string $question = '',
     ): GeneratedPrompt {
         // Return a cached result unless forced to refresh
         if (!$refreshEnabled) {
@@ -44,7 +46,7 @@ final readonly class CreateChatAction
             }
         }
 
-        $result = $this->createNewChat($input, $persona, $question);
+        $result = $this->createNewChat($input, $persona, $question, $refreshEnabled);
 
         return new GeneratedPrompt($result, isFresh: true);
     }
@@ -52,13 +54,20 @@ final readonly class CreateChatAction
     private function createNewChat(
         PromptInput $input,
         PromptPersona $persona,
-        string $question = '',
+        string $question,
+        bool $refreshEnabled,
     ): Chat {
         $this->enforceRateLimit();
 
         $blockchainData = $this->blockchain->getBlockchainData($input);
         $cleanQuestion = $this->userInputSanitizer->sanitize($question);
-        $aiResponse = $this->openai->generateText($blockchainData, $input, $persona, $cleanQuestion);
+
+        if ($refreshEnabled) {
+            $aiResponse = $this->openai->generateText($blockchainData, $input, $persona, $cleanQuestion);
+        } else {
+            $aiResponse = $this->messageRepository->findAiResponse($input, $persona, $question);
+        }
+
 
         return $this->repository->createChat($input, $aiResponse, $blockchainData->current(), $persona, $cleanQuestion);
     }

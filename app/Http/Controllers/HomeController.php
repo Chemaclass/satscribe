@@ -42,7 +42,7 @@ final readonly class HomeController
         $refreshEnabled = $request->isRefreshEnabled();
 
         try {
-            $generatedPrompt = $action->execute($search, $persona, $refreshEnabled, $question);
+            $generatedPrompt = $action->execute($search, $persona, $question, $refreshEnabled);
         } catch (BlockchainException|OpenAIError $e) {
             Log::error('Failed to describe prompt result', [
                 'search' => $search->text,
