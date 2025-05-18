@@ -19,6 +19,8 @@ import {
     User,
     Zap,
     ArrowUp,
+    Scissors,
+    Laptop,
 } from 'lucide';
 
 window.Alpine = Alpine;
@@ -42,6 +44,8 @@ const usedIcons = {
     Send,
     BadgeCheck,
     ArrowUp,
+    Scissors,
+    Laptop,
 };
 
 createIcons({icons: usedIcons});
