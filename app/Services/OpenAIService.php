@@ -44,7 +44,11 @@ final readonly class OpenAIService
             ...$history,
             [
                 'role' => 'user',
-                'content' => $this->preparePrompt($data, $input->type, $question, $persona),
+                'content' => $this->buildBlockchainContext($data),
+            ],
+            [
+                'role' => 'user',
+                'content' => $this->preparePrompt($input->type, $question, $persona),
             ],
         ];
 
@@ -67,7 +71,6 @@ final readonly class OpenAIService
     }
 
     private function preparePrompt(
-        BlockchainData $data,
         PromptType $type,
         string $question,
         PromptPersona $persona
@@ -78,7 +81,6 @@ final readonly class OpenAIService
                 : $this->buildQuestionPrompt($question),
 
             $this->buildWritingStyleInstructions(),
-            $this->buildBlockchainContext($data),
         ]));
     }
 
@@ -91,6 +93,7 @@ final readonly class OpenAIService
             "- All values are in satoshis.",
             $this->getAdditionalTaskInstructions($type),
             $persona->instructions($type),
+
         ]);
     }
 

@@ -73,54 +73,65 @@ PROMPT;
 
     public function instructions(PromptType $type): string
     {
-        return match ($this) {
-            self::Educator => <<<INSTRUCTIONS
+        $task = match ($this) {
+            self::Educator => <<<TEXT
 Task:
 - Explain Bitcoin using real-world analogies and step-by-step logic.
-- Avoid jargon and acronyms unless they are clearly explained.
-- Assume the reader has no technical background.
+- Avoid jargon unless you clearly define it.
+- Assume no technical background.
 
 Style:
-- Friendly and supportive tone.
+- Friendly and encouraging.
 - Use examples like money, mail, or games to clarify.
-- Use headings, bullet points, or short paragraphs when helpful.
-- Answer user questions directly first, then elaborate.
+- Prioritize clarity over completeness.
+TEXT,
 
-Context:
-The explanation should focus on the current {$type->value}. Data from previous or next blocks is optional and should only be used for extra context.
-INSTRUCTIONS,
-
-            self::Developer => <<<INSTRUCTIONS
+            self::Developer => <<<TEXT
 Task:
-- Focus on interpreting blockchain data for technical audiences.
-- Provide insight into patterns, anomalies, and structural elements (e.g., script types, TX shape).
-- Be concise and informative when answering user questions.
+- Interpret blockchain data for a technical audience.
+- Highlight patterns, anomalies, and structural elements.
+- Be concise and precise when answering questions.
 
 Style:
-- Precise, technical, and well-structured.
-- Use appropriate terms (e.g., vByte, UTXO, P2WPKH).
-- Format using markdown for clarity.
-- Avoid unnecessary metaphors or simplifications.
+- Technical, minimal, and structured.
+- Use correct terms (e.g., vByte, UTXO, P2WPKH).
+- Avoid over-explaining or metaphorical language.
+TEXT,
 
-Context:
-Your analysis should prioritize the current {$type->value}. Any surrounding block or transaction data is secondary and should only be referenced for context.
-INSTRUCTIONS,
-
-            self::Storyteller => <<<INSTRUCTIONS
+            self::Storyteller => <<<TEXT
 Task:
-- Use a story to explain what happened in this block or transaction.
-- Introduce characters (e.g., Satoshi, miners, explorers, treasure chests) or imaginative scenes.
-- Assume the audience is curious and possibly young.
+- Explain what happened using a creative narrative.
+- Introduce characters (e.g., Satoshi, miners, treasure maps).
+- Assume a curious, younger, or imaginative audience.
 
 Style:
-- Warm, playful, and imaginative.
-- Keep things simple and emotionally resonant.
-- Use metaphors like treasure maps, messengers, or games.
-- Always end with a reflection or "moral of the story".
-Context:
-Your story should center around the current {$type->value}. If you use details from before or after, treat them as background scenery — the main action should stay on the present moment.
-INSTRUCTIONS,
+- Warm, playful, and emotionally engaging.
+- Use vivid metaphors, simple phrasing, and a reflective tone.
+TEXT,
         };
+
+        $context = match ($this) {
+            self::Educator => "Context:\nFocus on the current {$type->value}. Use nearby blocks or transactions only for extra context.",
+            self::Developer => "Context:\nPrioritize the current {$type->value}. Reference surrounding data only if helpful.",
+            self::Storyteller => "Context:\nCenter the story on the current {$type->value}. Use prior or future data as scenery only.",
+        };
+
+        return implode("\n\n", [
+            $task,
+            $context,
+            $this->buildWritingStyleInstructions()
+        ]);
+    }
+
+    private function buildWritingStyleInstructions(): string
+    {
+        return <<<TEXT
+Global Writing Guidelines:
+- Use markdown if helpful (e.g., bullet points, headers).
+- Use active voice and concise paragraphs.
+- Avoid LaTeX and math formatting (e.g., \frac, \text, $...$).
+- Express any calculations in plain language using numbers.
+TEXT;
     }
 
     public function maxTokens(): int
