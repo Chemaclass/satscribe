@@ -84,19 +84,11 @@ final readonly class OpenAIService
 
     private function buildDefaultInsightPrompt(PromptType $type, PromptPersona $persona): string
     {
-        return implode("\n\n", [
-            <<<TEXT
-Task Instructions:
-- Summarize the most relevant insights from the blockchain context.
-- Focus on insights that are:
-    - New
-    - Surprising
-    - Non-obvious
-    - Historically or technically meaningful
-- DO NOT fabricate missing information.
-- DO NOT merely repeat the provided data.
-- All numeric values are denominated in satoshis.
-TEXT,
+        return implode("\n", [
+            "Task: Summarize insights from blockchain data.",
+            "- Focus on: new, surprising, or non-obvious patterns.",
+            "- Don't fabricate or repeat the raw data.",
+            "- All values are in satoshis.",
             $this->getAdditionalTaskInstructions($type),
             $persona->instructions($type),
         ]);
@@ -105,37 +97,30 @@ TEXT,
     private function buildQuestionPrompt(string $question): string
     {
         return <<<TEXT
-Task:
-The user may ask a general or abstract question (e.g., "Explain this like I'm five").
-Unless the question is clearly unrelated to Bitcoin or blockchain, assume they are referring to the provided blockchain data. The current block or tx has priority.
-If the question is clearly unrelated to Bitcoin or blockchain (e.g., "What's the weather like?" or "Tell me a joke"), reply politely that this service only answers Bitcoin-related queries.
-Answer using only the blockchain data context. Be concise, focus on the user question, and avoid adding extra analysis or context.
-
 User Question:
 {$question}
+
+Guidelines:
+- Assume the question refers to the current block or transaction unless obviously unrelated.
+- Ignore non-Bitcoin queries with a polite response.
+- Base your answer solely on the provided blockchain data.
 TEXT;
     }
 
     private function buildWritingStyleInstructions(): string
     {
         return <<<TEXT
-Writing Style:
-- Use markdown formatting (headers, bullet points, and emphasis where appropriate).
-- Prefer active voice over passive voice.
-- Keep sentences and paragraphs concise (aim for under 80 words per paragraph).
-- Group related ideas logically.
-- Maintain a professional yet accessible tone.
-- End the response naturally without abrupt cut-offs.
+Style:
+- Use markdown if helpful.
+- Prefer active voice.
+- Keep paragraphs short and well-structured.
+- Sound professional but accessible.
 TEXT;
     }
 
     private function buildBlockchainContext(BlockchainData $data): string
     {
-        return <<<TEXT
-Blockchain Data Context:
-All insights must be grounded in the following data. Do not fabricate or repeat. Interpret and summarize meaningfully.
-{$data->toPrompt()}
-TEXT;
+        return "Data:\n".$data->toPrompt();
     }
 
     private function getAdditionalTaskInstructions(PromptType $type): string
