@@ -36,7 +36,6 @@
             <span class="text-xs" title="Choose the level of detail in answers">Answer style:</span>
             @foreach ([
                 'tldr' => ['icon' => 'scissors', 'label' => 'TL;DR'],
-                'beginner' => ['icon' => 'book', 'label' => 'Beginner'],
                 'advance' => ['icon' => 'laptop', 'label' => 'Advanced'],
             ] as $level => $meta)
                 <button
@@ -57,7 +56,7 @@
             <template x-for="faq in filteredFaqs()" :key="faq.id">
                 <div class="faq-card rounded-lg p-4 shadow-sm transition-colors duration-150 hover:bg-orange-50 dark:hover:bg-gray-800"
                      x-data="{
-                answerLevel: 'beginner',
+                answerLevel: 'advance',
                 init() {
                     window.addEventListener('answer-level-change', (e) => {
                         this.answerLevel = e.detail;
@@ -92,7 +91,6 @@
 
                     <!-- Replace x-text with x-html for answers -->
                     <p class="faq-answer mb-2" x-show="answerLevel === 'tldr'" x-html="faq.highlighted_tldr"></p>
-                    <p class="faq-answer mb-2" x-show="answerLevel === 'beginner'" x-html="faq.highlighted_beginner"></p>
                     <p class="faq-answer mb-2" x-show="answerLevel === 'advance'" x-html="faq.highlighted_advance"></p>
 
                     <template x-if="faq.link">
@@ -113,7 +111,7 @@
             Alpine.data('faqSection', () => ({
                 search: '',
                 category: '',
-                globalAnswerLevel: 'beginner',
+                globalAnswerLevel: 'advance',
                 faqs: @json($faqs),
                 setGlobalAnswerLevel(level) {
                     this.globalAnswerLevel = level;
@@ -131,7 +129,6 @@
                             ...faq,
                             highlighted_question: this.highlightMatch(faq.question, this.search),
                             highlighted_tldr: this.highlightMatch(faq.answer_tldr, this.search),
-                            highlighted_beginner: this.highlightMatch(faq.answer_beginner, this.search),
                             highlighted_advance: this.highlightMatch(faq.answer_advance, this.search),
                         }));
                 },
