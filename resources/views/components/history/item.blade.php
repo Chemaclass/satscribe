@@ -10,30 +10,32 @@
 @endphp
 
 <li class="chat-item">
-    <div class="chat-header font-medium mb-1 flex justify-between items-start gap-2">
-        <div class="cursor-pointer w-full"
-             onclick="window.location.href='{{ route('chat.show', $chat) }}'"
-        >
-            <strong>{{ ucfirst($chat->type) }}:</strong>
-            <span class="truncate overflow-hidden text-ellipsis block link">
-                {{ $chat->input }}
-            </span>
-        </div>
-        @if($owned)
-            <span class="relative group">
-                <i data-lucide="badge-check"
-                   class="text-orange-500 w-6 h-6 cursor-pointer"
-                   aria-label="This chat belongs to you"
-                   aria-hidden="false"
-                   role="img"></i>
-
-                <span class="tooltip-content absolute z-10 right-full top-1/2 -translate-y-1/2 mr-2
-                             text-xs font-medium px-2 py-1 rounded whitespace-nowrap
-                             opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
-                    This chat belongs to you
+    <div class="cursor-pointer w-full hover:bg-gray-50 rounded-lg p-3 transition-colors duration-300"
+         onclick="window.location.href='{{ route('chat.show', $chat) }}'"
+    >
+        <div class="chat-header font-medium mb-1 flex justify-between items-start gap-2">
+            <div>
+                <strong>{{ ucfirst($chat->type) }}:</strong>
+                <span class="truncate overflow-hidden text-ellipsis block link text-left">
+                    {{ $chat->input }}
                 </span>
-            </span>
-        @endif
+            </div>
+            @if($owned)
+                <span class="relative group">
+                    <i data-lucide="badge-check"
+                       class="text-orange-500 w-6 h-6 cursor-pointer"
+                       aria-label="This chat belongs to you"
+                       aria-hidden="false"
+                       role="img"></i>
+
+                    <span class="tooltip-content absolute z-10 right-full top-1/2 -translate-y-1/2 mr-2
+                                 text-xs font-medium px-2 py-1 rounded whitespace-nowrap
+                                 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+                        This chat belongs to you
+                    </span>
+                </span>
+            @endif
+        </div>
     </div>
     <div class="chat-body relative collapsed" data-target="{{ $entryId }}">
         <div class="user-message mb-2 text-right">
