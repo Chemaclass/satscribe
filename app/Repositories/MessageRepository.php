@@ -9,19 +9,7 @@ use App\Models\Message;
 
 final readonly class MessageRepository
 {
-    public function findByCriteria(
-        PromptInput $input,
-        PromptPersona $persona,
-    ): ?Message {
-        return Message::query()
-            ->where('role', 'assistant')
-            ->whereJsonContains('meta->type', $input->type->value)
-            ->whereJsonContains('meta->input', $input->text)
-            ->whereJsonContains('meta->persona', $persona->value)
-            ->first();
-    }
-
-    public function findAiResponse(PromptInput $input, PromptPersona $persona, string $question): ?string
+    public function findAssistantMessage(PromptInput $input, PromptPersona $persona, string $question): ?Message
     {
         return Message::query()
             ->where('role', 'assistant')

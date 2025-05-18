@@ -64,7 +64,7 @@ final readonly class AddMessageAction
         PromptPersona $persona,
         string $cleanMsg,
     ): string {
-        $message = $this->messageRepository->findByCriteria($input, $persona);
+        $message = $this->messageRepository->findAssistantMessage($input, $persona, $cleanMsg);
         if ($message !== null) {
             return $message->content;
         }

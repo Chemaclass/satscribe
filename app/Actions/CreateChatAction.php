@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
+use App\Data\Blockchain\BlockchainData;
 use App\Data\GeneratedPrompt;
 use App\Data\PromptInput;
 use App\Enums\PromptPersona;
@@ -62,14 +63,37 @@ final readonly class CreateChatAction
         $blockchainData = $this->blockchain->getBlockchainData($input);
         $cleanQuestion = $this->userInputSanitizer->sanitize($question);
 
-        if ($refreshEnabled) {
-            $aiResponse = $this->openai->generateText($blockchainData, $input, $persona, $cleanQuestion);
-        } else {
-            $aiResponse = $this->messageRepository->findAiResponse($input, $persona, $question);
-        }
+        $aiResponse = $refreshEnabled
+            ? $this->generateAiResponse($blockchainData, $input, $persona, $cleanQuestion)
+            : $this->findOrGenerateAiResponse($input, $persona, $question, $blockchainData, $cleanQuestion);
 
+        return $this->repository->createChat(
+            $input,
+            $aiResponse,
+            $blockchainData->current(),
+            $persona,
+            $cleanQuestion
+        );
+    }
 
-        return $this->repository->createChat($input, $aiResponse, $blockchainData->current(), $persona, $cleanQuestion);
+    private function findOrGenerateAiResponse(
+        PromptInput $input,
+        PromptPersona $persona,
+        string $question,
+        BlockchainData $blockchainData,
+        string $cleanQuestion
+    ): string {
+        return $this->messageRepository->findAssistantMessage($input, $persona, $question)->content
+            ?? $this->generateAiResponse($blockchainData, $input, $persona, $cleanQuestion);
+    }
+
+    private function generateAiResponse(
+        BlockchainData $blockchainData,
+        PromptInput $input,
+        PromptPersona $persona,
+        string $cleanQuestion
+    ): string {
+        return $this->openai->generateText($blockchainData, $input, $persona, $cleanQuestion);
     }
 
     private function enforceRateLimit(): void
