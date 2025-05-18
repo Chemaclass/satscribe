@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
+use App\Models\Message;
 use App\Data\PromptInput;
 use App\Enums\PromptPersona;
 use App\Models\Chat;
@@ -41,7 +42,7 @@ final readonly class AddMessageAction
         $cleanMsg = $this->userInputSanitizer->sanitize($message);
         $persona = PromptPersona::from($firstUserMessage->persona);
 
-        $aiResponse = $this->generateAiResponse($input, $persona, $cleanMsg);
+        $aiResponse = $this->generateAiResponse($input, $persona, $cleanMsg, $chat);
 
         $this->chatRepository->addMessageToChat($chat, $cleanMsg, $aiResponse);
     }
@@ -63,9 +64,10 @@ final readonly class AddMessageAction
         PromptInput $input,
         PromptPersona $persona,
         string $cleanMsg,
+        Chat $chat,
     ): string {
         $message = $this->messageRepository->findAssistantMessage($input, $persona, $cleanMsg);
-        if ($message !== null) {
+        if ($message instanceof Message) {
             return $message->content;
         }
 
@@ -73,7 +75,8 @@ final readonly class AddMessageAction
             $this->blockchain->getBlockchainData($input),
             $input,
             $persona,
-            $cleanMsg
+            $cleanMsg,
+            $chat
         );
     }
 }

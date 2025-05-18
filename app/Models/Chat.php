@@ -147,4 +147,19 @@ final class Chat extends Model
 
         return $groups;
     }
+
+    /**
+     * @return list<array{role:string, content:string}>
+     */
+    public function getHistory(): array
+    {
+        $chatMessages = $this->messages()->orderBy('created_at')->get();
+
+        return $chatMessages
+            ->map(fn($msg) => [
+                'role' => $msg->role,
+                'content' => $msg->content,
+            ])
+            ->toArray();
+    }
 }

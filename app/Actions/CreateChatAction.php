@@ -81,7 +81,7 @@ final readonly class CreateChatAction
         PromptPersona $persona,
         string $question,
         BlockchainData $blockchainData,
-        string $cleanQuestion
+        string $cleanQuestion,
     ): string {
         return $this->messageRepository->findAssistantMessage($input, $persona, $question)->content
             ?? $this->generateAiResponse($blockchainData, $input, $persona, $cleanQuestion);
@@ -91,7 +91,7 @@ final readonly class CreateChatAction
         BlockchainData $blockchainData,
         PromptInput $input,
         PromptPersona $persona,
-        string $cleanQuestion
+        string $cleanQuestion,
     ): string {
         return $this->openai->generateText($blockchainData, $input, $persona, $cleanQuestion);
     }

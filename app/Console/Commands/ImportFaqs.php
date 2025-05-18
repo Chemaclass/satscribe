@@ -49,7 +49,7 @@ final class ImportFaqs extends Command
         while (($line = fgetcsv($handle)) !== false) {
             if (count($line) !== count($header)) {
                 $lineNumber = ftell($handle);
-                $this->warn("Skipping malformed line at byte $lineNumber", compact('line'));
+                $this->warn("Skipping malformed line at byte $lineNumber", ['line' => $line]);
                 continue;
             }
 

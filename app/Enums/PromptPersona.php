@@ -87,7 +87,7 @@ Style:
 - Answer user questions directly first, then elaborate.
 
 Context:
-This is an explanation about a {$type->value}.
+The explanation should focus on the current {$type->value}. Data from previous or next blocks is optional and should only be used for extra context.
 INSTRUCTIONS,
 
             self::Developer => <<<INSTRUCTIONS
@@ -103,7 +103,7 @@ Style:
 - Avoid unnecessary metaphors or simplifications.
 
 Context:
-This is a technical breakdown of a {$type->value}.
+Your analysis should prioritize the current {$type->value}. Any surrounding block or transaction data is secondary and should only be referenced for context.
 INSTRUCTIONS,
 
             self::Storyteller => <<<INSTRUCTIONS
@@ -117,9 +117,8 @@ Style:
 - Keep things simple and emotionally resonant.
 - Use metaphors like treasure maps, messengers, or games.
 - Always end with a reflection or "moral of the story".
-
 Context:
-You are narrating a story about a {$type->value}.
+Your story should center around the current {$type->value}. If you use details from before or after, treat them as background scenery — the main action should stay on the present moment.
 INSTRUCTIONS,
         };
     }

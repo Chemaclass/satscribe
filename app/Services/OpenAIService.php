@@ -10,6 +10,7 @@ use App\Enums\PromptPersona;
 use App\Enums\PromptType;
 use App\Exceptions\OpenAIError;
 use App\Http\Requests\HomeIndexRequest;
+use App\Models\Chat;
 use Illuminate\Http\Client\Factory as HttpClient;
 use Psr\Log\LoggerInterface;
 
@@ -27,25 +28,32 @@ final readonly class OpenAIService
         BlockchainData $data,
         PromptInput $input,
         PromptPersona $persona,
-        string $question = '',
+        string $question,
+        ?Chat $chat = null,
     ): string {
-        $payload = [
-            'model' => $this->openAiModel,
-            'messages' => [
-                [
-                    'role' => 'system',
-                    'content' => $persona->systemPrompt(),
-                ],
-                [
-                    'role' => 'user',
-                    'content' => $this->preparePrompt($data, $input->type, $question, $persona),
-                ],
+        $history = collect($chat?->getHistory() ?? [])
+            ->take(-5) // gets the last 5 messages
+            ->values()
+            ->all();
+
+        $messages = [
+            [
+                'role' => 'system',
+                'content' => $persona->systemPrompt(),
             ],
-            'max_tokens' => $persona->maxTokens(),
+            ...$history,
+            [
+                'role' => 'user',
+                'content' => $this->preparePrompt($data, $input->type, $question, $persona),
+            ],
         ];
 
         $response = $this->http->withToken($this->openAiApiKey)
-            ->post('https://api.openai.com/v1/chat/completions', $payload);
+            ->post('https://api.openai.com/v1/chat/completions', [
+                'model' => $this->openAiModel,
+                'messages' => $messages,
+                'max_tokens' => $persona->maxTokens(),
+            ]);
 
         if ($error = $response->json('error.message')) {
             throw new OpenAIError($error);

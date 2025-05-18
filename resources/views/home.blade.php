@@ -81,13 +81,14 @@
                         chatContainer.innerHTML = '';
                     }
 
+                    const assistantMsgCount = document.querySelectorAll('.assistant-message').length;
+
                     try {
                         const formData = new FormData(form);
                         const rawQuestion = formData.get('question');
                         const userMessage = rawQuestion?.trim() ? rawQuestion.trim() : 'Give me a generic overview.';
 
                         // Render user input
-                        const assistantMsgCount = document.querySelectorAll('.assistant-message').length;
                         const userHtml = `
             <div class="chat-message-group mb-6">
                 <div class="user-message mb-2 text-right">
