@@ -8,14 +8,17 @@
                 <h1 class="text-2xl sm:text-3xl font-bold leading-tight">Frequently Asked Questions</h1>
 
                 <p class="mt-3 text-base sm:text-lg subtitle leading-relaxed">
-                    <strong>Satscribe</strong> is a tool designed to make the Bitcoin blockchain easier to understand—whether you're just getting started or you're knee-deep in block analysis. By entering a transaction ID or block height, you can instantly get an AI-generated explanation in plain English.
+                    <strong>Satscribe</strong> helps you make sense of the Bitcoin blockchain—whether you’re new to it
+                    or diving into the technical details. Just enter a transaction ID or block height to receive an
+                    AI-generated explanation in plain English.
                 </p>
 
                 <p class="mt-3 text-base sm:text-lg subtitle leading-relaxed">
-                    From technical summaries to beginner-friendly overviews, Satscribe bridges the gap between raw blockchain data and human understanding.
+                    From quick summaries to deeper insights, Satscribe turns raw blockchain data into something anyone
+                    can understand.
                 </p>
                 <p class="subtitle text-base sm:text-lg text-gray-700 dark:text-gray-400 mt-4">
-                    Browse or search by topic to learn more.
+                    Use the search or browse by topic to explore more.
                 </p>
             </div>
         </header>
@@ -36,7 +39,7 @@
             <span class="text-xs" title="Choose the level of detail in answers">Answer style:</span>
             @foreach ([
                 'tldr' => ['icon' => 'scissors', 'label' => 'TL;DR'],
-                'advance' => ['icon' => 'laptop', 'label' => 'Advanced'],
+                'advance' => ['icon' => 'laptop', 'label' => 'Detailed'],
             ] as $level => $meta)
                 <button
                     class="answer-level-btn font-medium"
@@ -54,8 +57,9 @@
         {{-- FAQ List --}}
         <div class="space-y-6">
             <template x-for="faq in filteredFaqs()" :key="faq.id">
-                <div class="faq-card rounded-lg p-4 shadow-sm transition-colors duration-150 hover:bg-orange-50 dark:hover:bg-gray-800"
-                     x-data="{
+                <div
+                    class="faq-card rounded-lg p-4 shadow-sm transition-colors duration-150 hover:bg-orange-50 dark:hover:bg-gray-800"
+                    x-data="{
                 answerLevel: 'advance',
                 init() {
                     window.addEventListener('answer-level-change', (e) => {
@@ -115,7 +119,7 @@
                 faqs: @json($faqs),
                 setGlobalAnswerLevel(level) {
                     this.globalAnswerLevel = level;
-                    window.dispatchEvent(new CustomEvent('answer-level-change', { detail: level }));
+                    window.dispatchEvent(new CustomEvent('answer-level-change', {detail: level}));
                 },
                 filteredFaqs() {
                     return this.faqs
