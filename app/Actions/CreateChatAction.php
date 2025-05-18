@@ -15,7 +15,7 @@ use App\Services\UserInputSanitizer;
 use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Support\Facades\RateLimiter;
 
-final readonly class SatscribeAction
+final readonly class CreateChatAction
 {
     private const RATE_LIMIT_SECONDS = 86400; // 24 hours
 

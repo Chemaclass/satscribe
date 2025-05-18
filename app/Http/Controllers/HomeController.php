@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Actions\SatscribeAction;
+use App\Actions\CreateChatAction;
 use App\Data\PromptInput;
 use App\Data\QuestionPlaceholder;
 use App\Enums\PromptPersona;
@@ -34,7 +34,7 @@ final readonly class HomeController
         ]);
     }
 
-    public function createChat(HomeIndexRequest $request, SatscribeAction $action): JsonResponse
+    public function createChat(HomeIndexRequest $request, CreateChatAction $action): JsonResponse
     {
         $search = $this->getPromptInput($request);
         $persona = $this->getPromptPersona($request);

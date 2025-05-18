@@ -6,7 +6,7 @@ namespace App\Providers;
 
 use App\Actions\AddMessageAction;
 use App\Actions\AlbySettleWebhookAction;
-use App\Actions\SatscribeAction;
+use App\Actions\CreateChatAction;
 use App\Http\Middleware\IpRateLimiter;
 use App\Repositories\ChatRepository;
 use App\Repositories\MessageRepository;
@@ -32,12 +32,12 @@ final class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app
-            ->when(SatscribeAction::class)
+            ->when(CreateChatAction::class)
             ->needs('$ip')
             ->give(client_ip());
 
         $this->app
-            ->when(SatscribeAction::class)
+            ->when(CreateChatAction::class)
             ->needs('$maxOpenAIAttempts')
             ->giveConfig('services.openai.max_attempts');
 
@@ -83,11 +83,6 @@ final class AppServiceProvider extends ServiceProvider
 
         $this->app
             ->when(ChatRepository::class)
-            ->needs('$ip')
-            ->give(client_ip());
-
-        $this->app
-            ->when(MessageRepository::class)
             ->needs('$ip')
             ->give(client_ip());
 
