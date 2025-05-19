@@ -92,6 +92,7 @@
 
             init() {
                 window.addEventListener('rate-limit-reached', (event) => {
+                    window.__PAYWALL_ACTIVE = true;
                     this.show = true;
                     this.invoice = event.detail.invoice;
                     this.maxAttempts = event.detail.maxAttempts;
@@ -100,12 +101,14 @@
                 });
 
                 window.addEventListener('invoice-paid', () => {
+                    window.__PAYWALL_ACTIVE = false;
                     this.stopPolling();
                     this.show = false;
                     document.body.classList.remove('modal-open');
                 });
 
                 window.addEventListener('paywall-modal-closed', () => {
+                    window.__PAYWALL_ACTIVE = false;
                     this.stopPolling();
                     document.body.classList.remove('modal-open');
                 });
@@ -119,6 +122,7 @@
             },
 
             closeModal() {
+                window.__PAYWALL_ACTIVE = false;
                 this.show = false;
                 window.dispatchEvent(new CustomEvent('paywall-modal-closed'));
             },

@@ -175,6 +175,14 @@ document.addEventListener('alpine:init', () => {
     }));
 });
 
+document.getElementById('customFollowUp')?.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') {
+        if (window.__PAYWALL_ACTIVE) {
+            e.preventDefault();
+        }
+    }
+});
+
 document.addEventListener('DOMContentLoaded', () => {
     const scrollBtn = document.getElementById('scroll-to-top');
 

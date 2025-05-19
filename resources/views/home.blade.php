@@ -72,6 +72,7 @@
                 ],
 
                 async submitForm(form) {
+                    if(window.__PAYWALL_ACTIVE) return;
                     if (this.isSubmitting) return;
 
                     this.loadingMessage = this.loadingMessages[Math.floor(Math.random() * this.loadingMessages.length)];
