@@ -129,12 +129,6 @@
                                 }
                             }));
 
-                            document.dispatchEvent(new CustomEvent('invoice-created', {
-                                detail: {
-                                    identifier: data.invoice.identifier,
-                                }
-                            }));
-
                             return;
                         }
 
@@ -167,7 +161,13 @@
 
                         window.refreshLucideIcons?.();
                     } catch (error) {
-                        console.error('submitForm error:', error.message);
+                        if (error.response?.status === 429) {
+                            const data = error.response.data;
+                            // Dispatch global event just like you were doing for fetch
+                            window.dispatchEvent(new CustomEvent('rate-limit-reached', { detail: data }));
+                            return;
+                        }
+
                         const assistantDiv = document.getElementById(`assistant-message-${assistantMsgCount}`);
                         if (assistantDiv) {
                             assistantDiv.innerHTML = `
@@ -175,6 +175,7 @@
                     Error fetching assistant response.
                 </div>
             `;
+                        return Promise.reject(error);
                         }
                     } finally {
                         this.isSubmitting = false;
