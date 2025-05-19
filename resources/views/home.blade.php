@@ -163,7 +163,7 @@
                     } catch (error) {
                         if (error.response?.status === 429) {
                             const data = error.response.data;
-                            // Dispatch global event just like you were doing for fetch
+
                             window.dispatchEvent(new CustomEvent('rate-limit-reached', { detail: data }));
                             return;
                         }
@@ -171,12 +171,13 @@
                         const assistantDiv = document.getElementById(`assistant-message-${assistantMsgCount}`);
                         if (assistantDiv) {
                             assistantDiv.innerHTML = `
-                <div class="inline-block rounded px-3 py-2 text-red-700">
-                    Error fetching assistant response.
-                </div>
-            `;
-                        return Promise.reject(error);
+            <div class="inline-block rounded px-3 py-2 text-red-700">
+                Error fetching assistant response.
+            </div>
+        `;
                         }
+
+                        return Promise.reject(error);
                     } finally {
                         this.isSubmitting = false;
                         this.hasSubmitted = true;
@@ -292,7 +293,7 @@
                                         <span class="font-semibold">Scribe</span>
                                     </span>
                                     <div class="inline-block rounded px-3 py-2 prose">
-                                        ${data.content ? marked.parse(data.content) : 'No response.'}
+                                        ${data.content ? marked.parse(data.content) : 'Try again.'}
                                     </div>
                                 `;
                                 spinner.scrollIntoView({ behavior: 'smooth', block: 'start' });

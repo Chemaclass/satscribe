@@ -157,7 +157,7 @@ window.addEventListener('load', () => {
     window.fetch = async (...args) => {
         const response = await originalFetch(...args);
         if (response.status === 429) {
-            const data = await response.json();
+            const data = await response.clone().json();
             window.dispatchEvent(new CustomEvent('rate-limit-reached', {detail: data}));
         }
         return response;
