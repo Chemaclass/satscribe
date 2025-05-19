@@ -16,7 +16,9 @@ Route::post('/', [HomeController::class, 'createChat'])
     ->middleware(IpRateLimiter::class);
 
 Route::get('chats/{chat?}', [ChatController::class, 'show'])->name('chat.show');
-Route::post('chats/{chat}/messages', [ChatController::class, 'addMessage'])->name('chat.add-message');
+Route::post('chats/{chat}/messages', [ChatController::class, 'addMessage'])
+    ->name('chat.add-message')
+    ->middleware(IpRateLimiter::class);
 
 Route::get('history', [HistoryController::class, 'index'])->name('history.index');
 Route::get('history/{messageId}/raw', [HistoryController::class, 'getRaw'])->name('history.get-raw');
