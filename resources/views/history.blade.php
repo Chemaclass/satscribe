@@ -29,7 +29,7 @@
                 @foreach($chats as $chat)
                     <x-history.item
                         :chat="$chat"
-                        :owned="($chat->creator_ip === client_ip())"
+                        :owned="($chat->tracking_id === tracking_id())"
                     />
                 @endforeach
             </ul>

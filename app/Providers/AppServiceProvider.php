@@ -33,8 +33,8 @@ final class AppServiceProvider extends ServiceProvider
     {
         $this->app
             ->when(CreateChatAction::class)
-            ->needs('$ip')
-            ->give(client_ip());
+            ->needs('$trackingId')
+            ->give(tracking_id());
 
         $this->app
             ->when(CreateChatAction::class)
@@ -43,8 +43,8 @@ final class AppServiceProvider extends ServiceProvider
 
         $this->app
             ->when(AddMessageAction::class)
-            ->needs('$ip')
-            ->give(client_ip());
+            ->needs('$trackingId')
+            ->give(tracking_id());
 
         $this->app
             ->when(AddMessageAction::class)
@@ -83,8 +83,8 @@ final class AppServiceProvider extends ServiceProvider
 
         $this->app
             ->when(ChatRepository::class)
-            ->needs('$ip')
-            ->give(client_ip());
+            ->needs('$trackingId')
+            ->give(tracking_id());
 
         $this->app
             ->when(IpRateLimiter::class)

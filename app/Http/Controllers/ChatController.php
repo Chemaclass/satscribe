@@ -44,7 +44,7 @@ final readonly class ChatController
 
     public function addMessage(Request $request, Chat $chat): JsonResponse
     {
-        if (client_ip() !== $chat->creator_ip) {
+        if (tracking_id() !== $chat->tracking_id) {
             abort(403, 'You are not allowed to send messages to this chat.');
         }
 

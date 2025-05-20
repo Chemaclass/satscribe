@@ -8,6 +8,7 @@ use App\Exceptions\InvalidAlbyWebhookSignatureException;
 use App\Http\Middleware\IpRateLimiter;
 use Illuminate\Cache\RateLimiter;
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
+use Illuminate\Support\Facades\Log;
 use Psr\Log\LoggerInterface;
 use Svix\Webhook;
 use Throwable;
@@ -94,13 +95,12 @@ final readonly class AlbySettleWebhookAction
 
         $hash = $this->extractShortHash($memo);
         if ($hash !== null) {
-            $ip = $this->cache->pull(IpRateLimiter::createCacheKey($hash));
-
-            if ($ip) {
-                $this->rateLimiter->clear(IpRateLimiter::createRateLimitKey($ip));
-                $this->logger->info('Rate limit cleared for IP', ['ip' => $ip]);
+            $trackingId = $this->cache->pull(IpRateLimiter::createCacheKey($hash));
+            if ($trackingId) {
+                $this->rateLimiter->clear(IpRateLimiter::createRateLimitKey($trackingId));
+                $this->logger->info('Rate limit cleared for tracking', ['trackingId' => $trackingId]);
             } else {
-                $this->logger->warning('No IP found for hash', ['shortHash' => $hash]);
+                $this->logger->warning('No tracking ID found for hash', ['shortHash' => $hash]);
             }
         }
 

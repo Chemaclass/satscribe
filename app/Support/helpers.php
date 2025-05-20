@@ -14,3 +14,17 @@ if (!function_exists('client_ip')) {
             ?? Request::ip();
     }
 }
+
+if (!function_exists('client_uuid')) {
+    function client_uuid(): string
+    {
+        return (string) Request::header('X-Client-UUID', '');
+    }
+}
+
+if (!function_exists('tracking_id')) {
+    function tracking_id(): string
+    {
+        return hash('sha256', client_ip().client_uuid().Request::userAgent());
+    }
+}

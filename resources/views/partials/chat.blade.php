@@ -23,7 +23,7 @@
         @endforeach
     </div>
 
-    @if (client_ip() === $chat->creator_ip)
+    @if (tracking_id() === $chat->tracking_id)
         <div x-data="{ message: '' }" class="w-full">
             <form @submit.prevent="sendMessageToChat('{{ $chat->ulid }}', message)" class="flex w-full gap-2">
                 <input

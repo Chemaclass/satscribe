@@ -14,7 +14,7 @@ final readonly class ChatRepository
 {
     public function __construct(
         private int $perPage,
-        private string $ip,
+        private string $trackingId,
     ) {
     }
 
@@ -28,7 +28,7 @@ final readonly class ChatRepository
     ): ?Chat {
         // Find an existing chat by input type, input, persona, and question (legacy compatibility)
         return Chat::query()
-            ->where('creator_ip', '=', $this->ip)
+            ->where('tracking_id', '=', $this->trackingId)
             ->whereHas('messages', function ($q) use ($input, $persona, $question): void {
                 $q->where('role', 'user')
                     ->where('content', $question)
@@ -57,7 +57,7 @@ final readonly class ChatRepository
         /** @var Chat $chat */
         $chat = Chat::create([
             'title' => ucfirst($input->type->value).':'.$input->text,
-            'creator_ip' => $this->ip,
+            'tracking_id' => $this->trackingId,
         ]);
 
         $chat->addUserMessage($question, [
@@ -107,7 +107,7 @@ final readonly class ChatRepository
         $query = Chat::query();
 
         if (!$showAll) {
-            $query->where('creator_ip', $this->ip);
+            $query->where('tracking_id', $this->trackingId);
         }
 
         return $query->latest()

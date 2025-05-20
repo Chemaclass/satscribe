@@ -27,7 +27,7 @@ final readonly class CreateChatAction
         private ChatRepository $repository,
         private MessageRepository $messageRepository,
         private UserInputSanitizer $userInputSanitizer,
-        private string $ip,
+        private string $trackingId,
         private int $maxOpenAIAttempts,
     ) {
     }
@@ -98,7 +98,7 @@ final readonly class CreateChatAction
 
     private function enforceRateLimit(): void
     {
-        $key = "openai:{$this->ip}";
+        $key = "openai:{$this->trackingId}";
 
         if (RateLimiter::tooManyAttempts($key, $this->maxOpenAIAttempts)) {
             throw new ThrottleRequestsException(

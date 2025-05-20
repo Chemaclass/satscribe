@@ -28,24 +28,24 @@ final readonly class IpRateLimiter
         return str_contains($memo, '#');
     }
 
-    public static function createRateLimitKey(string $ip): string
+    public static function createRateLimitKey(string $trackingId): string
     {
-        return 'ip_rate_limit_'.$ip;
+        return 'ip_rate_limit_'.$trackingId;
     }
 
     public static function createCacheKey(string $hash): string
     {
-        return 'invoice_ip_mapping_'.$hash;
+        return 'invoice_tracking_mapping_'.$hash;
     }
 
     public function handle(Request $request, Closure $next): Response
     {
-        $ip = client_ip();
+        $trackingId = tracking_id();
 
-        $key = self::createRateLimitKey($ip);
+        $key = self::createRateLimitKey($trackingId);
         $shortHash = substr(md5($key), 0, 8);
 
-        $this->cache->put(self::createCacheKey($shortHash), $ip, now()->addHour());
+        $this->cache->put(self::createCacheKey($shortHash), $trackingId, now()->addHour());
 
         if (RateLimiter::tooManyAttempts($key, $this->maxAttempts)) {
             return response()->json([

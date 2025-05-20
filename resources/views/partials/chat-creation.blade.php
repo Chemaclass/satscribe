@@ -65,7 +65,7 @@
         </template>
     </div>
 
-    @if (client_ip() === $chat->creator_ip)
+    @if (tracking_id() === $chat->tracking_id)
         <x-chat.follow-up-suggestions
             :input="data_get($message['meta'], 'input')"
             :question="data_get($message['meta'], 'question', '')"
