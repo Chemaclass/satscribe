@@ -6,6 +6,7 @@ namespace App\Http\Middleware;
 
 use App\Data\InvoiceData;
 use App\Services\Alby\AlbyClientInterface;
+use Carbon\Carbon;
 use Closure;
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Illuminate\Http\Request;
@@ -44,27 +45,65 @@ final readonly class IpRateLimiter
 
         $key = self::createRateLimitKey($trackingId);
         $shortHash = substr(md5($key), 0, 8);
+        $invoiceCacheKey = "ln_invoice:{$shortHash}";
 
-        $this->cache->put(self::createCacheKey($shortHash), $trackingId, now()->addHour());
+        $this->cache->put(
+            self::createCacheKey($shortHash),
+            $trackingId,
+            now()->addSeconds($this->lnInvoiceExpirySeconds)
+        );
 
         if (RateLimiter::tooManyAttempts($key, $this->maxAttempts)) {
+            $cached = $this->cache->get($invoiceCacheKey);
+
+            if ($this->isValidCachedInvoice($cached)) {
+                return response()->json([
+                    'status' => 'rate_limited',
+                    'key' => $key,
+                    'retryAfter' => RateLimiter::availableIn($key),
+                    'maxAttempts' => $this->maxAttempts,
+                    'invoice' => $cached,
+                ], Response::HTTP_TOO_MANY_REQUESTS);
+            }
+
+            $invoice = $this->albyClient->createInvoice(new InvoiceData(
+                amount: $this->lnInvoiceAmountInSats,
+                memo: sprintf('Zap to keep Satscribe alive ⚡️ #%s', $shortHash),
+                expiry: $this->lnInvoiceExpirySeconds,
+            ));
+
+            // Cache the invoice until shortly before expiry
+            $this->cache->put(
+                $invoiceCacheKey,
+                $invoice,
+                now()->addSeconds($this->lnInvoiceExpirySeconds - 10)
+            );
+
             return response()->json([
                 'status' => 'rate_limited',
                 'key' => $key,
                 'retryAfter' => RateLimiter::availableIn($key),
                 'maxAttempts' => $this->maxAttempts,
-                'invoice' => $this->albyClient->createInvoice(
-                    new InvoiceData(
-                        amount: $this->lnInvoiceAmountInSats,
-                        memo: sprintf('Zap to keep Satscribe alive ⚡️ #%s', $shortHash),
-                        expiry: $this->lnInvoiceExpirySeconds,
-                    )
-                ),
+                'invoice' => $invoice,
             ], Response::HTTP_TOO_MANY_REQUESTS);
         }
 
         RateLimiter::hit($key, 60 * 60); // Reset after 1 hour
 
         return $next($request);
+    }
+
+    private function isValidCachedInvoice(mixed $cached): bool
+    {
+        if (
+            !is_array($cached) ||
+            !isset($cached['payment_hash'], $cached['payment_request'], $cached['created_at'], $cached['expires_in'])
+        ) {
+            return false;
+        }
+
+        $expiresAt = Carbon::parse($cached['created_at'])->addSeconds($cached['expires_in']);
+
+        return now()->lessThan($expiresAt);
     }
 }
