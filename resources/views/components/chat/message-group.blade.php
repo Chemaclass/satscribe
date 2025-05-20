@@ -20,10 +20,10 @@
                         : $userCreatedAt?->diffForHumans()
                     }}
                 </span>
-                <i data-lucide="user" class="w-6 h-6"></i>
                 <div class="inline-block rounded px-3 py-2">
                     {{ $userMsg->content }}
                 </div>
+                <i data-lucide="user" class="w-6 h-6"></i>
             </div>
         </div>
     @endif

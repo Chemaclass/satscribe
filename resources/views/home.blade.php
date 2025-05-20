@@ -96,10 +96,10 @@
             <div class="chat-message-group mb-6">
                 <div class="user-message mb-2 text-right">
                     <div class="flex items-center gap-1 justify-end">
-                        <i data-lucide="user" class="w-6 h-6"></i>
                         <div class="inline-block rounded px-3 py-2">
                             ${this.escapeHtml(userMessage)}
                         </div>
+                        <i data-lucide="user" class="w-6 h-6"></i>
                     </div>
                 </div>
                 <div id="assistant-message-${assistantMsgCount}" class="assistant-message loading-spinner-group text-left">
@@ -257,10 +257,10 @@
             <div class="chat-message-group mb-6">
                 <div class="user-message mb-2 text-right">
                     <div class="flex items-center gap-1 justify-end">
-                        <i data-lucide="user" class="w-6 h-6"></i>
                         <div class="inline-block rounded px-3 py-2">
                             ${this.escapeHtml(message)}
                         </div>
+                        <i data-lucide="user" class="w-6 h-6"></i>
                     </div>
                 </div>
                 <!-- Assistant will be appended here -->
