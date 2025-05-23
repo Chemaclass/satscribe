@@ -3,25 +3,21 @@
 @section('content')
     <section class="faq-section px-4 sm:px-6 lg:px-8 py-6" x-data="faqSection()">
         {{-- Header --}}
-        <header class="section-header mb-6">
-            <div class="flex flex-col">
-                <h1 class="text-2xl sm:text-3xl font-bold leading-tight">Frequently Asked Questions</h1>
+        <x-page.header title="Frequently Asked Questions">
+            <p class="mt-3 text-base sm:text-lg subtitle leading-relaxed">
+                <strong>Satscribe</strong> helps you make sense of the Bitcoin blockchain—whether you’re new to it
+                or diving into the technical details. Just enter a transaction ID or block height to receive an
+                AI-generated explanation in plain English.
+            </p>
 
-                <p class="mt-3 text-base sm:text-lg subtitle leading-relaxed">
-                    <strong>Satscribe</strong> helps you make sense of the Bitcoin blockchain—whether you’re new to it
-                    or diving into the technical details. Just enter a transaction ID or block height to receive an
-                    AI-generated explanation in plain English.
-                </p>
-
-                <p class="mt-3 text-base sm:text-lg subtitle leading-relaxed">
-                    From quick summaries to deeper insights, Satscribe turns raw blockchain data into something anyone
-                    can understand.
-                </p>
-                <p class="subtitle text-base sm:text-lg text-gray-700 dark:text-gray-400 mt-4">
-                    Use the search or browse by topic to explore more.
-                </p>
-            </div>
-        </header>
+            <p class="mt-3 text-base sm:text-lg subtitle leading-relaxed">
+                From quick summaries to deeper insights, Satscribe turns raw blockchain data into something anyone
+                can understand.
+            </p>
+            <p class="subtitle text-base sm:text-lg text-gray-700 dark:text-gray-400 mt-4">
+                Use the search or browse by topic to explore more.
+            </p>
+        </x-page.header>
 
         {{-- Search & Filter --}}
         <div class="flex flex-col sm:flex-row gap-4 mb-1">

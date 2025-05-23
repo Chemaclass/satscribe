@@ -5,22 +5,20 @@
 @section('content')
     <section id="history" class="sm:px-6 lg:px-8 px-4 py-6">
         {{-- Header --}}
-        <header class="section-header">
-            <div class="flex flex-col">
-                <h1 class="text-3xl sm:text-4xl font-bold leading-tight">
-                    History
-                </h1>
-                <p class="text-lg mt-2">
-                    From detailed tx investigations to high-level block summaries.
-                    <br class="hidden sm:block">
-                    <small>
-                        Dive into personal insights or
-                        <a href="{{ route('history.index', ['all' => 1]) }}">browse the archive</a>
-                        of the community. Discover how others interpret txs and blocks.
-                    </small>
-                </p>
-            </div>
-        </header>
+        <x-page.header
+            title="History"
+            titleClass="text-3xl sm:text-4xl font-bold leading-tight"
+        >
+            <p class="text-lg mt-2">
+                From detailed tx investigations to high-level block summaries.
+                <br class="hidden sm:block">
+                <small>
+                    Dive into personal insights or
+                    <a href="{{ route('history.index', ['all' => 1]) }}">browse the archive</a>
+                    of the community. Discover how others interpret txs and blocks.
+                </small>
+            </p>
+        </x-page.header>
 
         @if ($chats->isEmpty())
             <x-history.empty/>
