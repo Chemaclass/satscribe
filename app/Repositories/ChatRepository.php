@@ -46,7 +46,8 @@ final readonly class ChatRepository
         string $aiResponse,
         BlockchainDataInterface $blockchainData,
         PromptPersona $persona,
-        string $question = ''
+        string $question = '',
+        bool $isPrivate = false
     ): Chat {
         $raw = $blockchainData->toArray();
 
@@ -58,6 +59,7 @@ final readonly class ChatRepository
         $chat = Chat::create([
             'title' => ucfirst($input->type->value).':'.$input->text,
             'tracking_id' => $this->trackingId,
+            'is_private' => $isPrivate,
         ]);
 
         $chat->addUserMessage($question, [
@@ -106,7 +108,9 @@ final readonly class ChatRepository
     {
         $query = Chat::query();
 
-        if (!$showAll) {
+        if ($showAll) {
+            $query->where('is_private', false);
+        } else {
             $query->where('tracking_id', $this->trackingId);
         }
 

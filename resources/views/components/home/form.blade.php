@@ -182,6 +182,24 @@
                                 </small>
                             </label>
                         </div>
+
+                        {{-- Private checkbox --}}
+                        <div class="flex items-start gap-3">
+                            <input
+                                type="checkbox"
+                                id="private"
+                                name="private"
+                                value="true"
+                                class="checkbox-input mt-1 cursor-pointer"
+                            >
+                            <label for="private"
+                                   class="block text-sm font-medium text-gray-900 mb-1 cursor-pointer">
+                                Keep this chat private<br>
+                                <small class="checkbox-help text-gray-600 dark:text-gray-400">
+                                    (When enabled, this chat will not appear in the public archive)
+                                </small>
+                            </label>
+                        </div>
                     </div>
                 </div>
 

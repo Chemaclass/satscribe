@@ -37,6 +37,7 @@ final readonly class CreateChatAction
         PromptPersona $persona,
         string $question,
         bool $refreshEnabled = false,
+        bool $isPrivate = false,
     ): GeneratedPrompt {
         // Return a cached result unless forced to refresh
         if (!$refreshEnabled) {
@@ -47,7 +48,7 @@ final readonly class CreateChatAction
             }
         }
 
-        $result = $this->createNewChat($input, $persona, $question, $refreshEnabled);
+        $result = $this->createNewChat($input, $persona, $question, $refreshEnabled, $isPrivate);
 
         return new GeneratedPrompt($result, isFresh: true);
     }
@@ -57,6 +58,7 @@ final readonly class CreateChatAction
         PromptPersona $persona,
         string $question,
         bool $refreshEnabled,
+        bool $isPrivate,
     ): Chat {
         $this->enforceRateLimit();
 
@@ -72,7 +74,8 @@ final readonly class CreateChatAction
             $aiResponse,
             $blockchainData->current(),
             $persona,
-            $cleanQuestion
+            $cleanQuestion,
+            $isPrivate
         );
     }
 

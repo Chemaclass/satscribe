@@ -40,9 +40,10 @@ final readonly class HomeController
         $persona = $this->getPromptPersona($request);
         $question = $request->getQuestionInput();
         $refreshEnabled = $request->isRefreshEnabled();
+        $isPrivate = $request->isPrivate();
 
         try {
-            $generatedPrompt = $action->execute($search, $persona, $question, $refreshEnabled);
+            $generatedPrompt = $action->execute($search, $persona, $question, $refreshEnabled, $isPrivate);
         } catch (BlockchainException|OpenAIError $e) {
             Log::error('Failed to describe prompt result', [
                 'search' => $search->text,

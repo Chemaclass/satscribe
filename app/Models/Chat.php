@@ -16,6 +16,11 @@ final class Chat extends Model
         'title',
         'ulid',
         'tracking_id',
+        'is_private',
+    ];
+
+    protected $casts = [
+        'is_private' => 'boolean',
     ];
 
     protected static function boot(): void

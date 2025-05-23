@@ -20,21 +20,38 @@
                     {{ $chat->input }}
                 </span>
             </div>
-            @if($owned)
-                <span class="relative group">
-                    <i data-lucide="badge-check"
-                       class="text-orange-500 w-6 h-6 cursor-pointer"
-                       aria-label="This chat belongs to you"
-                       aria-hidden="false"
-                       role="img"></i>
+            <div class="flex gap-1 items-center">
+                @if($owned)
+                    <span class="relative group">
+                        <i data-lucide="badge-check"
+                           class="text-orange-500 w-6 h-6 cursor-pointer"
+                           aria-label="This chat belongs to you"
+                           aria-hidden="false"
+                           role="img"></i>
 
-                    <span class="tooltip-content absolute z-10 right-full top-1/2 -translate-y-1/2 mr-2
-                                 text-xs font-medium px-2 py-1 rounded whitespace-nowrap
-                                 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
-                        This chat belongs to you
+                        <span class="tooltip-content absolute z-10 right-full top-1/2 -translate-y-1/2 mr-2
+                                     text-xs font-medium px-2 py-1 rounded whitespace-nowrap
+                                     opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+                            This chat belongs to you
+                        </span>
                     </span>
-                </span>
-            @endif
+                @endif
+                @if($chat->is_private)
+                    <span class="relative group">
+                        <i data-lucide="lock"
+                           class="w-6 h-6 cursor-pointer"
+                           aria-label="Private chat"
+                           aria-hidden="false"
+                           role="img"></i>
+
+                        <span class="tooltip-content absolute z-10 right-full top-1/2 -translate-y-1/2 mr-2
+                                     text-xs font-medium px-2 py-1 rounded whitespace-nowrap
+                                     opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+                            Private chat
+                        </span>
+                    </span>
+                @endif
+            </div>
         </div>
     </div>
     <div class="chat-body relative collapsed" data-target="{{ $entryId }}">
