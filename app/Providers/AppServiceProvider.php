@@ -9,7 +9,8 @@ use App\Actions\AlbySettleWebhookAction;
 use App\Actions\CreateChatAction;
 use App\Http\Middleware\IpRateLimiter;
 use App\Repositories\ChatRepository;
-use App\Repositories\MessageRepository;
+use App\Repositories\FlaggedWordRepository;
+use App\Repositories\FlaggedWordRepositoryInterface;
 use App\Services\Alby\AlbyClient;
 use App\Services\Alby\AlbyClientInterface;
 use App\Services\BlockHeightProvider;
@@ -24,6 +25,7 @@ final class AppServiceProvider extends ServiceProvider
 {
     public $singletons = [
         AlbyClientInterface::class => AlbyClient::class,
+        FlaggedWordRepositoryInterface::class => FlaggedWordRepository::class,
     ];
 
     /**

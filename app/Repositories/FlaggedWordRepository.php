@@ -5,7 +5,7 @@ namespace App\Repositories;
 
 use App\Models\FlaggedWord;
 
-final class FlaggedWordRepository
+final class FlaggedWordRepository implements FlaggedWordRepositoryInterface
 {
     /**
      * @return list<string>
