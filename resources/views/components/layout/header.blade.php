@@ -24,7 +24,7 @@
 
         @if(!empty($btcPriceUsd))
             <div
-                class="nav-link hidden sm:inline-flex items-center gap-1 px-3 py-1 text-sm whitespace-nowrap"
+                class="nav-link sm:inline-flex items-center gap-1 px-1 py-1 text-sm whitespace-nowrap"
                 x-data="{
                     currency: StorageClient.getFiatCurrency() || 'usd',
                     toggle() {
@@ -34,6 +34,7 @@
                         StorageClient.setFiatCurrency(this.currency);
                     }
                 }"
+                x-cloak
             >
                 <span class="cursor-pointer" @click="toggle()">
                     <span x-show="currency === 'usd'" x-cloak>
@@ -49,7 +50,9 @@
                         &pound;{{ number_format($btcPriceGbp, 0) }}
                     </span>
                 </span>
-                <a href="https://coinmarketcap.com/currencies/bitcoin/" target="_blank" rel="noopener" class="flex items-center">
+                <a href="https://coinmarketcap.com/currencies/bitcoin/" target="_blank" rel="noopener"
+                   class="flex items-center hidden sm:inline-flex"
+                >
                     <svg data-lucide="external-link" class="w-4 h-4"></svg>
                 </a>
             </div>

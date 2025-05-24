@@ -1,5 +1,10 @@
 @import 'tailwindcss';
 
+/* Hide Alpine.js elements until fully initialized */
+[x-cloak] {
+    display: none !important;
+}
+
 /* =============================================================================
    Laravel Blade File Sources (Tailwind Just-In-Time Mode)
 ============================================================================= */
@@ -114,10 +119,6 @@ header {
     color: var(--btc-border-dark);
 }
 
-.nav-link:hover {
-    text-decoration: none;
-}
-
 .dark .nav-links {
     color: var(--btc-muted);
 }
@@ -151,6 +152,7 @@ header {
 
 .nav-link:hover {
     color: var(--btc-orange-dark);
+    text-decoration: none;
 }
 
 .dark .nav-link:hover {
@@ -160,7 +162,7 @@ header {
 /* Mobile nav tweaks */
 @media (max-width: 640px) {
     .nav-links {
-        gap: 1.5rem;
+        gap: 1rem;
     }
 
     .nav-links .link-text {
