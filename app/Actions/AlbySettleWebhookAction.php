@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
+use App\Data\AlbySettleWebhookPayload;
 use App\Exceptions\InvalidAlbyWebhookSignatureException;
 use App\Http\Middleware\IpRateLimiter;
 use Illuminate\Cache\RateLimiter;
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
-use Illuminate\Support\Facades\Log;
 use Psr\Log\LoggerInterface;
 use Svix\Webhook;
 use Throwable;
@@ -39,14 +39,14 @@ final readonly class AlbySettleWebhookAction
             svixSignature: $svixSignature,
         );
 
-        $this->logger->info('Webhook payload', ['payload' => $verifiedPayload]);
+        $this->logger->info('Webhook payload', ['payload' => $verifiedPayload->toArray()]);
 
-        if (($verifiedPayload['type'] ?? '') === 'incoming'
-            && ($verifiedPayload['state'] ?? '') === 'SETTLED'
+        if ($verifiedPayload->type === 'incoming'
+            && $verifiedPayload->state === 'SETTLED'
         ) {
             $this->handleInvoiceSettled($verifiedPayload);
         } else {
-            $this->logger->info('Unhandled webhook payload', ['payload' => $verifiedPayload]);
+            $this->logger->info('Unhandled webhook payload', ['payload' => $verifiedPayload->toArray()]);
         }
     }
 
@@ -55,7 +55,7 @@ final readonly class AlbySettleWebhookAction
         string $svixId,
         string $svixTimestamp,
         string $svixSignature,
-    ): array {
+    ): AlbySettleWebhookPayload {
         if ($this->webhookSecret === '') {
             $this->logger->warning('Webhook secret not configured');
             throw new InvalidAlbyWebhookSignatureException();
@@ -69,27 +69,18 @@ final readonly class AlbySettleWebhookAction
             ]);
 
             $this->logger->info('Webhook successfully verified');
-            // @todo: return DTO instead of raw array
-            return json_decode($payload, true, flags: JSON_THROW_ON_ERROR);
+            $data = json_decode($payload, true, flags: JSON_THROW_ON_ERROR);
+            return AlbySettleWebhookPayload::fromArray($data);
         } catch (Throwable $e) {
             $this->logger->warning('Webhook verification failed', ['error' => $e->getMessage()]);
             throw new InvalidAlbyWebhookSignatureException();
         }
     }
 
-    /**
-     * @param  array{
-     *     payment_hash: string,
-     *     type: string,
-     *     state: string,
-     *     memo: string,
-     *     amount: int,
-     * }  $payload
-     */
-    private function handleInvoiceSettled(array $payload): void
+    private function handleInvoiceSettled(AlbySettleWebhookPayload $payload): void
     {
-        $invoiceHash = $payload['payment_hash'];
-        $memo = $payload['memo'];
+        $invoiceHash = $payload->paymentHash;
+        $memo = $payload->memo;
 
         $this->logger->info('Invoice settled', ['$memo' => $memo]);
 
@@ -106,7 +97,7 @@ final readonly class AlbySettleWebhookAction
 
         $this->logger->info('Invoice settled', [
             'payment_hash' => $invoiceHash,
-            'amount' => $payload['amount'],
+            'amount' => $payload->amount,
         ]);
     }
 
