@@ -144,16 +144,15 @@
                             return;
                         }
 
-                        const assistantDiv = document.getElementById(`assistant-message-${assistantMsgCount}`);
-                        if (assistantDiv) {
-                            assistantDiv.innerHTML = `
-                <span class="font-semibold flex items-center gap-1">
-                    <i data-lucide="bot" class="w-6 h-6"></i>
-                    <span class="font-semibold">Scribe</span>
-                </span>
-
-                ${data.html || '<p>No response was received.</p>'}
-            `;
+                        const chatContainerEl = document.getElementById('chat-container');
+                        if (chatContainerEl) {
+                            chatContainerEl.innerHTML = data.html || '';
+                            const msgDiv = chatContainerEl.querySelector('.assistant-message div.inline-block');
+                            if (msgDiv && data.content) {
+                                msgDiv.textContent = '';
+                                this.typeText(msgDiv, data.content);
+                            }
+                            window.refreshLucideIcons?.();
                         }
 
                         // PushState to chat URL
@@ -304,10 +303,12 @@
                                         <i data-lucide="bot" class="w-6 h-6"></i>
                                         <span class="font-semibold">Scribe</span>
                                     </span>
-                                    <div class="inline-block rounded px-3 py-2 prose">
-                                        ${data.content ? marked.parse(data.content) : 'Try again.'}
-                                    </div>
+                                    <div class="inline-block rounded px-3 py-2 prose"></div>
                                 `;
+                                const msgEl = spinner.querySelector('div');
+                                if (msgEl && data.content) {
+                                    this.typeText(msgEl, data.content);
+                                }
                                 spinner.scrollIntoView({ behavior: 'smooth', block: 'start' });
                             }
                             if (data.suggestions) {
@@ -359,6 +360,38 @@
                             this.sendMessageToChat(ulid, suggestion);
                         });
                     });
+                },
+
+                typeText(element, markdownText, delay = 20) {
+                    const paragraphs = markdownText.split(/\n{2,}/); // Split by double newlines
+                    let paragraphIndex = 0;
+
+                    function typeParagraph(paragraph) {
+                        let i = 0;
+                        let currentText = '';
+                        const span = document.createElement('div'); // block-level for each paragraph
+                        element.appendChild(span);
+
+                        const tick = () => {
+                            if (i <= paragraph.length) {
+                                currentText = paragraph.slice(0, i);
+                                span.innerHTML = marked.parseInline(currentText);
+                                i++;
+                                setTimeout(tick, delay);
+                            } else {
+                                span.innerHTML = marked.parse(paragraph);
+                                paragraphIndex++;
+                                if (paragraphIndex < paragraphs.length) {
+                                    setTimeout(() => {
+                                        typeParagraph(paragraphs[paragraphIndex]);
+                                    }, delay * 5); // Slight pause before next paragraph
+                                }
+                            }
+                        };
+                        tick();
+                    }
+
+                    typeParagraph(paragraphs[paragraphIndex]);
                 },
 
                 escapeHtml(text) {
