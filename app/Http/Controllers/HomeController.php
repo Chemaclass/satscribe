@@ -61,6 +61,7 @@ final readonly class HomeController
             'maxBitcoinBlockHeight' => $this->heightProvider->getMaxPossibleBlockHeight(),
             'search' => $search,
             'chatUlid' => $actionResult->chat->ulid,
+            'content' => $actionResult->chat->getLastAssistantMessage()->content,
             'html' => view('partials.chat-creation', [
                 'chat' => $actionResult->chat,
                 'suggestions' => $this->generateSuggestions($search),

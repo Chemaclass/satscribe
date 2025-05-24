@@ -144,16 +144,15 @@
                             return;
                         }
 
-                        const assistantDiv = document.getElementById(`assistant-message-${assistantMsgCount}`);
-                        if (assistantDiv) {
-                            assistantDiv.innerHTML = `
-                <span class="font-semibold flex items-center gap-1">
-                    <i data-lucide="bot" class="w-6 h-6"></i>
-                    <span class="font-semibold">Scribe</span>
-                </span>
-
-                ${data.html || '<p>No response was received.</p>'}
-            `;
+                        const chatContainerEl = document.getElementById('chat-container');
+                        if (chatContainerEl) {
+                            chatContainerEl.innerHTML = data.html || '';
+                            const msgDiv = chatContainerEl.querySelector('.assistant-message div.inline-block');
+                            if (msgDiv && data.content) {
+                                msgDiv.textContent = '';
+                                this.typeText(msgDiv, data.content);
+                            }
+                            window.refreshLucideIcons?.();
                         }
 
                         // PushState to chat URL
@@ -304,10 +303,12 @@
                                         <i data-lucide="bot" class="w-6 h-6"></i>
                                         <span class="font-semibold">Scribe</span>
                                     </span>
-                                    <div class="inline-block rounded px-3 py-2 prose">
-                                        ${data.content ? marked.parse(data.content) : 'Try again.'}
-                                    </div>
+                                    <div class="inline-block rounded px-3 py-2 prose"></div>
                                 `;
+                                const msgEl = spinner.querySelector('div');
+                                if (msgEl && data.content) {
+                                    this.typeText(msgEl, data.content);
+                                }
                                 spinner.scrollIntoView({ behavior: 'smooth', block: 'start' });
                             }
                             if (data.suggestions) {
@@ -359,6 +360,21 @@
                             this.sendMessageToChat(ulid, suggestion);
                         });
                     });
+                },
+
+                typeText(element, text, delay = 30) {
+                    let index = 0;
+                    const tick = () => {
+                        if (index <= text.length) {
+                            element.textContent = text.slice(0, index);
+                            index++;
+                            setTimeout(tick, delay);
+                        } else {
+                            element.innerHTML = marked.parse(text);
+                            window.refreshLucideIcons?.();
+                        }
+                    };
+                    tick();
                 },
 
                 escapeHtml(text) {
