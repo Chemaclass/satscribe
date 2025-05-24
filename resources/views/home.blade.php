@@ -148,9 +148,27 @@
                         if (chatContainerEl) {
                             chatContainerEl.innerHTML = data.html || '';
                             const msgDiv = chatContainerEl.querySelector('.assistant-message div.inline-block');
+                            const header = chatContainerEl.querySelector('.assistant-message .flex.items-center');
+                            if (header) {
+                                header.insertAdjacentHTML('beforeend', `
+                                    <span class="ml-2 flex items-center gap-1 loading-dots-container">
+                                        <span class="dots-loader">
+                                            <span class="dot"></span>
+                                            <span class="dot"></span>
+                                            <span class="dot"></span>
+                                            <span class="dot"></span>
+                                            <span class="dot"></span>
+                                            <span class="dot"></span>
+                                        </span>
+                                    </span>
+                                `);
+                            }
                             if (msgDiv && data.content) {
                                 msgDiv.textContent = '';
-                                this.typeText(msgDiv, data.content);
+                                this.typeText(msgDiv, data.content).then(() => {
+                                    const loader = chatContainerEl.querySelector('.loading-dots-container');
+                                    if (loader) loader.remove();
+                                });
                             }
                             window.refreshLucideIcons?.();
                         }
@@ -302,12 +320,25 @@
                                     <span class="font-semibold flex items-center gap-1">
                                         <i data-lucide="bot" class="w-6 h-6"></i>
                                         <span class="font-semibold">Scribe</span>
+                                        <span class="ml-2 flex items-center gap-1 loading-dots-container">
+                                            <span class="dots-loader">
+                                                <span class="dot"></span>
+                                                <span class="dot"></span>
+                                                <span class="dot"></span>
+                                                <span class="dot"></span>
+                                                <span class="dot"></span>
+                                                <span class="dot"></span>
+                                            </span>
+                                        </span>
                                     </span>
                                     <div class="inline-block rounded px-3 py-2 prose"></div>
                                 `;
                                 const msgEl = spinner.querySelector('div');
                                 if (msgEl && data.content) {
-                                    this.typeText(msgEl, data.content);
+                                    this.typeText(msgEl, data.content).then(() => {
+                                        const loader = spinner.querySelector('.loading-dots-container');
+                                        if (loader) loader.remove();
+                                    });
                                 }
                                 spinner.scrollIntoView({ behavior: 'smooth', block: 'start' });
                             }
@@ -362,36 +393,40 @@
                     });
                 },
 
-                typeText(element, markdownText, delay = 20) {
-                    const paragraphs = markdownText.split(/\n{2,}/); // Split by double newlines
-                    let paragraphIndex = 0;
+                typeText(element, markdownText, delay = 15) {
+                    return new Promise(resolve => {
+                        const paragraphs = markdownText.split(/\n{2,}/); // Split by double newlines
+                        let paragraphIndex = 0;
 
-                    function typeParagraph(paragraph) {
-                        let i = 0;
-                        let currentText = '';
-                        const span = document.createElement('div'); // block-level for each paragraph
-                        element.appendChild(span);
+                        function typeParagraph(paragraph) {
+                            let i = 0;
+                            let currentText = '';
+                            const span = document.createElement('div'); // block-level for each paragraph
+                            element.appendChild(span);
 
-                        const tick = () => {
-                            if (i <= paragraph.length) {
-                                currentText = paragraph.slice(0, i);
-                                span.innerHTML = marked.parseInline(currentText);
-                                i++;
-                                setTimeout(tick, delay);
-                            } else {
-                                span.innerHTML = marked.parse(paragraph);
-                                paragraphIndex++;
-                                if (paragraphIndex < paragraphs.length) {
-                                    setTimeout(() => {
-                                        typeParagraph(paragraphs[paragraphIndex]);
-                                    }, delay * 5); // Slight pause before next paragraph
+                            const tick = () => {
+                                if (i <= paragraph.length) {
+                                    currentText = paragraph.slice(0, i);
+                                    span.innerHTML = marked.parseInline(currentText);
+                                    i++;
+                                    setTimeout(tick, delay);
+                                } else {
+                                    span.innerHTML = marked.parse(paragraph);
+                                    paragraphIndex++;
+                                    if (paragraphIndex < paragraphs.length) {
+                                        setTimeout(() => {
+                                            typeParagraph(paragraphs[paragraphIndex]);
+                                        }, delay);
+                                    } else {
+                                        resolve();
+                                    }
                                 }
-                            }
-                        };
-                        tick();
-                    }
+                            };
+                            tick();
+                        }
 
-                    typeParagraph(paragraphs[paragraphIndex]);
+                        typeParagraph(paragraphs[paragraphIndex]);
+                    });
                 },
 
                 escapeHtml(text) {
