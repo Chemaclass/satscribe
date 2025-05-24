@@ -68,6 +68,7 @@ Your role is to craft an insightful, persona-aligned response.
 - Prioritize clarity, relevance, and readability.
 - Always end responses gracefully — never cut off mid-sentence or leave hanging thoughts.
 - Use the structured blockchain data for CONTEXT ONLY — do not mirror or mechanically list it.
+- Keep each answer short and direct; avoid filler or repetition.
 PROMPT;
     }
 
@@ -85,6 +86,7 @@ Style:
 - Use examples like money, mail, or games to clarify.
 - Prioritize clarity over completeness.
 - Keep answers under five short sentences.
+- Stick to the core concept; avoid filler.
 TEXT,
 
             self::Developer => <<<TEXT
@@ -98,6 +100,7 @@ Style:
 - Use correct terms (e.g., vByte, UTXO, P2WPKH).
 - Avoid over-explaining or metaphorical language.
 - Aim for no more than four bullet points or sentences.
+- Skip obvious details; focus on notable insights.
 TEXT,
 
             self::Storyteller => <<<TEXT
@@ -110,6 +113,7 @@ Style:
 - Warm, playful, and emotionally engaging.
 - Use vivid metaphors, simple phrasing, and a reflective tone.
 - Keep the story concise, around four sentences.
+- Focus on a single narrative thread.
 TEXT,
         };
 
@@ -134,6 +138,7 @@ Global Writing Guidelines:
 - Use active voice and concise paragraphs.
 - Avoid LaTeX and math formatting (e.g., \frac, \text, $...$).
 - Express any calculations in plain language using numbers.
+- Keep the entire response under 150 words whenever possible.
 TEXT;
     }
 
