@@ -126,6 +126,19 @@
                 window.__PAYWALL_ACTIVE = false;
                 this.show = false;
                 window.dispatchEvent(new CustomEvent('paywall-modal-closed'));
+                document.querySelectorAll('.loading-spinner-group').forEach(el => {
+                    el.innerHTML = `
+                   <div class="flex items-center gap-1 group relative">
+                        <i data-lucide="bot" class="w-6 h-6 font-semibold"></i>
+                        <span class="font-semibold">Scribe</span>
+                    </div>
+                    <div class="inline-block rounded px-3 py-2 text-orange-700">
+                        Request cancelled.
+                    </div>
+                    `;
+                    el.classList.remove('loading-spinner-group');
+                });
+                window.refreshLucideIcons?.();
             },
 
             async startPolling(identifier) {
