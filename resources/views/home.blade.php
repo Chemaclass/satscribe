@@ -114,7 +114,7 @@
                     </div>
                 </div>
                 <div id="assistant-message-${assistantMsgCount}" class="assistant-message loading-spinner-group text-left">
-                    <x-chat.scribe-prompt/>
+                    <x-chat.assistant-loading-prompt/>
                 </div>
             </div>
         `;
@@ -275,7 +275,7 @@
                 </div>
                 <!-- Assistant will be appended here -->
                 <div id="assistant-message-${assistantMsgCount}" class="assistant-message loading-spinner-group text-left">
-                    <x-chat.scribe-prompt/>
+                    <x-chat.assistant-loading-prompt/>
                 </div>
             </div>
         `;
