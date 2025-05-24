@@ -43,7 +43,7 @@ final readonly class HomeController
         $isPrivate = $request->isPrivate();
 
         try {
-            $generatedPrompt = $action->execute($search, $persona, $question, $refreshEnabled, $isPrivate);
+            $actionResult = $action->execute($search, $persona, $question, $refreshEnabled, $isPrivate);
         } catch (BlockchainException|OpenAIError $e) {
             Log::error('Failed to describe prompt result', [
                 'search' => $search->text,
@@ -60,9 +60,9 @@ final readonly class HomeController
         return response()->json([
             'maxBitcoinBlockHeight' => $this->heightProvider->getMaxPossibleBlockHeight(),
             'search' => $search,
-            'chatUlid' => $generatedPrompt->chat->ulid,
+            'chatUlid' => $actionResult->chat->ulid,
             'html' => view('partials.chat-creation', [
-                'chat' => $generatedPrompt->chat,
+                'chat' => $actionResult->chat,
                 'suggestions' => $this->generateSuggestions($search),
             ])->render()
         ]);

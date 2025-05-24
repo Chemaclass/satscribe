@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Actions;
 
 use App\Data\Blockchain\BlockchainData;
-use App\Data\GeneratedPrompt;
+use App\Data\CreateChatActionResult;
 use App\Data\PromptInput;
 use App\Enums\PromptPersona;
 use App\Models\Chat;
@@ -38,19 +38,19 @@ final readonly class CreateChatAction
         string $question,
         bool $refreshEnabled = false,
         bool $isPrivate = false,
-    ): GeneratedPrompt {
+    ): CreateChatActionResult {
         // Return a cached result unless forced to refresh
         if (!$refreshEnabled) {
             $chat = $this->repository->findByCriteria($input, $persona, $question);
 
             if ($chat instanceof Chat && !$chat->force_refresh) {
-                return new GeneratedPrompt($chat, isFresh: false);
+                return new CreateChatActionResult($chat, isFresh: false);
             }
         }
 
         $result = $this->createNewChat($input, $persona, $question, $refreshEnabled, $isPrivate);
 
-        return new GeneratedPrompt($result, isFresh: true);
+        return new CreateChatActionResult($result, isFresh: true);
     }
 
     private function createNewChat(

@@ -46,8 +46,8 @@ final readonly class ChatRepository
         string $aiResponse,
         BlockchainDataInterface $blockchainData,
         PromptPersona $persona,
-        string $question = '',
-        bool $isPrivate = false
+        string $question,
+        bool $isPrivate
     ): Chat {
         $raw = $blockchainData->toArray();
 
