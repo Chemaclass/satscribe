@@ -107,6 +107,10 @@ header {
     color: #374151;
 }
 
+.nav-link:hover {
+    text-decoration: none;
+}
+
 .dark .nav-links {
     color: var(--btc-muted);
 }
