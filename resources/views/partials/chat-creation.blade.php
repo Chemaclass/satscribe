@@ -22,15 +22,18 @@
         />
     </div>
 
-    <x-chat.message-form :chat="$chat"/>
+    <div id="chat-message-form-container" class="flex flex-col">
+        <x-chat.message-form :chat="$chat"/>
 
-    @if (tracking_id() === $chat->tracking_id)
-        <x-chat.follow-up-suggestions
-            :input="data_get($message['meta'], 'input')"
-            :question="data_get($message['meta'], 'question', '')"
-            :suggestions="$suggestions"
-            :message="$message"
-        />
-    @endif
-    <x-chat.raw-data-toggle-button :chat="$chat" />
+        @if (tracking_id() === $chat->tracking_id)
+            <x-chat.follow-up-suggestions
+                :input="data_get($message['meta'], 'input')"
+                :question="data_get($message['meta'], 'question', '')"
+                :suggestions="$suggestions"
+                :message="$message"
+            />
+        @endif
+
+        <x-chat.raw-data-toggle-button :chat="$chat" />
+    </div>
 </section>
