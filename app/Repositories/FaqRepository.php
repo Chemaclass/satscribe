@@ -6,8 +6,9 @@ namespace App\Repositories;
 use App\Models\Faq;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use App\Repositories\FaqRepositoryInterface;
 
-final class FaqRepository
+final class FaqRepository implements FaqRepositoryInterface
 {
     public function findByQuestion(string $question): ?object
     {
