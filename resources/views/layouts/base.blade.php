@@ -47,13 +47,25 @@
         </button>
 
         @if(!empty($btcPriceUsd))
-            <a href="https://coinmarketcap.com/currencies/bitcoin/"
-               target="_blank"
-               rel="noopener"
-               class="nav-link hidden sm:inline-flex items-center gap-1 px-3 py-1 text-sm whitespace-nowrap"
+            <div
+                class="nav-link hidden sm:inline-flex items-center gap-1 px-3 py-1 text-sm whitespace-nowrap"
+                x-data="{ currency: 'usd' }"
             >
-                <span>${{ number_format($btcPriceUsd, 0) }}</span>
-            </a>
+                <span
+                    class="cursor-pointer"
+                    @click="currency = currency === 'usd' ? 'eur' : 'usd'"
+                >
+                    <span x-show="currency === 'usd'" x-cloak>
+                        ${{ number_format($btcPriceUsd, 0) }}
+                    </span>
+                    <span x-show="currency === 'eur'" x-cloak>
+                        &euro;{{ number_format($btcPriceEur, 0) }}
+                    </span>
+                </span>
+                <a href="https://coinmarketcap.com/currencies/bitcoin/" target="_blank" rel="noopener" class="flex items-center">
+                    <svg data-lucide="external-link" class="w-4 h-4"></svg>
+                </a>
+            </div>
         @endif
     </nav>
 </header>

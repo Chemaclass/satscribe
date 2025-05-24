@@ -22,6 +22,7 @@ import {
     Scissors,
     Laptop,
     Lock,
+    ExternalLink,
 } from 'lucide';
 
 window.Alpine = Alpine;
@@ -48,6 +49,7 @@ const usedIcons = {
     Scissors,
     Laptop,
     Lock,
+    ExternalLink,
 };
 
 createIcons({icons: usedIcons});
