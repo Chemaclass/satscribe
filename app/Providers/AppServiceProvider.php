@@ -10,6 +10,12 @@ use App\Actions\CreateChatAction;
 use App\Http\Middleware\IpRateLimiter;
 use App\Repositories\ChatRepository;
 use App\Repositories\MessageRepository;
+use App\Repositories\FaqRepository;
+use App\Repositories\FlaggedWordRepository;
+use App\Repositories\ChatRepositoryInterface;
+use App\Repositories\MessageRepositoryInterface;
+use App\Repositories\FaqRepositoryInterface;
+use App\Repositories\FlaggedWordRepositoryInterface;
 use App\Services\Alby\AlbyClient;
 use App\Services\Alby\AlbyClientInterface;
 use App\Services\BlockHeightProvider;
@@ -24,6 +30,10 @@ final class AppServiceProvider extends ServiceProvider
 {
     public $singletons = [
         AlbyClientInterface::class => AlbyClient::class,
+        ChatRepositoryInterface::class => ChatRepository::class,
+        MessageRepositoryInterface::class => MessageRepository::class,
+        FaqRepositoryInterface::class => FaqRepository::class,
+        FlaggedWordRepositoryInterface::class => FlaggedWordRepository::class,
     ];
 
     /**

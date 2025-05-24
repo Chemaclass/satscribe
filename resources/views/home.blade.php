@@ -393,7 +393,7 @@
                     });
                 },
 
-                typeText(element, markdownText, delay = 20) {
+                typeText(element, markdownText, delay = 15) {
                     return new Promise(resolve => {
                         const paragraphs = markdownText.split(/\n{2,}/); // Split by double newlines
                         let paragraphIndex = 0;
@@ -416,7 +416,7 @@
                                     if (paragraphIndex < paragraphs.length) {
                                         setTimeout(() => {
                                             typeParagraph(paragraphs[paragraphIndex]);
-                                        }, delay * 5); // Slight pause before next paragraph
+                                        }, delay);
                                     } else {
                                         resolve();
                                     }
