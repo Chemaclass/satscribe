@@ -70,6 +70,7 @@
                     "Just a moment — pulling in all the right info for you.",
                     "On it! I'm making sure every detail is spot-on.",
                 ],
+                lastRequest: null,
 
                 async submitForm(form) {
                     if(window.__PAYWALL_ACTIVE) return;
@@ -88,6 +89,16 @@
 
                     try {
                         const formData = new FormData(form);
+
+                        this.lastRequest = {
+                            search: formData.get('search') || '',
+                            question: formData.get('question') || '',
+                            persona: formData.get('persona') || '',
+                            refresh: formData.get('refresh') === 'true',
+                            private: formData.get('private') === 'true',
+                        };
+                        window.__LAST_REQUEST__ = this.lastRequest;
+
                         const rawQuestion = formData.get('question');
                         const userMessage = rawQuestion?.trim() ? rawQuestion.trim() : 'Give me a generic overview.';
 
@@ -406,6 +417,42 @@
             const refreshCheckbox = document.getElementById('refresh');
             if (refreshCheckbox) refreshCheckbox.checked = true;
             resubmit(searchValue, questionValue);
+        }
+
+        window.retryLastPaidRequest = function() {
+            const last = window.__LAST_REQUEST__;
+            const form = document.getElementById('satscribe-form');
+            if (!last || !form) return;
+
+            const searchInput = document.getElementById('search-input');
+            if (searchInput) searchInput.value = last.search;
+
+            const questionInput = document.getElementById('question');
+            if (questionInput) questionInput.value = last.question;
+
+            const personaInput = form.querySelector('input[name="persona"]');
+            if (personaInput) personaInput.value = last.persona;
+
+            const refreshCheckbox = document.getElementById('refresh');
+            if (refreshCheckbox) refreshCheckbox.checked = !!last.refresh;
+
+            const privateCheckbox = document.getElementById('private');
+            if (privateCheckbox) privateCheckbox.checked = !!last.private;
+
+            if (window.Alpine) {
+                const component = Alpine.closestDataStack(form);
+                if (component) {
+                    component.input = last.search;
+                    component.validate?.();
+                }
+
+                const personaComponent = form.querySelector('[x-data*="selectedPersona"]');
+                if (personaComponent && personaComponent.__x) {
+                    personaComponent.__x.$data.selectedPersona = last.persona;
+                }
+            }
+
+            form.dispatchEvent(new Event('submit', {bubbles: true}));
         }
     </script>
 @endpush

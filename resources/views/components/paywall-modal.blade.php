@@ -105,6 +105,7 @@
                     this.stopPolling();
                     this.show = false;
                     document.body.classList.remove('modal-open');
+                    window.retryLastPaidRequest?.();
                 });
 
                 window.addEventListener('paywall-modal-closed', () => {
