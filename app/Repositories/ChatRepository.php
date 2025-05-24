@@ -9,6 +9,7 @@ use App\Enums\PromptPersona;
 use App\Enums\PromptType;
 use App\Models\Chat;
 use Illuminate\Contracts\Pagination\Paginator;
+use Illuminate\Database\Eloquent\Builder;
 
 final readonly class ChatRepository
 {
@@ -109,7 +110,10 @@ final readonly class ChatRepository
         $query = Chat::query();
 
         if ($showAll) {
-            $query->where('is_private', false);
+            $query->where(function (Builder $q) {
+                $q->where('is_private', false)
+                    ->orWhere('tracking_id', $this->trackingId);
+            });
         } else {
             $query->where('tracking_id', $this->trackingId);
         }
