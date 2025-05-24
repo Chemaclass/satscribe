@@ -21,6 +21,7 @@ import {
     ArrowUp,
     Scissors,
     Laptop,
+    Lock,
 } from 'lucide';
 
 window.Alpine = Alpine;
@@ -46,6 +47,7 @@ const usedIcons = {
     ArrowUp,
     Scissors,
     Laptop,
+    Lock,
 };
 
 createIcons({icons: usedIcons});

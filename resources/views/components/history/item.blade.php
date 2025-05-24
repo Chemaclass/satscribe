@@ -10,7 +10,7 @@
 @endphp
 
 <li class="chat-item">
-    <div class="cursor-pointer w-full hover:bg-gray-50 rounded-lg p-3 transition-colors duration-300"
+    <div class="cursor-pointer w-full rounded-lg p-3 transition-colors duration-300"
          onclick="window.location.href='{{ route('chat.show', $chat) }}'"
     >
         <div class="chat-header font-medium mb-1 flex justify-between items-start gap-2">
@@ -21,6 +21,22 @@
                 </span>
             </div>
             <div class="flex gap-1 items-center">
+                @if($chat->is_private)
+                    <span class="relative group">
+                        <i data-lucide="lock"
+                           class="text-orange-700 w-6 h-6 cursor-pointer"
+                           aria-label="Private chat"
+                           aria-hidden="false"
+                           role="img"></i>
+
+                        <span class="tooltip-content absolute z-10 bottom-full mb-1 left-1/2 -translate-x-1/2
+                                     bg-gray-800 text-white text-xs font-medium px-2 py-1 rounded shadow-lg
+                                     whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-200 ease-out
+                                     pointer-events-none">
+                            Private chat
+                        </span>
+                    </span>
+                @endif
                 @if($owned)
                     <span class="relative group">
                         <i data-lucide="badge-check"
@@ -29,25 +45,11 @@
                            aria-hidden="false"
                            role="img"></i>
 
-                        <span class="tooltip-content absolute z-10 right-full top-1/2 -translate-y-1/2 mr-2
-                                     text-xs font-medium px-2 py-1 rounded whitespace-nowrap
-                                     opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+                        <span class="tooltip-content absolute z-10 bottom-full mb-1 left-1/2 -translate-x-1/2
+                                     bg-gray-800 text-white text-xs font-medium px-2 py-1 rounded shadow-lg
+                                     whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-200 ease-out
+                                     pointer-events-none">
                             This chat belongs to you
-                        </span>
-                    </span>
-                @endif
-                @if($chat->is_private)
-                    <span class="relative group">
-                        <i data-lucide="lock"
-                           class="w-6 h-6 cursor-pointer"
-                           aria-label="Private chat"
-                           aria-hidden="false"
-                           role="img"></i>
-
-                        <span class="tooltip-content absolute z-10 right-full top-1/2 -translate-y-1/2 mr-2
-                                     text-xs font-medium px-2 py-1 rounded whitespace-nowrap
-                                     opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
-                            Private chat
                         </span>
                     </span>
                 @endif
