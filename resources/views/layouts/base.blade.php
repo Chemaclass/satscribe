@@ -28,16 +28,19 @@
     @stack('head')
 </head>
 <body class="min-h-screen flex flex-col transition-colors duration-300">
-<x-layout.header :btc-price-usd="$btcPriceUsd" :btc-price-eur="$btcPriceEur" />
+    <x-layout.header
+        :btc-price-usd="$btcPriceUsd"
+        :btc-price-eur="$btcPriceEur"
+        :btc-price-cny="$btcPriceCny"
+        :btc-price-gbp="$btcPriceGbp"
+    />
 
-<main class="flex-grow">
-    @yield('content')
-</main>
+    <main class="flex-grow">
+        @yield('content')
+    </main>
 
-<x-layout.footer />
-
-<x-layout.scroll-to-top />
-
-@stack('scripts')
+    <x-layout.footer />
+    <x-layout.scroll-to-top />
+    @stack('scripts')
 </body>
 </html>

@@ -33,16 +33,31 @@ final readonly class PriceService
         return $this->getPrices()['eur'];
     }
 
+    public function getCurrentBtcPriceCny(): float
+    {
+        return $this->getPrices()['cny'];
+    }
+
+    public function getCurrentBtcPriceGbp(): float
+    {
+        return $this->getPrices()['gbp'];
+    }
+
     private function getPrices(): array
     {
         if (!$this->enabled) {
-            return ['usd' => 0.0, 'eur' => 0.0];
+            return [
+                'usd' => 0.0,
+                'eur' => 0.0,
+                'cny' => 0.0,
+                'gbp' => 0.0,
+            ];
         }
 
         return $this->cache->remember(self::CACHE_KEY, now()->addMinutes(self::CACHE_TTL_MINUTES), function () {
             $response = $this->http->get(self::BASE_URL.'/v3/simple/price', [
                 'ids' => 'bitcoin',
-                'vs_currencies' => 'usd,eur',
+                'vs_currencies' => 'usd,eur,cny,gbp',
             ]);
 
             if (!$response->successful()) {
@@ -55,6 +70,8 @@ final readonly class PriceService
             return [
                 'usd' => (float) $response->json('bitcoin.usd'),
                 'eur' => (float) $response->json('bitcoin.eur'),
+                'cny' => (float) $response->json('bitcoin.cny'),
+                'gbp' => (float) $response->json('bitcoin.gbp'),
             ];
         });
     }

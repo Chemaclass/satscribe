@@ -1,6 +1,8 @@
 @props([
     'btcPriceUsd' => null,
     'btcPriceEur' => null,
+    'btcPriceCny' => null,
+    'btcPriceGbp' => null,
 ])
 
 <header class="flex justify-between items-center px-4 py-3 border-gray-200 dark:border-gray-700">
@@ -23,14 +25,28 @@
         @if(!empty($btcPriceUsd))
             <div
                 class="nav-link hidden sm:inline-flex items-center gap-1 px-3 py-1 text-sm whitespace-nowrap"
-                x-data="{ currency: 'usd' }"
+                x-data="{
+                    currency: StorageClient.getFiatCurrency() || 'usd',
+                    toggle() {
+                        const order = ['usd', 'eur', 'cny', 'gbp'];
+                        const idx = order.indexOf(this.currency);
+                        this.currency = order[(idx + 1) % order.length];
+                        StorageClient.setFiatCurrency(this.currency);
+                    }
+                }"
             >
-                <span class="cursor-pointer" @click="currency = currency === 'usd' ? 'eur' : 'usd'">
+                <span class="cursor-pointer" @click="toggle()">
                     <span x-show="currency === 'usd'" x-cloak>
                         ${{ number_format($btcPriceUsd, 0) }}
                     </span>
                     <span x-show="currency === 'eur'" x-cloak>
                         &euro;{{ number_format($btcPriceEur, 0) }}
+                    </span>
+                    <span x-show="currency === 'cny'" x-cloak>
+                        &yen;{{ number_format($btcPriceCny, 0) }}
+                    </span>
+                    <span x-show="currency === 'gbp'" x-cloak>
+                        &pound;{{ number_format($btcPriceGbp, 0) }}
                     </span>
                 </span>
                 <a href="https://coinmarketcap.com/currencies/bitcoin/" target="_blank" rel="noopener" class="flex items-center">

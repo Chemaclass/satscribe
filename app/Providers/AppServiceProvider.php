@@ -118,8 +118,11 @@ final class AppServiceProvider extends ServiceProvider
         Paginator::useTailwind();
 
         View::share('cronitorClientKey', config('app.cronitorClientKey'));
+
         $priceService = app(PriceService::class);
         View::share('btcPriceUsd', $priceService->getCurrentBtcPriceUsd());
         View::share('btcPriceEur', $priceService->getCurrentBtcPriceEur());
+        View::share('btcPriceCny', $priceService->getCurrentBtcPriceCny());
+        View::share('btcPriceGbp', $priceService->getCurrentBtcPriceGbp());
     }
 }
