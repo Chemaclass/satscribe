@@ -6,7 +6,7 @@ namespace App\Data;
 
 use App\Models\Chat;
 
-final readonly class GeneratedPrompt
+final readonly class CreateChatActionResult
 {
     /**
      * @param  bool  $isFresh  true if newly generated, false if loaded from DB

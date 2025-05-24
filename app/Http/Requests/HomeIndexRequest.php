@@ -58,4 +58,9 @@ final class HomeIndexRequest extends FormRequest
     {
         return $this->boolean('refresh');
     }
+
+    public function isPrivate(): bool
+    {
+        return $this->boolean('private');
+    }
 }
