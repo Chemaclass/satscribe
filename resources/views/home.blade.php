@@ -276,6 +276,7 @@
 
                 async sendMessageToChat(chatUlid, message) {
                     if (!message || !message.trim()) return;
+                    hideChatFormContainer();
 
                     const chatGroups = document.getElementById('chat-message-groups');
                     const assistantMsgCount = document.querySelectorAll('.assistant-message').length;
@@ -393,7 +394,9 @@
                     });
                 },
 
-                typeText(element, markdownText, delay = 15) {
+                typeText(element, markdownText, delay = 1) {
+                    hideChatFormContainer();
+
                     return new Promise(resolve => {
                         const paragraphs = markdownText.split(/\n{2,}/); // Split by double newlines
                         let paragraphIndex = 0;
@@ -418,6 +421,7 @@
                                             typeParagraph(paragraphs[paragraphIndex]);
                                         }, delay);
                                     } else {
+                                        showChatFormContainer();
                                         resolve();
                                     }
                                 }
@@ -521,6 +525,16 @@
             }
 
             form.dispatchEvent(new Event('submit', {bubbles: true}));
+        }
+
+        function hideChatFormContainer() {
+            const formContainer = document.getElementById('chat-message-form-container');
+            if (formContainer) formContainer.classList.add('hidden');
+        }
+
+        function showChatFormContainer() {
+            const formContainer = document.getElementById('chat-message-form-container');
+            if (formContainer) formContainer.classList.remove('hidden');
         }
     </script>
 @endpush
