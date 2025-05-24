@@ -1,5 +1,5 @@
 @props(['chat'])
-<div x-data="{ message: '' }" class="w-full">
+<div x-data="{ message: '' }" class="w-full pt-1">
     <form @submit.prevent="sendMessageToChat('{{ $chat->ulid }}', message)" class="flex w-full gap-2">
         <input
             id="customFollowUp"
