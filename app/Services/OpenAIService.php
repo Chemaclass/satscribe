@@ -118,6 +118,7 @@ Style:
 - Prefer active voice.
 - Keep paragraphs short and well-structured.
 - Sound professional but accessible.
+- Keep the entire answer brief and focused on key points.
 TEXT;
     }
 
