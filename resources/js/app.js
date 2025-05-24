@@ -1,5 +1,6 @@
 import './bootstrap';
 import Alpine from 'alpinejs';
+import StorageClient from './storage-client';
 import {
     BadgeCheck,
     Bitcoin,
@@ -26,6 +27,7 @@ import {
 } from 'lucide';
 
 window.Alpine = Alpine;
+window.StorageClient = StorageClient;
 Alpine.start();
 
 const usedIcons = {
