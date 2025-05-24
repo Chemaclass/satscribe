@@ -12,7 +12,7 @@ use RuntimeException;
 final readonly class PriceService
 {
     private const BASE_URL = 'https://api.coingecko.com/api';
-    private const CACHE_KEY = 'btc_price_usd';
+    private const CACHE_KEY = 'btc_prices';
     private const CACHE_TTL_MINUTES = 15;
 
     public function __construct(
@@ -25,14 +25,24 @@ final readonly class PriceService
 
     public function getCurrentBtcPriceUsd(): float
     {
+        return $this->getPrices()['usd'];
+    }
+
+    public function getCurrentBtcPriceEur(): float
+    {
+        return $this->getPrices()['eur'];
+    }
+
+    private function getPrices(): array
+    {
         if (!$this->enabled) {
-            return 0.0;
+            return ['usd' => 0.0, 'eur' => 0.0];
         }
 
         return $this->cache->remember(self::CACHE_KEY, now()->addMinutes(self::CACHE_TTL_MINUTES), function () {
             $response = $this->http->get(self::BASE_URL.'/v3/simple/price', [
                 'ids' => 'bitcoin',
-                'vs_currencies' => 'usd',
+                'vs_currencies' => 'usd,eur',
             ]);
 
             if (!$response->successful()) {
@@ -42,7 +52,10 @@ final readonly class PriceService
                 throw new RuntimeException('Failed to fetch BTC price');
             }
 
-            return (float) $response->json('bitcoin.usd');
+            return [
+                'usd' => (float) $response->json('bitcoin.usd'),
+                'eur' => (float) $response->json('bitcoin.eur'),
+            ];
         });
     }
 }
