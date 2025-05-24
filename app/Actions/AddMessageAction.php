@@ -8,8 +8,8 @@ use App\Models\Message;
 use App\Data\PromptInput;
 use App\Enums\PromptPersona;
 use App\Models\Chat;
-use App\Repositories\ChatRepository;
-use App\Repositories\MessageRepository;
+use App\Repositories\ChatRepositoryInterface;
+use App\Repositories\MessageRepositoryInterface;
 use App\Services\BlockchainService;
 use App\Services\OpenAIService;
 use App\Services\UserInputSanitizer;
@@ -23,8 +23,8 @@ final readonly class AddMessageAction
     public function __construct(
         private BlockchainService $blockchain,
         private OpenAIService $openai,
-        private ChatRepository $chatRepository,
-        private MessageRepository $messageRepository,
+        private ChatRepositoryInterface $chatRepository,
+        private MessageRepositoryInterface $messageRepository,
         private UserInputSanitizer $userInputSanitizer,
         private string $trackingId,
         private int $maxOpenAIAttempts,

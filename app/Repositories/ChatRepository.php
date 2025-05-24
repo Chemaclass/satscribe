@@ -8,10 +8,11 @@ use App\Data\PromptInput;
 use App\Enums\PromptPersona;
 use App\Enums\PromptType;
 use App\Models\Chat;
+use App\Repositories\ChatRepositoryInterface;
 use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Database\Eloquent\Builder;
 
-final readonly class ChatRepository
+final readonly class ChatRepository implements ChatRepositoryInterface
 {
     public function __construct(
         private int $perPage,

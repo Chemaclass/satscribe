@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Repositories\FlaggedWordRepository;
+use App\Repositories\FlaggedWordRepositoryInterface;
 
 final readonly class UserInputSanitizer
 {
     public function __construct(
-        private FlaggedWordRepository $flaggedWordRepository,
+        private FlaggedWordRepositoryInterface $flaggedWordRepository,
     ) {
     }
 

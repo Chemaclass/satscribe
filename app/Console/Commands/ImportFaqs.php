@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Console\Commands;
 
 use Generator;
-use App\Repositories\FaqRepository;
+use App\Repositories\FaqRepositoryInterface;
 use Illuminate\Console\Command;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\LazyCollection;
@@ -17,7 +17,7 @@ final class ImportFaqs extends Command
     protected $description = 'Import FAQ entries from a CSV file into the faqs table';
 
     public function __construct(
-        private readonly FaqRepository $faqRepository,
+        private readonly FaqRepositoryInterface $faqRepository,
     ) {
         parent::__construct();
     }

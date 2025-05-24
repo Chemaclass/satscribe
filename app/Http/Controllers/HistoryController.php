@@ -4,14 +4,14 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Models\Message;
-use App\Repositories\ChatRepository;
+use App\Repositories\ChatRepositoryInterface;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 final class HistoryController
 {
-    public function index(Request $request, ChatRepository $repository): View
+    public function index(Request $request, ChatRepositoryInterface $repository): View
     {
         $showAll = $request->boolean('all');
         $pagination = $repository->getPagination($showAll);

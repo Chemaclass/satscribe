@@ -4,8 +4,9 @@ declare(strict_types=1);
 namespace App\Repositories;
 
 use App\Models\FlaggedWord;
+use App\Repositories\FlaggedWordRepositoryInterface;
 
-final class FlaggedWordRepository
+final class FlaggedWordRepository implements FlaggedWordRepositoryInterface
 {
     /**
      * @return list<string>
