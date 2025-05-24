@@ -5,7 +5,7 @@
     'btcPriceGbp' => null,
 ])
 
-<header class="flex justify-between items-center px-4 py-3 border-gray-200 dark:border-gray-700">
+<header class="flex justify-between select-none items-center px-4 py-3 border-gray-200 dark:border-gray-700">
     <a href="{{ url('/') }}" class="brand text-xl font-bold">Satscribe</a>
 
     <nav class="nav-links flex items-center">
