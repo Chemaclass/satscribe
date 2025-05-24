@@ -1,0 +1,42 @@
+@props([
+    'btcPriceUsd' => null,
+    'btcPriceEur' => null,
+])
+
+<header class="flex justify-between items-center px-4 py-3 border-gray-200 dark:border-gray-700">
+    <a href="{{ url('/') }}" class="brand text-xl font-bold">Satscribe</a>
+
+    <nav class="nav-links flex items-center">
+        <a href="{{ route('faq.index') }}" class="nav-link flex items-center gap-1">
+            <svg data-lucide="lightbulb" class="w-5 h-5"></svg>
+            <span class="link-text">FAQ</span>
+        </a>
+        <a href="{{ route('history.index') }}" class="nav-link flex items-center gap-1">
+            <svg data-lucide="scroll" class="w-5 h-5"></svg>
+            <span class="link-text">History</span>
+        </a>
+        <button class="nav-link flex items-center gap-1" @click="dark = !dark; $nextTick(() => refreshThemeIcon())">
+            <svg :data-lucide="dark ? 'sun' : 'moon'" id="theme-icon" class="w-5 h-5"></svg>
+            <span class="link-text" x-text="dark ? 'Light' : 'Dark'"></span>
+        </button>
+
+        @if(!empty($btcPriceUsd))
+            <div
+                class="nav-link hidden sm:inline-flex items-center gap-1 px-3 py-1 text-sm whitespace-nowrap"
+                x-data="{ currency: 'usd' }"
+            >
+                <span class="cursor-pointer" @click="currency = currency === 'usd' ? 'eur' : 'usd'">
+                    <span x-show="currency === 'usd'" x-cloak>
+                        ${{ number_format($btcPriceUsd, 0) }}
+                    </span>
+                    <span x-show="currency === 'eur'" x-cloak>
+                        &euro;{{ number_format($btcPriceEur, 0) }}
+                    </span>
+                </span>
+                <a href="https://coinmarketcap.com/currencies/bitcoin/" target="_blank" rel="noopener" class="flex items-center">
+                    <svg data-lucide="external-link" class="w-4 h-4"></svg>
+                </a>
+            </div>
+        @endif
+    </nav>
+</header>

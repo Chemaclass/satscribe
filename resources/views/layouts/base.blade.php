@@ -28,77 +28,15 @@
     @stack('head')
 </head>
 <body class="min-h-screen flex flex-col transition-colors duration-300">
-<header class="flex justify-between items-center px-4 py-3 border-gray-200 dark:border-gray-700">
-    <a href="{{ url('/') }}" class="brand text-xl font-bold">Satscribe</a>
-
-    <nav class="nav-links flex items-center">
-        <a href="{{ route('faq.index') }}" class="nav-link flex items-center gap-1">
-            <svg data-lucide="lightbulb" class="w-5 h-5"></svg>
-            <span class="link-text">FAQ</span>
-        </a>
-        <a href="{{ route('history.index') }}" class="nav-link flex items-center gap-1">
-            <svg data-lucide="scroll" class="w-5 h-5"></svg>
-            <span class="link-text">History</span>
-        </a>
-        <button class="nav-link flex items-center gap-1"
-                @click="dark = !dark; $nextTick(() => refreshThemeIcon())">
-            <svg :data-lucide="dark ? 'sun' : 'moon'" id="theme-icon" class="w-5 h-5"></svg>
-            <span class="link-text" x-text="dark ? 'Light' : 'Dark'"></span>
-        </button>
-
-        @if(!empty($btcPriceUsd))
-            <div
-                class="nav-link hidden sm:inline-flex items-center gap-1 px-3 py-1 text-sm whitespace-nowrap"
-                x-data="{ currency: 'usd' }"
-            >
-                <span
-                    class="cursor-pointer"
-                    @click="currency = currency === 'usd' ? 'eur' : 'usd'"
-                >
-                    <span x-show="currency === 'usd'" x-cloak>
-                        ${{ number_format($btcPriceUsd, 0) }}
-                    </span>
-                    <span x-show="currency === 'eur'" x-cloak>
-                        &euro;{{ number_format($btcPriceEur, 0) }}
-                    </span>
-                </span>
-                <a href="https://coinmarketcap.com/currencies/bitcoin/" target="_blank" rel="noopener" class="flex items-center">
-                    <svg data-lucide="external-link" class="w-4 h-4"></svg>
-                </a>
-            </div>
-        @endif
-    </nav>
-</header>
+<x-layout.header :btc-price-usd="$btcPriceUsd" :btc-price-eur="$btcPriceEur" />
 
 <main class="flex-grow">
     @yield('content')
 </main>
 
-<footer class="text-center py-2 border-t border-gray-200 dark:border-gray-700 text-sm text-gray-600 dark:text-gray-400">
-    <div class="flex justify-center items-center gap-2 flex-wrap">
-        <span>&copy;{{ date('Y') }} Built by <a href="https://chemaclass.com/" target="_blank" class="hover:underline">Chema</a></span>
-        <span class="hidden sm:inline">•</span>
-        <a href="https://getalby.com/p/chemaclass" target="_blank" class="flex items-center gap-1 hover:underline">
-            <i data-lucide="bitcoin" class="w-4 h-4 text-orange-500 dark:text-[--btc-orange-dark]"></i>
-            Leave a tip
-        </a>
-        <span class="hidden sm:inline">•</span>
-        <a href="https://github.com/Chemaclass/satscribe" target="_blank" class="flex items-center gap-1 hover:underline">
-            <svg data-lucide="github" class="w-4 h-4"></svg>
-            GitHub
-        </a>
-    </div>
-</footer>
+<x-layout.footer />
 
-<button
-    id="scroll-to-top"
-    type="button"
-    class="fixed bottom-6 right-6 z-50 bg-orange-300 hover:bg-orange-400 text-white rounded-full shadow-lg p-1.5 transition
-               opacity-0 pointer-events-none flex items-center justify-center"
-    aria-label="Scroll to top"
->
-    <i data-lucide="arrow-up" class="w-6 h-6"></i>
-</button>
+<x-layout.scroll-to-top />
 
 @stack('scripts')
 </body>
