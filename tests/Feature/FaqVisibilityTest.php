@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature;
 
 use App\Models\Faq;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-class FaqVisibilityTest extends TestCase
+final class FaqVisibilityTest extends TestCase
 {
     use RefreshDatabase;
 
