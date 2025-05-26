@@ -12,6 +12,7 @@ final class Faq extends Model
         'answer_beginner',
         'answer_advance',
         'answer_tldr',
+        'lang',
         'categories',
         'highlight',
         'priority',

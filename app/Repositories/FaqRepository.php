@@ -10,9 +10,15 @@ use App\Repositories\FaqRepositoryInterface;
 
 final class FaqRepository implements FaqRepositoryInterface
 {
-    public function findByQuestion(string $question): ?object
+    public function findByQuestion(string $question, ?string $lang = null): ?object
     {
-        return DB::table('faqs')->where('question', $question)->first();
+        $query = DB::table('faqs')->where('question', $question);
+
+        if ($lang !== null) {
+            $query->where('lang', $lang);
+        }
+
+        return $query->first();
     }
 
     public function update(int $id, array $data): void
@@ -27,12 +33,14 @@ final class FaqRepository implements FaqRepositoryInterface
 
     public function getCollectionBySearch(string $search): Collection
     {
-        $query = Faq::query();
+        $query = Faq::query()->where('lang', app()->getLocale());
 
         if ($search !== '' && $search !== '0') {
             $query->where(function ($q) use ($search): void {
-                $q->where('title', 'like', "%{$search}%")
-                    ->orWhere('description', 'like', "%{$search}%");
+                $q->where('question', 'like', "%{$search}%")
+                    ->orWhere('answer_tldr', 'like', "%{$search}%")
+                    ->orWhere('answer_advance', 'like', "%{$search}%")
+                    ->orWhere('answer_beginner', 'like', "%{$search}%");
             });
         }
 

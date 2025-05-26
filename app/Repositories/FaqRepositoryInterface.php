@@ -8,7 +8,7 @@ use Illuminate\Support\Collection;
 
 interface FaqRepositoryInterface
 {
-    public function findByQuestion(string $question): ?object;
+    public function findByQuestion(string $question, ?string $lang = null): ?object;
 
     public function update(int $id, array $data): void;
 
