@@ -51,7 +51,7 @@ final class QuestionPlaceholder
 
     public static function rand(): string
     {
-        return collect(self::SAMPLE_QUESTIONS)->flatten()->random();
+        return __(collect(self::SAMPLE_QUESTIONS)->flatten()->random());
     }
 
     /**
@@ -62,7 +62,12 @@ final class QuestionPlaceholder
         $blockPrompts = collect(self::SAMPLE_QUESTIONS['block'])->shuffle()->take(2);
         $bothPrompts = collect(self::SAMPLE_QUESTIONS['both'])->shuffle()->take(1);
 
-        return $blockPrompts->merge($bothPrompts)->shuffle()->values()->all();
+        return $blockPrompts
+            ->merge($bothPrompts)
+            ->shuffle()
+            ->map(fn(string $prompt) => __($prompt))
+            ->values()
+            ->all();
     }
 
     /**
@@ -73,7 +78,12 @@ final class QuestionPlaceholder
         $blockPrompts = collect(self::SAMPLE_QUESTIONS['transaction'])->shuffle()->take(2);
         $bothPrompts = collect(self::SAMPLE_QUESTIONS['both'])->shuffle()->take(1);
 
-        return $blockPrompts->merge($bothPrompts)->shuffle()->values()->all();
+        return $blockPrompts
+            ->merge($bothPrompts)
+            ->shuffle()
+            ->map(fn(string $prompt) => __($prompt))
+            ->values()
+            ->all();
     }
 
     /**
@@ -82,7 +92,12 @@ final class QuestionPlaceholder
     public static function groupedPrompts(): array
     {
         return collect(self::SAMPLE_QUESTIONS)
-            ->map(fn(array $prompts) => collect($prompts)->shuffle()->take(2))
+            ->map(fn(array $prompts) => collect($prompts)
+                ->shuffle()
+                ->take(2)
+                ->map(fn(string $prompt) => __($prompt))
+                ->values()
+            )
             ->all();
     }
 }
