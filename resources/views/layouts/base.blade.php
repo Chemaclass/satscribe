@@ -16,6 +16,14 @@
     if (localStorage.getItem('theme') === 'dark') {
         document.documentElement.classList.add('dark');
     }
+    window.i18n = {
+        showMore: "{{ __('Show more') }}",
+        showLess: "{{ __('Show less') }}",
+        showRawData: "{{ __('Show raw data') }}",
+        hideRawData: "{{ __('Hide raw data') }}",
+        hide: "{{ __('Hide') }}",
+        raw: "{{ __('Raw') }}"
+    };
     </script>
     <x-preload-assets />
     @if(isset($cronitorClientKey))
@@ -25,16 +33,6 @@
         cronitor('config', { clientKey: '{{$cronitorClientKey}}' });
     </script>
     @endif
-    <script>
-        window.i18n = {
-            showMore: "{{ __('Show more') }}",
-            showLess: "{{ __('Show less') }}",
-            showRawData: "{{ __('Show raw data') }}",
-            hideRawData: "{{ __('Hide raw data') }}",
-            hide: "{{ __('Hide') }}",
-            raw: "{{ __('Raw') }}"
-        };
-    </script>
     @stack('head')
 </head>
 <body class="min-h-screen flex flex-col transition-colors duration-300">

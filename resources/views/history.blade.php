@@ -51,8 +51,13 @@
                     const fullLabel = button.querySelector('.full-label');
                     const shortLabel = button.querySelector('.short-label');
 
-                    if (fullLabel) fullLabel.textContent = isCollapsed ? {{ json_encode(__('Show full response')) }} : {{ json_encode(__('Hide full response')) }};
-                    if (shortLabel) shortLabel.textContent = isCollapsed ? {{ json_encode(__('Full')) }} : {{ json_encode(__('Hide')) }};
+                    if (fullLabel) fullLabel.textContent = isCollapsed
+                        ? {!! json_encode(__('Show full response')) !!}
+                        : {!! json_encode(__('Hide full response')) !!};
+
+                    if (shortLabel) shortLabel.textContent = isCollapsed
+                        ? {!! json_encode(__('Full')) !!}
+                        : {!! json_encode(__('Hide')) !!};
                 }
             };
 
