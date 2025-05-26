@@ -9,13 +9,13 @@ use App\Actions\AlbySettleWebhookAction;
 use App\Actions\CreateChatAction;
 use App\Http\Middleware\IpRateLimiter;
 use App\Repositories\ChatRepository;
-use App\Repositories\MessageRepository;
-use App\Repositories\FaqRepository;
-use App\Repositories\FlaggedWordRepository;
 use App\Repositories\ChatRepositoryInterface;
-use App\Repositories\MessageRepositoryInterface;
+use App\Repositories\FaqRepository;
 use App\Repositories\FaqRepositoryInterface;
+use App\Repositories\FlaggedWordRepository;
 use App\Repositories\FlaggedWordRepositoryInterface;
+use App\Repositories\MessageRepository;
+use App\Repositories\MessageRepositoryInterface;
 use App\Services\Alby\AlbyClient;
 use App\Services\Alby\AlbyClientInterface;
 use App\Services\BlockHeightProvider;
@@ -36,89 +36,18 @@ final class AppServiceProvider extends ServiceProvider
         FlaggedWordRepositoryInterface::class => FlaggedWordRepository::class,
     ];
 
-    /**
-     * Register any application services.
-     */
     public function register(): void
     {
-        $this->app
-            ->when(CreateChatAction::class)
-            ->needs('$trackingId')
-            ->give(tracking_id());
-
-        $this->app
-            ->when(CreateChatAction::class)
-            ->needs('$maxOpenAIAttempts')
-            ->giveConfig('services.openai.max_attempts');
-
-        $this->app
-            ->when(AddMessageAction::class)
-            ->needs('$trackingId')
-            ->give(tracking_id());
-
-        $this->app
-            ->when(AddMessageAction::class)
-            ->needs('$maxOpenAIAttempts')
-            ->giveConfig('services.openai.max_attempts');
-
-        $this->app
-            ->when(OpenAIService::class)
-            ->needs('$openAiApiKey')
-            ->giveConfig('services.openai.key');
-
-        $this->app
-            ->when(OpenAIService::class)
-            ->needs('$openAiModel')
-            ->giveConfig('services.openai.model');
-
-        $this->app
-            ->when(PriceService::class)
-            ->needs('$enabled')
-            ->giveConfig('features.btc_price');
-
-        $this->app
-            ->when(BlockHeightProvider::class)
-            ->needs('$enabled')
-            ->giveConfig('features.btc_block_height');
-
-        $this->app
-            ->when(IpRateLimiter::class)
-            ->needs('$maxAttempts')
-            ->giveConfig('services.rate_limit.max_attempts');
-
-        $this->app
-            ->when(ChatRepository::class)
-            ->needs('$perPage')
-            ->giveConfig('app.pagination.per_page');
-
-        $this->app
-            ->when(ChatRepository::class)
-            ->needs('$trackingId')
-            ->give(tracking_id());
-
-        $this->app
-            ->when(IpRateLimiter::class)
-            ->needs('$lnInvoiceAmountInSats')
-            ->giveConfig('services.rate_limit.invoice_amount');
-
-        $this->app
-            ->when(IpRateLimiter::class)
-            ->needs('$lnInvoiceExpirySeconds')
-            ->giveConfig('services.rate_limit.invoice_expiry');
-
-        $this->app
-            ->when(AlbyClient::class)
-            ->needs('$accessToken')
-            ->giveConfig('services.alby.api_key');
-        $this->app
-            ->when(AlbySettleWebhookAction::class)
-            ->needs('$webhookSecret')
-            ->giveConfig('services.alby.webhook_secret');
+        $this->registerBindingsForCreateChatAction();
+        $this->registerBindingsForAddMessageAction();
+        $this->registerBindingsForOpenAIService();
+        $this->registerBindingsForPriceService();
+        $this->registerBindingsForBlockHeightProvider();
+        $this->registerBindingsForIpRateLimiter();
+        $this->registerBindingsForChatRepository();
+        $this->registerBindingsForAlbyClient();
     }
 
-    /**
-     * Bootstrap any application services.
-     */
     public function boot(): void
     {
         if (app()->environment('prod')) {
@@ -134,5 +63,89 @@ final class AppServiceProvider extends ServiceProvider
         View::share('btcPriceEur', $priceService->getCurrentBtcPriceEur());
         View::share('btcPriceCny', $priceService->getCurrentBtcPriceCny());
         View::share('btcPriceGbp', $priceService->getCurrentBtcPriceGbp());
+    }
+
+    private function registerBindingsForCreateChatAction(): void
+    {
+        $this->app->when(CreateChatAction::class)
+            ->needs('$trackingId')
+            ->give(tracking_id());
+
+        $this->app->when(CreateChatAction::class)
+            ->needs('$maxOpenAIAttempts')
+            ->giveConfig('services.openai.max_attempts');
+    }
+
+    private function registerBindingsForAddMessageAction(): void
+    {
+        $this->app->when(AddMessageAction::class)
+            ->needs('$trackingId')
+            ->give(tracking_id());
+
+        $this->app->when(AddMessageAction::class)
+            ->needs('$maxOpenAIAttempts')
+            ->giveConfig('services.openai.max_attempts');
+    }
+
+    private function registerBindingsForOpenAIService(): void
+    {
+        $this->app->when(OpenAIService::class)
+            ->needs('$openAiApiKey')
+            ->giveConfig('services.openai.key');
+
+        $this->app->when(OpenAIService::class)
+            ->needs('$openAiModel')
+            ->giveConfig('services.openai.model');
+    }
+
+    private function registerBindingsForPriceService(): void
+    {
+        $this->app->when(PriceService::class)
+            ->needs('$enabled')
+            ->giveConfig('features.btc_price');
+    }
+
+    private function registerBindingsForBlockHeightProvider(): void
+    {
+        $this->app->when(BlockHeightProvider::class)
+            ->needs('$enabled')
+            ->giveConfig('features.btc_block_height');
+    }
+
+    private function registerBindingsForIpRateLimiter(): void
+    {
+        $this->app->when(IpRateLimiter::class)
+            ->needs('$maxAttempts')
+            ->giveConfig('services.rate_limit.max_attempts');
+
+        $this->app->when(IpRateLimiter::class)
+            ->needs('$lnInvoiceAmountInSats')
+            ->giveConfig('services.rate_limit.invoice_amount');
+
+        $this->app->when(IpRateLimiter::class)
+            ->needs('$lnInvoiceExpirySeconds')
+            ->giveConfig('services.rate_limit.invoice_expiry');
+    }
+
+    private function registerBindingsForChatRepository(): void
+    {
+        $this->app->when(ChatRepository::class)
+            ->needs('$perPage')
+            ->giveConfig('app.pagination.per_page');
+
+        $this->app->when(ChatRepository::class)
+            ->needs('$trackingId')
+            ->give(tracking_id());
+    }
+
+    private function registerBindingsForAlbyClient(): void
+    {
+        $this->app->when(AlbyClient::class)
+            ->needs('$accessToken')
+            ->giveConfig('services.alby.api_key');
+
+        $this->app->when(AlbySettleWebhookAction::class)
+            ->needs('$webhookSecret')
+            ->giveConfig('services.alby.webhook_secret');
     }
 }
