@@ -14,6 +14,9 @@ final class FaqController
     {
         $search = $request->input('search', '');
         $faqs = $repository->getCollectionBySearch($search);
+        if ($faqs->isEmpty()) {
+            abort(404);
+        }
         $categories = $repository->getCategories($faqs);
 
         return view('faq', [

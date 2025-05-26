@@ -41,6 +41,7 @@
         :btc-price-eur="$btcPriceEur"
         :btc-price-cny="$btcPriceCny"
         :btc-price-gbp="$btcPriceGbp"
+        :has-faqs="$hasFaqs"
     />
 
     <main class="flex-grow">

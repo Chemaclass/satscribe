@@ -49,6 +49,11 @@ final class FaqRepository implements FaqRepositoryInterface
             ->get();
     }
 
+    public function hasAny(string $lang): bool
+    {
+        return DB::table('faqs')->where('lang', $lang)->exists();
+    }
+
     /**
      * @param  Collection<int, Faq>  $faqs
      * @return  Collection<int, string>

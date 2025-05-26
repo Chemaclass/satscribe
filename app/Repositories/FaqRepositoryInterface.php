@@ -16,6 +16,8 @@ interface FaqRepositoryInterface
 
     public function getCollectionBySearch(string $search): Collection;
 
+    public function hasAny(string $lang): bool;
+
     /**
      * @param  Collection<int, mixed>  $faqs
      * @return Collection<int, string>

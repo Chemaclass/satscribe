@@ -3,16 +3,19 @@
     'btcPriceEur' => null,
     'btcPriceCny' => null,
     'btcPriceGbp' => null,
+    'hasFaqs' => true,
 ])
 
 <header class="flex justify-between select-none items-center px-4 py-3 border-gray-200 dark:border-gray-700">
     <a href="{{ url('/') }}" class="brand text-xl font-bold">Satscribe</a>
 
     <nav class="nav-links flex items-center">
-        <a href="{{ route('faq.index') }}" class="nav-link flex items-center gap-1">
-            <svg data-lucide="lightbulb" class="w-5 h-5"></svg>
-            <span class="link-text">{{ __('FAQ') }}</span>
-        </a>
+        @if($hasFaqs)
+            <a href="{{ route('faq.index') }}" class="nav-link flex items-center gap-1">
+                <svg data-lucide="lightbulb" class="w-5 h-5"></svg>
+                <span class="link-text">{{ __('FAQ') }}</span>
+            </a>
+        @endif
         <a href="{{ route('history.index') }}" class="nav-link flex items-center gap-1">
             <svg data-lucide="scroll" class="w-5 h-5"></svg>
             <span class="link-text">{{ __('History') }}</span>
