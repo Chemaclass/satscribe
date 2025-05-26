@@ -63,5 +63,11 @@
     "Dark": "Dunkel",
     "No history yet!": "Noch keine Historie!",
     "Your history is empty — start your first Bitcoin analysis and be part of the collective knowledge.": "Deine Historie ist leer – starte deine erste Bitcoin-Analyse und werde Teil des gemeinsamen Wissens.",
+    "persona.educator.label": "🧑‍🏫 Lehrer",
+    "persona.developer.label": "💻 Entwickler",
+    "persona.storyteller.label": "📖 Geschichtenerzähler",
+    "persona.educator.description": "Vermittle Bitcoin-Konzepte klar und strukturiert",
+    "persona.developer.description": "Erkläre Bitcoin-Interna mit technischer Präzision",
+    "persona.storyteller.description": "Vermittle Bitcoin-Einblicke durch Geschichten und Metaphern",
     "Start Satscribing": "Starte Satscribing"
 }

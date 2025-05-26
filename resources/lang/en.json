@@ -63,5 +63,11 @@
     "Dark": "Dark",
     "No history yet!": "No history yet!",
     "Your history is empty — start your first Bitcoin analysis and be part of the collective knowledge.": "Your history is empty — start your first Bitcoin analysis and be part of the collective knowledge.",
+    "persona.educator.label": "🧑‍🏫 Educator",
+    "persona.developer.label": "💻 Developer",
+    "persona.storyteller.label": "📖 Storyteller",
+    "persona.educator.description": "Teach Bitcoin concepts with clarity and structure",
+    "persona.developer.description": "Explain Bitcoin internals with technical precision",
+    "persona.storyteller.description": "Share Bitcoin insights through stories and metaphor",
     "Start Satscribing": "Start Satscribing"
 }

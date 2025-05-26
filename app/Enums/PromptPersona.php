@@ -24,20 +24,12 @@ enum PromptPersona: string
 
     public function label(): string
     {
-        return match ($this) {
-            self::Educator => '🧑‍🏫 Educator',
-            self::Developer => '💻 Developer',
-            self::Storyteller => '📖 Storyteller',
-        };
+        return __("persona.{$this->value}.label");
     }
 
     public function description(): string
     {
-        return match ($this) {
-            self::Educator => 'Teach Bitcoin concepts with clarity and structure',
-            self::Developer => 'Explain Bitcoin internals with technical precision',
-            self::Storyteller => 'Share Bitcoin insights through stories and metaphor',
-        };
+        return __("persona.{$this->value}.description");
     }
 
     public static function options(): array
@@ -61,6 +53,9 @@ enum PromptPersona: string
             self::Storyteller => 'You are a Bitcoin storyteller. Your goal is to explain Bitcoin through metaphor, character, and narrative, especially for younger or curious minds.',
         };
 
+        // todo: refactor extract logic to service
+        $language = self::languageName(app()->getLocale());
+
         return <<<PROMPT
 {$personaIntro}
 
@@ -69,6 +64,7 @@ Your role is to craft an insightful, persona-aligned response.
 - Always end responses gracefully — never cut off mid-sentence or leave hanging thoughts.
 - Use the structured blockchain data for CONTEXT ONLY — do not mirror or mechanically list it.
 - Keep each answer short and direct; avoid filler or repetition.
+- Respond in {$language}.
 PROMPT;
     }
 
@@ -140,6 +136,15 @@ Global Writing Guidelines:
 - Express any calculations in plain language using numbers.
 - Keep the entire response under 150 words whenever possible.
 TEXT;
+    }
+
+    private static function languageName(string $locale): string
+    {
+        return match ($locale) {
+            'de' => 'German',
+            'es' => 'Spanish',
+            default => 'English',
+        };
     }
 
     public function maxTokens(): int
