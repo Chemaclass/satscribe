@@ -83,7 +83,7 @@ function setupBlockchainToggle() {
 
     toggleBtn.addEventListener('click', () => {
         const collapsed = rawBlock.classList.toggle('collapsed');
-        toggleBtn.textContent = collapsed ? 'Show more' : 'Show less';
+        toggleBtn.textContent = collapsed ? window.i18n.showMore : window.i18n.showLess;
     });
 }
 
@@ -109,7 +109,7 @@ const toggleRawBlockVisibility = (button, rawBlock, visible) => {
     const fullSpan = button.querySelector('.full-label');
     const shortSpan = button.querySelector('.short-label');
 
-    if (fullSpan) fullSpan.textContent = visible ? window.i18n.hideRaw : window.i18n.showRaw;
+    if (fullSpan) fullSpan.textContent = visible ? window.i18n.hideRawData : window.i18n.showRawData;
     if (shortSpan) shortSpan.textContent = visible ? window.i18n.hide : window.i18n.raw;
 };
 

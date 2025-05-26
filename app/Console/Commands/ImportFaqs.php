@@ -75,12 +75,14 @@ final class ImportFaqs extends Command
     private function processRow(array $row, Carbon $now, array &$rows): void
     {
         $question = $row['question'] ?? '';
-        $existing = $this->faqRepository->findByQuestion($question);
+        $lang = $row['lang'] ?? 'en';
+        $existing = $this->faqRepository->findByQuestion($question, $lang);
 
         $data = [
             'answer_beginner' => $row['answer_beginner'] ?? '',
             'answer_advance' => $row['answer_advance'] ?? '',
             'answer_tldr' => $row['answer_tldr'] ?? '',
+            'lang' => $lang,
             'categories' => $row['categories'] ?? '',
             'highlight' => filter_var($row['highlight'] ?? false, FILTER_VALIDATE_BOOLEAN),
             'priority' => (int) ($row['priority'] ?? 0),

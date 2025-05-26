@@ -11,5 +11,11 @@
             <svg data-lucide="github" class="w-4 h-4"></svg>
             {{ __('GitHub') }}
         </a>
+        <span class="hidden sm:inline">•</span>
+        <select class="nav-link" onchange="const p=new URLSearchParams(window.location.search);p.set('lang', this.value);window.location.search=p.toString();">
+            <option value="en" @selected(app()->getLocale()==='en')>EN</option>
+            <option value="de" @selected(app()->getLocale()==='de')>DE</option>
+            <option value="es" @selected(app()->getLocale()==='es')>ES</option>
+        </select>
     </div>
 </footer>
