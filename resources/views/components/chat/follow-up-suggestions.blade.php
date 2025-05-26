@@ -18,7 +18,7 @@
     x-data="{ suggestions: @js($filteredSuggestions ?? []) }"
 >
     <div class="mt-4">
-        <p class="text-sm font-medium mb-2">Or try one of these</p>
+        <p class="text-sm font-medium mb-2">{{ __('Or try one of these') }}</p>
         <div class="flex flex-wrap gap-2">
             <template x-for="suggestion in suggestions" :key="suggestion">
                 <form @submit.prevent="sendMessageToChat('{{ $chat->ulid }}', suggestion)" class="inline">

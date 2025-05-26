@@ -83,15 +83,15 @@
             <button type="button"
                     class="toggle-chat-btn link"
                     data-target="{{ $entryId }}">
-                <span class="full-label hidden sm:inline">Show full response</span>
-                <span class="short-label inline sm:hidden">Full</span>
+                <span class="full-label hidden sm:inline">{{ __('Show full response') }}</span>
+                <span class="short-label inline sm:hidden">{{ __('Full') }}</span>
             </button>
             <button type="button"
                     class="toggle-history-raw-btn link"
                     data-target="raw-{{ $assistantMsg->id }}"
                     data-id="{{ $assistantMsg->id }}">
-                <span class="full-label hidden sm:inline">Show raw data</span>
-                <span class="short-label inline sm:hidden">Raw</span>
+                <span class="full-label hidden sm:inline">{{ __('Show raw data') }}</span>
+                <span class="short-label inline sm:hidden">{{ __('Raw') }}</span>
             </button>
         </div>
     </div>

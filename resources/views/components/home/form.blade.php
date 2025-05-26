@@ -32,7 +32,7 @@
             @csrf
 
             <fieldset>
-                <legend id="form-heading" class="sr-only">Describe Bitcoin Data</legend>
+                <legend id="form-heading" class="sr-only">{{ __('Describe Bitcoin Data') }}</legend>
 
                 {{-- Search input --}}
                 <div class="flex gap-2 items-start">
@@ -47,7 +47,7 @@
                             autocomplete="off"
                             spellcheck="false"
                             class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-                            placeholder="Enter txid or block height"
+                            placeholder="{{ __('Enter txid or block height') }}"
                         />
                     </div>
 
@@ -67,8 +67,8 @@
                         @click="showAdvanced = !showAdvanced"
                     >
                         <i data-lucide="sliders-horizontal"></i>
-                        <span x-show="!showAdvanced">Show advanced fields ▾</span>
-                        <span x-show="showAdvanced">Hide advanced fields ▴</span>
+                        <span x-show="!showAdvanced">{{ __('Show advanced fields') }} ▾</span>
+                        <span x-show="showAdvanced">{{ __('Hide advanced fields') }} ▴</span>
                     </button>
 
                     <div
@@ -86,7 +86,7 @@
                             class="space-y-2"
                         >
                             <label for="persona" class="persona-label block text-sm font-medium mb-1">
-                                AI Persona
+                                {{ __('AI Persona') }}
                             </label>
 
                             <input type="hidden" name="persona" :value="selectedPersona">
@@ -112,21 +112,21 @@
                         {{-- Optional question + Suggested Prompts --}}
                         <div class="form-section mb-6">
                             <label for="question" class="block text-sm font-medium text-gray-900 mb-1">
-                                Ask a Question
+                                {{ __('Ask a Question') }}
                             </label>
                             <input
                                 type="text"
                                 id="question"
                                 name="question"
                                 value="{{ $question }}"
-                                placeholder="{{ $questionPlaceholder ?? 'Compare with the previous block' }}"
+                                placeholder="{{ __($questionPlaceholder ?? 'Compare with the previous block') }}"
                                 class="form-input w-full"
                                 aria-describedby="questionHelp"
                                 autocomplete="off"
                                 maxlength="200"
                             >
                             <small id="questionHelp" class="text-gray-600 text-sm mt-1 block mb-2">
-                                Ask the AI a specific question about this transaction or block.
+                                {{ __('Ask the AI a specific question about this transaction or block.') }}
                             </small>
 
                             {{-- Suggested Prompts inline --}}
@@ -176,9 +176,9 @@
                             >
                             <label for="refresh"
                                    class="block text-sm font-medium text-gray-900 mb-1 cursor-pointer">
-                                Fetch the latest data from the blockchain<br>
+                                {{ __('Fetch the latest data from the blockchain') }}<br>
                                 <small class="checkbox-help text-gray-600 dark:text-gray-400">
-                                    (Skips cached data and requests fresh live data from the blockchain and OpenAI)
+                                    {{ __('(Skips cached data and requests fresh live data from the blockchain and OpenAI)') }}
                                 </small>
                             </label>
                         </div>
@@ -194,9 +194,9 @@
                             >
                             <label for="private"
                                    class="block text-sm font-medium text-gray-900 mb-1 cursor-pointer">
-                                Keep this chat private<br>
+                                {{ __('Keep this chat private') }}<br>
                                 <small class="checkbox-help text-gray-600 dark:text-gray-400">
-                                    (When enabled, this chat will not appear in the public archive)
+                                    {{ __('(When enabled, this chat will not appear in the public archive)') }}
                                 </small>
                             </label>
                         </div>
@@ -215,9 +215,9 @@
                             <i data-lucide="zap" class="w-4 h-4"></i>
                         </span>
                         @if($isChat)
-                            <span>Start a new chat</span>
+                            <span>{{ __('Start a new chat') }}</span>
                         @else
-                            <span x-text="hasSubmitted ? 'Start a new chat' : 'Satscribe'"></span>
+                            <span x-text="hasSubmitted ? '{{ __('Start a new chat') }}' : 'Satscribe'"></span>
                         @endif
                     </button>
 
@@ -227,10 +227,10 @@
                         @click="fetchRandomBlock()"
                         :disabled="isSubmitting"
                         class="w-1/4 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md flex items-center justify-center gap-2 cursor-pointer"
-                        title="Get a random block"
+                        title="{{ __('Get a random block') }}"
                     >
                         <i data-lucide="shuffle" class="w-4 h-4"></i>
-                        <span class="hidden md:inline"> Random</span>
+                        <span class="hidden md:inline"> {{ __('Random') }}</span>
                     </button>
                 </div>
             </fieldset>
