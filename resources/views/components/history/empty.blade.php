@@ -5,11 +5,11 @@
         <circle cx="17" cy="21" r="2" fill="currentColor"/>
         <circle cx="31" cy="21" r="2" fill="currentColor"/>
     </svg>
-    <h2 class="text-xl font-semibold mb-2">No history yet!</h2>
+    <h2 class="text-xl font-semibold mb-2">{{ __('No history yet!') }}</h2>
     <p class="mb-4">
-        Your history is empty — start your first Bitcoin analysis and be part of the collective knowledge.
+        {{ __('Your history is empty — start your first Bitcoin analysis and be part of the collective knowledge.') }}
     </p>
     <a href="{{ url('/') }}" class="form-button">
-        Start Satscribing
+        {{ __('Start Satscribing') }}
     </a>
 </div>

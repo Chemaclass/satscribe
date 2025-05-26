@@ -7,7 +7,7 @@
             x-model="message"
             @input="errorFollowUpQuestion = ''"
             class="w-3/4 p-2 border rounded"
-            placeholder="Ask a follow-up question..."
+            placeholder="{{ __('Ask a follow-up question...') }}"
             autocomplete="off"
         />
         <button
@@ -17,7 +17,7 @@
             <span class="submit-icon mr-2" x-cloak>
                 <i data-lucide="send" class="w-4 h-4"></i>
             </span>
-            <span class="submit-text" x-cloak>Send</span>
+            <span class="submit-text" x-cloak>{{ __('Send') }}</span>
         </button>
     </form>
     <template x-if="errorFollowUpQuestion">

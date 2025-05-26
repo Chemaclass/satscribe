@@ -3,27 +3,27 @@
 @section('content')
     <section class="faq-section px-4 sm:px-6 lg:px-8 py-6" x-data="faqSection()">
         {{-- Header --}}
-        <x-page.header title="Frequently Asked Questions">
+        <x-page.header title="{{ __('Frequently Asked Questions') }}">
             <p class="mt-3 text-base sm:text-lg subtitle leading-relaxed">
-                <strong>Satscribe</strong> helps you make sense of the Bitcoin blockchain—whether you’re new to it
-                or diving into the technical details. Just enter a transaction ID or block height to receive an
-                AI-generated explanation in plain English.
+                <strong>Satscribe</strong> {{ __('helps you make sense of the Bitcoin blockchain—whether you’re new to it') }}
+                {{ __('or diving into the technical details. Just enter a transaction ID or block height to receive an') }}
+                {{ __('AI-generated explanation in plain English.') }}
             </p>
 
             <p class="mt-3 text-base sm:text-lg subtitle leading-relaxed">
-                From quick summaries to deeper insights, Satscribe turns raw blockchain data into something anyone
-                can understand.
+                {{ __('From quick summaries to deeper insights, Satscribe turns raw blockchain data into something anyone') }}
+                {{ __('can understand.') }}
             </p>
             <p class="subtitle text-base sm:text-lg text-gray-700 dark:text-gray-400 mt-4">
-                Use the search or browse by topic to explore more.
+                {{ __('Use the search or browse by topic to explore more.') }}
             </p>
         </x-page.header>
 
         {{-- Search & Filter --}}
         <div class="flex flex-col sm:flex-row gap-4 mb-1">
-            <input type="text" placeholder="Search FAQs..." class="form-input w-full sm:w-2/3" x-model="search">
+            <input type="text" placeholder="{{ __('Search FAQs...') }}" class="form-input w-full sm:w-2/3" x-model="search">
             <select class="form-select sm:w-1/3 cursor-pointer" x-model="category">
-                <option value="">All Categories</option>
+                <option value="">{{ __('All Categories') }}</option>
                 @foreach ($categories as $cat)
                     <option value="{{ $cat }}">{{ ucfirst(trim($cat)) }}</option>
                 @endforeach
@@ -32,10 +32,10 @@
 
         {{-- Answer Type Tabs --}}
         <div class="flex mt-4 gap-2 mb-4 text-sm items-center">
-            <span class="text-xs" title="Choose the level of detail in answers">Answer style:</span>
+            <span class="text-xs" title="Choose the level of detail in answers">{{ __('Answer style:') }}</span>
             @foreach ([
-                'tldr' => ['icon' => 'scissors', 'label' => 'TL;DR'],
-                'advance' => ['icon' => 'laptop', 'label' => 'Detailed'],
+                'tldr' => ['icon' => 'scissors', 'label' => __('TL;DR')],
+                'advance' => ['icon' => 'laptop', 'label' => __('Detailed')],
             ] as $level => $meta)
                 <button
                     class="answer-level-btn font-medium"
@@ -96,7 +96,7 @@
                     <template x-if="faq.link">
                         <a :href="faq.link" target="_blank"
                            class="text-sm text-orange-600 hover:underline inline-block mt-2 dark:text-orange-400">
-                            Learn more
+                            {{ __('Learn more') }}
                         </a>
                     </template>
                 </div>

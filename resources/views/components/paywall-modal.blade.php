@@ -26,7 +26,7 @@
             class="fixed top-6 right-6 bg-orange-400 text-white text-sm px-4 py-2 rounded shadow-lg z-50"
             style="display: none;"
         >
-            Invoice Copied!
+            {{ __('Invoice Copied!') }}
         </div>
 
         <!-- Main content -->
@@ -41,7 +41,7 @@
             <div x-show="invoice?.qr_code_svg" x-transition class="flex justify-center">
                 <img
                     :src="invoice.qr_code_svg"
-                    alt="Lightning Invoice QR"
+                    alt="{{ __('Lightning Invoice QR') }}"
                     class="w-64 h-64 object-contain rounded-lg shadow-lg bg-white p-2 ring-1 ring-gray-300 cursor-pointer"
                     @click="copyInvoice"
                 />
@@ -56,7 +56,7 @@
                     @click="copyInvoice"
                     class="ml-3 bg-orange-500 hover:bg-orange-600 text-white text-xs font-semibold px-4 py-1.5 rounded transition"
                 >
-                    Copy
+                    {{ __('Copy') }}
                 </button>
             </div>
 
@@ -71,7 +71,7 @@
                     @click="closeModal"
                     class="w-full bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded-md transition font-semibold"
                 >
-                    Close
+                    {{ __('Close') }}
                 </button>
             </div>
         </div>
@@ -133,7 +133,7 @@
                         <span class="font-semibold">Scribe</span>
                     </div>
                     <div class="inline-block rounded px-3 py-2 text-orange-700">
-                        Request cancelled.
+                        {{ __('Request cancelled.') }}
                     </div>
                     `;
                     el.classList.remove('loading-spinner-group');

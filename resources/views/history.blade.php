@@ -6,16 +6,16 @@
     <section id="history" class="sm:px-6 lg:px-8 px-4 py-6">
         {{-- Header --}}
         <x-page.header
-            title="History"
+            title="{{ __('History') }}"
             titleClass="text-3xl sm:text-4xl font-bold leading-tight"
         >
             <p class="text-lg mt-2">
-                From detailed tx investigations to high-level block summaries.
+                {{ __('From detailed tx investigations to high-level block summaries.') }}
                 <br class="hidden sm:block">
                 <small>
-                    Dive into personal insights or
-                    <a href="{{ route('history.index', ['all' => 1]) }}">browse the archive</a>
-                    of the community. Discover how others interpret txs and blocks.
+                    {{ __('Dive into personal insights or') }}
+                    <a href="{{ route('history.index', ['all' => 1]) }}">{{ __('browse the archive') }}</a>
+                    {{ __('of the community. Discover how others interpret txs and blocks.') }}
                 </small>
             </p>
         </x-page.header>
@@ -51,8 +51,8 @@
                     const fullLabel = button.querySelector('.full-label');
                     const shortLabel = button.querySelector('.short-label');
 
-                    if (fullLabel) fullLabel.textContent = isCollapsed ? 'Show full response' : 'Hide full response';
-                    if (shortLabel) shortLabel.textContent = isCollapsed ? 'Full' : 'Hide';
+                    if (fullLabel) fullLabel.textContent = isCollapsed ? {{ json_encode(__('Show full response')) }} : {{ json_encode(__('Hide full response')) }};
+                    if (shortLabel) shortLabel.textContent = isCollapsed ? {{ json_encode(__('Full')) }} : {{ json_encode(__('Hide')) }};
                 }
             };
 
