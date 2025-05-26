@@ -76,7 +76,7 @@ final readonly class OpenAIService
         PromptPersona $persona
     ): string {
         return implode("\n\n", array_filter([
-            ($question === '' || $question === HomeIndexRequest::DEFAULT_USER_QUESTION)
+            ($question === '' || $question === __(HomeIndexRequest::DEFAULT_USER_QUESTION))
                 ? $this->buildDefaultInsightPrompt($type, $persona)
                 : $this->buildQuestionPrompt($question),
 

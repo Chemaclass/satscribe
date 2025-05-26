@@ -100,7 +100,7 @@
                         window.__LAST_REQUEST__ = this.lastRequest;
 
                         const rawQuestion = formData.get('question');
-                        const userMessage = rawQuestion?.trim() ? rawQuestion.trim() : 'Give me a generic overview.';
+                        const userMessage = rawQuestion?.trim() ? rawQuestion.trim() : @js(__('Give me a generic overview.'));
 
                         // Render user input
                         const userHtml = `

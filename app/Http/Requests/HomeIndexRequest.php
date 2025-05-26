@@ -46,7 +46,7 @@ final class HomeIndexRequest extends FormRequest
     public function getQuestionInput(): string
     {
         return trim((string) $this->string('question'))
-            ?: self::DEFAULT_USER_QUESTION;
+            ?: __(self::DEFAULT_USER_QUESTION);
     }
 
     public function getPersonaInput(): string
