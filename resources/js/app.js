@@ -109,8 +109,8 @@ const toggleRawBlockVisibility = (button, rawBlock, visible) => {
     const fullSpan = button.querySelector('.full-label');
     const shortSpan = button.querySelector('.short-label');
 
-    if (fullSpan) fullSpan.textContent = visible ? 'Hide raw data' : 'Show raw data';
-    if (shortSpan) shortSpan.textContent = visible ? 'Hide' : 'Raw';
+    if (fullSpan) fullSpan.textContent = visible ? window.i18n.hideRaw : window.i18n.showRaw;
+    if (shortSpan) shortSpan.textContent = visible ? window.i18n.hide : window.i18n.raw;
 };
 
 const loadRawData = async (messageId) => {

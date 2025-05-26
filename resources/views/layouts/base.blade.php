@@ -16,6 +16,12 @@
     if (localStorage.getItem('theme') === 'dark') {
         document.documentElement.classList.add('dark');
     }
+    window.i18n = {
+        showRaw: @json(__('Show raw data')),
+        hideRaw: @json(__('Hide raw data')),
+        raw: @json(__('Raw')),
+        hide: @json(__('Hide'))
+    };
     </script>
     <x-preload-assets />
     @if(isset($cronitorClientKey))
