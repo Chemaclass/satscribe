@@ -398,38 +398,10 @@
                     hideChatFormContainer();
 
                     return new Promise(resolve => {
-                        const paragraphs = markdownText.split(/\n{2,}/); // Split by double newlines
-                        let paragraphIndex = 0;
-
-                        function typeParagraph(paragraph) {
-                            let i = 0;
-                            let currentText = '';
-                            const span = document.createElement('div'); // block-level for each paragraph
-                            element.appendChild(span);
-
-                            const tick = () => {
-                                if (i <= paragraph.length) {
-                                    currentText = paragraph.slice(0, i);
-                                    span.innerHTML = marked.parseInline(currentText);
-                                    i++;
-                                    setTimeout(tick, delay);
-                                } else {
-                                    span.innerHTML = marked.parse(paragraph);
-                                    paragraphIndex++;
-                                    if (paragraphIndex < paragraphs.length) {
-                                        setTimeout(() => {
-                                            typeParagraph(paragraphs[paragraphIndex]);
-                                        }, delay);
-                                    } else {
-                                        showChatFormContainer();
-                                        resolve();
-                                    }
-                                }
-                            };
-                            tick();
-                        }
-
-                        typeParagraph(paragraphs[paragraphIndex]);
+                        // Immediately render the full markdown text without typing effect
+                        element.innerHTML = marked.parse(markdownText);
+                        showChatFormContainer();
+                        resolve();
                     });
                 },
 
