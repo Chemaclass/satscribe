@@ -1,4 +1,4 @@
-<x-page.header title="{{ __('Explore Any Bitcoin Transaction or Block') }}" containerClass="max-w-2xl">
+<x-page.header title="{{ __('Unlock the Story Behind Every Satoshi') }}" containerClass="max-w-2xl">
     <p class="subtitle text-base sm:text-lg text-gray-700 leading-relaxed">
         <strong>Satscribe</strong> {{ __('makes Bitcoin easier to understand.') }}
         <br class="hidden sm:block">
