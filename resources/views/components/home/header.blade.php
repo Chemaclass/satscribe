@@ -2,7 +2,7 @@
     <p class="subtitle text-base sm:text-lg text-gray-700 leading-relaxed">
         <strong>Satscribe</strong> {{ __('makes Bitcoin easier to understand.') }}
         <br class="hidden sm:block">
-        {{ __('Just enter a transaction ID or block height to get an AI-powered explanation.') }}
+        {{ __('Just enter a TXID or block height to get an AI-powered explanation.') }}
         <br class="hidden sm:block">
         <span class="subtitle mt-1 text-sm text-gray-600 leading-relaxed">
             {{ __('Curious about the latest blocks and transactions? Visit') }}
