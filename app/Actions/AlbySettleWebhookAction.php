@@ -7,6 +7,7 @@ namespace App\Actions;
 use App\Data\AlbySettleWebhookPayload;
 use App\Exceptions\InvalidAlbyWebhookSignatureException;
 use App\Http\Middleware\IpRateLimiter;
+use App\Repositories\PaymentRepositoryInterface;
 use Illuminate\Cache\RateLimiter;
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Psr\Log\LoggerInterface;
@@ -21,6 +22,7 @@ final readonly class AlbySettleWebhookAction
         private string $webhookSecret,
         private CacheRepository $cache,
         private RateLimiter $rateLimiter,
+        private PaymentRepositoryInterface $paymentRepository,
         private LoggerInterface $logger,
     ) {
         $this->webhook = new Webhook($this->webhookSecret);
@@ -85,6 +87,7 @@ final readonly class AlbySettleWebhookAction
         $this->logger->info('Invoice settled', ['$memo' => $memo]);
 
         $hash = $this->extractShortHash($memo);
+        $trackingId = null;
         if ($hash !== null) {
             $trackingId = $this->cache->pull(IpRateLimiter::createCacheKey($hash));
             if ($trackingId) {
@@ -94,6 +97,13 @@ final readonly class AlbySettleWebhookAction
                 $this->logger->warning('No tracking ID found for hash', ['shortHash' => $hash]);
             }
         }
+
+        $this->paymentRepository->create([
+            'tracking_id' => $trackingId,
+            'payment_hash' => $invoiceHash,
+            'memo' => $memo,
+            'amount' => $payload->amount,
+        ]);
 
         $this->logger->info('Invoice settled', [
             'payment_hash' => $invoiceHash,

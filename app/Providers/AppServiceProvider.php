@@ -16,6 +16,8 @@ use App\Repositories\FlaggedWordRepository;
 use App\Repositories\FlaggedWordRepositoryInterface;
 use App\Repositories\MessageRepository;
 use App\Repositories\MessageRepositoryInterface;
+use App\Repositories\PaymentRepository;
+use App\Repositories\PaymentRepositoryInterface;
 use App\Services\Alby\AlbyClient;
 use App\Services\Alby\AlbyClientInterface;
 use App\Services\BlockHeightProvider;
@@ -34,6 +36,7 @@ final class AppServiceProvider extends ServiceProvider
         MessageRepositoryInterface::class => MessageRepository::class,
         FaqRepositoryInterface::class => FaqRepository::class,
         FlaggedWordRepositoryInterface::class => FlaggedWordRepository::class,
+        PaymentRepositoryInterface::class => PaymentRepository::class,
     ];
 
     public function register(): void
