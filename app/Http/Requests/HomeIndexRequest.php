@@ -51,7 +51,7 @@ final class HomeIndexRequest extends FormRequest
 
     public function getPersonaInput(): string
     {
-        return $this->input('persona', '');
+        return (string)$this->string('persona', '');
     }
 
     public function isRefreshEnabled(): bool
