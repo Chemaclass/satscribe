@@ -65,7 +65,7 @@ final readonly class OpenAIService
 
         $text = $response->json('choices.0.message.content');
         $text = $this->trimToLastFullSentence($text);
-        $this->logger->info("OpenAI generated description:\n".$text);
+        $this->logger->info('OpenAI description generation worked. Text len:'.strlen($text));
 
         return $text;
     }

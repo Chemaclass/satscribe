@@ -36,16 +36,14 @@ final readonly class AlbySettleWebhookAction
     ): void {
         $verified = $this->verifySignature($payload, $svixId, $svixTimestamp, $svixSignature);
 
-        $this->logger->info('Webhook payload', ['payload' => $verified->toArray()]);
+        $this->logger->info('Webhook payload received', ['payload' => $verified->toArray()]);
 
         if ($verified->type !== 'incoming') {
-            $this->logger->info('Unhandled webhook payload', ['payload' => $verified->toArray()]);
+            $this->logger->warning('Unhandled webhook type', ['type' => $verified->type]);
             return;
         }
 
-        $verified->state === 'SETTLED'
-            ? $this->handleInvoice($verified, isFailure: false)
-            : $this->handleInvoice($verified, isFailure: true);
+        $this->handleInvoice($verified, $verified->state !== 'SETTLED');
     }
 
     private function verifySignature(
@@ -54,8 +52,8 @@ final readonly class AlbySettleWebhookAction
         string $svixTimestamp,
         string $svixSignature,
     ): AlbySettleWebhookPayload {
-        if ($this->webhookSecret === '') {
-            $this->logger->warning('Webhook secret not configured');
+        if (empty($this->webhookSecret)) {
+            $this->logger->warning('Webhook secret is not configured');
             throw new InvalidAlbyWebhookSignatureException();
         }
 
@@ -66,45 +64,46 @@ final readonly class AlbySettleWebhookAction
                 'svix-signature' => $svixSignature,
             ]);
 
-            $this->logger->info('Webhook successfully verified');
+            $this->logger->info('Webhook signature successfully verified');
 
-            return AlbySettleWebhookPayload::fromArray(
-                json_decode($payload, true, flags: JSON_THROW_ON_ERROR)
-            );
+            $data = json_decode($payload, true, flags: JSON_THROW_ON_ERROR);
+            return AlbySettleWebhookPayload::fromArray($data);
         } catch (Throwable $e) {
-            $this->logger->warning('Webhook verification failed', ['error' => $e->getMessage()]);
+            $this->logger->warning('Webhook signature verification failed', ['error' => $e->getMessage()]);
             throw new InvalidAlbyWebhookSignatureException();
         }
     }
 
     private function handleInvoice(AlbySettleWebhookPayload $payload, bool $isFailure): void
     {
-        $hash = $this->extractShortHash($payload->memo);
         $trackingId = null;
-        $chatId = null;
+        $hash = $this->extractShortHash($payload->memo);
 
-        if ($hash !== null) {
+        if ($hash === null) {
+            $this->logger->warning('No hash found in memo', ['memo' => $payload->memo]);
+        } else {
             $cached = $this->cache->pull(IpRateLimiter::createCacheKey($hash));
+
             if (is_array($cached)) {
                 $trackingId = $cached['tracking_id'] ?? null;
-                $chatId = $cached['chat_id'] ?? null;
-            } elseif ($cached) {
+            } elseif ($cached !== null) {
                 $trackingId = $cached;
             }
 
-            if (! $cached) {
-                $this->logger->warning('No tracking data found for hash', ['shortHash' => $hash]);
+            if ($cached !== null) {
+                $this->logger->info('Tracking data found for short hash', ['shortHash' => $hash]);
+            } else {
+                $this->logger->warning('No tracking data found for short hash', ['shortHash' => $hash]);
             }
 
-            if ($trackingId && ! $isFailure) {
+            if ($trackingId && !$isFailure) {
                 $this->rateLimiter->clear(IpRateLimiter::createRateLimitKey($trackingId));
-                $this->logger->info('Rate limit cleared', ['trackingId' => $trackingId]);
+                $this->logger->info('Rate limit cleared for tracking ID', ['trackingId' => $trackingId]);
             }
         }
 
         $this->paymentRepository->create([
             'tracking_id' => $trackingId,
-            'chat_id' => $chatId,
             'payment_hash' => $payload->paymentHash,
             'memo' => $payload->memo,
             'amount' => $payload->amount,
@@ -112,19 +111,18 @@ final readonly class AlbySettleWebhookAction
             'failure_reason' => $isFailure ? $payload->state : null,
         ]);
 
-        $this->logger->info($isFailure ? 'Invoice failure stored' : 'Invoice settled', [
-            'payment_hash' => $payload->paymentHash,
-            'amount' => $payload->amount,
-            'state' => $payload->state,
-        ]);
+        $this->logger->info(
+            $isFailure ? 'Invoice failure stored' : 'Invoice settled',
+            [
+                'payment_hash' => $payload->paymentHash,
+                'amount' => $payload->amount,
+                'state' => $payload->state,
+            ]
+        );
     }
 
     private function extractShortHash(string $memo): ?string
     {
-        if (preg_match('/#([a-f0-9]{8})/', $memo, $matches)) {
-            return $matches[1];
-        }
-
-        return null;
+        return preg_match('/#([a-f0-9]{8})/', $memo, $matches) ? $matches[1] : null;
     }
 }

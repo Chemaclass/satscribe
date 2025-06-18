@@ -47,15 +47,9 @@ final readonly class IpRateLimiter
         $shortHash = substr(md5($key), 0, 8);
         $invoiceCacheKey = "ln_invoice:{$shortHash}";
 
-        $chat = $request->route('chat');
-        $chatId = $chat instanceof \App\Models\Chat ? $chat->id : null;
-
         $this->cache->put(
             self::createCacheKey($shortHash),
-            [
-                'tracking_id' => $trackingId,
-                'chat_id' => $chatId,
-            ],
+            ['tracking_id' => $trackingId],
             now()->addSeconds($this->lnInvoiceExpirySeconds)
         );
 
@@ -78,7 +72,6 @@ final readonly class IpRateLimiter
                 expiry: $this->lnInvoiceExpirySeconds,
             ));
 
-            // Cache the invoice until shortly before expiry
             $this->cache->put(
                 $invoiceCacheKey,
                 $invoice,
