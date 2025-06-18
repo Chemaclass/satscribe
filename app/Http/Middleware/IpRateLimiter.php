@@ -7,6 +7,7 @@ namespace App\Http\Middleware;
 use App\Data\InvoiceData;
 use App\Services\Alby\AlbyClientInterface;
 use Carbon\Carbon;
+use Carbon\CarbonInterface;
 use Closure;
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Illuminate\Http\Request;
@@ -20,6 +21,7 @@ final readonly class IpRateLimiter
         private AlbyClientInterface $albyClient,
         private CacheRepository $cache,
         private LoggerInterface $logger,
+        private CarbonInterface $now,
         private int $maxAttempts,
         private int $lnInvoiceAmountInSats,
         private int $lnInvoiceExpirySeconds,
@@ -54,7 +56,7 @@ final readonly class IpRateLimiter
         $this->cache->put(
             self::createCacheKey($shortHash),
             ['tracking_id' => $trackingId],
-            now()->addSeconds($this->lnInvoiceExpirySeconds)
+            $this->now->addSeconds($this->lnInvoiceExpirySeconds)
         );
 
         if (RateLimiter::tooManyAttempts($key, $this->maxAttempts)) {
@@ -84,7 +86,7 @@ final readonly class IpRateLimiter
             $this->cache->put(
                 $invoiceCacheKey,
                 $invoice,
-                now()->addSeconds($this->lnInvoiceExpirySeconds - 10)
+                $this->now->addSeconds($this->lnInvoiceExpirySeconds - 10)
             );
 
             return response()->json([
@@ -115,7 +117,7 @@ final readonly class IpRateLimiter
         $expiresAt = Carbon::parse($cached['created_at'])->addSeconds((int) $cached['expiry']);
         $this->logger->info('Cached invoice expires at: '.$expiresAt->toDateTimeString());
 
-        if (now()->greaterThanOrEqualTo($expiresAt)) {
+        if ($this->now->greaterThanOrEqualTo($expiresAt)) {
             $this->logger->info('Cached invoice expired');
             return false;
         }

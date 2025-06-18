@@ -23,6 +23,8 @@ use App\Services\Alby\AlbyClientInterface;
 use App\Services\BlockHeightProvider;
 use App\Services\OpenAIService;
 use App\Services\PriceService;
+use Carbon\Carbon;
+use Carbon\CarbonInterface;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
@@ -41,6 +43,8 @@ final class AppServiceProvider extends ServiceProvider
 
     public function register(): void
     {
+        $this->app->bind(CarbonInterface::class, fn () => Carbon::now());
+
         $this->registerBindingsForCreateChatAction();
         $this->registerBindingsForAddMessageAction();
         $this->registerBindingsForOpenAIService();
