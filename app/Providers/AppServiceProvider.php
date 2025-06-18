@@ -21,6 +21,8 @@ use App\Repositories\PaymentRepositoryInterface;
 use App\Services\Alby\AlbyClient;
 use App\Services\Alby\AlbyClientInterface;
 use App\Services\BlockHeightProvider;
+use App\Services\CachedInvoiceValidator;
+use App\Services\CachedInvoiceValidatorInterface;
 use App\Services\OpenAIService;
 use App\Services\PriceService;
 use Carbon\Carbon;
@@ -39,11 +41,12 @@ final class AppServiceProvider extends ServiceProvider
         FaqRepositoryInterface::class => FaqRepository::class,
         FlaggedWordRepositoryInterface::class => FlaggedWordRepository::class,
         PaymentRepositoryInterface::class => PaymentRepository::class,
+        CachedInvoiceValidatorInterface::class => CachedInvoiceValidator::class,
     ];
 
     public function register(): void
     {
-        $this->app->bind(CarbonInterface::class, fn () => Carbon::now());
+        $this->app->bind(CarbonInterface::class, fn() => Carbon::now());
 
         $this->registerBindingsForCreateChatAction();
         $this->registerBindingsForAddMessageAction();
