@@ -6,7 +6,6 @@ namespace App\Http\Middleware;
 
 use App\Data\InvoiceData;
 use App\Services\Alby\AlbyClientInterface;
-use Carbon\Carbon;
 use Closure;
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Illuminate\Http\Request;
@@ -49,6 +48,8 @@ final readonly class IpRateLimiter
         $shortHash = substr(md5($key), 0, 8);
         $invoiceCacheKey = "ln_invoice:{$shortHash}";
 
+        $this->logger->info('Put cache', ['tracking_id' => $trackingId, 'invoiceCacheKey' => $invoiceCacheKey,]);
+
         $this->cache->put(
             self::createCacheKey($shortHash),
             ['tracking_id' => $trackingId],
@@ -56,6 +57,7 @@ final readonly class IpRateLimiter
         );
 
         if (RateLimiter::tooManyAttempts($key, $this->maxAttempts)) {
+            $this->logger->info('Too many attempts, creating invoice', ['$key' => $key]);
 //            $cached = $this->cache->get($invoiceCacheKey);
 //
 //            if ($this->isValidCachedInvoice($cached)) {
