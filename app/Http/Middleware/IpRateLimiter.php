@@ -25,12 +25,130 @@ final readonly class IpRateLimiter
         private int $maxAttempts,
         private int $lnInvoiceAmountInSats,
         private int $lnInvoiceExpirySeconds,
-    ) {
+    ) {}
+
+    public function handle(Request $request, Closure $next): Response
+    {
+        $trackingId = tracking_id();
+        $rateLimitKey = self::createRateLimitKey($trackingId);
+        $shortHash = substr(md5($rateLimitKey), 0, 8);
+        $invoiceCacheKey = "ln_invoice:{$shortHash}";
+
+        $this->logTracking($trackingId, $invoiceCacheKey);
+        $this->cacheTrackingMapping($shortHash, $trackingId);
+
+        if (RateLimiter::tooManyAttempts($rateLimitKey, $this->maxAttempts)) {
+            return $this->handleRateLimited($rateLimitKey, $invoiceCacheKey, $shortHash);
+        }
+
+        $this->logRateLimitHit($rateLimitKey);
+        RateLimiter::hit($rateLimitKey, 3600); // 1-hour window
+
+        return $next($request);
     }
 
-    public static function containsHash(string $memo): bool
+    private function handleRateLimited(string $rateLimitKey, string $invoiceCacheKey, string $shortHash): Response
     {
-        return str_contains($memo, '#');
+        $this->logger->info('Too many attempts, preparing invoice', ['key' => $rateLimitKey]);
+
+        $cachedInvoice = $this->cache->get($invoiceCacheKey);
+
+        if ($this->isValidCachedInvoice($cachedInvoice)) {
+            $this->logger->info('Using valid cached invoice', ['invoice' => $cachedInvoice]);
+            return $this->buildRateLimitedResponse($rateLimitKey, $cachedInvoice);
+        }
+
+        $invoice = $this->buildInvoice($shortHash);
+        $this->cacheInvoice($invoiceCacheKey, $invoice);
+
+        return $this->buildRateLimitedResponse($rateLimitKey, $invoice);
+    }
+
+    private function buildInvoice(string $shortHash): array
+    {
+        return $this->albyClient->createInvoice(new InvoiceData(
+            amount: $this->lnInvoiceAmountInSats,
+            memo: sprintf('Zap to keep Satscribe alive ⚡️ #%s', $shortHash),
+            expiry: $this->lnInvoiceExpirySeconds,
+        ));
+    }
+
+    private function cacheInvoice(string $key, array $invoice): void
+    {
+        $this->logger->info('Caching new invoice', ['invoiceCacheKey' => $key]);
+
+        $this->cache->put(
+            $key,
+            $invoice,
+            $this->now->copy()->addSeconds($this->lnInvoiceExpirySeconds - 10)
+        );
+    }
+
+    private function cacheTrackingMapping(string $hash, string $trackingId): void
+    {
+        $this->cache->put(
+            self::createCacheKey($hash),
+            ['tracking_id' => $trackingId],
+            $this->now->copy()->addSeconds($this->lnInvoiceExpirySeconds)
+        );
+    }
+
+    private function logTracking(string $trackingId, string $cacheKey): void
+    {
+        $this->logger->info('Tracking request', [
+            'tracking_id' => $trackingId,
+            'invoiceCacheKey' => $cacheKey,
+        ]);
+    }
+
+    private function logRateLimitHit(string $key): void
+    {
+        $this->logger->info('Rate limiter hit', [
+            'key' => $key,
+            'attempts' => RateLimiter::attempts($key),
+        ]);
+    }
+
+    private function buildRateLimitedResponse(string $key, array $invoice): Response
+    {
+        return response()->json([
+            'status' => 'rate_limited',
+            'key' => $key,
+            'retryAfter' => RateLimiter::availableIn($key),
+            'maxAttempts' => $this->maxAttempts,
+            'invoice' => $invoice,
+        ], Response::HTTP_TOO_MANY_REQUESTS);
+    }
+
+    private function isValidCachedInvoice(?array $cached): bool
+    {
+        if (
+            !is_array($cached) ||
+            !isset($cached['payment_hash'], $cached['payment_request'], $cached['created_at'], $cached['expiry'])
+        ) {
+            $this->logger->warning('Invalid cached invoice structure', ['cached' => $cached]);
+            return false;
+        }
+
+        $expiresAt = Carbon::parse($cached['created_at'])->addSeconds((int) $cached['expiry']);
+        $this->logger->info('Cached invoice expiry', ['expires_at' => $expiresAt->toDateTimeString()]);
+
+        if ($this->now->greaterThanOrEqualTo($expiresAt)) {
+            $this->logger->info('Cached invoice expired');
+            return false;
+        }
+
+        try {
+            if ($this->albyClient->isInvoicePaid($cached['payment_hash'])) {
+                $this->logger->info('Invoice already paid', ['payment_hash' => $cached['payment_hash']]);
+                return false;
+            }
+        } catch (\Throwable $e) {
+            $this->logger->warning('Invoice verification failed', ['error' => $e->getMessage()]);
+            return false;
+        }
+
+        return true;
     }
 
     public static function createRateLimitKey(string $trackingId): string
@@ -41,97 +159,5 @@ final readonly class IpRateLimiter
     public static function createCacheKey(string $hash): string
     {
         return 'invoice_tracking_mapping_'.$hash;
-    }
-
-    public function handle(Request $request, Closure $next): Response
-    {
-        $trackingId = tracking_id();
-
-        $key = self::createRateLimitKey($trackingId);
-        $shortHash = substr(md5($key), 0, 8);
-        $invoiceCacheKey = "ln_invoice:{$shortHash}";
-
-        $this->logger->info('Put cache', ['tracking_id' => $trackingId, 'invoiceCacheKey' => $invoiceCacheKey,]);
-
-        $this->cache->put(
-            self::createCacheKey($shortHash),
-            ['tracking_id' => $trackingId],
-            $this->now->addSeconds($this->lnInvoiceExpirySeconds)
-        );
-
-        if (RateLimiter::tooManyAttempts($key, $this->maxAttempts)) {
-            $this->logger->info('Too many attempts, creating invoice', ['$key' => $key]);
-
-            $cached = $this->cache->get($invoiceCacheKey);
-
-            if ($this->isValidCachedInvoice($cached)) {
-                $this->logger->info('Returning cached invoice', ['invoice' => $cached]);
-
-                return response()->json([
-                    'status' => 'rate_limited',
-                    'key' => $key,
-                    'retryAfter' => RateLimiter::availableIn($key),
-                    'maxAttempts' => $this->maxAttempts,
-                    'invoice' => $cached,
-                ], Response::HTTP_TOO_MANY_REQUESTS);
-            }
-
-            $invoice = $this->albyClient->createInvoice(new InvoiceData(
-                amount: $this->lnInvoiceAmountInSats,
-                memo: sprintf('Zap to keep Satscribe alive ⚡️ #%s', $shortHash),
-                expiry: $this->lnInvoiceExpirySeconds,
-            ));
-
-            $this->logger->info('Put cache', ['invoiceCacheKey' => $invoiceCacheKey]);
-            $this->cache->put(
-                $invoiceCacheKey,
-                $invoice,
-                $this->now->addSeconds($this->lnInvoiceExpirySeconds - 10)
-            );
-
-            return response()->json([
-                'status' => 'rate_limited',
-                'key' => $key,
-                'retryAfter' => RateLimiter::availableIn($key),
-                'maxAttempts' => $this->maxAttempts,
-                'invoice' => $invoice,
-            ], Response::HTTP_TOO_MANY_REQUESTS);
-        }
-
-        $this->logger->info('Hit RateLimiter key', ['key' => $key, 'attempts' => RateLimiter::attempts($key),]);
-        RateLimiter::hit($key, 60 * 60); // Reset after 1 hour
-
-        return $next($request);
-    }
-
-    private function isValidCachedInvoice(?array $cached): bool
-    {
-        if (
-            !is_array($cached) ||
-            !isset($cached['payment_hash'], $cached['payment_request'], $cached['created_at'], $cached['expiry'])
-        ) {
-            $this->logger->warning('Invalid cached invoice', ['cached' => $cached]);
-            return false;
-        }
-
-        $expiresAt = Carbon::parse($cached['created_at'])->addSeconds((int) $cached['expiry']);
-        $this->logger->info('Cached invoice expires at: '.$expiresAt->toDateTimeString());
-
-        if ($this->now->greaterThanOrEqualTo($expiresAt)) {
-            $this->logger->info('Cached invoice expired');
-            return false;
-        }
-
-        try {
-            if ($this->albyClient->isInvoicePaid($cached['payment_hash'])) {
-                $this->logger->info('Cached invoice is already settled', ['payment_hash' => $cached['payment_hash']]);
-                return false;
-            }
-        } catch (\Throwable $e) {
-            $this->logger->warning('Failed to verify cached invoice status', ['error' => $e->getMessage()]);
-            return false;
-        }
-
-        return true;
     }
 }
