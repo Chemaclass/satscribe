@@ -8,6 +8,7 @@ use App\Data\InvoiceData;
 use GuzzleHttp\Client as GuzzleClient;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Psr7\Request as GuzzleRequest;
+use Illuminate\Support\Facades\Log;
 use RuntimeException;
 
 /**
@@ -55,11 +56,6 @@ final class AlbyClient implements AlbyClientInterface
         return $this->accessToken !== '' && $this->accessToken !== '0';
     }
 
-    /**
-     * Create a new Lightning invoice.
-     *
-     * @return array{id:string, r_hash:string, payment_hash:string} Created invoice details
-     */
     public function createInvoice(InvoiceData $invoice): array
     {
         $params = [

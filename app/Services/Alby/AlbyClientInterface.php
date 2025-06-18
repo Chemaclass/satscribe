@@ -10,6 +10,16 @@ interface AlbyClientInterface
 
     public function getInfo(): array;
 
+    /**
+     * Create a new Lightning invoice.
+     *
+     * @return array{
+     *     id: string,
+     *     r_hash: string,
+     *     payment_hash: string,
+     *     expiry: int
+     * }
+     */
     public function createInvoice(InvoiceData $invoice): array;
 
     public function getInvoice(string $hash): array;

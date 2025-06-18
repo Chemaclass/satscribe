@@ -13,17 +13,17 @@ final readonly class InvoiceData
         public string $memo = 'Tip to unlock more requests',
         public ?string $description = null,
         public ?string $descriptionHash = null,
-        public ?int $expiry = 3600,
+        public int $expiry = 3600,
     ) {
     }
 
     /**
      * @param  array{
-     *     amount:int,
-     *     memo:string,
-     *     description:string,
-     *     description_hash:string,
-     *     expiry:int
+     *     amount: int,
+     *     memo: string,
+     *     description: string,
+     *     description_hash: string,
+     *     expiry: int,
      * }  $data
      */
     public static function create(array $data): self
@@ -53,6 +53,6 @@ final readonly class InvoiceData
             'description' => $this->description,
             'description_hash' => $this->descriptionHash,
             'expiry' => $this->expiry,
-        ], fn($value) => $value !== null);
+        ], static fn($value) => $value !== null);
     }
 }

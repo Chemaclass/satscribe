@@ -15,18 +15,15 @@ final class Handler extends ExceptionHandler
 {
     public function render($request, Throwable $e): Response
     {
-        if (app()->environment('production')) {
-            // Custom response for method not allowed
-            if ($e instanceof MethodNotAllowedHttpException) {
-                Log::warning('Invalid HTTP method used', [
-                    'method' => $request->method(),
-                    'url' => $request->fullUrl(),
-                ]);
+        if ($e instanceof MethodNotAllowedHttpException && app()->environment('production')) {
+            Log::warning('Invalid HTTP method used', [
+                'method' => $request->method(),
+                'url' => $request->fullUrl(),
+            ]);
 
-                return response()->json([
-                    'message' => 'Method Not Allowed.',
-                ], Response::HTTP_METHOD_NOT_ALLOWED);;
-            }
+            return response()->json([
+                'message' => 'Method Not Allowed.',
+            ], Response::HTTP_METHOD_NOT_ALLOWED);
         }
 
         if ($e instanceof ThrottleRequestsException) {
