@@ -97,8 +97,12 @@ final readonly class AlbySettleWebhookAction
             }
 
             if ($trackingId && !$isFailure) {
-                $this->rateLimiter->clear(IpRateLimiter::createRateLimitKey($trackingId));
-                $this->logger->info('Rate limit cleared for tracking ID', ['trackingId' => $trackingId]);
+                $cacheKey = IpRateLimiter::createRateLimitKey($trackingId);
+                $this->rateLimiter->clear($cacheKey);
+                $this->logger->info('Rate limit cleared for tracking ID', [
+                    'trackingId' => $trackingId,
+                    'invoiceCacheKey' => $cacheKey
+                ]);
             }
         }
 

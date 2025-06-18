@@ -11,6 +11,7 @@ use Closure;
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Response;
 
 final readonly class IpRateLimiter
@@ -18,6 +19,7 @@ final readonly class IpRateLimiter
     public function __construct(
         private AlbyClientInterface $albyClient,
         private CacheRepository $cache,
+        private LoggerInterface $logger,
         private int $maxAttempts,
         private int $lnInvoiceAmountInSats,
         private int $lnInvoiceExpirySeconds,
@@ -57,6 +59,8 @@ final readonly class IpRateLimiter
             $cached = $this->cache->get($invoiceCacheKey);
 
             if ($this->isValidCachedInvoice($cached)) {
+                $this->logger->info('Returning cached invoice', ['invoice' => $cached]);
+
                 return response()->json([
                     'status' => 'rate_limited',
                     'key' => $key,
@@ -72,6 +76,7 @@ final readonly class IpRateLimiter
                 expiry: $this->lnInvoiceExpirySeconds,
             ));
 
+            $this->logger->info('Put cache', ['invoiceCacheKey' => $invoiceCacheKey]);
             $this->cache->put(
                 $invoiceCacheKey,
                 $invoice,
@@ -87,6 +92,7 @@ final readonly class IpRateLimiter
             ], Response::HTTP_TOO_MANY_REQUESTS);
         }
 
+        $this->logger->info('Hit RateLimiter key', ['key' => $key]);
         RateLimiter::hit($key, 60 * 60); // Reset after 1 hour
 
         return $next($request);
