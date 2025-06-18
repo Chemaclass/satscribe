@@ -8,7 +8,6 @@ use App\Data\InvoiceData;
 use GuzzleHttp\Client as GuzzleClient;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Psr7\Request as GuzzleRequest;
-use Illuminate\Support\Facades\Log;
 use RuntimeException;
 
 /**
@@ -36,6 +35,55 @@ final class AlbyClient implements AlbyClientInterface
         $data["alias"] = "getalby.com";
         $data["identity_pubkey"] = "";
         return $data;
+    }
+
+    /**
+     * @param  string  $method  HTTP method (GET, POST, etc.)
+     * @param  string  $path  API endpoint path
+     * @param  mixed|null  $body  Request payload (optional)
+     *
+     * @return array|null Decoded JSON response as an associative array
+     */
+    private function request(string $method, string $path, mixed $body = null): ?array
+    {
+        $headers = [
+            "Accept" => "application/json",
+            "Content-Type" => "application/json",
+            "Access-Control-Allow-Origin" => "*",
+            "Authorization" => "Bearer {$this->accessToken}",
+            "User-Agent" => "alby-php",
+        ];
+
+        $requestBody = $body ? json_encode($body) : null;
+        $request = new GuzzleRequest($method, $path, $headers, $requestBody);
+
+        try {
+            $response = $this->client()->send($request);
+            $responseBody = $response->getBody()->getContents();
+            return json_decode($responseBody, true);
+        } catch (ClientException $e) {
+            $error = json_decode($e->getResponse()->getBody()->getContents(), true);
+            throw new RuntimeException($error["error"] ?? 'Unknown Alby API error', $e->getCode(), $e);
+        }
+    }
+
+    /**
+     * Get or initialize the Guzzle HTTP client.
+     */
+    private function client(): GuzzleClient
+    {
+        if ($this->client instanceof GuzzleClient) {
+            return $this->client;
+        }
+
+        $options = [
+            'base_uri' => self::URL,
+            'timeout' => 10,
+        ];
+
+        $this->client = new GuzzleClient($options);
+
+        return $this->client;
     }
 
     /**
@@ -100,54 +148,5 @@ final class AlbyClient implements AlbyClientInterface
     public function getInvoice(string $hash): array
     {
         return $this->request("GET", "/invoices/{$hash}") ?? [];
-    }
-
-    /**
-     * @param  string  $method  HTTP method (GET, POST, etc.)
-     * @param  string  $path  API endpoint path
-     * @param  mixed|null  $body  Request payload (optional)
-     *
-     * @return array|null Decoded JSON response as an associative array
-     */
-    private function request(string $method, string $path, mixed $body = null): ?array
-    {
-        $headers = [
-            "Accept" => "application/json",
-            "Content-Type" => "application/json",
-            "Access-Control-Allow-Origin" => "*",
-            "Authorization" => "Bearer {$this->accessToken}",
-            "User-Agent" => "alby-php",
-        ];
-
-        $requestBody = $body ? json_encode($body) : null;
-        $request = new GuzzleRequest($method, $path, $headers, $requestBody);
-
-        try {
-            $response = $this->client()->send($request);
-            $responseBody = $response->getBody()->getContents();
-            return json_decode($responseBody, true);
-        } catch (ClientException $e) {
-            $error = json_decode($e->getResponse()->getBody()->getContents(), true);
-            throw new RuntimeException($error["error"] ?? 'Unknown Alby API error', $e->getCode(), $e);
-        }
-    }
-
-    /**
-     * Get or initialize the Guzzle HTTP client.
-     */
-    private function client(): GuzzleClient
-    {
-        if ($this->client instanceof GuzzleClient) {
-            return $this->client;
-        }
-
-        $options = [
-            'base_uri' => self::URL,
-            'timeout' => 10,
-        ];
-
-        $this->client = new GuzzleClient($options);
-
-        return $this->client;
     }
 }

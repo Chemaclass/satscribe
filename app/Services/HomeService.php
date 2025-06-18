@@ -38,8 +38,8 @@ final readonly class HomeService
     /**
      * Handle chat creation request and return data for JSON response.
      *
-     * @throws BlockchainException|OpenAIError
      * @return array<string, mixed>
+     * @throws BlockchainException|OpenAIError
      */
     public function createChat(HomeIndexRequest $request): array
     {

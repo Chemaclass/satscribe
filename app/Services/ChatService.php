@@ -8,6 +8,7 @@ use App\Actions\AddMessageAction;
 use App\Data\QuestionPlaceholder;
 use App\Enums\PromptPersona;
 use App\Models\Chat;
+use App\Models\Message;
 
 final readonly class ChatService
 {
@@ -26,7 +27,7 @@ final readonly class ChatService
     {
         $chat->load('messages');
 
-        /** @var \App\Models\Message $firstMsg */
+        /** @var Message $firstMsg */
         $firstMsg = $chat->messages()->first();
 
         return [

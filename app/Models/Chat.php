@@ -47,6 +47,11 @@ final class Chat extends Model
             ->firstOrFail();
     }
 
+    public function messages(): HasMany
+    {
+        return $this->hasMany(Message::class);
+    }
+
     public function getLastUserMessage(): Message
     {
         return $this->messages()
@@ -69,11 +74,6 @@ final class Chat extends Model
             ->where('role', 'assistant')
             ->orderBy('id', 'desc')
             ->first();
-    }
-
-    public function messages(): HasMany
-    {
-        return $this->hasMany(Message::class);
     }
 
     public function getForceRefreshAttribute(): bool

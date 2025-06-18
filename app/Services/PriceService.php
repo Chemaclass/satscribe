@@ -28,21 +28,6 @@ final readonly class PriceService
         return $this->getPrices()['usd'];
     }
 
-    public function getCurrentBtcPriceEur(): float
-    {
-        return $this->getPrices()['eur'];
-    }
-
-    public function getCurrentBtcPriceCny(): float
-    {
-        return $this->getPrices()['cny'];
-    }
-
-    public function getCurrentBtcPriceGbp(): float
-    {
-        return $this->getPrices()['gbp'];
-    }
-
     private function getPrices(): array
     {
         if (!$this->enabled) {
@@ -74,5 +59,20 @@ final readonly class PriceService
                 'gbp' => (float) $response->json('bitcoin.gbp'),
             ];
         });
+    }
+
+    public function getCurrentBtcPriceEur(): float
+    {
+        return $this->getPrices()['eur'];
+    }
+
+    public function getCurrentBtcPriceCny(): float
+    {
+        return $this->getPrices()['cny'];
+    }
+
+    public function getCurrentBtcPriceGbp(): float
+    {
+        return $this->getPrices()['gbp'];
     }
 }

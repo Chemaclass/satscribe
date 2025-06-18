@@ -13,7 +13,8 @@ final readonly class SetLocale
 {
     public function __construct(
         private FaqRepositoryInterface $faqRepository
-    ) {}
+    ) {
+    }
 
     public function handle(Request $request, Closure $next): Response
     {

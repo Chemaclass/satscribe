@@ -10,7 +10,6 @@ use App\Data\Blockchain\TransactionData;
 use App\Data\PromptInput;
 use App\Exceptions\BlockchainException;
 use Illuminate\Http\Client\Factory as HttpClient;
-use Illuminate\Support\Facades\Log;
 use Psr\Log\LoggerInterface;
 
 final readonly class BlockchainService
@@ -56,34 +55,17 @@ final readonly class BlockchainService
         );
     }
 
-    private function buildTransactionData(string $txid): BlockchainData
+    private function getBlockHash(string $input): string
     {
-        $rawTx = $this->fetchTransaction($txid);
-        $rawStatusTx = $this->fetchTransactionStatus($txid);
-
-        $blockData = null;
-        if (!empty($rawStatusTx['block_hash'])) {
-            $rawBlock = $this->fetchBlock($rawStatusTx['block_hash']);
-            $blockData = BlockData::fromArray($rawBlock);
+        if (!is_numeric($input)) {
+            return $input;
         }
-
-        return BlockchainData::forTransaction(
-            new TransactionData(
-                txid: $rawTx['txid'],
-                version: $rawTx['version'],
-                locktime: $rawTx['locktime'],
-                vin: $rawTx['vin'],
-                vout: $rawTx['vout'],
-                size: $rawTx['size'],
-                weight: $rawTx['weight'],
-                fee: $rawTx['fee'],
-                confirmed: $rawStatusTx['confirmed'],
-                blockHeight: $rawStatusTx['block_height'] ?? null,
-                blockHash: $rawStatusTx['block_hash'] ?? null,
-                blockTime: $rawStatusTx['block_time'] ?? null,
-            ),
-            $blockData,
-        );
+        $response = $this->http->get(self::BASE_URL."/block-height/{$input}");
+        if (!$response->successful()) {
+            $this->logger->warning('Block height lookup failed', ['height' => $input]);
+            throw BlockchainException::blockOrTxFetchFailed($input);
+        }
+        return $response->body();
     }
 
     private function fetchBlock(string $hash): array
@@ -115,6 +97,36 @@ final readonly class BlockchainService
         }
     }
 
+    private function buildTransactionData(string $txid): BlockchainData
+    {
+        $rawTx = $this->fetchTransaction($txid);
+        $rawStatusTx = $this->fetchTransactionStatus($txid);
+
+        $blockData = null;
+        if (!empty($rawStatusTx['block_hash'])) {
+            $rawBlock = $this->fetchBlock($rawStatusTx['block_hash']);
+            $blockData = BlockData::fromArray($rawBlock);
+        }
+
+        return BlockchainData::forTransaction(
+            new TransactionData(
+                txid: $rawTx['txid'],
+                version: $rawTx['version'],
+                locktime: $rawTx['locktime'],
+                vin: $rawTx['vin'],
+                vout: $rawTx['vout'],
+                size: $rawTx['size'],
+                weight: $rawTx['weight'],
+                fee: $rawTx['fee'],
+                confirmed: $rawStatusTx['confirmed'],
+                blockHeight: $rawStatusTx['block_height'] ?? null,
+                blockHash: $rawStatusTx['block_hash'] ?? null,
+                blockTime: $rawStatusTx['block_time'] ?? null,
+            ),
+            $blockData,
+        );
+    }
+
     private function fetchTransaction(string $txid): array
     {
         $response = $this->http->get(self::BASE_URL."/tx/{$txid}");
@@ -133,18 +145,5 @@ final readonly class BlockchainService
             throw BlockchainException::txLookupFailed($txid);
         }
         return $response->json();
-    }
-
-    private function getBlockHash(string $input): string
-    {
-        if (!is_numeric($input)) {
-            return $input;
-        }
-        $response = $this->http->get(self::BASE_URL."/block-height/{$input}");
-        if (!$response->successful()) {
-            $this->logger->warning('Block height lookup failed', ['height' => $input]);
-            throw BlockchainException::blockOrTxFetchFailed($input);
-        }
-        return $response->body();
     }
 }

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
-use App\Models\Message;
 use App\Data\PromptInput;
 use App\Enums\PromptPersona;
 use App\Models\Chat;
+use App\Models\Message;
 use App\Repositories\ChatRepositoryInterface;
 use App\Repositories\MessageRepositoryInterface;
 use App\Services\BlockchainService;

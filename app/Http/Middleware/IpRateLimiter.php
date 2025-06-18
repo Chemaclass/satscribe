@@ -26,7 +26,8 @@ final readonly class IpRateLimiter
         private int $maxAttempts,
         private int $lnInvoiceAmountInSats,
         private int $lnInvoiceExpirySeconds,
-    ) {}
+    ) {
+    }
 
     public function handle(Request $request, Closure $next): Response
     {
@@ -48,6 +49,33 @@ final readonly class IpRateLimiter
         return $next($request);
     }
 
+    public static function createRateLimitKey(string $trackingId): string
+    {
+        return 'ip_rate_limit_'.$trackingId;
+    }
+
+    private function logTracking(string $trackingId, string $cacheKey): void
+    {
+        $this->logger->info('Tracking request', [
+            'tracking_id' => $trackingId,
+            'invoiceCacheKey' => $cacheKey,
+        ]);
+    }
+
+    private function cacheTrackingMapping(string $hash, string $trackingId): void
+    {
+        $this->cache->put(
+            self::createCacheKey($hash),
+            ['tracking_id' => $trackingId],
+            $this->now->copy()->addSeconds($this->lnInvoiceExpirySeconds)
+        );
+    }
+
+    public static function createCacheKey(string $hash): string
+    {
+        return 'invoice_tracking_mapping_'.$hash;
+    }
+
     private function handleRateLimited(string $rateLimitKey, string $invoiceCacheKey, string $shortHash): Response
     {
         $this->logger->info('Too many attempts, preparing invoice', ['key' => $rateLimitKey]);
@@ -63,6 +91,17 @@ final readonly class IpRateLimiter
         $this->cacheInvoice($invoiceCacheKey, $invoice);
 
         return $this->buildRateLimitedResponse($rateLimitKey, $invoice);
+    }
+
+    private function buildRateLimitedResponse(string $key, array $invoice): Response
+    {
+        return response()->json([
+            'status' => 'rate_limited',
+            'key' => $key,
+            'retryAfter' => RateLimiter::availableIn($key),
+            'maxAttempts' => $this->maxAttempts,
+            'invoice' => $invoice,
+        ], Response::HTTP_TOO_MANY_REQUESTS);
     }
 
     private function buildInvoice(string $shortHash): array
@@ -85,50 +124,11 @@ final readonly class IpRateLimiter
         );
     }
 
-    private function cacheTrackingMapping(string $hash, string $trackingId): void
-    {
-        $this->cache->put(
-            self::createCacheKey($hash),
-            ['tracking_id' => $trackingId],
-            $this->now->copy()->addSeconds($this->lnInvoiceExpirySeconds)
-        );
-    }
-
-    private function logTracking(string $trackingId, string $cacheKey): void
-    {
-        $this->logger->info('Tracking request', [
-            'tracking_id' => $trackingId,
-            'invoiceCacheKey' => $cacheKey,
-        ]);
-    }
-
     private function logRateLimitHit(string $key): void
     {
         $this->logger->info('Rate limiter hit', [
             'key' => $key,
             'attempts' => RateLimiter::attempts($key),
         ]);
-    }
-
-    private function buildRateLimitedResponse(string $key, array $invoice): Response
-    {
-        return response()->json([
-            'status' => 'rate_limited',
-            'key' => $key,
-            'retryAfter' => RateLimiter::availableIn($key),
-            'maxAttempts' => $this->maxAttempts,
-            'invoice' => $invoice,
-        ], Response::HTTP_TOO_MANY_REQUESTS);
-    }
-
-
-    public static function createRateLimitKey(string $trackingId): string
-    {
-        return 'ip_rate_limit_'.$trackingId;
-    }
-
-    public static function createCacheKey(string $hash): string
-    {
-        return 'invoice_tracking_mapping_'.$hash;
     }
 }

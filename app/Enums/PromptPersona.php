@@ -22,11 +22,6 @@ enum PromptPersona: string
             ]);
     }
 
-    public function label(): string
-    {
-        return __("persona.{$this->value}.label");
-    }
-
     public function description(): string
     {
         return __("persona.{$this->value}.description");
@@ -43,6 +38,11 @@ enum PromptPersona: string
             ],
             self::cases()
         );
+    }
+
+    public function label(): string
+    {
+        return __("persona.{$this->value}.label");
     }
 
     public function systemPrompt(): string
@@ -66,6 +66,15 @@ Your role is to craft an insightful, persona-aligned response.
 - Keep each answer short and direct; avoid filler or repetition.
 - Respond in {$language}.
 PROMPT;
+    }
+
+    private static function languageName(string $locale): string
+    {
+        return match ($locale) {
+            'de' => 'German',
+            'es' => 'Spanish',
+            default => 'English',
+        };
     }
 
     public function instructions(PromptType $type): string
@@ -136,15 +145,6 @@ Global Writing Guidelines:
 - Express any calculations in plain language using numbers.
 - Keep the entire response under 150 words whenever possible.
 TEXT;
-    }
-
-    private static function languageName(string $locale): string
-    {
-        return match ($locale) {
-            'de' => 'German',
-            'es' => 'Spanish',
-            default => 'English',
-        };
     }
 
     public function maxTokens(): int

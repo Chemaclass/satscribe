@@ -70,6 +70,11 @@ final readonly class OpenAIService
         return $text;
     }
 
+    private function buildBlockchainContext(BlockchainData $data): string
+    {
+        return "Data:\n".$data->toPrompt();
+    }
+
     private function preparePrompt(
         PromptType $type,
         string $question,
@@ -97,6 +102,23 @@ final readonly class OpenAIService
         ]);
     }
 
+    private function getAdditionalTaskInstructions(PromptType $type): string
+    {
+        return $type === PromptType::Transaction
+            ? <<<TEXT
+- Identify the transaction type (e.g., coinbase, CoinJoin-like, P2PK, P2PKH, P2SH, P2MS, P2WPKH, P2WSH, P2TR, etc.).
+- Highlight unusual input/output patterns (e.g., large numbers of inputs/outputs, consolidation behavior, privacy techniques).
+- Mention if the transaction paid exceptionally high fees relative to its size.
+TEXT
+            : <<<TEXT
+- Highlight if the block has only one transaction, an unusually low or high transaction count, or exceptionally large total fees.
+- Compare size, timestamp, and miner with adjacent blocks if noteworthy.
+- Mention if the miner is notable, changed recently, or unexpected.
+- Highlight any anomalies (size, timestamp gaps, etc.).
+- If the block has historical significance, clearly explain why.
+TEXT;
+    }
+
     private function buildQuestionPrompt(string $question): string
     {
         return <<<TEXT
@@ -119,28 +141,6 @@ Style:
 - Keep paragraphs short and well-structured.
 - Sound professional but accessible.
 - Keep the entire answer brief and focused on key points.
-TEXT;
-    }
-
-    private function buildBlockchainContext(BlockchainData $data): string
-    {
-        return "Data:\n".$data->toPrompt();
-    }
-
-    private function getAdditionalTaskInstructions(PromptType $type): string
-    {
-        return $type === PromptType::Transaction
-            ? <<<TEXT
-- Identify the transaction type (e.g., coinbase, CoinJoin-like, P2PK, P2PKH, P2SH, P2MS, P2WPKH, P2WSH, P2TR, etc.).
-- Highlight unusual input/output patterns (e.g., large numbers of inputs/outputs, consolidation behavior, privacy techniques).
-- Mention if the transaction paid exceptionally high fees relative to its size.
-TEXT
-            : <<<TEXT
-- Highlight if the block has only one transaction, an unusually low or high transaction count, or exceptionally large total fees.
-- Compare size, timestamp, and miner with adjacent blocks if noteworthy.
-- Mention if the miner is notable, changed recently, or unexpected.
-- Highlight any anomalies (size, timestamp gaps, etc.).
-- If the block has historical significance, clearly explain why.
 TEXT;
     }
 

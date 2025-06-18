@@ -9,7 +9,7 @@ use App\Models\Payment;
 final readonly class PaymentRepository implements PaymentRepositoryInterface
 {
     /**
-     * @param array{
+     * @param  array{
      *     tracking_id:?string,
      *     chat_id:?int,
      *     payment_hash:string,

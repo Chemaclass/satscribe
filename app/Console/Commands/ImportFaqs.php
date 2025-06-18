@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
-use Generator;
 use App\Repositories\FaqRepositoryInterface;
+use Generator;
 use Illuminate\Console\Command;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\LazyCollection;

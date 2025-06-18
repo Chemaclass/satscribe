@@ -58,23 +58,6 @@ final class AppServiceProvider extends ServiceProvider
         $this->registerBindingsForAlbyClient();
     }
 
-    public function boot(): void
-    {
-        if (app()->environment('prod')) {
-            URL::forceScheme('https');
-        }
-
-        Paginator::useTailwind();
-
-        View::share('cronitorClientKey', config('app.cronitorClientKey'));
-
-        $priceService = app(PriceService::class);
-        View::share('btcPriceUsd', $priceService->getCurrentBtcPriceUsd());
-        View::share('btcPriceEur', $priceService->getCurrentBtcPriceEur());
-        View::share('btcPriceCny', $priceService->getCurrentBtcPriceCny());
-        View::share('btcPriceGbp', $priceService->getCurrentBtcPriceGbp());
-    }
-
     private function registerBindingsForCreateChatAction(): void
     {
         $this->app->when(CreateChatAction::class)
@@ -157,5 +140,22 @@ final class AppServiceProvider extends ServiceProvider
         $this->app->when(AlbySettleWebhookAction::class)
             ->needs('$webhookSecret')
             ->giveConfig('services.alby.webhook_secret');
+    }
+
+    public function boot(): void
+    {
+        if (app()->environment('prod')) {
+            URL::forceScheme('https');
+        }
+
+        Paginator::useTailwind();
+
+        View::share('cronitorClientKey', config('app.cronitorClientKey'));
+
+        $priceService = app(PriceService::class);
+        View::share('btcPriceUsd', $priceService->getCurrentBtcPriceUsd());
+        View::share('btcPriceEur', $priceService->getCurrentBtcPriceEur());
+        View::share('btcPriceCny', $priceService->getCurrentBtcPriceCny());
+        View::share('btcPriceGbp', $priceService->getCurrentBtcPriceGbp());
     }
 }

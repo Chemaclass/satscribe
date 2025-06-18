@@ -16,15 +16,6 @@ final readonly class BlockchainData
     ) {
     }
 
-    public function current(): BlockchainDataInterface
-    {
-        if ($this->transaction instanceof TransactionData) {
-            return $this->transaction;
-        }
-
-        return $this->block;
-    }
-
     public static function forBlock(BlockData $block, ?BlockData $previous = null, ?BlockData $next = null): self
     {
         return new self(
@@ -45,6 +36,15 @@ final readonly class BlockchainData
             nextBlock: null,
             transactionBlock: $block
         );
+    }
+
+    public function current(): BlockchainDataInterface
+    {
+        if ($this->transaction instanceof TransactionData) {
+            return $this->transaction;
+        }
+
+        return $this->block;
     }
 
     public function toPrompt(): string

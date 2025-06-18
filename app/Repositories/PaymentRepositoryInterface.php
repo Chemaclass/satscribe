@@ -11,7 +11,7 @@ interface PaymentRepositoryInterface
     /**
      * Create a new payment record.
      *
-     * @param array{
+     * @param  array{
      *     tracking_id:?string,
      *     chat_id:?int,
      *     payment_hash:string,

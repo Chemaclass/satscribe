@@ -6,7 +6,6 @@ namespace App\Repositories;
 use App\Data\PromptInput;
 use App\Enums\PromptPersona;
 use App\Models\Message;
-use App\Repositories\MessageRepositoryInterface;
 
 final readonly class MessageRepository implements MessageRepositoryInterface
 {

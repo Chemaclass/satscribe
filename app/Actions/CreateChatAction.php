@@ -79,26 +79,6 @@ final readonly class CreateChatAction
         );
     }
 
-    private function findOrGenerateAiResponse(
-        PromptInput $input,
-        PromptPersona $persona,
-        string $question,
-        BlockchainData $blockchainData,
-        string $cleanQuestion,
-    ): string {
-        return $this->messageRepository->findAssistantMessage($input, $persona, $question)->content
-            ?? $this->generateAiResponse($blockchainData, $input, $persona, $cleanQuestion);
-    }
-
-    private function generateAiResponse(
-        BlockchainData $blockchainData,
-        PromptInput $input,
-        PromptPersona $persona,
-        string $cleanQuestion,
-    ): string {
-        return $this->openai->generateText($blockchainData, $input, $persona, $cleanQuestion);
-    }
-
     private function enforceRateLimit(): void
     {
         $key = "openai:{$this->trackingId}";
@@ -110,5 +90,25 @@ final readonly class CreateChatAction
         }
 
         RateLimiter::hit($key, self::RATE_LIMIT_SECONDS);
+    }
+
+    private function generateAiResponse(
+        BlockchainData $blockchainData,
+        PromptInput $input,
+        PromptPersona $persona,
+        string $cleanQuestion,
+    ): string {
+        return $this->openai->generateText($blockchainData, $input, $persona, $cleanQuestion);
+    }
+
+    private function findOrGenerateAiResponse(
+        PromptInput $input,
+        PromptPersona $persona,
+        string $question,
+        BlockchainData $blockchainData,
+        string $cleanQuestion,
+    ): string {
+        return $this->messageRepository->findAssistantMessage($input, $persona, $question)->content
+            ?? $this->generateAiResponse($blockchainData, $input, $persona, $cleanQuestion);
     }
 }

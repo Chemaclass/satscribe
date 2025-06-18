@@ -8,6 +8,7 @@ use App\Services\Alby\AlbyClientInterface;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
 use Psr\Log\LoggerInterface;
+use Throwable;
 
 final readonly class CachedInvoiceValidator implements CachedInvoiceValidatorInterface
 {
@@ -15,7 +16,8 @@ final readonly class CachedInvoiceValidator implements CachedInvoiceValidatorInt
         private AlbyClientInterface $albyClient,
         private LoggerInterface $logger,
         private CarbonInterface $now,
-    ) {}
+    ) {
+    }
 
     public function isValidCachedInvoice(?array $cached): bool
     {
@@ -43,7 +45,7 @@ final readonly class CachedInvoiceValidator implements CachedInvoiceValidatorInt
 
                 return false;
             }
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             $this->logger->warning('Invoice verification failed', ['error' => $e->getMessage()]);
 
             return false;
