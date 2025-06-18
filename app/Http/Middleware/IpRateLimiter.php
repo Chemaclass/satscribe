@@ -56,19 +56,19 @@ final readonly class IpRateLimiter
         );
 
         if (RateLimiter::tooManyAttempts($key, $this->maxAttempts)) {
-            $cached = $this->cache->get($invoiceCacheKey);
-
-            if ($this->isValidCachedInvoice($cached)) {
-                $this->logger->info('Returning cached invoice', ['invoice' => $cached]);
-
-                return response()->json([
-                    'status' => 'rate_limited',
-                    'key' => $key,
-                    'retryAfter' => RateLimiter::availableIn($key),
-                    'maxAttempts' => $this->maxAttempts,
-                    'invoice' => $cached,
-                ], Response::HTTP_TOO_MANY_REQUESTS);
-            }
+//            $cached = $this->cache->get($invoiceCacheKey);
+//
+//            if ($this->isValidCachedInvoice($cached)) {
+//                $this->logger->info('Returning cached invoice', ['invoice' => $cached]);
+//
+//                return response()->json([
+//                    'status' => 'rate_limited',
+//                    'key' => $key,
+//                    'retryAfter' => RateLimiter::availableIn($key),
+//                    'maxAttempts' => $this->maxAttempts,
+//                    'invoice' => $cached,
+//                ], Response::HTTP_TOO_MANY_REQUESTS);
+//            }
 
             $invoice = $this->albyClient->createInvoice(new InvoiceData(
                 amount: $this->lnInvoiceAmountInSats,
@@ -76,12 +76,12 @@ final readonly class IpRateLimiter
                 expiry: $this->lnInvoiceExpirySeconds,
             ));
 
-            $this->logger->info('Put cache', ['invoiceCacheKey' => $invoiceCacheKey]);
-            $this->cache->put(
-                $invoiceCacheKey,
-                $invoice,
-                now()->addSeconds($this->lnInvoiceExpirySeconds - 10)
-            );
+//            $this->logger->info('Put cache', ['invoiceCacheKey' => $invoiceCacheKey]);
+//            $this->cache->put(
+//                $invoiceCacheKey,
+//                $invoice,
+//                now()->addSeconds($this->lnInvoiceExpirySeconds - 10)
+//            );
 
             return response()->json([
                 'status' => 'rate_limited',
@@ -98,17 +98,17 @@ final readonly class IpRateLimiter
         return $next($request);
     }
 
-    private function isValidCachedInvoice(mixed $cached): bool
-    {
-        if (
-            !is_array($cached) ||
-            !isset($cached['payment_hash'], $cached['payment_request'], $cached['created_at'], $cached['expires_in'])
-        ) {
-            return false;
-        }
-
-        $expiresAt = Carbon::parse($cached['created_at'])->addSeconds($cached['expires_in']);
-
-        return now()->lessThan($expiresAt);
-    }
+//    private function isValidCachedInvoice(mixed $cached): bool
+//    {
+//        if (
+//            !is_array($cached) ||
+//            !isset($cached['payment_hash'], $cached['payment_request'], $cached['created_at'], $cached['expires_in'])
+//        ) {
+//            return false;
+//        }
+//
+//        $expiresAt = Carbon::parse($cached['created_at'])->addSeconds($cached['expires_in']);
+//
+//        return now()->lessThan($expiresAt);
+//    }
 }
