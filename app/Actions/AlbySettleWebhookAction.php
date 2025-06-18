@@ -77,12 +77,12 @@ final readonly class AlbySettleWebhookAction
     private function handleInvoice(AlbySettleWebhookPayload $payload, bool $isFailure): void
     {
         $trackingId = null;
-        $hash = $this->extractShortHash($payload->memo);
+        $shortHash = $this->extractShortHash($payload->memo);
 
-        if ($hash === null) {
+        if ($shortHash === null) {
             $this->logger->warning('No hash found in memo', ['memo' => $payload->memo]);
         } else {
-            $cached = $this->cache->pull(IpRateLimiter::createCacheKey($hash));
+            $cached = $this->cache->pull(IpRateLimiter::createCacheKey($shortHash));
 
             if (is_array($cached)) {
                 $trackingId = $cached['tracking_id'] ?? null;
@@ -91,20 +91,26 @@ final readonly class AlbySettleWebhookAction
             }
 
             if ($cached !== null) {
-                $this->logger->info('Tracking data found for short hash', ['shortHash' => $hash]);
+                $this->logger->info('Tracking data found for short hash', ['shortHash' => $shortHash]);
             } else {
-                $this->logger->warning('No tracking data found for short hash', ['shortHash' => $hash]);
+                $this->logger->warning('No tracking data found for short hash', ['shortHash' => $shortHash]);
             }
 
             if ($trackingId && !$isFailure) {
                 $cacheKey = IpRateLimiter::createRateLimitKey($trackingId);
                 $this->rateLimiter->clear($cacheKey);
+
+
                 $this->logger->info('Rate limit cleared for tracking ID', [
                     'trackingId' => $trackingId,
                     'invoiceCacheKey' => $cacheKey
                 ]);
             }
         }
+
+        $invoiceCacheKey = "ln_invoice:{$shortHash}";
+
+        $this->rateLimiter->clear($invoiceCacheKey);
 
         $this->paymentRepository->create([
             'tracking_id' => $trackingId,
@@ -121,6 +127,7 @@ final readonly class AlbySettleWebhookAction
                 'payment_hash' => $payload->paymentHash,
                 'amount' => $payload->amount,
                 'state' => $payload->state,
+                '$invoiceCacheKey' => $invoiceCacheKey,
             ]
         );
     }
