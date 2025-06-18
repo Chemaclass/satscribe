@@ -28,11 +28,6 @@ final class HomeIndexRequest extends FormRequest
         ];
     }
 
-    public function isSubmitted(): bool
-    {
-        return $this->boolean('submitted');
-    }
-
     public function hasSearchInput(): bool
     {
         return $this->filled('search');
@@ -51,7 +46,7 @@ final class HomeIndexRequest extends FormRequest
 
     public function getPersonaInput(): string
     {
-        return (string)$this->string('persona', '');
+        return (string) $this->string('persona', '');
     }
 
     public function isRefreshEnabled(): bool
