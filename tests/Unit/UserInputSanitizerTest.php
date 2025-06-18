@@ -2,6 +2,7 @@
 
 namespace Tests\Unit;
 
+use App\Repositories\FlaggedWordRepositoryInterface;
 use App\Services\UserInputSanitizer;
 use PHPUnit\Framework\TestCase;
 
@@ -9,7 +10,7 @@ class UserInputSanitizerTest extends TestCase
 {
     public function test_sanitizes_urls_and_flagged_words(): void
     {
-        $repository = new class {
+        $repository = new class implements FlaggedWordRepositoryInterface {
             public function getAllWords(): array
             {
                 return ['badword'];
