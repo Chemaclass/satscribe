@@ -34,22 +34,18 @@ final readonly class AlbySettleWebhookAction
         string $svixTimestamp,
         string $svixSignature,
     ): void {
-        $verifiedPayload = $this->verifySignature(
-            payload: $payload,
-            svixId: $svixId,
-            svixTimestamp: $svixTimestamp,
-            svixSignature: $svixSignature,
-        );
+        $verified = $this->verifySignature($payload, $svixId, $svixTimestamp, $svixSignature);
 
-        $this->logger->info('Webhook payload', ['payload' => $verifiedPayload->toArray()]);
+        $this->logger->info('Webhook payload', ['payload' => $verified->toArray()]);
 
-        if ($verifiedPayload->type === 'incoming'
-            && $verifiedPayload->state === 'SETTLED'
-        ) {
-            $this->handleInvoiceSettled($verifiedPayload);
-        } else {
-            $this->logger->info('Unhandled webhook payload', ['payload' => $verifiedPayload->toArray()]);
+        if ($verified->type !== 'incoming') {
+            $this->logger->info('Unhandled webhook payload', ['payload' => $verified->toArray()]);
+            return;
         }
+
+        $verified->state === 'SETTLED'
+            ? $this->handleInvoice($verified, isFailure: false)
+            : $this->handleInvoice($verified, isFailure: true);
     }
 
     private function verifySignature(
@@ -71,43 +67,55 @@ final readonly class AlbySettleWebhookAction
             ]);
 
             $this->logger->info('Webhook successfully verified');
-            $data = json_decode($payload, true, flags: JSON_THROW_ON_ERROR);
-            return AlbySettleWebhookPayload::fromArray($data);
+
+            return AlbySettleWebhookPayload::fromArray(
+                json_decode($payload, true, flags: JSON_THROW_ON_ERROR)
+            );
         } catch (Throwable $e) {
             $this->logger->warning('Webhook verification failed', ['error' => $e->getMessage()]);
             throw new InvalidAlbyWebhookSignatureException();
         }
     }
 
-    private function handleInvoiceSettled(AlbySettleWebhookPayload $payload): void
+    private function handleInvoice(AlbySettleWebhookPayload $payload, bool $isFailure): void
     {
-        $invoiceHash = $payload->paymentHash;
-        $memo = $payload->memo;
-
-        $this->logger->info('Invoice settled', ['$memo' => $memo]);
-
-        $hash = $this->extractShortHash($memo);
+        $hash = $this->extractShortHash($payload->memo);
         $trackingId = null;
+        $chatId = null;
+
         if ($hash !== null) {
-            $trackingId = $this->cache->pull(IpRateLimiter::createCacheKey($hash));
-            if ($trackingId) {
+            $cached = $this->cache->pull(IpRateLimiter::createCacheKey($hash));
+            if (is_array($cached)) {
+                $trackingId = $cached['tracking_id'] ?? null;
+                $chatId = $cached['chat_id'] ?? null;
+            } elseif ($cached) {
+                $trackingId = $cached;
+            }
+
+            if (! $cached) {
+                $this->logger->warning('No tracking data found for hash', ['shortHash' => $hash]);
+            }
+
+            if ($trackingId && ! $isFailure) {
                 $this->rateLimiter->clear(IpRateLimiter::createRateLimitKey($trackingId));
-                $this->logger->info('Rate limit cleared for tracking', ['trackingId' => $trackingId]);
-            } else {
-                $this->logger->warning('No tracking ID found for hash', ['shortHash' => $hash]);
+                $this->logger->info('Rate limit cleared', ['trackingId' => $trackingId]);
             }
         }
 
         $this->paymentRepository->create([
             'tracking_id' => $trackingId,
-            'payment_hash' => $invoiceHash,
-            'memo' => $memo,
+            'chat_id' => $chatId,
+            'payment_hash' => $payload->paymentHash,
+            'memo' => $payload->memo,
             'amount' => $payload->amount,
+            'status' => $payload->state,
+            'failure_reason' => $isFailure ? $payload->state : null,
         ]);
 
-        $this->logger->info('Invoice settled', [
-            'payment_hash' => $invoiceHash,
+        $this->logger->info($isFailure ? 'Invoice failure stored' : 'Invoice settled', [
+            'payment_hash' => $payload->paymentHash,
             'amount' => $payload->amount,
+            'state' => $payload->state,
         ]);
     }
 
