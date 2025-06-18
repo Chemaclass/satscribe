@@ -1,0 +1,35 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Services;
+
+use App\Repositories\FaqRepositoryInterface;
+use Illuminate\Support\Collection;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+
+final readonly class FaqService
+{
+    public function __construct(private FaqRepositoryInterface $repository)
+    {
+    }
+
+    /**
+     * Fetch FAQ data for the given search term.
+     *
+     * @return array<string, mixed>
+     */
+    public function getFaqData(string $search): array
+    {
+        $faqs = $this->repository->getCollectionBySearch($search);
+        if ($faqs->isEmpty()) {
+            throw new NotFoundHttpException();
+        }
+
+        return [
+            'search' => $search,
+            'faqs' => $faqs,
+            'categories' => $this->repository->getCategories($faqs),
+        ];
+    }
+}

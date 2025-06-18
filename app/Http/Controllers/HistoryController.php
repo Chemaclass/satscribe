@@ -3,18 +3,21 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Models\Message;
-use App\Repositories\ChatRepositoryInterface;
+use App\Services\HistoryService;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
-final class HistoryController
+final readonly class HistoryController
 {
-    public function index(Request $request, ChatRepositoryInterface $repository): View
+    public function __construct(private HistoryService $service)
+    {
+    }
+
+    public function index(Request $request): View
     {
         $showAll = $request->boolean('all');
-        $pagination = $repository->getPagination($showAll);
+        $pagination = $this->service->getHistory($showAll);
         $pagination->appends($request->query());
 
         return view('history', [
@@ -24,8 +27,6 @@ final class HistoryController
 
     public function getRaw(int $messageId): JsonResponse
     {
-        $message = Message::find($messageId);
-
-        return response()->json($message->meta['raw_data'] ?? null);
+        return response()->json($this->service->getRawMessageData($messageId));
     }
 }

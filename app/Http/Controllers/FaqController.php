@@ -4,25 +4,21 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Repositories\FaqRepositoryInterface;
+use App\Services\FaqService;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
-final class FaqController
+final readonly class FaqController
 {
-    public function index(Request $request, FaqRepositoryInterface $repository): View
+    public function __construct(private FaqService $service)
+    {
+    }
+
+    public function index(Request $request): View
     {
         $search = $request->input('search', '');
-        $faqs = $repository->getCollectionBySearch($search);
-        if ($faqs->isEmpty()) {
-            abort(404);
-        }
-        $categories = $repository->getCategories($faqs);
+        $data = $this->service->getFaqData($search);
 
-        return view('faq', [
-            'search' => $search,
-            'faqs' => $faqs,
-            'categories' => $categories,
-        ]);
+        return view('faq', $data);
     }
 }
