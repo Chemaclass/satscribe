@@ -75,6 +75,13 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 });
 
+document.addEventListener('DOMContentLoaded', () => {
+    if (sessionStorage.getItem('scrollToBottom') === '1') {
+        sessionStorage.removeItem('scrollToBottom');
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'auto' });
+    }
+});
+
 // ---------- UI SETUP ----------
 function setupBlockchainToggle() {
     const rawBlock = document.getElementById('blockchain-data');

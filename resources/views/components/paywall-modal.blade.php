@@ -105,7 +105,8 @@
                     this.stopPolling();
                     this.show = false;
                     document.body.classList.remove('modal-open');
-                    window.retryLastPaidRequest?.();
+                    sessionStorage.setItem('scrollToBottom', '1');
+                    window.location.reload();
                 });
 
                 window.addEventListener('paywall-modal-closed', () => {

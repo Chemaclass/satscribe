@@ -463,41 +463,6 @@
             resubmit(searchValue, questionValue);
         }
 
-        window.retryLastPaidRequest = function() {
-            const last = window.__LAST_REQUEST__;
-            const form = document.getElementById('satscribe-form');
-            if (!last || !form) return;
-
-            const searchInput = document.getElementById('search-input');
-            if (searchInput) searchInput.value = last.search;
-
-            const questionInput = document.getElementById('question');
-            if (questionInput) questionInput.value = last.question;
-
-            const personaInput = form.querySelector('input[name="persona"]');
-            if (personaInput) personaInput.value = last.persona;
-
-            const refreshCheckbox = document.getElementById('refresh');
-            if (refreshCheckbox) refreshCheckbox.checked = !!last.refresh;
-
-            const privateCheckbox = document.getElementById('private');
-            if (privateCheckbox) privateCheckbox.checked = !!last.private;
-
-            if (window.Alpine) {
-                const component = Alpine.closestDataStack(form);
-                if (component) {
-                    component.input = last.search;
-                    component.validate?.();
-                }
-
-                const personaComponent = form.querySelector('[x-data*="selectedPersona"]');
-                if (personaComponent && personaComponent.__x) {
-                    personaComponent.__x.$data.selectedPersona = last.persona;
-                }
-            }
-
-            form.dispatchEvent(new Event('submit', {bubbles: true}));
-        }
 
         function hideChatFormContainer() {
             const formContainer = document.getElementById('chat-message-form-container');
