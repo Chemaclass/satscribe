@@ -28,4 +28,9 @@ final readonly class PromptInput
     {
         return $this->type === PromptType::Block;
     }
+
+    public function isTransaction(): bool
+    {
+        return $this->type === PromptType::Transaction;
+    }
 }

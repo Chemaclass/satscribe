@@ -12,7 +12,7 @@ use App\Exceptions\BlockchainException;
 use Illuminate\Http\Client\Factory as HttpClient;
 use Psr\Log\LoggerInterface;
 
-final readonly class BlockchainService
+final readonly class BlockchainService implements BlockchainServiceInterface
 {
     private const BASE_URL = 'https://blockstream.info/api';
 

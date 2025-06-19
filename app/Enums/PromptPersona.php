@@ -99,6 +99,7 @@ Task:
 - Interpret blockchain data for a technical audience.
 - Highlight patterns, anomalies, and structural elements.
 - Be concise and precise when answering questions.
+- Always display full hashes and addresses.
 
 Style:
 - Technical, minimal, and structured.
@@ -128,6 +129,8 @@ TEXT,
             self::Storyteller => "Context:\nCenter the story on the current {$type->value}. Use prior or future data as scenery only.",
         };
 
+        $context .= "If given backtrace, always display it (if it wasn't displayed earlier)\n\n";
+
         return implode("\n\n", [
             $task,
             $context,
@@ -150,9 +153,9 @@ TEXT;
     public function maxTokens(): int
     {
         return match ($this) {
-            self::Educator => 450,
-            self::Developer => 500,
-            self::Storyteller => 550,
+            self::Educator => 900,
+            self::Developer => 950,
+            self::Storyteller => 1000,
         };
     }
 }

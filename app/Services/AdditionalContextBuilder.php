@@ -8,8 +8,10 @@ use App\Data\PromptInput;
 
 final readonly class AdditionalContextBuilder
 {
-    public function __construct(private BlockchainService $blockchain)
-    {
+    public function __construct(
+        private BlockchainServiceInterface $blockchainService,
+        private TransactionBacktraceService $backtraceService,
+    ) {
     }
 
     public function build(BlockchainData $baseData, PromptInput $currentInput, string $question): string
@@ -19,7 +21,7 @@ final readonly class AdditionalContextBuilder
         if (preg_match('/tx\s*["\']?([a-f0-9]{64})["\']?/i', $question, $m)) {
             $txInput = PromptInput::fromRaw($m[1]);
             if ($txInput->text !== $currentInput->text) {
-                $txData = $this->blockchain->getBlockchainData($txInput);
+                $txData = $this->blockchainService->getBlockchainData($txInput);
                 $sections[] = "Referenced Transaction\n" . $txData->current()->toPrompt();
             }
         }
@@ -27,8 +29,20 @@ final readonly class AdditionalContextBuilder
         if (preg_match('/block\s*(\d+|0{8,}[a-f0-9]{56})/i', $question, $m)) {
             $blockInput = PromptInput::fromRaw($m[1]);
             if ($blockInput->text !== $currentInput->text) {
-                $blockData = $this->blockchain->getBlockchainData($blockInput);
+                $blockData = $this->blockchainService->getBlockchainData($blockInput);
                 $sections[] = "Referenced Block\n" . $blockData->current()->toPrompt();
+            }
+        }
+
+        if (preg_match('/back-?trace/i', $question)) {
+            $txid = $currentInput->isTransaction() ? $currentInput->text : null;
+            if (preg_match('/tx\s*["\']?([a-f0-9]{64})["\']?/i', $question, $m)) {
+                $txid = $m[1];
+            }
+
+            if ($txid !== null) {
+                $trace = $this->backtraceService->getBacktrace($txid);
+                $sections[] = $this->backtraceService->formatForPrompt($trace);
             }
         }
 

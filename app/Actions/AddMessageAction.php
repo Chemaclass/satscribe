@@ -10,10 +10,11 @@ use App\Models\Chat;
 use App\Models\Message;
 use App\Repositories\ChatRepositoryInterface;
 use App\Repositories\MessageRepositoryInterface;
-use App\Services\BlockchainService;
+use App\Services\BlockchainServiceInterface;
 use App\Services\OpenAIService;
 use App\Services\UserInputSanitizer;
 use App\Services\AdditionalContextBuilder;
+use App\Services\TransactionBacktraceService;
 use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Support\Facades\RateLimiter;
 use Psr\Log\LoggerInterface;
@@ -23,12 +24,13 @@ final readonly class AddMessageAction
     private const RATE_LIMIT_SECONDS = 86400; // 24 hours
 
     public function __construct(
-        private BlockchainService $blockchain,
+        private BlockchainServiceInterface $blockchain,
         private OpenAIService $openai,
         private ChatRepositoryInterface $chatRepository,
         private MessageRepositoryInterface $messageRepository,
         private UserInputSanitizer $userInputSanitizer,
         private AdditionalContextBuilder $contextBuilder,
+        private TransactionBacktraceService $backtrace,
         private LoggerInterface $logger,
         private string $trackingId,
         private int $maxOpenAIAttempts,

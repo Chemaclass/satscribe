@@ -20,6 +20,8 @@ use App\Repositories\PaymentRepository;
 use App\Repositories\PaymentRepositoryInterface;
 use App\Services\Alby\AlbyClient;
 use App\Services\Alby\AlbyClientInterface;
+use App\Services\BlockchainService;
+use App\Services\BlockchainServiceInterface;
 use App\Services\BlockHeightProvider;
 use App\Services\CachedInvoiceValidator;
 use App\Services\CachedInvoiceValidatorInterface;
@@ -42,6 +44,7 @@ final class AppServiceProvider extends ServiceProvider
         FlaggedWordRepositoryInterface::class => FlaggedWordRepository::class,
         PaymentRepositoryInterface::class => PaymentRepository::class,
         CachedInvoiceValidatorInterface::class => CachedInvoiceValidator::class,
+        BlockchainServiceInterface::class => BlockchainService::class,
     ];
 
     public function register(): void

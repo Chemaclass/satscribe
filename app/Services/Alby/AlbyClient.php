@@ -76,12 +76,10 @@ final class AlbyClient implements AlbyClientInterface
             return $this->client;
         }
 
-        $options = [
+        $this->client = new GuzzleClient([
             'base_uri' => self::URL,
             'timeout' => 10,
-        ];
-
-        $this->client = new GuzzleClient($options);
+        ]);
 
         return $this->client;
     }
