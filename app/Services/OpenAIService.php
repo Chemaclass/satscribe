@@ -32,6 +32,10 @@ final readonly class OpenAIService
         ?Chat $chat = null,
         string $additionalContext = '',
     ): string {
+        $this->logger->info('Calling OpenAI API', [
+            'model' => $this->openAiModel,
+            'persona' => $persona->value,
+        ]);
         $history = collect($chat?->getHistory() ?? [])
             ->take(-5) // gets the last 5 messages
             ->values()
@@ -78,7 +82,7 @@ final readonly class OpenAIService
 
         $text = $response->json('choices.0.message.content');
         $text = $this->trimToLastFullSentence($text);
-        $this->logger->info('OpenAI description generation worked. Text len:'.strlen($text));
+        $this->logger->info('OpenAI description generation worked', ['length' => strlen($text)]);
 
         return $text;
     }
