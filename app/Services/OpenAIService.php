@@ -59,7 +59,19 @@ final readonly class OpenAIService
                 'max_tokens' => $persona->maxTokens(),
             ]);
 
+        if ($response->failed()) {
+            $this->logger->error('OpenAI API request failed', [
+                'status' => $response->status(),
+                'body' => $response->body(),
+            ]);
+            throw new OpenAIError('OpenAI API request failed');
+        }
+
         if ($error = $response->json('error.message')) {
+            $this->logger->error('OpenAI API responded with an error', [
+                'error' => $error,
+                'status' => $response->status(),
+            ]);
             throw new OpenAIError($error);
         }
 

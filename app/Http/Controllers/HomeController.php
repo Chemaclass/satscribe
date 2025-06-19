@@ -26,11 +26,23 @@ final readonly class HomeController
 
     public function createChat(HomeIndexRequest $request): JsonResponse
     {
+        Log::info('Creating chat request', [
+            'search' => $request->hasSearchInput() ? $request->getSearchInput() : null,
+            'persona' => $request->getPersonaInput(),
+            'ip' => $request->ip(),
+        ]);
+
         try {
             $data = $this->service->createChat($request);
+            Log::info('Chat created successfully', [
+                'chat_ulid' => $data['chatUlid'] ?? null,
+            ]);
         } catch (BlockchainException|OpenAIError $e) {
             Log::error('Failed to describe prompt result', [
                 'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'search' => $request->hasSearchInput() ? $request->getSearchInput() : null,
+                'persona' => $request->getPersonaInput(),
             ]);
 
             return response()->json([

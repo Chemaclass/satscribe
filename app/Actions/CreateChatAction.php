@@ -16,6 +16,7 @@ use App\Services\OpenAIService;
 use App\Services\UserInputSanitizer;
 use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Support\Facades\RateLimiter;
+use Psr\Log\LoggerInterface;
 
 final readonly class CreateChatAction
 {
@@ -27,6 +28,7 @@ final readonly class CreateChatAction
         private ChatRepositoryInterface $repository,
         private MessageRepositoryInterface $messageRepository,
         private UserInputSanitizer $userInputSanitizer,
+        private LoggerInterface $logger,
         private string $trackingId,
         private int $maxOpenAIAttempts,
     ) {
@@ -39,16 +41,23 @@ final readonly class CreateChatAction
         bool $refreshEnabled = false,
         bool $isPrivate = false,
     ): CreateChatActionResult {
+        $this->logger->info('Create chat action started', [
+            'input' => $input->text,
+            'persona' => $persona->value,
+            'refresh' => $refreshEnabled,
+        ]);
         // Return a cached result unless forced to refresh
         if (!$refreshEnabled) {
             $chat = $this->repository->findByCriteria($input, $persona, $question);
 
             if ($chat instanceof Chat && !$chat->force_refresh) {
+                $this->logger->info('Returning cached chat', ['chat_id' => $chat->id]);
                 return new CreateChatActionResult($chat, isFresh: false);
             }
         }
 
         $result = $this->createNewChat($input, $persona, $question, $refreshEnabled, $isPrivate);
+        $this->logger->info('New chat created', ['chat_id' => $result->id]);
 
         return new CreateChatActionResult($result, isFresh: true);
     }

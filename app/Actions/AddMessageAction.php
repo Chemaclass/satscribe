@@ -15,6 +15,7 @@ use App\Services\OpenAIService;
 use App\Services\UserInputSanitizer;
 use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Support\Facades\RateLimiter;
+use Psr\Log\LoggerInterface;
 
 final readonly class AddMessageAction
 {
@@ -26,6 +27,7 @@ final readonly class AddMessageAction
         private ChatRepositoryInterface $chatRepository,
         private MessageRepositoryInterface $messageRepository,
         private UserInputSanitizer $userInputSanitizer,
+        private LoggerInterface $logger,
         private string $trackingId,
         private int $maxOpenAIAttempts,
     ) {
@@ -35,6 +37,7 @@ final readonly class AddMessageAction
         Chat $chat,
         string $message,
     ): void {
+        $this->logger->info('Adding message to chat', ['chat_id' => $chat->id]);
         $this->enforceRateLimit();
         $firstUserMessage = $chat->getFirstUserMessage();
 
@@ -45,6 +48,7 @@ final readonly class AddMessageAction
         $aiResponse = $this->generateAiResponse($input, $persona, $cleanMsg, $chat);
 
         $this->chatRepository->addMessageToChat($chat, $cleanMsg, $aiResponse);
+        $this->logger->info('Message added to chat', ['chat_id' => $chat->id]);
     }
 
     private function enforceRateLimit(): void
