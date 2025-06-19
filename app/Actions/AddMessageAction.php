@@ -13,6 +13,7 @@ use App\Repositories\MessageRepositoryInterface;
 use App\Services\BlockchainService;
 use App\Services\OpenAIService;
 use App\Services\UserInputSanitizer;
+use App\Services\AdditionalContextBuilder;
 use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Support\Facades\RateLimiter;
 use Psr\Log\LoggerInterface;
@@ -27,6 +28,7 @@ final readonly class AddMessageAction
         private ChatRepositoryInterface $chatRepository,
         private MessageRepositoryInterface $messageRepository,
         private UserInputSanitizer $userInputSanitizer,
+        private AdditionalContextBuilder $contextBuilder,
         private LoggerInterface $logger,
         private string $trackingId,
         private int $maxOpenAIAttempts,
@@ -75,12 +77,16 @@ final readonly class AddMessageAction
             return $message->content;
         }
 
+        $data = $this->blockchain->getBlockchainData($input);
+        $additional = $this->contextBuilder->build($data, $input, $cleanMsg);
+
         return $this->openai->generateText(
-            $this->blockchain->getBlockchainData($input),
+            $data,
             $input,
             $persona,
             $cleanMsg,
-            $chat
+            $chat,
+            $additional,
         );
     }
 }

@@ -30,6 +30,7 @@ final readonly class OpenAIService
         PromptPersona $persona,
         string $question,
         ?Chat $chat = null,
+        string $additionalContext = '',
     ): string {
         $history = collect($chat?->getHistory() ?? [])
             ->take(-5) // gets the last 5 messages
@@ -44,7 +45,7 @@ final readonly class OpenAIService
             ...$history,
             [
                 'role' => 'user',
-                'content' => $this->buildBlockchainContext($data),
+                'content' => $this->buildBlockchainContext($data, $additionalContext),
             ],
             [
                 'role' => 'user',
@@ -82,9 +83,15 @@ final readonly class OpenAIService
         return $text;
     }
 
-    private function buildBlockchainContext(BlockchainData $data): string
+    private function buildBlockchainContext(BlockchainData $data, string $additional): string
     {
-        return "Data:\n".$data->toPrompt();
+        $content = "Data:\n".$data->toPrompt();
+
+        if ($additional !== '') {
+            $content .= "\n\n---\nAdditional Data\n".$additional;
+        }
+
+        return $content;
     }
 
     private function preparePrompt(

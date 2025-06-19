@@ -14,6 +14,7 @@ use App\Repositories\MessageRepositoryInterface;
 use App\Services\BlockchainService;
 use App\Services\OpenAIService;
 use App\Services\UserInputSanitizer;
+use App\Services\AdditionalContextBuilder;
 use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Support\Facades\RateLimiter;
 use Psr\Log\LoggerInterface;
@@ -28,6 +29,7 @@ final readonly class CreateChatAction
         private ChatRepositoryInterface $repository,
         private MessageRepositoryInterface $messageRepository,
         private UserInputSanitizer $userInputSanitizer,
+        private AdditionalContextBuilder $contextBuilder,
         private LoggerInterface $logger,
         private string $trackingId,
         private int $maxOpenAIAttempts,
@@ -107,7 +109,9 @@ final readonly class CreateChatAction
         PromptPersona $persona,
         string $cleanQuestion,
     ): string {
-        return $this->openai->generateText($blockchainData, $input, $persona, $cleanQuestion);
+        $additional = $this->contextBuilder->build($blockchainData, $input, $cleanQuestion);
+
+        return $this->openai->generateText($blockchainData, $input, $persona, $cleanQuestion, null, $additional);
     }
 
     private function findOrGenerateAiResponse(
