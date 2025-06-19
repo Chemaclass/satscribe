@@ -3,11 +3,21 @@
 @php
     /** @var \App\Models\Chat $chat */
     $assistantMsg = $chat->getFirstAssistantMessage();
+    $rawData = $assistantMsg->rawData ?? [];
+    $mempoolUrl = $assistantMsg->isBlock()
+        ? 'https://mempool.space/block/' . ($rawData['hash'] ?? $assistantMsg->input)
+        : 'https://mempool.space/tx/' . ($rawData['txid'] ?? $assistantMsg->input);
 @endphp
 
 <div class="chat-meta mt-2 flex justify-between items-center text-sm text-gray-500">
     <span>{{ $chat->getLastAssistantMessage()->created_at->diffForHumans() }}</span>
     <div class="flex gap-4 items-center">
+        <a href="{{ $mempoolUrl }}" target="_blank" rel="noopener" class="link full-label hidden sm:inline">
+            {{ __('View on mempool') }}
+        </a>
+        <a href="{{ $mempoolUrl }}" target="_blank" rel="noopener" class="link short-label inline sm:hidden">
+            {{ __('Mempool') }}
+        </a>
         <button type="button"
                 class="toggle-history-raw-btn link"
                 data-target="raw-{{ $assistantMsg->id }}"
