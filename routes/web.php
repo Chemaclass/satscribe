@@ -5,6 +5,7 @@ use App\Http\Controllers\FaqController;
 use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\TraceUtxoPageController;
+use App\Http\Controllers\TraceUtxoJsonController;
 use App\Http\Middleware\IpRateLimiter;
 use Illuminate\Support\Facades\Route;
 

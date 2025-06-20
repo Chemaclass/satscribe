@@ -18,6 +18,56 @@ final readonly class UtxoTraceService
     }
 
     /**
+     * Same trace() response but using references to avoid repeating
+     * identical child traces.
+     */
+    public function traceWithReferences(string $txid, int $depth = 2): array
+    {
+        $traces = $this->trace($txid, $depth);
+
+        $map = [];
+        $refs = [];
+        $id = 1;
+
+        $process = static function (array $node) use (&$process, &$map, &$refs, &$id): string {
+            $children = [];
+            foreach ($node['source'] as $child) {
+                $children[] = $process($child);
+            }
+            $key = $node['txid'].'|'.$node['vout'].'|'.$node['value'].'|'.implode(',', $children);
+            if (!isset($map[$key])) {
+                $ref = 'r'.$id++;
+                $map[$key] = $ref;
+                $refs[$ref] = [
+                    'txid' => $node['txid'],
+                    'vout' => $node['vout'],
+                    'value' => $node['value'],
+                    'source' => $children,
+                ];
+            }
+
+            return $map[$key];
+        };
+
+        $result = ['references' => [], 'utxos' => []];
+
+        foreach ($traces as $item) {
+            $traceRefs = [];
+            foreach ($item['trace'] as $child) {
+                $traceRefs[] = $process($child);
+            }
+            $result['utxos'][] = [
+                'utxo' => $item['utxo'],
+                'trace' => $traceRefs,
+            ];
+        }
+
+        $result['references'] = $refs;
+
+        return $result;
+    }
+
+    /**
      * Trace all UTXOs produced by a transaction.
      *
      * @return array<int, array{utxo: array{txid: string, vout: int, value: int}, trace: array}>
@@ -43,7 +93,10 @@ final readonly class UtxoTraceService
             $result[] = [
                 'utxo' => [
                     'txid' => $txid,
-                    'vout' => $output['n'] ?? 'null',
+                    'vout' => $output['n'] ?? null,
+                    'scriptpubkey' => $output['scriptpubkey'] ?? null,
+                    'scriptpubkey_address' => $output['scriptpubkey_address'] ?? null,
+                    'scriptpubkey_type' => $output['scriptpubkey_type'] ?? null,
                     'value' => $output['value'] ?? 0,
                 ],
                 'trace' => $trace,
@@ -95,6 +148,8 @@ final readonly class UtxoTraceService
                 $inputs[] = [
                     'txid' => $prevTxid,
                     'vout' => $vout,
+                    'scriptpubkey_type' => $vout['scriptpubkey_type'] ?? null,
+                    'scriptpubkey_address' => $vout['scriptpubkey_address'] ?? null,
                     'value' => $value,
                     'source' => $this->traceInputs($prevTxid, $depth - 1, $level + 1),
                 ];
@@ -108,6 +163,12 @@ final readonly class UtxoTraceService
         }
 
         return $inputs;
+    }
+
+    private function getVoutValue(string $txid, int $vout): int
+    {
+        $tx = $this->getTransaction($txid);
+        return (int) ($tx['vout'][$vout]['value'] ?? 0);
     }
 
     private function getTransaction(string $txid): array
@@ -126,11 +187,5 @@ final readonly class UtxoTraceService
         }
 
         return $response->json();
-    }
-
-    private function getVoutValue(string $txid, int $vout): int
-    {
-        $tx = $this->getTransaction($txid);
-        return (int) ($tx['vout'][$vout]['value'] ?? 0);
     }
 }
