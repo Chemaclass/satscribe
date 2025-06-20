@@ -35,7 +35,7 @@ document.addEventListener('alpine:init', () => {
             this.loading = true;
             this.trace = null;
             try {
-                const { data } = await axios.get(`/api/trace-utxo/${encodeURIComponent(this.txid)}?depth=5`);
+                const { data } = await axios.get(`/api/trace-utxo/${encodeURIComponent(this.txid)}`);
                 this.trace = data;
             } catch (e) {
                 this.trace = { error: e.response?.data?.error || 'Request failed' };
