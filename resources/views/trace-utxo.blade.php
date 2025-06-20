@@ -15,6 +15,16 @@
             <button type="submit" class="form-button w-full" :disabled="loading">
                 {{ __('Trace') }}
             </button>
+            <div x-show="loading" x-cloak class="flex justify-center mt-2">
+                <span class="dots-loader">
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                </span>
+            </div>
         </form>
 
         <pre x-show="trace" class="mt-6 p-4 bg-gray-100 dark:bg-gray-800 rounded overflow-auto text-sm">
