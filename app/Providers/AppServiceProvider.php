@@ -18,6 +18,8 @@ use App\Repositories\MessageRepository;
 use App\Repositories\MessageRepositoryInterface;
 use App\Repositories\PaymentRepository;
 use App\Repositories\PaymentRepositoryInterface;
+use App\Repositories\UtxoTraceRepository;
+use App\Repositories\UtxoTraceRepositoryInterface;
 use App\Services\Alby\AlbyClient;
 use App\Services\Alby\AlbyClientInterface;
 use App\Services\BlockchainService;
@@ -45,6 +47,7 @@ final class AppServiceProvider extends ServiceProvider
         PaymentRepositoryInterface::class => PaymentRepository::class,
         CachedInvoiceValidatorInterface::class => CachedInvoiceValidator::class,
         BlockchainServiceInterface::class => BlockchainService::class,
+        UtxoTraceRepositoryInterface::class => UtxoTraceRepository::class,
     ];
 
     public function register(): void
