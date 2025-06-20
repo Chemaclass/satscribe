@@ -23,6 +23,8 @@ final readonly class TraceUtxoController
 
         $depth = max((int) $request->query('depth', 2), 1);
 
+        ini_set('max_execution_time', '300');
+
         return response()->json($this->utxoTraceService->traceWithReferences($txid, $depth));
     }
 }
