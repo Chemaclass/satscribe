@@ -6,6 +6,7 @@ namespace App\Services;
 
 use Illuminate\Http\Client\Factory as HttpClient;
 use Psr\Log\LoggerInterface;
+use App\Repositories\UtxoTraceRepositoryInterface;
 
 final readonly class UtxoTraceService
 {
@@ -14,6 +15,7 @@ final readonly class UtxoTraceService
     public function __construct(
         private HttpClient $http,
         private LoggerInterface $logger,
+        private UtxoTraceRepositoryInterface $repository,
     ) {
     }
 
@@ -23,6 +25,15 @@ final readonly class UtxoTraceService
      */
     public function traceWithReferences(string $txid, int $depth = 1): array
     {
+        if ($cached = $this->repository->find($txid, $depth)) {
+            $this->logger->info('Loaded UTXO trace from DB', [
+                'txid' => $txid,
+                'depth' => $depth,
+            ]);
+
+            return $cached->result;
+        }
+
         $traces = $this->trace($txid, $depth);
 
         $map = [];
@@ -67,6 +78,8 @@ final readonly class UtxoTraceService
 
         uksort($refs, fn(string $a, string $b) => (int) substr($b, 1) <=> (int) substr($a, 1));
         $result['references'] = $refs;
+
+        $this->repository->store($txid, $depth, $result);
 
         return $result;
     }
