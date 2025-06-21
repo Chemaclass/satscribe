@@ -5,9 +5,11 @@ namespace Modules\Blockchain;
 
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
+use Modules\Blockchain\Application\BlockchainFacade;
 use Modules\Blockchain\Application\BlockchainService;
 use Modules\Blockchain\Application\BlockHeightProvider;
 use Modules\Blockchain\Application\PriceService;
+use Modules\Blockchain\Domain\BlockchainFacadeInterface;
 use Modules\Blockchain\Domain\BlockchainServiceInterface;
 use Override;
 
@@ -18,6 +20,7 @@ final class BlockchainServiceProvider extends ServiceProvider
      */
     public $singletons = [
         BlockchainServiceInterface::class => BlockchainService::class,
+        BlockchainFacadeInterface::class => BlockchainFacade::class,
     ];
 
     /**

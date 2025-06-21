@@ -6,7 +6,7 @@ namespace Modules\Chat\Application;
 
 use App\Models\Chat;
 use App\Models\Message;
-use Modules\Blockchain\Application\BlockHeightProvider;
+use Modules\Blockchain\Domain\BlockchainFacadeInterface;
 use Modules\Blockchain\Domain\Exception\BlockchainException;
 use Modules\Chat\Domain\Data\PromptInput;
 use Modules\Chat\Domain\Data\QuestionPlaceholder;
@@ -17,9 +17,9 @@ use Modules\OpenAI\Domain\Exception\OpenAIError;
 final readonly class ChatService
 {
     public function __construct(
-        private BlockHeightProvider $heightProvider,// @todo use Blockchain Facade instead
-        private AddMessageAction $addMessageAction,
+        private BlockchainFacadeInterface $blockchainFacade,
         private CreateChatAction $createChatAction,
+        private AddMessageAction $addMessageAction,
     ) {
     }
 
@@ -39,7 +39,7 @@ final readonly class ChatService
             'questionPlaceholder' => QuestionPlaceholder::rand(),
             'suggestedPromptsGrouped' => QuestionPlaceholder::groupedPrompts(),
             'suggestions' => $firstMsg->isBlock() ? QuestionPlaceholder::forBlock() : QuestionPlaceholder::forTx(),
-            'maxBitcoinBlockHeight' => $this->heightProvider->getMaxPossibleBlockHeight(),
+            'maxBitcoinBlockHeight' => $this->blockchainFacade->getMaxPossibleBlockHeight(),
             'personaDescriptions' => PromptPersona::descriptions()->toJson(),
             'question' => $chat->messages()->first()->content,
             'chat' => $chat,
@@ -73,7 +73,7 @@ final readonly class ChatService
         return [
             'questionPlaceholder' => QuestionPlaceholder::rand(),
             'suggestedPromptsGrouped' => QuestionPlaceholder::groupedPrompts(),
-            'maxBitcoinBlockHeight' => $this->heightProvider->getMaxPossibleBlockHeight(),
+            'maxBitcoinBlockHeight' => $this->blockchainFacade->getMaxPossibleBlockHeight(),
             'personaDescriptions' => PromptPersona::descriptions()->toJson(),
         ];
     }
@@ -101,7 +101,7 @@ final readonly class ChatService
         );
 
         return [
-            'maxBitcoinBlockHeight' => $this->heightProvider->getMaxPossibleBlockHeight(),
+            'maxBitcoinBlockHeight' => $this->blockchainFacade->getMaxPossibleBlockHeight(),
             'search' => $search,
             'chatUlid' => $actionResult->chat->ulid,
             'content' => $actionResult->chat->getLastAssistantMessage()->content,
@@ -118,7 +118,7 @@ final readonly class ChatService
             return PromptInput::fromRaw($request->getSearchInput());
         }
 
-        return PromptInput::fromRaw($this->heightProvider->getCurrentBlockHeight());
+        return PromptInput::fromRaw($this->blockchainFacade->getCurrentBlockHeight());
     }
 
     private function getPromptPersona(CreateChatRequest $request): PromptPersona

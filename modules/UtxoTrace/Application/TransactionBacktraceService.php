@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\UtxoTrace\Application;
 
-use Modules\Blockchain\Domain\BlockchainServiceInterface;
+use Modules\Blockchain\Domain\BlockchainFacadeInterface;
 use Modules\Blockchain\Domain\Data\TransactionData;
 use Modules\Chat\Domain\Data\PromptInput;
 use Psr\Log\LoggerInterface;
@@ -13,7 +13,7 @@ use Throwable;
 final readonly class TransactionBacktraceService
 {
     public function __construct(
-        private BlockchainServiceInterface $blockchain,
+        private BlockchainFacadeInterface $blockchainFacade,
         private LoggerInterface $logger,
     ) {
     }
@@ -34,7 +34,7 @@ final readonly class TransactionBacktraceService
             }
 
             try {
-                $data = $this->blockchain->getBlockchainData(PromptInput::fromRaw($current));
+                $data = $this->blockchainFacade->getBlockchainData(PromptInput::fromRaw($current));
                 $tx = $data->transaction;
                 $this->logger->info('Generating Backtrace', [
                     'count(trace)' => count($trace),
