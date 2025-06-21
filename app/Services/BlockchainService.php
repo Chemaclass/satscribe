@@ -9,7 +9,6 @@ use App\Data\Blockchain\BlockData;
 use App\Data\Blockchain\TransactionData;
 use App\Data\PromptInput;
 use App\Exceptions\BlockchainException;
-use Illuminate\Http\Client\Factory as HttpClient;
 use Psr\Log\LoggerInterface;
 
 final readonly class BlockchainService implements BlockchainServiceInterface
@@ -17,7 +16,7 @@ final readonly class BlockchainService implements BlockchainServiceInterface
     private const BASE_URL = 'https://blockstream.info/api';
 
     public function __construct(
-        private HttpClient $http,
+        private HttpClientInterface $http,
         private LoggerInterface $logger,
     ) {
     }
