@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Models\UtxoTrace;
 use App\Repositories\UtxoTraceRepositoryInterface;
 use Psr\Log\LoggerInterface;
 
@@ -24,7 +25,7 @@ final readonly class UtxoTraceService
      */
     public function traceWithReferences(string $txid, int $depth = 1): array
     {
-        if ($cached = $this->repository->find($txid, $depth)) {
+        if (($cached = $this->repository->find($txid, $depth)) instanceof UtxoTrace) {
             $this->logger->info('Loaded UTXO trace from DB', [
                 'txid' => $txid,
                 'depth' => $depth,

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Actions;
+namespace Modules\Chat\Application;
 
 use App\Data\PromptInput;
 use App\Enums\PromptPersona;
@@ -13,7 +13,6 @@ use App\Repositories\MessageRepositoryInterface;
 use App\Services\AdditionalContextBuilder;
 use App\Services\BlockchainServiceInterface;
 use App\Services\OpenAIService;
-use App\Services\TransactionBacktraceService;
 use App\Services\UserInputSanitizer;
 use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Support\Facades\RateLimiter;
@@ -30,10 +29,9 @@ final readonly class AddMessageAction
         private MessageRepositoryInterface $messageRepository,
         private UserInputSanitizer $userInputSanitizer,
         private AdditionalContextBuilder $contextBuilder,
-        private TransactionBacktraceService $backtrace,
         private LoggerInterface $logger,
-        private string $trackingId,
-        private int $maxOpenAIAttempts,
+        private string $trackingId = '',
+        private int $maxOpenAIAttempts = 1000,
     ) {
     }
 

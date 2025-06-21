@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit;
 
+use RuntimeException;
 use App\Models\UtxoTrace;
 use App\Repositories\UtxoTraceRepositoryInterface;
 use App\Services\HttpClientInterface;
@@ -19,7 +20,7 @@ final class UtxoTraceServiceTest extends TestCase
         $expected = ['foo' => 'bar'];
 
         $repo = new class($expected) implements UtxoTraceRepositoryInterface {
-            public function __construct(private array $data) {}
+            public function __construct(private readonly array $data) {}
             public function find(string $txid, int $depth): ?UtxoTrace
             {
                 $trace = new UtxoTrace();
@@ -28,7 +29,7 @@ final class UtxoTraceServiceTest extends TestCase
             }
             public function store(string $txid, int $depth, array $result): UtxoTrace
             {
-                throw new \RuntimeException('Should not be called');
+                throw new RuntimeException('Should not be called');
             }
         };
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use Throwable;
 use App\Data\Blockchain\TransactionData;
 use App\Data\PromptInput;
 use Psr\Log\LoggerInterface;
@@ -42,7 +43,7 @@ final readonly class TransactionBacktraceService
                 if (!$tx instanceof TransactionData) {
                     break;
                 }
-            } catch (\Throwable $e) {
+            } catch (Throwable $e) {
                 $this->logger->warning('Backtrace fetch failed', [
                     'txid' => $current,
                     'message' => $e->getMessage(),

@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace Modules\Chat;
+namespace Modules\Blockchain;
 
 use Illuminate\Support\ServiceProvider;
 use Override;
 
-final class ChatServiceProvider extends ServiceProvider
+final class BlockchainServiceProvider extends ServiceProvider
 {
     /**
      * @var array<class-string, class-string>

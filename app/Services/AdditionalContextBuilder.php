@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Data\Blockchain\BlockData;
 use App\Data\Blockchain\BlockchainData;
 use App\Data\PromptInput;
 
@@ -48,15 +49,11 @@ final readonly class AdditionalContextBuilder
 
         if ($currentInput->isBlock()) {
             $lower = strtolower($question);
-            if (str_contains($lower, 'previous')) {
-                if ($baseData->previousBlock !== null) {
-                    $sections[] = "Previous Block\n" . $baseData->previousBlock->toPrompt();
-                }
+            if (str_contains($lower, 'previous') && $baseData->previousBlock instanceof BlockData) {
+                $sections[] = "Previous Block\n" . $baseData->previousBlock->toPrompt();
             }
-            if (str_contains($lower, 'next')) {
-                if ($baseData->nextBlock !== null) {
-                    $sections[] = "Next Block\n" . $baseData->nextBlock->toPrompt();
-                }
+            if (str_contains($lower, 'next') && $baseData->nextBlock instanceof BlockData) {
+                $sections[] = "Next Block\n" . $baseData->nextBlock->toPrompt();
             }
         }
 

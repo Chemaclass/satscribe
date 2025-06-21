@@ -110,7 +110,7 @@ final readonly class ChatRepository implements ChatRepositoryInterface
         $query = Chat::query();
 
         if ($showAll) {
-            $query->where(function (Builder $q) {
+            $query->where(function (Builder $q): void {
                 $q->where('is_private', false)
                     ->orWhere('tracking_id', $this->trackingId);
             });

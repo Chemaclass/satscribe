@@ -2,22 +2,65 @@
 
 declare(strict_types=1);
 
-namespace App\Services;
+namespace Modules\Chat\Application;
 
-use App\Actions\CreateChatAction;
 use App\Data\PromptInput;
 use App\Data\QuestionPlaceholder;
 use App\Enums\PromptPersona;
 use App\Exceptions\BlockchainException;
 use App\Exceptions\OpenAIError;
 use App\Http\Requests\HomeIndexRequest;
+use App\Models\Chat;
+use App\Models\Message;
+use Modules\Blockchain\Application\BlockHeightProvider;
 
-final readonly class HomeService
+final readonly class ChatService
 {
     public function __construct(
-        private BlockHeightProvider $heightProvider,
+        private BlockHeightProvider $heightProvider,// @todo use Blockchain Facade instead
+        private AddMessageAction $addMessageAction,
         private CreateChatAction $createChatAction,
     ) {
+    }
+
+    /**
+     * Prepare data for showing a chat.
+     *
+     * @return array<string, mixed>
+     */
+    public function getChatData(Chat $chat): array
+    {
+        $chat->load('messages');
+
+        /** @var Message $firstMsg */
+        $firstMsg = $chat->messages()->first();
+
+        return [
+            'questionPlaceholder' => QuestionPlaceholder::rand(),
+            'suggestedPromptsGrouped' => QuestionPlaceholder::groupedPrompts(),
+            'suggestions' => $firstMsg->isBlock() ? QuestionPlaceholder::forBlock() : QuestionPlaceholder::forTx(),
+            'maxBitcoinBlockHeight' => $this->heightProvider->getMaxPossibleBlockHeight(),
+            'personaDescriptions' => PromptPersona::descriptions()->toJson(),
+            'question' => $chat->messages()->first()->content,
+            'chat' => $chat,
+            'search' => $firstMsg->meta['input'] ?? '',
+            'persona' => $firstMsg->meta['persona'] ?? '',
+        ];
+    }
+
+    /**
+     * Add a new message to the chat and return response data.
+     *
+     * @return array<string, mixed>
+     */
+    public function addMessage(Chat $chat, string $message): array
+    {
+        $this->addMessageAction->execute($chat, $message);
+
+        return [
+            'content' => $chat->getLastAssistantMessage()->content,
+            'suggestions' => $chat->isBlock() ? QuestionPlaceholder::forBlock() : QuestionPlaceholder::forTx(),
+        ];
     }
 
     /**

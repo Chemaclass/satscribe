@@ -52,7 +52,7 @@ final readonly class AlbySettleWebhookAction
         string $svixTimestamp,
         string $svixSignature,
     ): AlbySettleWebhookPayload {
-        if (empty($this->webhookSecret)) {
+        if ($this->webhookSecret === '') {
             $this->logger->warning('Webhook secret is not configured');
             throw new InvalidAlbyWebhookSignatureException();
         }

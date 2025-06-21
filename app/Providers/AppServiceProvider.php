@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
-use App\Actions\AddMessageAction;
 use App\Actions\AlbySettleWebhookAction;
-use App\Actions\CreateChatAction;
 use App\Http\Middleware\IpRateLimiter;
 use App\Repositories\ChatRepository;
 use App\Repositories\ChatRepositoryInterface;
@@ -24,7 +22,6 @@ use App\Services\Alby\AlbyClient;
 use App\Services\Alby\AlbyClientInterface;
 use App\Services\BlockchainService;
 use App\Services\BlockchainServiceInterface;
-use App\Services\BlockHeightProvider;
 use App\Services\CachedInvoiceValidator;
 use App\Services\CachedInvoiceValidatorInterface;
 use App\Services\HttpClient;
@@ -37,6 +34,7 @@ use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
+use Modules\Chat\Application\CreateChatAction;
 
 final class AppServiceProvider extends ServiceProvider
 {

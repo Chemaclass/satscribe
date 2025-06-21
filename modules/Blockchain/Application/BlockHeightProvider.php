@@ -2,9 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Services;
+namespace Modules\Blockchain\Application;
 
 use App\Exceptions\BlockstreamException;
+use App\Services\HttpClientInterface;
 use Illuminate\Contracts\Cache\Repository as Cache;
 use Illuminate\Support\Carbon;
 use Psr\Log\LoggerInterface;
@@ -22,7 +23,7 @@ final readonly class BlockHeightProvider
         private Cache $cache,
         private HttpClientInterface $http,
         private LoggerInterface $logger,
-        private bool $enabled,
+        private bool $enabled = false,
     ) {
     }
 
