@@ -1,18 +1,17 @@
 <?php
 
-use App\Http\Controllers\ChatController;
 use App\Http\Controllers\FaqController;
 use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\TraceUtxoPageController;
 use App\Http\Middleware\IpRateLimiter;
 use Illuminate\Support\Facades\Route;
-use Modules\Chat\Infrastructure\Http\Controller\HomeController;
+use Modules\Chat\Infrastructure\Http\Controller\ChatController;
 
 Route::redirect('generate', '/');
 Route::redirect('describe', '/');
 
-Route::get('/', [HomeController::class, 'index'])->name('home.index');
-Route::post('/', [HomeController::class, 'createChat'])
+Route::get('/', [ChatController::class, 'index'])->name('home.index');
+Route::post('/', [ChatController::class, 'createChat'])
     ->name('home.create-chat')
     ->middleware(IpRateLimiter::class);
 

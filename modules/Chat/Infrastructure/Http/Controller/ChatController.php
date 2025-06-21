@@ -7,18 +7,38 @@ namespace Modules\Chat\Infrastructure\Http\Controller;
 use App\Exceptions\BlockchainException;
 use App\Exceptions\OpenAIError;
 use App\Http\Requests\HomeIndexRequest;
+use App\Models\Chat;
+use App\Services\ChatService;
 use App\Services\HomeService;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 
-final readonly class HomeController
+final readonly class ChatController
 {
     public function __construct(
+        private ChatService $chatService,
         private HomeService $service,
         private LoggerInterface $logger,
     ) {
+    }
+
+    public function show(Chat $chat): View
+    {
+        return view('home', $this->chatService->getChatData($chat));
+    }
+
+    public function addMessage(Request $request, Chat $chat): JsonResponse
+    {
+        if (tracking_id() !== $chat->tracking_id) {
+            abort(403, 'You are not allowed to send messages to this chat.');
+        }
+
+        return response()->json(
+            $this->chatService->addMessage($chat, (string) $request->input('message'))
+        );
     }
 
     public function index(): View
