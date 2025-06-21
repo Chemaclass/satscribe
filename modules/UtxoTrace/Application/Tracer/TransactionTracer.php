@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Modules\UtxoTrace\Application;
+namespace Modules\UtxoTrace\Application\Tracer;
 
 use Modules\Blockchain\Domain\BlockchainFacadeInterface;
 use Modules\Blockchain\Domain\Data\TransactionData;
@@ -10,7 +10,7 @@ use Modules\Chat\Domain\Data\PromptInput;
 use Psr\Log\LoggerInterface;
 use Throwable;
 
-final readonly class TransactionBacktraceService
+final readonly class TransactionTracer
 {
     public function __construct(
         private BlockchainFacadeInterface $blockchainFacade,

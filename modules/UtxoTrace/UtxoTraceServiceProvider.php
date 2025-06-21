@@ -4,7 +4,9 @@ declare(strict_types=1);
 namespace Modules\UtxoTrace;
 
 use Illuminate\Support\ServiceProvider;
+use Modules\UtxoTrace\Application\UtxoTraceFacade;
 use Modules\UtxoTrace\Domain\Repository\UtxoTraceRepositoryInterface;
+use Modules\UtxoTrace\Domain\UtxoTraceFacadeInterface;
 use Modules\UtxoTrace\Infrastructure\Repository\UtxoTraceRepository;
 use Override;
 
@@ -15,6 +17,7 @@ final class UtxoTraceServiceProvider extends ServiceProvider
      */
     public $singletons = [
         UtxoTraceRepositoryInterface::class => UtxoTraceRepository::class,
+        UtxoTraceFacadeInterface::class => UtxoTraceFacade::class,
     ];
 
     /**

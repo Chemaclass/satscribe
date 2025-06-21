@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Modules\UtxoTrace\Application;
+namespace Modules\UtxoTrace\Application\Tracer;
 
 use App\Models\UtxoTrace;
 use Modules\Shared\Domain\HttpClientInterface;
 use Modules\UtxoTrace\Domain\Repository\UtxoTraceRepositoryInterface;
 use Psr\Log\LoggerInterface;
 
-final readonly class UtxoTraceService
+final readonly class UtxoTracer
 {
     private const BASE_URL = 'https://blockstream.info/api';
 
@@ -24,7 +24,7 @@ final readonly class UtxoTraceService
      * Same trace() response but using references to avoid repeating
      * identical child traces.
      */
-    public function traceWithReferences(string $txid, int $depth = 1): array
+    public function getBacktrace(string $txid, int $depth = 1): array
     {
         if (($cached = $this->repository->find($txid, $depth)) instanceof UtxoTrace) {
             $this->logger->info('Loaded UTXO trace from DB', [
@@ -35,7 +35,7 @@ final readonly class UtxoTraceService
             return $cached->result;
         }
 
-        $result = $this->buildReferences($this->trace($txid, $depth));
+        $result = $this->buildReferences($this->buildBacktrace($txid, $depth));
 
         $this->repository->store($txid, $depth, $result);
 
@@ -54,8 +54,9 @@ final readonly class UtxoTraceService
      *     trace: array,
      * }>
      */
-    public function trace(string $txid, int $depth = 2): array
+    public function buildBacktrace(string $txid, int $depth = 2): array
     {
+        // todo: consider make this method private and/or extract to class to keep unit tests
         $this->logger->info('Starting UTXO trace', [
             'txid' => $txid,
             'depth' => $depth,
