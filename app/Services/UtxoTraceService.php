@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Repositories\UtxoTraceRepositoryInterface;
-use Illuminate\Http\Client\Factory as HttpClient;
 use Psr\Log\LoggerInterface;
 
 final readonly class UtxoTraceService
@@ -13,7 +12,7 @@ final readonly class UtxoTraceService
     private const BASE_URL = 'https://blockstream.info/api';
 
     public function __construct(
-        private HttpClient $http,
+        private HttpClientInterface $http,
         private LoggerInterface $logger,
         private UtxoTraceRepositoryInterface $repository,
     ) {
@@ -210,19 +209,28 @@ final readonly class UtxoTraceService
 
     private function getTransaction(string $txid): array
     {
+        static $cache = [];
+
+        if (isset($cache[$txid])) {
+            return $cache[$txid];
+        }
+
         $url = self::BASE_URL."/tx/{$txid}";
         $this->logger->info('Blockstream API call', [
             'url' => $url,
         ]);
+
         $response = $this->http->get($url);
+
         if ($response->failed()) {
             $this->logger->warning('Blockstream API error', [
                 'url' => $url,
                 'status' => $response->status(),
             ]);
-            return [];
+
+            return $cache[$txid] = [];
         }
 
-        return $response->json();
+        return $cache[$txid] = $response->json();
     }
 }

@@ -27,6 +27,8 @@ use App\Services\BlockchainServiceInterface;
 use App\Services\BlockHeightProvider;
 use App\Services\CachedInvoiceValidator;
 use App\Services\CachedInvoiceValidatorInterface;
+use App\Services\HttpClient;
+use App\Services\HttpClientInterface;
 use App\Services\OpenAIService;
 use App\Services\PriceService;
 use Carbon\Carbon;
@@ -48,6 +50,7 @@ final class AppServiceProvider extends ServiceProvider
         CachedInvoiceValidatorInterface::class => CachedInvoiceValidator::class,
         BlockchainServiceInterface::class => BlockchainService::class,
         UtxoTraceRepositoryInterface::class => UtxoTraceRepository::class,
+        HttpClientInterface::class => HttpClient::class,
     ];
 
     public function register(): void

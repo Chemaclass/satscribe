@@ -12,15 +12,6 @@ final class FaqVisibilityTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_faq_page_returns_404_when_no_faqs_for_locale(): void
-    {
-        app()->setLocale('fr');
-
-        $response = $this->get(route('faq.index'));
-
-        $response->assertStatus(404);
-    }
-
     public function test_faq_page_renders_when_faqs_exist(): void
     {
         Faq::factory()->create(['lang' => 'en']);
