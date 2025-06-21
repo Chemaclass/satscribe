@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit;
 
-use App\Http\Middleware\IpRateLimiter;
+use Modules\Shared\Infrastructure\Http\Middleware\IpRateLimiter;
 use PHPUnit\Framework\TestCase;
 
 final class IpRateLimiterTest extends TestCase

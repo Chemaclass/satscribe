@@ -1,5 +1,5 @@
 @php
-    use App\Enums\PromptPersona;
+    use Modules\Chat\Domain\Enum\PromptPersona;
 @endphp
 
 @props([
