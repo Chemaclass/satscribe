@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Modules\Blockchain\Application;
+namespace Modules\Blockchain\Application\Coingecko;
 
 use Illuminate\Contracts\Cache\Repository as Cache;
 use Modules\Shared\Domain\HttpClientInterface;

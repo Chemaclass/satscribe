@@ -7,7 +7,7 @@ namespace Modules\Chat\Application;
 use App\Models\Chat;
 use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Support\Facades\RateLimiter;
-use Modules\Blockchain\Domain\BlockchainServiceInterface;
+use Modules\Blockchain\Domain\BlockchainFacadeInterface;
 use Modules\Blockchain\Domain\Data\BlockchainData;
 use Modules\Chat\Domain\Data\CreateChatActionResult;
 use Modules\Chat\Domain\Data\PromptInput;
@@ -23,8 +23,8 @@ final readonly class CreateChatAction
     private const RATE_LIMIT_SECONDS = 86400; // 24 hours
 
     public function __construct(
-        private BlockchainServiceInterface $blockchain,
-        private OpenAIService $openai,
+        private BlockchainFacadeInterface $blockchainFacade,
+        private OpenAIService $openai, // @todo use OpenAIFacade
         private ChatRepositoryInterface $repository,
         private MessageRepositoryInterface $messageRepository,
         private UserInputSanitizer $userInputSanitizer,
@@ -72,7 +72,7 @@ final readonly class CreateChatAction
     ): Chat {
         $this->enforceRateLimit();
 
-        $blockchainData = $this->blockchain->getBlockchainData($input);
+        $blockchainData = $this->blockchainFacade->getBlockchainData($input);
         $cleanQuestion = $this->userInputSanitizer->sanitize($question);
 
         $aiResponse = $refreshEnabled

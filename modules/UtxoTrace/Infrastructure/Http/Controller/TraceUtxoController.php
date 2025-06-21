@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace Modules\UtxoTrace\Infrastructure\Http\Controller;
 
 use Illuminate\Http\Request;
-use Modules\UtxoTrace\Application\UtxoTraceService;
+use Modules\UtxoTrace\Application\Tracer\UtxoTracer;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 final readonly class TraceUtxoController
 {
     public function __construct(
-        private UtxoTraceService $utxoTraceService,
+        private UtxoTracer $utxoTraceService,
     ) {
     }
 
@@ -25,6 +25,6 @@ final readonly class TraceUtxoController
 
         ini_set('max_execution_time', '300');
 
-        return response()->json($this->utxoTraceService->traceWithReferences($txid, $depth));
+        return response()->json($this->utxoTraceService->getBacktrace($txid, $depth));
     }
 }

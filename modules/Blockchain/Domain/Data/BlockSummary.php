@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Modules\Blockchain\Domain\Data;
 
 use Illuminate\Support\Collection;
-use Modules\Chat\Application\MinerIdentifier;
 
 final class BlockSummary
 {

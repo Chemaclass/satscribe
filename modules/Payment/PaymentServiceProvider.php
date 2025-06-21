@@ -10,8 +10,8 @@ use Modules\Payment\Application\CachedInvoiceValidator;
 use Modules\Payment\Domain\AlbyClientInterface;
 use Modules\Payment\Domain\CachedInvoiceValidatorInterface;
 use Modules\Payment\Domain\Repository\PaymentRepositoryInterface;
+use Modules\Payment\Infrastructure\Repository\PaymentRepository;
 use Override;
-use PaymentRepository;
 
 final class PaymentServiceProvider extends ServiceProvider
 {
@@ -22,7 +22,6 @@ final class PaymentServiceProvider extends ServiceProvider
         AlbyClientInterface::class => AlbyClient::class,
         PaymentRepositoryInterface::class => PaymentRepository::class,
         CachedInvoiceValidatorInterface::class => CachedInvoiceValidator::class,
-
     ];
 
     /**
@@ -43,6 +42,5 @@ final class PaymentServiceProvider extends ServiceProvider
         $this->app->when(AlbySettleWebhookAction::class)
             ->needs('$webhookSecret')
             ->giveConfig('services.alby.webhook_secret');
-
     }
 }

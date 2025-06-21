@@ -2,9 +2,8 @@
 
 declare(strict_types=1);
 
-namespace Modules\Blockchain\Application;
+namespace Modules\Blockchain\Application\Blockstream;
 
-use Modules\Blockchain\Domain\BlockchainServiceInterface;
 use Modules\Blockchain\Domain\Data\BlockchainData;
 use Modules\Blockchain\Domain\Data\BlockData;
 use Modules\Blockchain\Domain\Data\TransactionData;
@@ -13,7 +12,7 @@ use Modules\Chat\Domain\Data\PromptInput;
 use Modules\Shared\Domain\HttpClientInterface;
 use Psr\Log\LoggerInterface;
 
-final readonly class BlockchainService implements BlockchainServiceInterface
+final readonly class BlockchainService
 {
     private const BASE_URL = 'https://blockstream.info/api';
 

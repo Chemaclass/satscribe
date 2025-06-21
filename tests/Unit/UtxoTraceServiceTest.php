@@ -7,7 +7,7 @@ namespace Tests\Unit;
 use App\Models\UtxoTrace;
 use Illuminate\Http\Client\Response;
 use Modules\Shared\Domain\HttpClientInterface;
-use Modules\UtxoTrace\Application\UtxoTraceService;
+use Modules\UtxoTrace\Application\Tracer\UtxoTracer;
 use Modules\UtxoTrace\Domain\Repository\UtxoTraceRepositoryInterface;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -36,9 +36,9 @@ final class UtxoTraceServiceTest extends TestCase
         $http = self::createStub(HttpClientInterface::class);
         $logger = self::createStub(LoggerInterface::class);
 
-        $service = new UtxoTraceService($http, $logger, $repo);
+        $service = new UtxoTracer($http, $logger, $repo);
 
-        $this->assertSame($expected, $service->traceWithReferences('tx', 1));
+        $this->assertSame($expected, $service->getBacktrace('tx', 1));
     }
 
     public function test_returns_empty_array_when_missing_vout(): void
@@ -58,9 +58,9 @@ final class UtxoTraceServiceTest extends TestCase
 
         $logger = $this->createStub(LoggerInterface::class);
 
-        $service = new UtxoTraceService($http, $logger, $repo);
+        $service = new UtxoTracer($http, $logger, $repo);
 
-        $this->assertSame([], $service->trace('tx', 1));
+        $this->assertSame([], $service->buildBacktrace('tx', 1));
     }
 
     public function test_uses_transaction_cache_to_avoid_duplicate_requests(): void
@@ -109,8 +109,8 @@ final class UtxoTraceServiceTest extends TestCase
 
         $logger = $this->createStub(LoggerInterface::class);
 
-        $service = new UtxoTraceService($http, $logger, $repo);
+        $service = new UtxoTracer($http, $logger, $repo);
 
-        $service->trace('tx0', 1);
+        $service->buildBacktrace('tx0', 1);
     }
 }
