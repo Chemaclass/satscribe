@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Tests\Unit;
 
-use RuntimeException;
 use App\Models\UtxoTrace;
-use App\Repositories\UtxoTraceRepositoryInterface;
-use App\Services\HttpClientInterface;
-use App\Services\UtxoTraceService;
 use Illuminate\Http\Client\Response;
+use Modules\Shared\Domain\HttpClientInterface;
+use Modules\UtxoTrace\Application\UtxoTraceService;
+use Modules\UtxoTrace\Domain\Repository\UtxoTraceRepositoryInterface;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
+use RuntimeException;
 
 final class UtxoTraceServiceTest extends TestCase
 {

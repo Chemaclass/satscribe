@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\Unit;
 
-use App\Services\CachedInvoiceValidator;
-use App\Services\Alby\AlbyClientInterface;
 use Carbon\Carbon;
+use Modules\Payment\Application\CachedInvoiceValidator;
+use Modules\Payment\Domain\AlbyClientInterface;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 

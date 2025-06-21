@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Enums\PromptPersona;
 use Illuminate\Database\Eloquent\Model;
+use Modules\Chat\Domain\Enum\PromptPersona;
 
 final class SatscribeDescription extends Model
 {

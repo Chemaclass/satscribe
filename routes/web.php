@@ -1,11 +1,11 @@
 <?php
 
-use App\Http\Controllers\FaqController;
-use App\Http\Controllers\HistoryController;
-use App\Http\Controllers\TraceUtxoPageController;
-use App\Http\Middleware\IpRateLimiter;
 use Illuminate\Support\Facades\Route;
 use Modules\Chat\Infrastructure\Http\Controller\ChatController;
+use Modules\Chat\Infrastructure\Http\Controller\HistoryController;
+use Modules\Faq\Infrastructure\Http\Controller\FaqController;
+use Modules\Shared\Infrastructure\Http\Middleware\IpRateLimiter;
+use Modules\UtxoTrace\Infrastructure\Http\Controller\TraceUtxoPageController;
 
 Route::redirect('generate', '/');
 Route::redirect('describe', '/');

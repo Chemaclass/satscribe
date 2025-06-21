@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Modules\Blockchain\Application;
 
-use App\Exceptions\BlockstreamException;
-use App\Services\HttpClientInterface;
+use Modules\Shared\Domain\HttpClientInterface;
 use Illuminate\Contracts\Cache\Repository as Cache;
 use Illuminate\Support\Carbon;
+use Modules\Blockchain\Domain\Exception\BlockstreamException;
 use Psr\Log\LoggerInterface;
 use RuntimeException;
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Modules\OpenAI;
 
 use Illuminate\Support\ServiceProvider;
+use Modules\OpenAI\Application\OpenAIService;
 use Override;
 
 final class OpenAIServiceProvider extends ServiceProvider
@@ -24,9 +25,12 @@ final class OpenAIServiceProvider extends ServiceProvider
     #[Override]
     public function register(): void
     {
-    }
+        $this->app->when(OpenAIService::class)
+            ->needs('$openAiApiKey')
+            ->giveConfig('services.openai.key');
 
-    public function boot(): void
-    {
+        $this->app->when(OpenAIService::class)
+            ->needs('$openAiModel')
+            ->giveConfig('services.openai.model');
     }
 }

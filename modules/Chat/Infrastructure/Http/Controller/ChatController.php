@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Modules\Chat\Infrastructure\Http\Controller;
 
-use App\Exceptions\BlockchainException;
-use App\Exceptions\OpenAIError;
-use App\Http\Requests\HomeIndexRequest;
 use App\Models\Chat;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Modules\Blockchain\Domain\Exception\BlockchainException;
 use Modules\Chat\Application\ChatService;
+use Modules\Chat\Infrastructure\Http\Request\CreateChatRequest;
+use Modules\OpenAI\Domain\Exception\OpenAIError;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -44,7 +44,7 @@ final readonly class ChatController
         return view('home', $this->chatService->getIndexData());
     }
 
-    public function createChat(HomeIndexRequest $request): JsonResponse
+    public function createChat(CreateChatRequest $request): JsonResponse
     {
         $this->logger->info('Creating chat request', [
             'search' => $request->hasSearchInput() ? $request->getSearchInput() : null,

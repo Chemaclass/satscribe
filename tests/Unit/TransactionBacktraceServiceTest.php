@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\Unit;
 
-use App\Data\Blockchain\TransactionData;
-use App\Services\BlockchainServiceInterface;
-use App\Services\TransactionBacktraceService;
+use Modules\Blockchain\Domain\BlockchainServiceInterface;
+use Modules\Blockchain\Domain\Data\TransactionData;
+use Modules\UtxoTrace\Application\TransactionBacktraceService;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 

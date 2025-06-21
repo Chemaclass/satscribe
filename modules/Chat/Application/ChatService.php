@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace Modules\Chat\Application;
 
-use App\Data\PromptInput;
-use App\Data\QuestionPlaceholder;
-use App\Enums\PromptPersona;
-use App\Exceptions\BlockchainException;
-use App\Exceptions\OpenAIError;
-use App\Http\Requests\HomeIndexRequest;
 use App\Models\Chat;
 use App\Models\Message;
 use Modules\Blockchain\Application\BlockHeightProvider;
+use Modules\Blockchain\Domain\Exception\BlockchainException;
+use Modules\Chat\Domain\Data\PromptInput;
+use Modules\Chat\Domain\Data\QuestionPlaceholder;
+use Modules\Chat\Domain\Enum\PromptPersona;
+use Modules\Chat\Infrastructure\Http\Request\CreateChatRequest;
+use Modules\OpenAI\Domain\Exception\OpenAIError;
 
 final readonly class ChatService
 {
@@ -84,7 +84,7 @@ final readonly class ChatService
      * @return array<string, mixed>
      * @throws BlockchainException|OpenAIError
      */
-    public function createChat(HomeIndexRequest $request): array
+    public function createChat(CreateChatRequest $request): array
     {
         $search = $this->getPromptInput($request);
         $persona = $this->getPromptPersona($request);
@@ -112,7 +112,7 @@ final readonly class ChatService
         ];
     }
 
-    private function getPromptInput(HomeIndexRequest $request): PromptInput
+    private function getPromptInput(CreateChatRequest $request): PromptInput
     {
         if ($request->hasSearchInput()) {
             return PromptInput::fromRaw($request->getSearchInput());
@@ -121,7 +121,7 @@ final readonly class ChatService
         return PromptInput::fromRaw($this->heightProvider->getCurrentBlockHeight());
     }
 
-    private function getPromptPersona(HomeIndexRequest $request): PromptPersona
+    private function getPromptPersona(CreateChatRequest $request): PromptPersona
     {
         return PromptPersona::tryFrom($request->getPersonaInput())
             ?? PromptPersona::from(PromptPersona::DEFAULT);

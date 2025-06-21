@@ -1,5 +1,5 @@
 @php
-    use App\Enums\PromptPersona;
+    use Modules\Chat\Domain\Enum\PromptPersona;
 @endphp
 
 @extends('layouts.base')
@@ -73,7 +73,7 @@
                 lastRequest: null,
 
                 async submitForm(form) {
-                    if(window.__PAYWALL_ACTIVE) return;
+                    if (window.__PAYWALL_ACTIVE) return;
                     if (this.isSubmitting) return;
 
                     this.loadingMessage = this.loadingMessages[Math.floor(Math.random() * this.loadingMessages.length)];
@@ -122,7 +122,7 @@
                         window.refreshLucideIcons?.();
 
                         // Send to backend
-                        const { data } = await axios.post(form.action, formData, {
+                        const {data} = await axios.post(form.action, formData, {
                             headers: {
                                 'X-Requested-With': 'XMLHttpRequest',
                                 'Accept': 'application/json',
@@ -193,7 +193,7 @@
                         if (error.response?.status === 429) {
                             const data = error.response.data;
 
-                            window.dispatchEvent(new CustomEvent('rate-limit-reached', { detail: data }));
+                            window.dispatchEvent(new CustomEvent('rate-limit-reached', {detail: data}));
                             return;
                         }
 
@@ -341,7 +341,7 @@
                                         if (loader) loader.remove();
                                     });
                                 }
-                                spinner.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                spinner.scrollIntoView({behavior: 'smooth', block: 'start'});
                             }
                             if (data.suggestions) {
                                 this.updateSuggestionsList(chatUlid, data.suggestions);

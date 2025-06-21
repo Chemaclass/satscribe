@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use App\Enums\FlaggedWordSeverity;
 use Illuminate\Database\Eloquent\Model;
+use Modules\Chat\Domain\Enum\FlaggedWordSeverity;
 
 final class FlaggedWord extends Model
 {

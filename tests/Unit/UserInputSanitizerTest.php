@@ -2,8 +2,8 @@
 
 namespace Tests\Unit;
 
-use App\Repositories\FlaggedWordRepositoryInterface;
-use App\Services\UserInputSanitizer;
+use Modules\Chat\Domain\Data\UserInputSanitizer;
+use Modules\Chat\Domain\Repository\FlaggedWordRepositoryInterface;
 use PHPUnit\Framework\TestCase;
 
 class UserInputSanitizerTest extends TestCase

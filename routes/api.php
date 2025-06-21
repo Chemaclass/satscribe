@@ -1,9 +1,9 @@
 <?php
 
-use App\Http\Controllers\Api\AlbyWebhookController;
-use App\Http\Controllers\Api\InvoiceController;
-use App\Http\Controllers\Api\TraceUtxoController;
 use Illuminate\Support\Facades\Route;
+use Modules\Payment\Infrastructure\Http\Controller\AlbyWebhookController;
+use Modules\Payment\Infrastructure\Http\Controller\InvoiceController;
+use Modules\UtxoTrace\Infrastructure\Http\Controller\TraceUtxoController;
 
 Route::post('/webhooks/alby', AlbyWebhookController::class)->name('api.webhooks.alby');
 Route::get('/invoice/{identifier}/status', [InvoiceController::class, 'status'])->name('api.invoice.status');

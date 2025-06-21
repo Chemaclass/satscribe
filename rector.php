@@ -9,6 +9,7 @@ use Rector\Php74\Rector\Property\RestoreDefaultNullToNullableTypePropertyRector;
 return RectorConfig::configure()
     ->withPaths([
         __DIR__.'/app',
+        __DIR__.'/modules',
         __DIR__.'/bootstrap',
         __DIR__.'/database',
         __DIR__.'/config',
@@ -18,7 +19,6 @@ return RectorConfig::configure()
         __DIR__.'/tests',
     ])
     ->withSkipPath(__DIR__.'/bootstrap/cache')
-    ->withSkipPath(__DIR__.'/app/Providers/AppServiceProvider.php')
     ->withPhpSets(php82: true)
     ->withTypeCoverageLevel(0)
     ->withPreparedSets(

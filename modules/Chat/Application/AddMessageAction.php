@@ -4,18 +4,17 @@ declare(strict_types=1);
 
 namespace Modules\Chat\Application;
 
-use App\Data\PromptInput;
-use App\Enums\PromptPersona;
 use App\Models\Chat;
 use App\Models\Message;
-use App\Repositories\ChatRepositoryInterface;
-use App\Repositories\MessageRepositoryInterface;
-use App\Services\AdditionalContextBuilder;
-use App\Services\BlockchainServiceInterface;
-use App\Services\OpenAIService;
-use App\Services\UserInputSanitizer;
 use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Support\Facades\RateLimiter;
+use Modules\Blockchain\Domain\BlockchainServiceInterface;
+use Modules\Chat\Domain\Data\PromptInput;
+use Modules\Chat\Domain\Data\UserInputSanitizer;
+use Modules\Chat\Domain\Enum\PromptPersona;
+use Modules\Chat\Domain\Repository\ChatRepositoryInterface;
+use Modules\Chat\Domain\Repository\MessageRepositoryInterface;
+use Modules\OpenAI\Application\OpenAIService;
 use Psr\Log\LoggerInterface;
 
 final readonly class AddMessageAction
