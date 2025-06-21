@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Repositories\UtxoTraceRepositoryInterface;
 use Illuminate\Http\Client\Factory as HttpClient;
 use Psr\Log\LoggerInterface;
-use App\Repositories\UtxoTraceRepositoryInterface;
 
 final readonly class UtxoTraceService
 {
@@ -34,50 +34,7 @@ final readonly class UtxoTraceService
             return $cached->result;
         }
 
-        $traces = $this->trace($txid, $depth);
-
-        $map = [];
-        $refs = [];
-        $id = 1;
-
-        $process = static function (array $node) use (&$process, &$map, &$refs, &$id): string {
-            $children = [];
-            foreach ($node['source'] as $child) {
-                $children[] = $process($child);
-            }
-            $key = $node['txid'].'|'.$node['vout'].'|'.$node['value'].'|'.implode(',', $children);
-            if (!isset($map[$key])) {
-                $ref = 'r'.$id++;
-                $map[$key] = $ref;
-                $refs[$ref] = [
-                    'txid' => $node['txid'],
-                    'vout' => $node['vout'],
-                    'scriptpubkey' => $node['scriptpubkey'] ?? null,
-                    'scriptpubkey_address' => $node['scriptpubkey_address'] ?? null,
-                    'scriptpubkey_type' => $node['scriptpubkey_type'] ?? null,
-                    'value' => $node['value'],
-                    'source' => $children,
-                ];
-            }
-
-            return $map[$key];
-        };
-
-        $result = ['utxos' => [], 'references' => []];
-
-        foreach ($traces as $item) {
-            $traceRefs = [];
-            foreach ($item['trace'] as $child) {
-                $traceRefs[] = $process($child);
-            }
-            $result['utxos'][] = [
-                'utxo' => $item['utxo'],
-                'trace' => $traceRefs,
-            ];
-        }
-
-        uksort($refs, fn(string $a, string $b) => (int) substr($b, 1) <=> (int) substr($a, 1));
-        $result['references'] = $refs;
+        $result = $this->buildReferences($this->trace($txid, $depth));
 
         $this->repository->store($txid, $depth, $result);
 
@@ -155,45 +112,100 @@ final readonly class UtxoTraceService
             return [];
         }
 
-        $inputs = [];
-        foreach ($tx['vin'] as $i => $input) {
-            $prevTxid = $input['txid'] ?? null;
-            $vout = $input['vout'] ?? null;
-
-            if ($prevTxid !== null && $vout !== null) {
-                $voutArray = $this->getVout($prevTxid, $vout);
-
-                $this->logger->info('Tracing input', [
-                    'txid' => $prevTxid,
-                    'vout' => $vout,
-                    'index' => $i,
-                    'level' => $level,
-                    'value' => $voutArray['value'],
-                ]);
-                $inputs[] = [
-                    'txid' => $prevTxid,
-                    'vout' => $vout,
-                    'scriptpubkey' => $voutArray['scriptpubkey'] ?? null,
-                    'scriptpubkey_address' => $voutArray['scriptpubkey_address'] ?? null,
-                    'scriptpubkey_type' => $voutArray['scriptpubkey_type'] ?? null,
-                    'value' => $voutArray['value'],
-                    'source' => $this->traceInputs($prevTxid, $depth - 1, $level + 1),
-                ];
-            } else {
-                $this->logger->warning('Missing txid or vout', [
-                    'txid' => $txid,
-                    'input_index' => $i,
-                    'level' => $level,
-                ]);
-            }
-        }
-
-        return $inputs;
+        return array_values(array_filter(array_map(
+            fn(array $input, int $i) => $this->traceInput($input, $depth, $level, $i, $txid),
+            $tx['vin'],
+            array_keys($tx['vin'])
+        )));
     }
 
-    private function getVout(string $txid, int $vout): array|null
+    private function traceInput(array $input, int $depth, int $level, int $index, string $parentTxid): ?array
     {
-        return $this->getTransaction($txid)['vout'][$vout];
+        $prevTxid = $input['txid'] ?? null;
+        $vout = $input['vout'] ?? null;
+
+        if ($prevTxid === null || $vout === null) {
+            $this->logger->warning('Missing txid or vout', [
+                'txid' => $parentTxid,
+                'input_index' => $index,
+                'level' => $level,
+            ]);
+
+            return null;
+        }
+
+        $voutArray = $this->getVout($prevTxid, $vout);
+
+        $this->logger->info('Tracing input', [
+            'txid' => $prevTxid,
+            'vout' => $vout,
+            'index' => $index,
+            'level' => $level,
+            'value' => $voutArray['value'] ?? 0,
+        ]);
+
+        return [
+            'txid' => $prevTxid,
+            'vout' => $vout,
+            'scriptpubkey' => $voutArray['scriptpubkey'] ?? null,
+            'scriptpubkey_address' => $voutArray['scriptpubkey_address'] ?? null,
+            'scriptpubkey_type' => $voutArray['scriptpubkey_type'] ?? null,
+            'value' => $voutArray['value'] ?? 0,
+            'source' => $this->traceInputs($prevTxid, $depth - 1, $level + 1),
+        ];
+    }
+
+    /**
+     * Convert full traces into a map of references to avoid duplication.
+     */
+    private function buildReferences(array $traces): array
+    {
+        $map = [];
+        $refs = [];
+        $id = 1;
+
+        $process = static function (array $node) use (&$process, &$map, &$refs, &$id): string {
+            $children = array_map($process, $node['source']);
+
+            $key = $node['txid'].'|'.$node['vout'].'|'.$node['value'].'|'.implode(',', $children);
+
+            if (!isset($map[$key])) {
+                $ref = 'r'.$id++;
+                $map[$key] = $ref;
+                $refs[$ref] = [
+                    'txid' => $node['txid'],
+                    'vout' => $node['vout'],
+                    'scriptpubkey' => $node['scriptpubkey'] ?? null,
+                    'scriptpubkey_address' => $node['scriptpubkey_address'] ?? null,
+                    'scriptpubkey_type' => $node['scriptpubkey_type'] ?? null,
+                    'value' => $node['value'],
+                    'source' => $children,
+                ];
+            }
+
+            return $map[$key];
+        };
+
+        $utxos = [];
+
+        foreach ($traces as $item) {
+            $utxos[] = [
+                'utxo' => $item['utxo'],
+                'trace' => array_map($process, $item['trace']),
+            ];
+        }
+
+        uksort($refs, static fn(string $a, string $b) => (int) substr($b, 1) <=> (int) substr($a, 1));
+
+        return [
+            'utxos' => $utxos,
+            'references' => $refs,
+        ];
+    }
+
+    private function getVout(string $txid, int $vout): array
+    {
+        return $this->getTransaction($txid)['vout'][$vout] ?? [];
     }
 
     private function getTransaction(string $txid): array
