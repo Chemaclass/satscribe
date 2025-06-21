@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit;
 
+use Modules\Blockchain\Domain\BlockchainFacadeInterface;
 use Modules\Blockchain\Domain\BlockchainServiceInterface;
 use Modules\Blockchain\Domain\Data\TransactionData;
 use Modules\UtxoTrace\Application\TransactionBacktraceService;
@@ -15,7 +16,7 @@ final class TransactionBacktraceServiceTest extends TestCase
     public function test_format_for_prompt(): void
     {
         $service = new TransactionBacktraceService(
-            self::createStub(BlockchainServiceInterface::class),
+            self::createStub(BlockchainFacadeInterface::class),
             self::createStub(LoggerInterface::class)
         );
 
