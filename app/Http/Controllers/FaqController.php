@@ -10,8 +10,9 @@ use Illuminate\View\View;
 
 final readonly class FaqController
 {
-    public function __construct(private FaqService $service)
-    {
+    public function __construct(
+        private FaqService $service,
+    ) {
     }
 
     public function index(Request $request): View

@@ -12,8 +12,9 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 
 final readonly class ChatController
 {
-    public function __construct(private ChatService $service)
-    {
+    public function __construct(
+        private ChatService $service,
+    ) {
     }
 
     public function show(Chat $chat): View

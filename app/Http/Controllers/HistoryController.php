@@ -10,8 +10,9 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 
 final readonly class HistoryController
 {
-    public function __construct(private HistoryService $service)
-    {
+    public function __construct(
+        private HistoryService $service,
+    ) {
     }
 
     public function index(Request $request): View
