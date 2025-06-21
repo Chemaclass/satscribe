@@ -6,4 +6,5 @@ use App\Providers\RouteServiceProvider;
 return [
     AppServiceProvider::class,
     RouteServiceProvider::class,
+    ChatServiceProvider::class,
 ];

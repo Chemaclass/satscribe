@@ -3,10 +3,10 @@
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\FaqController;
 use App\Http\Controllers\HistoryController;
-use App\Http\Controllers\HomeController;
 use App\Http\Controllers\TraceUtxoPageController;
 use App\Http\Middleware\IpRateLimiter;
 use Illuminate\Support\Facades\Route;
+use Modules\Chat\Infrastructure\Http\Controller\HomeController;
 
 Route::redirect('generate', '/');
 Route::redirect('describe', '/');

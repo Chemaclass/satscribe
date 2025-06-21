@@ -10,11 +10,11 @@ use App\Models\Chat;
 use App\Models\Message;
 use App\Repositories\ChatRepositoryInterface;
 use App\Repositories\MessageRepositoryInterface;
+use App\Services\AdditionalContextBuilder;
 use App\Services\BlockchainServiceInterface;
 use App\Services\OpenAIService;
-use App\Services\UserInputSanitizer;
-use App\Services\AdditionalContextBuilder;
 use App\Services\TransactionBacktraceService;
+use App\Services\UserInputSanitizer;
 use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Support\Facades\RateLimiter;
 use Psr\Log\LoggerInterface;
@@ -37,10 +37,8 @@ final readonly class AddMessageAction
     ) {
     }
 
-    public function execute(
-        Chat $chat,
-        string $message,
-    ): void {
+    public function execute(Chat $chat, string $message): void
+    {
         $this->logger->info('Adding message to chat', ['chat_id' => $chat->id]);
         $this->enforceRateLimit();
         $firstUserMessage = $chat->getFirstUserMessage();

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Controllers;
+namespace Modules\Chat\Infrastructure\Http\Controller;
 
 use App\Exceptions\BlockchainException;
 use App\Exceptions\OpenAIError;
