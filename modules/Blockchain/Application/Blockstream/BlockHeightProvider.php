@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Modules\Blockchain\Application;
+namespace Modules\Blockchain\Application\Blockstream;
 
-use Modules\Shared\Domain\HttpClientInterface;
 use Illuminate\Contracts\Cache\Repository as Cache;
 use Illuminate\Support\Carbon;
 use Modules\Blockchain\Domain\Exception\BlockstreamException;
+use Modules\Shared\Domain\HttpClientInterface;
 use Psr\Log\LoggerInterface;
 use RuntimeException;
 

@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Modules\Chat\Application;
 
-use Modules\Blockchain\Domain\BlockchainServiceInterface;
+use Modules\Blockchain\Application\Blockstream\BlockchainService;
 use Modules\Blockchain\Domain\Data\BlockchainData;
 use Modules\Blockchain\Domain\Data\BlockData;
 use Modules\Chat\Domain\Data\PromptInput;
@@ -12,7 +12,7 @@ use Modules\UtxoTrace\Application\TransactionBacktraceService;
 final readonly class AdditionalContextBuilder
 {
     public function __construct(
-        private BlockchainServiceInterface $blockchainService,
+        private BlockchainService $blockchainService,
         private TransactionBacktraceService $backtraceService,
     ) {
     }

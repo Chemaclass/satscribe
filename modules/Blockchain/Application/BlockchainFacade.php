@@ -3,8 +3,9 @@ declare(strict_types=1);
 
 namespace Modules\Blockchain\Application;
 
+use Modules\Blockchain\Application\Blockstream\BlockchainService;
+use Modules\Blockchain\Application\Blockstream\BlockHeightProvider;
 use Modules\Blockchain\Domain\BlockchainFacadeInterface;
-use Modules\Blockchain\Domain\BlockchainServiceInterface;
 use Modules\Blockchain\Domain\Data\BlockchainData;
 use Modules\Chat\Domain\Data\PromptInput;
 
@@ -12,7 +13,7 @@ final readonly class BlockchainFacade implements BlockchainFacadeInterface
 {
     public function __construct(
         private BlockHeightProvider $blockHeightProvider,
-        private BlockchainServiceInterface $blockchainService,
+        private BlockchainService $blockchainService,
     ) {
     }
 
