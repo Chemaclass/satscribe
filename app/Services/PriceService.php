@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Services;
 
 use Illuminate\Contracts\Cache\Repository as Cache;
-use Illuminate\Http\Client\Factory as HttpClient;
 use Psr\Log\LoggerInterface;
 use RuntimeException;
 
@@ -16,7 +15,7 @@ final readonly class PriceService
     private const CACHE_TTL_MINUTES = 15;
 
     public function __construct(
-        private HttpClient $http,
+        private HttpClientInterface $http,
         private LoggerInterface $logger,
         private Cache $cache,
         private bool $enabled,
@@ -26,6 +25,21 @@ final readonly class PriceService
     public function getCurrentBtcPriceUsd(): float
     {
         return $this->getPrices()['usd'];
+    }
+
+    public function getCurrentBtcPriceEur(): float
+    {
+        return $this->getPrices()['eur'];
+    }
+
+    public function getCurrentBtcPriceCny(): float
+    {
+        return $this->getPrices()['cny'];
+    }
+
+    public function getCurrentBtcPriceGbp(): float
+    {
+        return $this->getPrices()['gbp'];
     }
 
     private function getPrices(): array
@@ -59,20 +73,5 @@ final readonly class PriceService
                 'gbp' => (float) $response->json('bitcoin.gbp'),
             ];
         });
-    }
-
-    public function getCurrentBtcPriceEur(): float
-    {
-        return $this->getPrices()['eur'];
-    }
-
-    public function getCurrentBtcPriceCny(): float
-    {
-        return $this->getPrices()['cny'];
-    }
-
-    public function getCurrentBtcPriceGbp(): float
-    {
-        return $this->getPrices()['gbp'];
     }
 }

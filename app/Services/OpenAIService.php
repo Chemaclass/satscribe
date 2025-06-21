@@ -11,13 +11,12 @@ use App\Enums\PromptType;
 use App\Exceptions\OpenAIError;
 use App\Http\Requests\HomeIndexRequest;
 use App\Models\Chat;
-use Illuminate\Http\Client\Factory as HttpClient;
 use Psr\Log\LoggerInterface;
 
 final readonly class OpenAIService
 {
     public function __construct(
-        private HttpClient $http,
+        private HttpClientInterface $http,
         private LoggerInterface $logger,
         private string $openAiApiKey,
         private string $openAiModel,
