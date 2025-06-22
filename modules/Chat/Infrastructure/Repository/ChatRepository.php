@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Modules\Chat\Infrastructure\Repository;
@@ -31,7 +32,7 @@ final readonly class ChatRepository implements ChatRepositoryInterface
         // Find an existing chat by input type, input, persona, and question (legacy compatibility)
         return Chat::query()
             ->where('tracking_id', '=', $this->trackingId)
-            ->whereHas('messages', function ($q) use ($input, $persona, $question): void {
+            ->whereHas('messages', static function ($q) use ($input, $persona, $question): void {
                 $q->where('role', 'user')
                     ->where('content', $question)
                     ->whereJsonContains('meta->type', $input->type->value)
@@ -49,7 +50,7 @@ final readonly class ChatRepository implements ChatRepositoryInterface
         BlockchainDataInterface $blockchainData,
         PromptPersona $persona,
         string $question,
-        bool $isPrivate
+        bool $isPrivate,
     ): Chat {
         $raw = $blockchainData->toArray();
 
@@ -59,7 +60,7 @@ final readonly class ChatRepository implements ChatRepositoryInterface
 
         /** @var Chat $chat */
         $chat = Chat::create([
-            'title' => ucfirst($input->type->value).':'.$input->text,
+            'title' => ucfirst($input->type->value) . ':' . $input->text,
             'tracking_id' => $this->trackingId,
             'is_private' => $isPrivate,
         ]);

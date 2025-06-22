@@ -36,10 +36,10 @@ final readonly class BlockHeightProvider
                 try {
                     return $this->getCurrentBlockHeight() + self::BUFFER_HEIGHT;
                 } catch (RuntimeException $e) {
-                    $this->logger->warning('[BlockHeightProvider] '.$e->getMessage());
+                    $this->logger->warning('[BlockHeightProvider] ' . $e->getMessage());
                     return self::FALLBACK_HEIGHT;
                 }
-            }
+            },
         );
     }
 
@@ -62,7 +62,7 @@ final readonly class BlockHeightProvider
         $this->cache->put(
             self::CACHE_KEY,
             $height + self::BUFFER_HEIGHT,
-            Carbon::now()->addMinutes(self::CACHE_TTL_MINUTES)
+            Carbon::now()->addMinutes(self::CACHE_TTL_MINUTES),
         );
 
         return $height;

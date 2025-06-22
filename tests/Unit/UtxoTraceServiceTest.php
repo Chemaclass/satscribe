@@ -20,7 +20,9 @@ final class UtxoTraceServiceTest extends TestCase
         $expected = ['foo' => 'bar'];
 
         $repo = new class($expected) implements UtxoTraceRepositoryInterface {
-            public function __construct(private readonly array $data) {}
+            public function __construct(private readonly array $data)
+            {
+            }
             public function find(string $txid, int $depth): ?UtxoTrace
             {
                 $trace = new UtxoTrace();
@@ -44,8 +46,14 @@ final class UtxoTraceServiceTest extends TestCase
     public function test_returns_empty_array_when_missing_vout(): void
     {
         $repo = new class() implements UtxoTraceRepositoryInterface {
-            public function find(string $txid, int $depth): ?UtxoTrace { return null; }
-            public function store(string $txid, int $depth, array $result): UtxoTrace { return new UtxoTrace(); }
+            public function find(string $txid, int $depth): ?UtxoTrace
+            {
+                return null;
+            }
+            public function store(string $txid, int $depth, array $result): UtxoTrace
+            {
+                return new UtxoTrace();
+            }
         };
 
         $response = $this->createConfiguredMock(Response::class, [
@@ -66,8 +74,14 @@ final class UtxoTraceServiceTest extends TestCase
     public function test_uses_transaction_cache_to_avoid_duplicate_requests(): void
     {
         $repo = new class() implements UtxoTraceRepositoryInterface {
-            public function find(string $txid, int $depth): ?UtxoTrace { return null; }
-            public function store(string $txid, int $depth, array $result): UtxoTrace { return new UtxoTrace(); }
+            public function find(string $txid, int $depth): ?UtxoTrace
+            {
+                return null;
+            }
+            public function store(string $txid, int $depth, array $result): UtxoTrace
+            {
+                return new UtxoTrace();
+            }
         };
 
         $tx0 = [
@@ -103,7 +117,7 @@ final class UtxoTraceServiceTest extends TestCase
             ->method('get')
             ->willReturnOnConsecutiveCalls(
                 ['https://blockstream.info/api/tx/tx0'],
-                ['https://blockstream.info/api/tx/tx1']
+                ['https://blockstream.info/api/tx/tx1'],
             )
             ->willReturnOnConsecutiveCalls($respTx0, $respTx1);
 

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Modules\Faq\Infrastructure\Repository;
@@ -36,7 +37,7 @@ final class FaqRepository implements FaqRepositoryInterface
         $query = Faq::query()->where('lang', app()->getLocale());
 
         if ($search !== '' && $search !== '0') {
-            $query->where(function ($q) use ($search): void {
+            $query->where(static function ($q) use ($search): void {
                 $q->where('question', 'like', "%{$search}%")
                     ->orWhere('answer_tldr', 'like', "%{$search}%")
                     ->orWhere('answer_advance', 'like', "%{$search}%")
@@ -56,13 +57,14 @@ final class FaqRepository implements FaqRepositoryInterface
 
     /**
      * @param  Collection<int, Faq>  $faqs
+     *
      * @return  Collection<int, string>
      */
     public function getCategories(Collection $faqs): Collection
     {
         return $faqs
-            ->flatMap(fn($faq) => explode(',', (string) $faq->categories))
-            ->map(fn($c) => trim($c))
+            ->flatMap(static fn ($faq) => explode(',', (string) $faq->categories))
+            ->map(static fn ($c) => trim($c))
             ->unique()
             ->sort()
             ->values();

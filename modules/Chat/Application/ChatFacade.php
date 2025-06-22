@@ -8,5 +8,4 @@ use Modules\Chat\Domain\ChatFacadeInterface;
 
 final readonly class ChatFacade implements ChatFacadeInterface
 {
-
 }

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Modules\Chat\Infrastructure\Command;
@@ -68,8 +69,8 @@ final class ImportFlaggedWords extends Command
                 'is_active' => $isActive,
             ]);
 
-            $this->info("Imported: {$word} (severity: {$severity->value}, active: ".($isActive ? 'yes' : 'no').")");
-            $inserted++;
+            $this->info("Imported: {$word} (severity: {$severity->value}, active: " . ($isActive ? 'yes' : 'no') . ')');
+            ++$inserted;
         }
 
         return $inserted;
@@ -81,7 +82,7 @@ final class ImportFlaggedWords extends Command
         $word = $columns[0] ?? null;
 
         if (!$word) {
-            $this->warn("Skipped invalid line: '$line'");
+            $this->warn("Skipped invalid line: '{$line}'");
             return null;
         }
 

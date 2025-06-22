@@ -12,13 +12,6 @@ use Psr\Log\LoggerInterface;
 
 final class CachedInvoiceValidatorTest extends TestCase
 {
-    private function newValidator(AlbyClientInterface $alby, Carbon $now): CachedInvoiceValidator
-    {
-        $logger = self::createStub(LoggerInterface::class);
-
-        return new CachedInvoiceValidator($alby, $logger, $now);
-    }
-
     public function test_returns_true_when_unexpired_and_unpaid(): void
     {
         $alby = self::createStub(AlbyClientInterface::class);
@@ -71,5 +64,11 @@ final class CachedInvoiceValidatorTest extends TestCase
         ];
 
         $this->assertFalse($validator->isValidCachedInvoice($cached));
+    }
+    private function newValidator(AlbyClientInterface $alby, Carbon $now): CachedInvoiceValidator
+    {
+        $logger = self::createStub(LoggerInterface::class);
+
+        return new CachedInvoiceValidator($alby, $logger, $now);
     }
 }

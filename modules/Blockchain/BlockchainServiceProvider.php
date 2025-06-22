@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Modules\Blockchain;
@@ -13,16 +14,12 @@ use Override;
 
 final class BlockchainServiceProvider extends ServiceProvider
 {
-    /**
-     * @var array<class-string, class-string>
-     */
+    /** @var array<class-string, class-string> */
     public $singletons = [
         BlockchainFacadeInterface::class => BlockchainFacade::class,
     ];
 
-    /**
-     * @var array<class-string, class-string>
-     */
+    /** @var array<class-string, class-string> */
     public $bindings = [];
 
     /**

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Modules\UtxoTrace;
@@ -12,17 +13,13 @@ use Override;
 
 final class UtxoTraceServiceProvider extends ServiceProvider
 {
-    /**
-     * @var array<class-string, class-string>
-     */
+    /** @var array<class-string, class-string> */
     public $singletons = [
         UtxoTraceRepositoryInterface::class => UtxoTraceRepository::class,
         UtxoTraceFacadeInterface::class => UtxoTraceFacade::class,
     ];
 
-    /**
-     * @var array<class-string, class-string>
-     */
+    /** @var array<class-string, class-string> */
     public $bindings = [];
 
     /**

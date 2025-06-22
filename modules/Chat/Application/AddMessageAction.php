@@ -56,7 +56,7 @@ final readonly class AddMessageAction
 
         if (RateLimiter::tooManyAttempts($key, $this->maxOpenAIAttempts)) {
             throw new ThrottleRequestsException(
-                "You have reached the daily OpenAI limit of {$this->maxOpenAIAttempts} requests."
+                "You have reached the daily OpenAI limit of {$this->maxOpenAIAttempts} requests.",
             );
         }
 

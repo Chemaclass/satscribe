@@ -8,5 +8,4 @@ use Modules\Payment\Domain\PaymentFacadeInterface;
 
 final readonly class PaymentFacade implements PaymentFacadeInterface
 {
-
 }

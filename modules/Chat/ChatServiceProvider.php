@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Modules\Chat;
@@ -18,9 +19,7 @@ use Override;
 
 final class ChatServiceProvider extends ServiceProvider
 {
-    /**
-     * @var array<class-string, class-string>
-     */
+    /** @var array<class-string, class-string> */
     public $singletons = [
         ChatRepositoryInterface::class => ChatRepository::class,
         MessageRepositoryInterface::class => MessageRepository::class,
@@ -28,9 +27,7 @@ final class ChatServiceProvider extends ServiceProvider
         ChatFacadeInterface::class => ChatFacade::class,
     ];
 
-    /**
-     * @var array<class-string, class-string>
-     */
+    /** @var array<class-string, class-string> */
     public $bindings = [];
 
     /**
@@ -53,7 +50,6 @@ final class ChatServiceProvider extends ServiceProvider
         $this->app->when(AddMessageAction::class)
             ->needs('$maxOpenAIAttempts')
             ->giveConfig('services.openai.max_attempts');
-
 
         $this->app->when(ChatRepository::class)
             ->needs('$perPage')

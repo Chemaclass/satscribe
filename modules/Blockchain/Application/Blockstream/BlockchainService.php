@@ -46,11 +46,11 @@ final readonly class BlockchainService
             BlockData::fromArray($rawBlock, $txs),
             $previousBlockData ? BlockData::fromArray(
                 $previousBlockData,
-                $this->fetchBlockTransactions($previousBlockHash)
+                $this->fetchBlockTransactions($previousBlockHash),
             ) : null,
             $nextBlockData ? BlockData::fromArray(
                 $nextBlockData,
-                $this->fetchBlockTransactions($nextBlockHash)
+                $this->fetchBlockTransactions($nextBlockHash),
             ) : null,
         );
     }
@@ -60,7 +60,7 @@ final readonly class BlockchainService
         if (!is_numeric($input)) {
             return $input;
         }
-        $response = $this->http->get(self::BASE_URL."/block-height/{$input}");
+        $response = $this->http->get(self::BASE_URL . "/block-height/{$input}");
         if (!$response->successful()) {
             $this->logger->warning('Block height lookup failed', ['height' => $input]);
             throw BlockchainException::blockOrTxFetchFailed($input);
@@ -70,7 +70,7 @@ final readonly class BlockchainService
 
     private function fetchBlock(string $hash): array
     {
-        $response = $this->http->get(self::BASE_URL."/block/{$hash}");
+        $response = $this->http->get(self::BASE_URL . "/block/{$hash}");
         if (!$response->successful()) {
             $this->logger->warning('Block fetch failed', ['hash' => $hash]);
             throw BlockchainException::blockOrTxFetchFailed($hash);
@@ -80,7 +80,7 @@ final readonly class BlockchainService
 
     private function fetchBlockTransactions(string $hash): array
     {
-        $response = $this->http->get(self::BASE_URL."/block/{$hash}/txs");
+        $response = $this->http->get(self::BASE_URL . "/block/{$hash}/txs");
         if (!$response->successful()) {
             $this->logger->warning('Block transactions fetch failed', ['hash' => $hash]);
             throw BlockchainException::blockOrTxFetchFailed($hash);
@@ -129,7 +129,7 @@ final readonly class BlockchainService
 
     private function fetchTransaction(string $txid): array
     {
-        $response = $this->http->get(self::BASE_URL."/tx/{$txid}");
+        $response = $this->http->get(self::BASE_URL . "/tx/{$txid}");
         if (!$response->successful()) {
             $this->logger->warning('Transaction fetch failed', ['txid' => $txid]);
             throw BlockchainException::txLookupFailed($txid);
@@ -139,7 +139,7 @@ final readonly class BlockchainService
 
     private function fetchTransactionStatus(string $txid): array
     {
-        $response = $this->http->get(self::BASE_URL."/tx/{$txid}/status");
+        $response = $this->http->get(self::BASE_URL . "/tx/{$txid}/status");
         if (!$response->successful()) {
             $this->logger->warning('Transaction status fetch failed', ['txid' => $txid]);
             throw BlockchainException::txLookupFailed($txid);

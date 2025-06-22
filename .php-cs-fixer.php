@@ -8,9 +8,9 @@ use PhpCsFixer\Runner\Parallel\ParallelConfigFactory;
 
 $finder = Finder::create()
     ->files()
-    ->in(__DIR__ . '/src/php')
-    ->in(__DIR__ . '/tests/php')
-    ->exclude(['out', 'PhelGenerated']);
+    ->in(__DIR__ . '/app')
+    ->in(__DIR__ . '/modules')
+    ->in(__DIR__ . '/tests');
 
 return (new Config())
     ->setParallelConfig(ParallelConfigFactory::detect())

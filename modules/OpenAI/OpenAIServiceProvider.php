@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Modules\OpenAI;
@@ -11,16 +12,12 @@ use Override;
 
 final class OpenAIServiceProvider extends ServiceProvider
 {
-    /**
-     * @var array<class-string, class-string>
-     */
+    /** @var array<class-string, class-string> */
     public $singletons = [
         OpenAIFacadeInterface::class => OpenAIFacade::class,
     ];
 
-    /**
-     * @var array<class-string, class-string>
-     */
+    /** @var array<class-string, class-string> */
     public $bindings = [];
 
     /**

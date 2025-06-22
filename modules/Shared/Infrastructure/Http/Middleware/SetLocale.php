@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Modules\Shared\Infrastructure\Http\Middleware;
@@ -12,7 +13,7 @@ use Symfony\Component\HttpFoundation\Response;
 final readonly class SetLocale
 {
     public function __construct(
-        private FaqRepositoryInterface $faqRepository
+        private FaqRepositoryInterface $faqRepository,
     ) {
     }
 

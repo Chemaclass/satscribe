@@ -53,6 +53,6 @@ final readonly class InvoiceData
             'description' => $this->description,
             'description_hash' => $this->descriptionHash,
             'expiry' => $this->expiry,
-        ], static fn($value) => $value !== null);
+        ], static fn ($value) => $value !== null);
     }
 }

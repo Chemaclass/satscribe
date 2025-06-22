@@ -16,7 +16,7 @@ use RuntimeException;
  */
 final class AlbyClient implements AlbyClientInterface
 {
-    private const URL = "https://api.getalby.com";
+    private const URL = 'https://api.getalby.com';
 
     private ?GuzzleClient $client = null;
 
@@ -32,10 +32,74 @@ final class AlbyClient implements AlbyClientInterface
      */
     public function getInfo(): array
     {
-        $data = $this->request("GET", "/user/me") ?? [];
-        $data["alias"] = "getalby.com";
-        $data["identity_pubkey"] = "";
+        $data = $this->request('GET', '/user/me') ?? [];
+        $data['alias'] = 'getalby.com';
+        $data['identity_pubkey'] = '';
         return $data;
+    }
+
+    /**
+     * Retrieve the current wallet balance.
+     *
+     * @return array Balance information
+     */
+    public function getBalance(): array
+    {
+        return $this->request('GET', '/balance') ?? [];
+    }
+
+    /**
+     * Check if the connection to Alby is valid.
+     */
+    public function isConnectionValid(): bool
+    {
+        return $this->accessToken !== '' && $this->accessToken !== '0';
+    }
+
+    public function createInvoice(InvoiceData $invoice): array
+    {
+        $params = [
+            'amount' => $invoice->amount,
+            'memo' => $invoice->memo,
+        ];
+
+        if ($invoice->descriptionHash !== null) {
+            $params['description_hash'] = $invoice->descriptionHash;
+        }
+
+        if ($invoice->description !== null) {
+            $params['description'] = $invoice->description;
+        }
+
+        if ($invoice->expiry !== null) {
+            $params['expiry'] = $invoice->expiry;
+        }
+
+        $data = $this->request('POST', '/invoices', $params) ?? [];
+
+        $data['id'] = $data['payment_hash'];
+        $data['r_hash'] = $data['payment_hash'];
+
+        return $data;
+    }
+
+    /**
+     * @param  string  $hash  Payment hash of the invoice
+     */
+    public function isInvoicePaid(string $hash): bool
+    {
+        $invoice = $this->getInvoice($hash);
+        return $invoice['settled'] ?? false;
+    }
+
+    /**
+     * @param  string  $hash  Payment hash of the invoice
+     *
+     * @return array Invoice details
+     */
+    public function getInvoice(string $hash): array
+    {
+        return $this->request('GET', "/invoices/{$hash}") ?? [];
     }
 
     /**
@@ -48,11 +112,11 @@ final class AlbyClient implements AlbyClientInterface
     private function request(string $method, string $path, mixed $body = null): ?array
     {
         $headers = [
-            "Accept" => "application/json",
-            "Content-Type" => "application/json",
-            "Access-Control-Allow-Origin" => "*",
-            "Authorization" => "Bearer {$this->accessToken}",
-            "User-Agent" => "alby-php",
+            'Accept' => 'application/json',
+            'Content-Type' => 'application/json',
+            'Access-Control-Allow-Origin' => '*',
+            'Authorization' => "Bearer {$this->accessToken}",
+            'User-Agent' => 'alby-php',
         ];
 
         $requestBody = $body ? json_encode($body) : null;
@@ -64,7 +128,7 @@ final class AlbyClient implements AlbyClientInterface
             return json_decode($responseBody, true);
         } catch (ClientException $e) {
             $error = json_decode($e->getResponse()->getBody()->getContents(), true);
-            throw new RuntimeException($error["error"] ?? 'Unknown Alby API error', $e->getCode(), $e);
+            throw new RuntimeException($error['error'] ?? 'Unknown Alby API error', $e->getCode(), $e);
         }
     }
 
@@ -83,69 +147,5 @@ final class AlbyClient implements AlbyClientInterface
         ]);
 
         return $this->client;
-    }
-
-    /**
-     * Retrieve the current wallet balance.
-     *
-     * @return array Balance information
-     */
-    public function getBalance(): array
-    {
-        return $this->request("GET", "/balance") ?? [];
-    }
-
-    /**
-     * Check if the connection to Alby is valid.
-     */
-    public function isConnectionValid(): bool
-    {
-        return $this->accessToken !== '' && $this->accessToken !== '0';
-    }
-
-    public function createInvoice(InvoiceData $invoice): array
-    {
-        $params = [
-            "amount" => $invoice->amount,
-            "memo" => $invoice->memo,
-        ];
-
-        if ($invoice->descriptionHash !== null) {
-            $params['description_hash'] = $invoice->descriptionHash;
-        }
-
-        if ($invoice->description !== null) {
-            $params['description'] = $invoice->description;
-        }
-
-        if ($invoice->expiry !== null) {
-            $params['expiry'] = $invoice->expiry;
-        }
-
-        $data = $this->request("POST", "/invoices", $params) ?? [];
-
-        $data["id"] = $data["payment_hash"];
-        $data["r_hash"] = $data["payment_hash"];
-
-        return $data;
-    }
-
-    /**
-     * @param  string  $hash  Payment hash of the invoice
-     */
-    public function isInvoicePaid(string $hash): bool
-    {
-        $invoice = $this->getInvoice($hash);
-        return $invoice["settled"] ?? false;
-    }
-
-    /**
-     * @param  string  $hash  Payment hash of the invoice
-     *
-     * @return array Invoice details
-     */
-    public function getInvoice(string $hash): array
-    {
-        return $this->request("GET", "/invoices/{$hash}") ?? [];
     }
 }

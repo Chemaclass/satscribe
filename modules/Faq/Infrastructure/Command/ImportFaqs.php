@@ -10,6 +10,8 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\LazyCollection;
 use Modules\Faq\Domain\Repository\FaqRepositoryInterface;
 
+use function count;
+
 final class ImportFaqs extends Command
 {
     protected $signature = 'import:faqs {file : Path to the CSV file}';
@@ -31,7 +33,7 @@ final class ImportFaqs extends Command
             return Command::FAILURE;
         }
 
-        LazyCollection::make(fn() => $this->readCsvLines($filePath))
+        LazyCollection::make(fn () => $this->readCsvLines($filePath))
             ->chunk(50)
             ->each(function (LazyCollection $chunk): void {
                 $this->processChunk($chunk->all(), Carbon::now());
@@ -49,7 +51,7 @@ final class ImportFaqs extends Command
         while (($line = fgetcsv($handle)) !== false) {
             if (count($line) !== count($header)) {
                 $lineNumber = ftell($handle);
-                $this->warn("Skipping malformed line at byte $lineNumber", ['line' => $line]);
+                $this->warn("Skipping malformed line at byte {$lineNumber}", ['line' => $line]);
                 continue;
             }
 

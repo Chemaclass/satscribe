@@ -6,6 +6,8 @@ namespace Modules\Chat\Domain\Data;
 
 use Modules\Chat\Domain\Repository\FlaggedWordRepositoryInterface;
 
+use function strlen;
+
 final readonly class UserInputSanitizer
 {
     public function __construct(
@@ -18,11 +20,11 @@ final readonly class UserInputSanitizer
         $sanitized = $this->removeUrls($input);
 
         foreach ($this->flaggedWordRepository->getAllWords() as $word) {
-            $pattern = '/\b'.preg_quote($word, '/').'\b/i';
+            $pattern = '/\b' . preg_quote($word, '/') . '\b/i';
             $sanitized = preg_replace(
                 $pattern,
                 str_repeat('*', strlen($word)),
-                (string) $sanitized
+                (string) $sanitized,
             );
         }
 

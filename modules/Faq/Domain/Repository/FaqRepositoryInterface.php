@@ -20,6 +20,7 @@ interface FaqRepositoryInterface
 
     /**
      * @param  Collection<int, mixed>  $faqs
+     *
      * @return Collection<int, string>
      */
     public function getCategories(Collection $faqs): Collection;

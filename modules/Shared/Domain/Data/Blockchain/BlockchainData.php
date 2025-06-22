@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Modules\Shared\Domain\Data\Blockchain;
@@ -32,7 +33,7 @@ final readonly class BlockchainData
             transaction: $tx,
             previousBlock: null,
             nextBlock: null,
-            transactionBlock: $block
+            transactionBlock: $block,
         );
     }
 

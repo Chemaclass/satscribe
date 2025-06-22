@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Modules\Blockchain\Domain;
 
 use Modules\Shared\Domain\Data\Blockchain\BlockchainData;

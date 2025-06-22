@@ -6,9 +6,7 @@ namespace Modules\Shared\Domain\Data\Blockchain;
 
 final class MinerIdentifier
 {
-    /**
-     * Map of known coinbase tags to human-friendly miner names.
-     */
+    /** Map of known coinbase tags to human-friendly miner names. */
     private const POOLS = [
         '1THASH' => '1THash',
         '58COIN' => '58COIN & 1THash',

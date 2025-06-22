@@ -15,6 +15,8 @@ use Modules\Shared\Domain\Data\Payment\InvoiceData;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Response;
 
+use function sprintf;
+
 final readonly class IpRateLimiter
 {
     public function __construct(
@@ -51,7 +53,12 @@ final readonly class IpRateLimiter
 
     public static function createRateLimitKey(string $trackingId): string
     {
-        return 'ip_rate_limit_'.$trackingId;
+        return 'ip_rate_limit_' . $trackingId;
+    }
+
+    public static function createCacheKey(string $hash): string
+    {
+        return 'invoice_tracking_mapping_' . $hash;
     }
 
     private function logTracking(string $trackingId, string $cacheKey): void
@@ -67,13 +74,8 @@ final readonly class IpRateLimiter
         $this->cache->put(
             self::createCacheKey($hash),
             ['tracking_id' => $trackingId],
-            $this->now->copy()->addSeconds($this->lnInvoiceExpirySeconds)
+            $this->now->copy()->addSeconds($this->lnInvoiceExpirySeconds),
         );
-    }
-
-    public static function createCacheKey(string $hash): string
-    {
-        return 'invoice_tracking_mapping_'.$hash;
     }
 
     private function handleRateLimited(string $rateLimitKey, string $invoiceCacheKey, string $shortHash): Response
@@ -120,7 +122,7 @@ final readonly class IpRateLimiter
         $this->cache->put(
             $key,
             $invoice,
-            $this->now->copy()->addSeconds($this->lnInvoiceExpirySeconds - 10)
+            $this->now->copy()->addSeconds($this->lnInvoiceExpirySeconds - 10),
         );
     }
 
