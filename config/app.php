@@ -105,6 +105,8 @@ return [
         ),
     ],
 
+    'last_commit' => env('LAST_RELEASE_COMMIT', 'unknown'),
+
     /*
     |--------------------------------------------------------------------------
     | Maintenance Mode Driver
