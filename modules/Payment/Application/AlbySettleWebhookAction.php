@@ -128,7 +128,7 @@ final readonly class AlbySettleWebhookAction
                 'payment_hash' => $payload->paymentHash,
                 'amount' => $payload->amount,
                 'state' => $payload->state,
-                '$invoiceCacheKey' => $invoiceCacheKey,
+                'invoiceCacheKey' => $invoiceCacheKey,
             ],
         );
     }

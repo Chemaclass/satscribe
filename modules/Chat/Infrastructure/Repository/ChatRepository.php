@@ -94,7 +94,7 @@ final readonly class ChatRepository implements ChatRepositoryInterface
         $chat->addUserMessage($userMessage, [
             'type' => $firstUserMsg->type,
             'persona' => $firstUserMsg->persona,
-            'input' => $userMessage,
+            'input' => $firstUserMsg->input,
         ]);
 
         $chat->addAssistantMessage($assistantResponse, [
