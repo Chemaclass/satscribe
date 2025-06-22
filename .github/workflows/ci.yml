@@ -70,11 +70,12 @@ jobs:
       - name: Install dependencies
         run: composer install --no-interaction --no-ansi --no-progress
 
-      - name: Prepare .env
-        run: cp .env.example .env
+      - name: Copy .env.testing to .env
+        run: cp .env.testing .env
 
       - name: Create SQLite database
         run: |
+          mkdir -p database
           touch database/database.sqlite
 
       - name: Generate application key
