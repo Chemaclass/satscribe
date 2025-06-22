@@ -4,9 +4,9 @@ declare(strict_types=1);
 namespace Modules\Shared\Infrastructure\Http\Middleware;
 
 use Closure;
-use Modules\Faq\Domain\Repository\FaqRepositoryInterface;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\View;
+use Modules\Faq\Domain\Repository\FaqRepositoryInterface;
 use Symfony\Component\HttpFoundation\Response;
 
 final readonly class SetLocale

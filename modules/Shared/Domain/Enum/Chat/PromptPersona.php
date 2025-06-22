@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Modules\Shared\Domain\Enum\Chat;
 
-use Modules\Chat\Domain\Enum\PromptType;
 use Illuminate\Support\Collection;
 
 enum PromptPersona: string

@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
+
 namespace Modules\Chat\Infrastructure\Repository;
+
 use App\Models\FlaggedWord;
 use Modules\Chat\Domain\Repository\FlaggedWordRepositoryInterface;
 

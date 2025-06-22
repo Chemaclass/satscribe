@@ -1,8 +1,7 @@
 <?php
-
 declare(strict_types=1);
 
-namespace Modules\Chat\Domain\Enum;
+namespace Modules\Shared\Domain\Enum\Chat;
 
 enum PromptType: string
 {
@@ -11,9 +10,7 @@ enum PromptType: string
 
     public static function fromInput(string $input): self
     {
-        if (is_numeric($input)
-            || preg_match('/^0{8,}[a-f0-9]{56}$/i', $input)
-        ) {
+        if (is_numeric($input) || preg_match('/^0{8,}[a-f0-9]{56}$/i', $input)) {
             return self::Block;
         }
 
