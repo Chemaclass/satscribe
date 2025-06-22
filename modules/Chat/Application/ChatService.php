@@ -8,11 +8,11 @@ use App\Models\Chat;
 use App\Models\Message;
 use Modules\Blockchain\Domain\BlockchainFacadeInterface;
 use Modules\Blockchain\Domain\Exception\BlockchainException;
-use Modules\Chat\Domain\Data\PromptInput;
 use Modules\Chat\Domain\Data\QuestionPlaceholder;
 use Modules\Chat\Domain\Enum\PromptPersona;
 use Modules\Chat\Infrastructure\Http\Request\CreateChatRequest;
 use Modules\OpenAI\Domain\Exception\OpenAIError;
+use Modules\Shared\Domain\Data\Chat\PromptInput;
 
 final readonly class ChatService
 {

@@ -6,8 +6,8 @@ namespace Modules\Blockchain\Application;
 use Modules\Blockchain\Application\Blockstream\BlockchainService;
 use Modules\Blockchain\Application\Blockstream\BlockHeightProvider;
 use Modules\Blockchain\Domain\BlockchainFacadeInterface;
-use Modules\Blockchain\Domain\Data\BlockchainData;
-use Modules\Chat\Domain\Data\PromptInput;
+use Modules\Shared\Domain\Data\Blockchain\BlockchainData;
+use Modules\Shared\Domain\Data\Chat\PromptInput;
 
 final readonly class BlockchainFacade implements BlockchainFacadeInterface
 {

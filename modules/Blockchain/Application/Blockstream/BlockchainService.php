@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Modules\Blockchain\Application\Blockstream;
 
-use Modules\Blockchain\Domain\Data\BlockchainData;
-use Modules\Blockchain\Domain\Data\BlockData;
-use Modules\Blockchain\Domain\Data\TransactionData;
 use Modules\Blockchain\Domain\Exception\BlockchainException;
-use Modules\Chat\Domain\Data\PromptInput;
+use Modules\Shared\Domain\Data\Blockchain\BlockchainData;
+use Modules\Shared\Domain\Data\Blockchain\BlockData;
+use Modules\Shared\Domain\Data\Blockchain\TransactionData;
+use Modules\Shared\Domain\Data\Chat\PromptInput;
 use Modules\Shared\Domain\HttpClientInterface;
 use Psr\Log\LoggerInterface;
 

@@ -11,7 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Modules\Payment\Domain\AlbyClientInterface;
 use Modules\Payment\Domain\CachedInvoiceValidatorInterface;
-use Modules\Payment\Domain\Data\InvoiceData;
+use Modules\Shared\Domain\Data\Payment\InvoiceData;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Response;
 

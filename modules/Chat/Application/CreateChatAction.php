@@ -8,14 +8,14 @@ use App\Models\Chat;
 use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Support\Facades\RateLimiter;
 use Modules\Blockchain\Domain\BlockchainFacadeInterface;
-use Modules\Blockchain\Domain\Data\BlockchainData;
 use Modules\Chat\Domain\Data\CreateChatActionResult;
-use Modules\Chat\Domain\Data\PromptInput;
 use Modules\Chat\Domain\Data\UserInputSanitizer;
 use Modules\Chat\Domain\Enum\PromptPersona;
 use Modules\Chat\Domain\Repository\ChatRepositoryInterface;
 use Modules\Chat\Domain\Repository\MessageRepositoryInterface;
 use Modules\OpenAI\Application\OpenAIService;
+use Modules\Shared\Domain\Data\Blockchain\BlockchainData;
+use Modules\Shared\Domain\Data\Chat\PromptInput;
 use Psr\Log\LoggerInterface;
 
 final readonly class CreateChatAction

@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit;
 
-use Modules\Blockchain\Domain\Data\MinerIdentifier;
+use Modules\Shared\Domain\Data\Blockchain\MinerIdentifier;
 use PHPUnit\Framework\TestCase;
 
 final class MinerIdentifierTest extends TestCase

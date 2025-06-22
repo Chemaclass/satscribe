@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Modules\UtxoTrace\Application\Tracer;
 
 use Modules\Blockchain\Domain\BlockchainFacadeInterface;
-use Modules\Blockchain\Domain\Data\TransactionData;
-use Modules\Chat\Domain\Data\PromptInput;
+use Modules\Shared\Domain\Data\Blockchain\TransactionData;
+use Modules\Shared\Domain\Data\Chat\PromptInput;
 use Psr\Log\LoggerInterface;
 use Throwable;
 

@@ -9,12 +9,12 @@ use App\Models\Message;
 use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Support\Facades\RateLimiter;
 use Modules\Blockchain\Domain\BlockchainFacadeInterface;
-use Modules\Chat\Domain\Data\PromptInput;
 use Modules\Chat\Domain\Data\UserInputSanitizer;
 use Modules\Chat\Domain\Enum\PromptPersona;
 use Modules\Chat\Domain\Repository\ChatRepositoryInterface;
 use Modules\Chat\Domain\Repository\MessageRepositoryInterface;
 use Modules\OpenAI\Application\OpenAIService;
+use Modules\Shared\Domain\Data\Chat\PromptInput;
 use Psr\Log\LoggerInterface;
 
 final readonly class AddMessageAction

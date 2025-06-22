@@ -4,9 +4,9 @@ declare(strict_types=1);
 namespace Modules\Chat\Application;
 
 use Modules\Blockchain\Domain\BlockchainFacadeInterface;
-use Modules\Blockchain\Domain\Data\BlockchainData;
-use Modules\Blockchain\Domain\Data\BlockData;
-use Modules\Chat\Domain\Data\PromptInput;
+use Modules\Shared\Domain\Data\Blockchain\BlockchainData;
+use Modules\Shared\Domain\Data\Blockchain\BlockData;
+use Modules\Shared\Domain\Data\Chat\PromptInput;
 use Modules\UtxoTrace\Domain\UtxoTraceFacadeInterface;
 
 final readonly class AdditionalContextBuilder

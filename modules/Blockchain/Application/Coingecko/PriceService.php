@@ -43,7 +43,7 @@ final readonly class PriceService
         return $this->getPrices()['gbp'];
     }
 
-    private function getPrices(): array
+    protected function getPrices(): array
     {
         if (!$this->enabled) {
             return [

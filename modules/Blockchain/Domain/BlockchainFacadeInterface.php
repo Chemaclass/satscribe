@@ -2,8 +2,8 @@
 
 namespace Modules\Blockchain\Domain;
 
-use Modules\Blockchain\Domain\Data\BlockchainData;
-use Modules\Chat\Domain\Data\PromptInput;
+use Modules\Shared\Domain\Data\Blockchain\BlockchainData;
+use Modules\Shared\Domain\Data\Chat\PromptInput;
 
 interface BlockchainFacadeInterface
 {

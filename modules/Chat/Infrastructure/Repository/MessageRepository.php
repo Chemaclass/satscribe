@@ -2,9 +2,9 @@
 declare(strict_types=1);
 namespace Modules\Chat\Infrastructure\Repository;
 use App\Models\Message;
-use Modules\Chat\Domain\Data\PromptInput;
 use Modules\Chat\Domain\Enum\PromptPersona;
 use Modules\Chat\Domain\Repository\MessageRepositoryInterface;
+use Modules\Shared\Domain\Data\Chat\PromptInput;
 
 final readonly class MessageRepository implements MessageRepositoryInterface
 {

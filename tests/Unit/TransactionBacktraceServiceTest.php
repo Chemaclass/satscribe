@@ -6,7 +6,7 @@ namespace Tests\Unit;
 
 use Modules\Blockchain\Domain\BlockchainFacadeInterface;
 use Modules\Blockchain\Domain\BlockchainServiceInterface;
-use Modules\Blockchain\Domain\Data\TransactionData;
+use Modules\Shared\Domain\Data\Blockchain\TransactionData;
 use Modules\UtxoTrace\Application\Tracer\TransactionTracer;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;

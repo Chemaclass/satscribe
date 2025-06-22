@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\Blockchain\Domain\Data;
+namespace Modules\Shared\Domain\Data\Blockchain;
 
 interface BlockchainDataInterface
 {

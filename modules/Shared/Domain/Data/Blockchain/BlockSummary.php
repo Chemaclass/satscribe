@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Modules\Blockchain\Domain\Data;
+namespace Modules\Shared\Domain\Data\Blockchain;
 
 use Illuminate\Support\Collection;
 
