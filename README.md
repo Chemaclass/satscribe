@@ -56,3 +56,35 @@ Run the app for local development:
 ```bash
 composer dev
 ```
+
+## ▶️ Usage
+
+Once the development server is running visit **http://localhost:8000** in your
+browser. Enter a Bitcoin transaction ID or block height in the form and the
+application will fetch the blockchain data, send it to OpenAI and display a
+short summary. Every generated paragraph is stored so you can review it later in
+the **History** page.
+
+## 🧪 Testing
+
+Run the automated test suite with:
+
+```bash
+composer test
+```
+
+Static analysis can be executed with:
+
+```bash
+composer phpstan
+```
+
+## 🤝 Contributing
+
+Bug reports and pull requests are welcome. Please read the
+[CONTRIBUTING](.github/CONTRIBUTING.md) guide and our
+[Code of Conduct](.github/CODE_OF_CONDUCT.md) before participating.
+
+## 📄 License
+
+The project is released under the [MIT](LICENSE) license.
