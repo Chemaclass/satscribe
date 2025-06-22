@@ -189,7 +189,7 @@
                                     type="checkbox"
                                     id="private"
                                     name="private"
-                                    value="true"
+                                    checked
                                     class="checkbox-input mt-1 cursor-pointer"
                             >
                             <label for="private"
