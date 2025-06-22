@@ -210,6 +210,7 @@
                             type="submit"
                             :disabled="isSubmitting"
                             class="form-button w-3/4"
+                            @click="hasSubmitted = true"
                     >
                         <span x-cloak class="submit-icon sm-2">
                             <i data-lucide="zap" class="w-4 h-4"></i>
@@ -224,7 +225,7 @@
                     <button
                             id="random-button"
                             type="button"
-                            @click="fetchRandomBlock()"
+                            @click="hasSubmitted = true && fetchRandomBlock()"
                             :disabled="isSubmitting"
                             class="w-1/4 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md flex items-center justify-center gap-2 cursor-pointer"
                             title="{{ __('Get a random block') }}"
