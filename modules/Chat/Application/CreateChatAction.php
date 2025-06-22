@@ -8,6 +8,7 @@ use App\Models\Chat;
 use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Support\Facades\RateLimiter;
 use Modules\Blockchain\Domain\BlockchainFacadeInterface;
+use Modules\Chat\Domain\CreateChatActionInterface;
 use Modules\Chat\Domain\Data\CreateChatActionResult;
 use Modules\Chat\Domain\Data\UserInputSanitizer;
 use Modules\Chat\Domain\Repository\ChatRepositoryInterface;
@@ -18,7 +19,7 @@ use Modules\Shared\Domain\Data\Chat\PromptInput;
 use Modules\Shared\Domain\Enum\Chat\PromptPersona;
 use Psr\Log\LoggerInterface;
 
-final readonly class CreateChatAction
+final readonly class CreateChatAction implements CreateChatActionInterface
 {
     private const RATE_LIMIT_SECONDS = 86400; // 24 hours
 

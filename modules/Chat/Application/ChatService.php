@@ -8,6 +8,8 @@ use App\Models\Chat;
 use App\Models\Message;
 use Modules\Blockchain\Domain\BlockchainFacadeInterface;
 use Modules\Blockchain\Domain\Exception\BlockchainException;
+use Modules\Chat\Domain\AddMessageActionInterface;
+use Modules\Chat\Domain\CreateChatActionInterface;
 use Modules\Chat\Domain\Data\QuestionPlaceholder;
 use Modules\Chat\Infrastructure\Http\Request\CreateChatRequest;
 use Modules\OpenAI\Domain\Exception\OpenAIError;
@@ -18,8 +20,8 @@ final readonly class ChatService
 {
     public function __construct(
         private BlockchainFacadeInterface $blockchainFacade,
-        private CreateChatAction $createChatAction,
-        private AddMessageAction $addMessageAction,
+        private CreateChatActionInterface $createChatAction,
+        private AddMessageActionInterface $addMessageAction,
     ) {
     }
 
