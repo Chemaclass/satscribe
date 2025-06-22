@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Modules\Payment\Domain\Data;
+namespace Modules\Shared\Domain\Data\Payment;
 
 use InvalidArgumentException;
 

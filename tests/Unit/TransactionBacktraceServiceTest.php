@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace Tests\Unit;
 
+use Modules\Blockchain\Domain\BlockchainFacadeInterface;
 use Modules\Blockchain\Domain\BlockchainServiceInterface;
-use Modules\Blockchain\Domain\Data\TransactionData;
-use Modules\UtxoTrace\Application\TransactionBacktraceService;
+use Modules\Shared\Domain\Data\Blockchain\TransactionData;
+use Modules\UtxoTrace\Application\Tracer\TransactionTracer;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
@@ -14,8 +15,8 @@ final class TransactionBacktraceServiceTest extends TestCase
 {
     public function test_format_for_prompt(): void
     {
-        $service = new TransactionBacktraceService(
-            self::createStub(BlockchainServiceInterface::class),
+        $service = new TransactionTracer(
+            self::createStub(BlockchainFacadeInterface::class),
             self::createStub(LoggerInterface::class)
         );
 

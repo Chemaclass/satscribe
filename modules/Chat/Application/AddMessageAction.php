@@ -8,13 +8,13 @@ use App\Models\Chat;
 use App\Models\Message;
 use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Support\Facades\RateLimiter;
-use Modules\Blockchain\Domain\BlockchainServiceInterface;
-use Modules\Chat\Domain\Data\PromptInput;
+use Modules\Blockchain\Domain\BlockchainFacadeInterface;
 use Modules\Chat\Domain\Data\UserInputSanitizer;
-use Modules\Chat\Domain\Enum\PromptPersona;
 use Modules\Chat\Domain\Repository\ChatRepositoryInterface;
 use Modules\Chat\Domain\Repository\MessageRepositoryInterface;
-use Modules\OpenAI\Application\OpenAIService;
+use Modules\OpenAI\Domain\OpenAIFacadeInterface;
+use Modules\Shared\Domain\Data\Chat\PromptInput;
+use Modules\Shared\Domain\Enum\Chat\PromptPersona;
 use Psr\Log\LoggerInterface;
 
 final readonly class AddMessageAction
@@ -22,8 +22,8 @@ final readonly class AddMessageAction
     private const RATE_LIMIT_SECONDS = 86400; // 24 hours
 
     public function __construct(
-        private BlockchainServiceInterface $blockchain,
-        private OpenAIService $openai,
+        private BlockchainFacadeInterface $blockchainFacade,
+        private OpenAIFacadeInterface $openAIFacade,
         private ChatRepositoryInterface $chatRepository,
         private MessageRepositoryInterface $messageRepository,
         private UserInputSanitizer $userInputSanitizer,
@@ -74,10 +74,10 @@ final readonly class AddMessageAction
             return $message->content;
         }
 
-        $data = $this->blockchain->getBlockchainData($input);
+        $data = $this->blockchainFacade->getBlockchainData($input);
         $additional = $this->contextBuilder->build($data, $input, $cleanMsg);
 
-        return $this->openai->generateText(
+        return $this->openAIFacade->generateText(
             $data,
             $input,
             $persona,

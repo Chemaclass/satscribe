@@ -7,15 +7,15 @@ namespace Modules\Chat\Application;
 use App\Models\Chat;
 use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Support\Facades\RateLimiter;
-use Modules\Blockchain\Domain\BlockchainServiceInterface;
-use Modules\Blockchain\Domain\Data\BlockchainData;
+use Modules\Blockchain\Domain\BlockchainFacadeInterface;
 use Modules\Chat\Domain\Data\CreateChatActionResult;
-use Modules\Chat\Domain\Data\PromptInput;
 use Modules\Chat\Domain\Data\UserInputSanitizer;
-use Modules\Chat\Domain\Enum\PromptPersona;
 use Modules\Chat\Domain\Repository\ChatRepositoryInterface;
 use Modules\Chat\Domain\Repository\MessageRepositoryInterface;
-use Modules\OpenAI\Application\OpenAIService;
+use Modules\OpenAI\Domain\OpenAIFacadeInterface;
+use Modules\Shared\Domain\Data\Blockchain\BlockchainData;
+use Modules\Shared\Domain\Data\Chat\PromptInput;
+use Modules\Shared\Domain\Enum\Chat\PromptPersona;
 use Psr\Log\LoggerInterface;
 
 final readonly class CreateChatAction
@@ -23,8 +23,8 @@ final readonly class CreateChatAction
     private const RATE_LIMIT_SECONDS = 86400; // 24 hours
 
     public function __construct(
-        private BlockchainServiceInterface $blockchain,
-        private OpenAIService $openai,
+        private BlockchainFacadeInterface $blockchainFacade,
+        private OpenAIFacadeInterface $openaiFacade,
         private ChatRepositoryInterface $repository,
         private MessageRepositoryInterface $messageRepository,
         private UserInputSanitizer $userInputSanitizer,
@@ -72,7 +72,7 @@ final readonly class CreateChatAction
     ): Chat {
         $this->enforceRateLimit();
 
-        $blockchainData = $this->blockchain->getBlockchainData($input);
+        $blockchainData = $this->blockchainFacade->getBlockchainData($input);
         $cleanQuestion = $this->userInputSanitizer->sanitize($question);
 
         $aiResponse = $refreshEnabled
@@ -110,7 +110,7 @@ final readonly class CreateChatAction
     ): string {
         $additional = $this->contextBuilder->build($blockchainData, $input, $cleanQuestion);
 
-        return $this->openai->generateText($blockchainData, $input, $persona, $cleanQuestion, null, $additional);
+        return $this->openaiFacade->generateText($blockchainData, $input, $persona, $cleanQuestion, null, $additional);
     }
 
     private function findOrGenerateAiResponse(

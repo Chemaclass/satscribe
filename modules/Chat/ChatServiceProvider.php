@@ -5,7 +5,9 @@ namespace Modules\Chat;
 
 use Illuminate\Support\ServiceProvider;
 use Modules\Chat\Application\AddMessageAction;
+use Modules\Chat\Application\ChatFacade;
 use Modules\Chat\Application\CreateChatAction;
+use Modules\Chat\Domain\ChatFacadeInterface;
 use Modules\Chat\Domain\Repository\ChatRepositoryInterface;
 use Modules\Chat\Domain\Repository\FlaggedWordRepositoryInterface;
 use Modules\Chat\Domain\Repository\MessageRepositoryInterface;
@@ -23,6 +25,7 @@ final class ChatServiceProvider extends ServiceProvider
         ChatRepositoryInterface::class => ChatRepository::class,
         MessageRepositoryInterface::class => MessageRepository::class,
         FlaggedWordRepositoryInterface::class => FlaggedWordRepository::class,
+        ChatFacadeInterface::class => ChatFacade::class,
     ];
 
     /**
@@ -59,8 +62,5 @@ final class ChatServiceProvider extends ServiceProvider
         $this->app->when(ChatRepository::class)
             ->needs('$trackingId')
             ->give(tracking_id());
-
-
-
     }
 }

@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace Modules\Chat\Domain\Data;
+namespace Modules\Shared\Domain\Data\Chat;
 
-use Modules\Chat\Domain\Enum\PromptType;
+use Modules\Shared\Domain\Enum\Chat\PromptType;
 
 final readonly class PromptInput
 {

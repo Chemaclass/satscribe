@@ -8,7 +8,7 @@ use GuzzleHttp\Client as GuzzleClient;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Psr7\Request as GuzzleRequest;
 use Modules\Payment\Domain\AlbyClientInterface;
-use Modules\Payment\Domain\Data\InvoiceData;
+use Modules\Shared\Domain\Data\Payment\InvoiceData;
 use RuntimeException;
 
 /**

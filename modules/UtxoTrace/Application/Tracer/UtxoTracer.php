@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Modules\UtxoTrace\Application;
+namespace Modules\UtxoTrace\Application\Tracer;
 
 use App\Models\UtxoTrace;
 use Modules\Shared\Domain\HttpClientInterface;
 use Modules\UtxoTrace\Domain\Repository\UtxoTraceRepositoryInterface;
 use Psr\Log\LoggerInterface;
 
-final readonly class UtxoTraceService
+final readonly class UtxoTracer
 {
     private const BASE_URL = 'https://blockstream.info/api';
 
@@ -24,7 +24,7 @@ final readonly class UtxoTraceService
      * Same trace() response but using references to avoid repeating
      * identical child traces.
      */
-    public function traceWithReferences(string $txid, int $depth = 1): array
+    public function getBacktrace(string $txid, int $depth = 1): array
     {
         if (($cached = $this->repository->find($txid, $depth)) instanceof UtxoTrace) {
             $this->logger->info('Loaded UTXO trace from DB', [
@@ -35,11 +35,59 @@ final readonly class UtxoTraceService
             return $cached->result;
         }
 
-        $result = $this->buildReferences($this->trace($txid, $depth));
+        $result = $this->buildReferences($this->buildBacktrace($txid, $depth));
 
         $this->repository->store($txid, $depth, $result);
 
         return $result;
+    }
+
+    /**
+     * Convert full traces into a map of references to avoid duplication.
+     */
+    private function buildReferences(array $traces): array
+    {
+        $map = [];
+        $refs = [];
+        $id = 1;
+
+        $process = static function (array $node) use (&$process, &$map, &$refs, &$id): string {
+            $children = array_map($process, $node['source']);
+
+            $key = $node['txid'].'|'.$node['vout'].'|'.$node['value'].'|'.implode(',', $children);
+
+            if (!isset($map[$key])) {
+                $ref = 'r'.$id++;
+                $map[$key] = $ref;
+                $refs[$ref] = [
+                    'txid' => $node['txid'],
+                    'vout' => $node['vout'],
+                    'scriptpubkey' => $node['scriptpubkey'] ?? null,
+                    'scriptpubkey_address' => $node['scriptpubkey_address'] ?? null,
+                    'scriptpubkey_type' => $node['scriptpubkey_type'] ?? null,
+                    'value' => $node['value'],
+                    'source' => $children,
+                ];
+            }
+
+            return $map[$key];
+        };
+
+        $utxos = [];
+
+        foreach ($traces as $item) {
+            $utxos[] = [
+                'utxo' => $item['utxo'],
+                'trace' => array_map($process, $item['trace']),
+            ];
+        }
+
+        uksort($refs, static fn(string $a, string $b) => (int) substr($b, 1) <=> (int) substr($a, 1));
+
+        return [
+            'utxos' => $utxos,
+            'references' => $refs,
+        ];
     }
 
     /**
@@ -54,8 +102,9 @@ final readonly class UtxoTraceService
      *     trace: array,
      * }>
      */
-    public function trace(string $txid, int $depth = 2): array
+    public function buildBacktrace(string $txid, int $depth = 2): array
     {
+        // todo: consider make this method private and/or extract to class to keep unit tests
         $this->logger->info('Starting UTXO trace', [
             'txid' => $txid,
             'depth' => $depth,
@@ -86,6 +135,33 @@ final readonly class UtxoTraceService
         }
 
         return $result;
+    }
+
+    private function getTransaction(string $txid): array
+    {
+        static $cache = [];
+
+        if (isset($cache[$txid])) {
+            return $cache[$txid];
+        }
+
+        $url = self::BASE_URL."/tx/{$txid}";
+        $this->logger->info('Blockstream API call', [
+            'url' => $url,
+        ]);
+
+        $response = $this->http->get($url);
+
+        if ($response->failed()) {
+            $this->logger->warning('Blockstream API error', [
+                'url' => $url,
+                'status' => $response->status(),
+            ]);
+
+            return $cache[$txid] = [];
+        }
+
+        return $cache[$txid] = $response->json();
     }
 
     private function traceInputs(string $txid, int $depth, int $level): array
@@ -156,83 +232,8 @@ final readonly class UtxoTraceService
         ];
     }
 
-    /**
-     * Convert full traces into a map of references to avoid duplication.
-     */
-    private function buildReferences(array $traces): array
-    {
-        $map = [];
-        $refs = [];
-        $id = 1;
-
-        $process = static function (array $node) use (&$process, &$map, &$refs, &$id): string {
-            $children = array_map($process, $node['source']);
-
-            $key = $node['txid'].'|'.$node['vout'].'|'.$node['value'].'|'.implode(',', $children);
-
-            if (!isset($map[$key])) {
-                $ref = 'r'.$id++;
-                $map[$key] = $ref;
-                $refs[$ref] = [
-                    'txid' => $node['txid'],
-                    'vout' => $node['vout'],
-                    'scriptpubkey' => $node['scriptpubkey'] ?? null,
-                    'scriptpubkey_address' => $node['scriptpubkey_address'] ?? null,
-                    'scriptpubkey_type' => $node['scriptpubkey_type'] ?? null,
-                    'value' => $node['value'],
-                    'source' => $children,
-                ];
-            }
-
-            return $map[$key];
-        };
-
-        $utxos = [];
-
-        foreach ($traces as $item) {
-            $utxos[] = [
-                'utxo' => $item['utxo'],
-                'trace' => array_map($process, $item['trace']),
-            ];
-        }
-
-        uksort($refs, static fn(string $a, string $b) => (int) substr($b, 1) <=> (int) substr($a, 1));
-
-        return [
-            'utxos' => $utxos,
-            'references' => $refs,
-        ];
-    }
-
     private function getVout(string $txid, int $vout): array
     {
         return $this->getTransaction($txid)['vout'][$vout] ?? [];
-    }
-
-    private function getTransaction(string $txid): array
-    {
-        static $cache = [];
-
-        if (isset($cache[$txid])) {
-            return $cache[$txid];
-        }
-
-        $url = self::BASE_URL."/tx/{$txid}";
-        $this->logger->info('Blockstream API call', [
-            'url' => $url,
-        ]);
-
-        $response = $this->http->get($url);
-
-        if ($response->failed()) {
-            $this->logger->warning('Blockstream API error', [
-                'url' => $url,
-                'status' => $response->status(),
-            ]);
-
-            return $cache[$txid] = [];
-        }
-
-        return $cache[$txid] = $response->json();
     }
 }

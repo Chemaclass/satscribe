@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace Modules\OpenAI\Application;
 
 use App\Models\Chat;
-use Modules\Blockchain\Domain\Data\BlockchainData;
-use Modules\Chat\Domain\Data\PromptInput;
-use Modules\Chat\Domain\Enum\PromptPersona;
-use Modules\Chat\Domain\Enum\PromptType;
-use Modules\Chat\Infrastructure\Http\Request\CreateChatRequest;
 use Modules\OpenAI\Domain\Exception\OpenAIError;
+use Modules\Shared\Domain\Chat\ChatConstants;
+use Modules\Shared\Domain\Data\Blockchain\BlockchainData;
+use Modules\Shared\Domain\Data\Chat\PromptInput;
+use Modules\Shared\Domain\Enum\Chat\PromptPersona;
+use Modules\Shared\Domain\Enum\Chat\PromptType;
 use Modules\Shared\Domain\HttpClientInterface;
 use Psr\Log\LoggerInterface;
 
@@ -104,7 +104,7 @@ final readonly class OpenAIService
         PromptPersona $persona
     ): string {
         return implode("\n\n", array_filter([
-            ($question === '' || $question === __(CreateChatRequest::DEFAULT_USER_QUESTION))
+            ($question === '' || $question === __(ChatConstants::DEFAULT_USER_QUESTION))
                 ? $this->buildDefaultInsightPrompt($type, $persona)
                 : $this->buildQuestionPrompt($question),
 

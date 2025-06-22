@@ -5,8 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit;
 
 use Illuminate\Contracts\Cache\Repository;
-use Illuminate\Http\Client\Factory;
-use Modules\Blockchain\Application\PriceService;
+use Modules\Blockchain\Application\Coingecko\PriceService;
 use Modules\Shared\Domain\HttpClientInterface;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;

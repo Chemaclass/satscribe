@@ -2,7 +2,7 @@
 
 namespace Modules\Payment\Domain;
 
-use Modules\Payment\Domain\Data\InvoiceData;
+use Modules\Shared\Domain\Data\Payment\InvoiceData;
 
 interface AlbyClientInterface
 {

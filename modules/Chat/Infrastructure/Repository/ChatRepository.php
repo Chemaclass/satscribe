@@ -6,11 +6,11 @@ namespace Modules\Chat\Infrastructure\Repository;
 use App\Models\Chat;
 use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Database\Eloquent\Builder;
-use Modules\Blockchain\Domain\Data\BlockchainDataInterface;
-use Modules\Chat\Domain\Data\PromptInput;
-use Modules\Chat\Domain\Enum\PromptPersona;
-use Modules\Chat\Domain\Enum\PromptType;
 use Modules\Chat\Domain\Repository\ChatRepositoryInterface;
+use Modules\Shared\Domain\Data\Blockchain\BlockchainDataInterface;
+use Modules\Shared\Domain\Data\Chat\PromptInput;
+use Modules\Shared\Domain\Enum\Chat\PromptPersona;
+use Modules\Shared\Domain\Enum\Chat\PromptType;
 
 final readonly class ChatRepository implements ChatRepositoryInterface
 {

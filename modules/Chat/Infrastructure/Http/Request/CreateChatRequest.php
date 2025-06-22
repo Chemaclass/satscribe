@@ -6,10 +6,11 @@ namespace Modules\Chat\Infrastructure\Http\Request;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Modules\Shared\Domain\Chat\ChatConstants;
 
 final class CreateChatRequest extends FormRequest
 {
-    public const DEFAULT_USER_QUESTION = 'Give me a generic overview.';
+    public const DEFAULT_USER_QUESTION = ChatConstants::DEFAULT_USER_QUESTION;
 
     /**
      * @return array<string, ValidationRule|array<mixed>|string>

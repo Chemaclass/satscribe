@@ -2,18 +2,18 @@
 
 declare(strict_types=1);
 
-namespace Modules\UtxoTrace\Application;
+namespace Modules\UtxoTrace\Application\Tracer;
 
-use Modules\Blockchain\Domain\BlockchainServiceInterface;
-use Modules\Blockchain\Domain\Data\TransactionData;
-use Modules\Chat\Domain\Data\PromptInput;
+use Modules\Blockchain\Domain\BlockchainFacadeInterface;
+use Modules\Shared\Domain\Data\Blockchain\TransactionData;
+use Modules\Shared\Domain\Data\Chat\PromptInput;
 use Psr\Log\LoggerInterface;
 use Throwable;
 
-final readonly class TransactionBacktraceService
+final readonly class TransactionTracer
 {
     public function __construct(
-        private BlockchainServiceInterface $blockchain,
+        private BlockchainFacadeInterface $blockchainFacade,
         private LoggerInterface $logger,
     ) {
     }
@@ -34,7 +34,7 @@ final readonly class TransactionBacktraceService
             }
 
             try {
-                $data = $this->blockchain->getBlockchainData(PromptInput::fromRaw($current));
+                $data = $this->blockchainFacade->getBlockchainData(PromptInput::fromRaw($current));
                 $tx = $data->transaction;
                 $this->logger->info('Generating Backtrace', [
                     'count(trace)' => count($trace),

@@ -6,9 +6,9 @@ namespace Modules\Chat\Domain\Repository;
 
 use App\Models\Chat;
 use Illuminate\Contracts\Pagination\Paginator;
-use Modules\Blockchain\Domain\Data\BlockchainDataInterface;
-use Modules\Chat\Domain\Data\PromptInput;
-use Modules\Chat\Domain\Enum\PromptPersona;
+use Modules\Shared\Domain\Data\Blockchain\BlockchainDataInterface;
+use Modules\Shared\Domain\Data\Chat\PromptInput;
+use Modules\Shared\Domain\Enum\Chat\PromptPersona;
 
 interface ChatRepositoryInterface
 {

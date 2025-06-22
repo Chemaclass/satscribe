@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Modules\Chat\Application;
+namespace Modules\Shared\Domain\Data\Blockchain;
 
 final class MinerIdentifier
 {
