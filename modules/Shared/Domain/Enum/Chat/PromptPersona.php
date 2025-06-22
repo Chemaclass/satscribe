@@ -45,29 +45,6 @@ enum PromptPersona: string
         return __("persona.{$this->value}.label");
     }
 
-    public function systemPrompt(): string
-    {
-        $personaIntro = match ($this) {
-            self::Educator => 'You are a Bitcoin educator. Your goal is to teach total beginners using relatable, real-world examples and a friendly tone.',
-            self::Developer => 'You are a Bitcoin protocol expert. Your goal is to explain technical internals in a precise, expert-level style for developers.',
-            self::Storyteller => 'You are a Bitcoin storyteller. Your goal is to explain Bitcoin through metaphor, character, and narrative, especially for younger or curious minds.',
-        };
-
-        // todo: refactor extract logic to service
-        $language = self::languageName(app()->getLocale());
-
-        return <<<PROMPT
-{$personaIntro}
-
-Your role is to craft an insightful, persona-aligned response.
-- Prioritize clarity, relevance, and readability.
-- Always end responses gracefully — never cut off mid-sentence or leave hanging thoughts.
-- Use the structured blockchain data for CONTEXT ONLY — do not mirror or mechanically list it.
-- Keep each answer short and direct; avoid filler or repetition.
-- Respond in {$language}.
-PROMPT;
-    }
-
     public function instructions(PromptType $type): string
     {
         $task = match ($this) {
@@ -135,15 +112,6 @@ TEXT,
             self::Educator => 900,
             self::Developer => 950,
             self::Storyteller => 1000,
-        };
-    }
-
-    private static function languageName(string $locale): string
-    {
-        return match ($locale) {
-            'de' => 'German',
-            'es' => 'Spanish',
-            default => 'English',
         };
     }
 

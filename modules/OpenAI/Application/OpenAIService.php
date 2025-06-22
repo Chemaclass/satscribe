@@ -21,6 +21,7 @@ final readonly class OpenAIService
     public function __construct(
         private HttpClientInterface $http,
         private LoggerInterface $logger,
+        private PersonaPromptBuilder $promptBuilder,
         private string $openAiApiKey,
         private string $openAiModel,
     ) {
@@ -46,7 +47,7 @@ final readonly class OpenAIService
         $messages = [
             [
                 'role' => 'system',
-                'content' => $persona->systemPrompt(),
+                'content' => $this->promptBuilder->buildSystemPrompt($persona),
             ],
             ...$history,
             [
