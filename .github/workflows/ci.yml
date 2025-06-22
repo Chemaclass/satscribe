@@ -40,6 +40,9 @@ jobs:
       - name: Run rector/rector
         run: ./vendor/bin/rector process --dry-run --config=rector.php
 
+      - name: Run PHPStan with higher memory
+        run: php -d memory_limit=512M vendor/bin/phpstan analyse
+
   tests:
     name: Tests on PHP ${{ matrix.php }}
     runs-on: ubuntu-latest
