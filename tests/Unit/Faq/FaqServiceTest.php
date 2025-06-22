@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit;
+namespace Tests\Unit\Faq;
 
 use Illuminate\Support\Collection;
 use Modules\Faq\Application\FaqService;

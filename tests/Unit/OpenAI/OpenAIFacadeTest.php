@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit;
+namespace Tests\Unit\OpenAI;
 
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Response;

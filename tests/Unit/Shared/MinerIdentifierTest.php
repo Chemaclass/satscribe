@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit;
+namespace Tests\Unit\Shared;
 
 use Modules\Shared\Domain\Data\Blockchain\MinerIdentifier;
 use PHPUnit\Framework\TestCase;

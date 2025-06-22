@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit;
+namespace Tests\Unit\Blockchain;
 
 use Illuminate\Contracts\Cache\Repository;
 use Modules\Blockchain\Application\Coingecko\PriceService;

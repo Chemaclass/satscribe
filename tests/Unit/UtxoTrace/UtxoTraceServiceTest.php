@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit;
+namespace Tests\Unit\UtxoTrace;
 
 use App\Models\UtxoTrace;
 use Illuminate\Http\Client\Response;

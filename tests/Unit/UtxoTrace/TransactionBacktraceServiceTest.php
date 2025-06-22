@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit;
+namespace Tests\Unit\UtxoTrace;
 
 use Modules\Blockchain\Domain\BlockchainFacadeInterface;
 use Modules\Shared\Domain\Data\Blockchain\TransactionData;

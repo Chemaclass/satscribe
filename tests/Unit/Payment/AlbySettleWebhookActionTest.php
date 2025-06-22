@@ -34,7 +34,7 @@ class RateLimiter
     }
 }
 
-namespace Tests\Unit;
+namespace Tests\Unit\Payment;
 
 use App\Models\Payment;
 use Illuminate\Contracts\Cache\Repository;
