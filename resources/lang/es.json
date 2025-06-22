@@ -1,5 +1,12 @@
 {
     "Unlock the Story Behind Every Satoshi": "Descubre la historia detrás de cada Satoshi",
+    "home.subheading.line1": "Satscribe traduce los datos de la blockchain a un lenguaje humano.",
+    "home.subheading.line2": "Introduce cualquier TXID o altura de bloque para obtener una explicación generada por IA.",
+    "home.helper_link": "¿Quieres datos en tiempo real? Explora los últimos bloques en <a href=\"https://mempool.space\" target=\"_blank\" rel=\"noopener\" class=\"hover:underline\">mempool.space</a>",
+    "home.placeholder": "Pega aquí una TXID o altura de bloque",
+    "home.narrative.line1": "¿Alguna vez te has preguntado qué significa realmente una transacción de Bitcoin?",
+    "home.narrative.line2": "Satscribe usa IA para convertir datos crudos de la blockchain en historias claras y con sentido.",
+    "home.footer.support": "Apoya el proyecto",
     "makes Bitcoin easier to understand.": "hace que Bitcoin sea más fácil de entender.",
     "Just enter a TXID or block height to get an AI-powered explanation.": "Solo ingresa un ID de transacción o altura de bloque para obtener una explicación con IA.",
     "Curious about the latest blocks and transactions? Visit": "¿Tienes curiosidad por los últimos bloques y transacciones? Visita",

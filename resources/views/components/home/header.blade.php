@@ -1,14 +1,11 @@
 <x-page.header title="{{ __('Unlock the Story Behind Every Satoshi') }}" containerClass="max-w-2xl">
     <p class="subtitle text-base sm:text-lg text-gray-700 leading-relaxed">
-        <strong>Satscribe</strong> {{ __('makes Bitcoin easier to understand.') }}
+        {{ __('home.subheading.line1') }}
         <br class="hidden sm:block">
-        {{ __('Just enter a TXID or block height to get an AI-powered explanation.') }}
+        {{ __('home.subheading.line2') }}
         <br class="hidden sm:block">
         <span class="subtitle mt-1 text-sm text-gray-600 leading-relaxed">
-            {{ __('Curious about the latest blocks and transactions? Visit') }}
-            <a href="https://mempool.space" target="_blank" rel="noopener" class="hover:underline">
-                mempool.space
-            </a>
+            {!! __('home.helper_link') !!}
         </span>
     </p>
 </x-page.header>

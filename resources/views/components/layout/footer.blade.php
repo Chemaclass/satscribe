@@ -4,7 +4,7 @@
         <span class="hidden sm:inline">•</span>
         <a href="https://getalby.com/p/chemaclass" target="_blank" class="flex items-center gap-1 hover:underline">
             <i data-lucide="bitcoin" class="w-4 h-4 text-orange-500 dark:text-[--btc-orange-dark]"></i>
-            {{ __('Leave a tip') }}
+            {{ __("home.footer.support") }}
         </a>
         <span class="hidden sm:inline">•</span>
         <a href="https://github.com/Chemaclass/satscribe" target="_blank" class="flex items-center gap-1 hover:underline">

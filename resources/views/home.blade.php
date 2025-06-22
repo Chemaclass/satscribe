@@ -30,13 +30,11 @@
 
         @if(!isset($chat))
             <div
-                class="mt-6 text-center text-gray-700 space-y-2"
+                class="mt-6 text-center text-gray-700 space-y-2 home-narrative"
                 x-show="!hasSubmitted"
                 x-cloak>
-                <p>
-                    {{ __('Ever looked at a Bitcoin transaction and wondered what story it tells?') }}
-                    {{ __('Satscribe turns raw blockchain data into plain-language narratives — helping you discover the meaning behind every satoshi.') }}
-                </p>
+                <p>{{ __('home.narrative.line1') }}</p>
+                <p>{{ __('home.narrative.line2') }}</p>
             </div>
         @endif
 
