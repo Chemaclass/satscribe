@@ -9,8 +9,9 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 final readonly class FaqService
 {
-    public function __construct(private FaqRepositoryInterface $repository)
-    {
+    public function __construct(
+        private FaqRepositoryInterface $repository,
+    ) {
     }
 
     /**
