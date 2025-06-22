@@ -33,6 +33,9 @@ jobs:
       - name: Install dependencies
         run: composer install --no-interaction --no-ansi --no-progress
 
+      - name: Run php-cs-fixer
+        run: ./vendor/bin/php-cs-fixer fix --allow-risky=yes --dry-run --show-progress=dots --using-cache=no --verbose
+
       - name: Run rector/rector
         run: ./vendor/bin/rector process --dry-run --config=rector.php
 
