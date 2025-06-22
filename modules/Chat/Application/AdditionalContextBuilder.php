@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Modules\Chat\Application;
@@ -25,7 +26,7 @@ final readonly class AdditionalContextBuilder
             $txInput = PromptInput::fromRaw($m[1]);
             if ($txInput->text !== $currentInput->text) {
                 $txData = $this->blockchainFacade->getBlockchainData($txInput);
-                $sections[] = "Referenced Transaction\n".$txData->current()->toPrompt();
+                $sections[] = "Referenced Transaction\n" . $txData->current()->toPrompt();
             }
         }
 
@@ -33,7 +34,7 @@ final readonly class AdditionalContextBuilder
             $blockInput = PromptInput::fromRaw($m[1]);
             if ($blockInput->text !== $currentInput->text) {
                 $blockData = $this->blockchainFacade->getBlockchainData($blockInput);
-                $sections[] = "Referenced Block\n".$blockData->current()->toPrompt();
+                $sections[] = "Referenced Block\n" . $blockData->current()->toPrompt();
             }
         }
 
@@ -52,10 +53,10 @@ final readonly class AdditionalContextBuilder
         if ($currentInput->isBlock()) {
             $lower = strtolower($question);
             if (str_contains($lower, 'previous') && $baseData->previousBlock instanceof BlockData) {
-                $sections[] = "Previous Block\n".$baseData->previousBlock->toPrompt();
+                $sections[] = "Previous Block\n" . $baseData->previousBlock->toPrompt();
             }
             if (str_contains($lower, 'next') && $baseData->nextBlock instanceof BlockData) {
-                $sections[] = "Next Block\n".$baseData->nextBlock->toPrompt();
+                $sections[] = "Next Block\n" . $baseData->nextBlock->toPrompt();
             }
         }
 

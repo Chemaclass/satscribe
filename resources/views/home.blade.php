@@ -1,5 +1,6 @@
 @php
-        @endphp
+    use Modules\Shared\Domain\Enum\Chat\PromptPersona;
+@endphp
 
 @extends('layouts.base')
 

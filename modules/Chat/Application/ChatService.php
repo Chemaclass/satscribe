@@ -81,8 +81,9 @@ final readonly class ChatService
     /**
      * Handle chat creation request and return data for JSON response.
      *
-     * @return array<string, mixed>
      * @throws BlockchainException|OpenAIError
+     *
+     * @return array<string, mixed>
      */
     public function createChat(CreateChatRequest $request): array
     {

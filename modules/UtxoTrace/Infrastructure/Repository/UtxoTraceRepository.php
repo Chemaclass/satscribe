@@ -20,7 +20,7 @@ final readonly class UtxoTraceRepository implements UtxoTraceRepositoryInterface
     {
         return UtxoTrace::updateOrCreate(
             ['txid' => $txid, 'depth' => $depth],
-            ['result' => $result]
+            ['result' => $result],
         );
     }
 }

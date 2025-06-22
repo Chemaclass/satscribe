@@ -20,7 +20,7 @@ interface ChatRepositoryInterface
         BlockchainDataInterface $blockchainData,
         PromptPersona $persona,
         string $question,
-        bool $isPrivate
+        bool $isPrivate,
     ): Chat;
 
     public function addMessageToChat(Chat $chat, string $userMessage, string $assistantResponse): void;

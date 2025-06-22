@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Modules\Shared\Domain\Data\Blockchain;
 
+use function count;
+
 final class TransactionSummary
 {
     public function __construct(
@@ -32,22 +34,23 @@ final class TransactionSummary
         $inputs = collect($tx->vin);
         $outputs = collect($tx->vout);
 
-        $totalInput = $inputs->sum(fn($vin) => $vin['prevout']['value'] ?? 0);
+        $totalInput = $inputs->sum(static fn ($vin) => $vin['prevout']['value'] ?? 0);
         $totalOutput = $outputs->sum('value');
 
-        $hasOpReturn = $outputs->contains(fn($out) => $out['scriptpubkey_type'] === 'op_return');
-        $hasMultiSig = $outputs->contains(fn($out) => $out['scriptpubkey_type'] === 'multisig');
+        $hasOpReturn = $outputs->contains(static fn ($out) => $out['scriptpubkey_type'] === 'op_return');
+        $hasMultiSig = $outputs->contains(static fn ($out) => $out['scriptpubkey_type'] === 'multisig');
 
         $isTopFeePayer = $block instanceof BlockSummary && collect($block->topTransactionsByFee)
                 ->pluck('txid')->contains($tx->txid);
 
         $walletTypes = collect([...$inputs, ...$outputs])
-            ->map(fn($io) => $io['prevout']['scriptpubkey_type'] ?? $io['scriptpubkey_type'] ?? null)
+            ->map(static fn ($io) => $io['prevout']['scriptpubkey_type'] ?? $io['scriptpubkey_type'] ?? null)
             ->filter()
             ->countBy()
             ->toArray();
 
-        $uniqueInputAddresses = $inputs->map(fn($vin
+        $uniqueInputAddresses = $inputs->map(static fn (
+            $vin,
         ) => $vin['prevout']['scriptpubkey_address'] ?? null)->filter()->unique();
         $outputValues = $outputs->pluck('value')->filter();
 
@@ -91,7 +94,7 @@ final class TransactionSummary
         $blockTxCountText = $this->blockTxCount ?? '—';
 
         $walletTypeSummary = collect($this->walletTypes)
-            ->map(fn($count, $type) => "- {$type}: {$count}")
+            ->map(static fn ($count, $type) => "- {$type}: {$count}")
             ->implode("\n");
 
         return <<<TEXT

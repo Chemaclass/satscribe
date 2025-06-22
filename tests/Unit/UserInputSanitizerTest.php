@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Unit;
 
 use Modules\Chat\Domain\Data\UserInputSanitizer;
@@ -10,7 +12,7 @@ class UserInputSanitizerTest extends TestCase
 {
     public function test_sanitizes_urls_and_flagged_words(): void
     {
-        $repository = new class implements FlaggedWordRepositoryInterface {
+        $repository = new class() implements FlaggedWordRepositoryInterface {
             public function getAllWords(): array
             {
                 return ['badword'];

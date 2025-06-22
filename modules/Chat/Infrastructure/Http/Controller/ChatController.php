@@ -35,7 +35,7 @@ final readonly class ChatController
         }
 
         return response()->json(
-            $this->chatService->addMessage($chat, (string) $request->input('message'))
+            $this->chatService->addMessage($chat, (string) $request->input('message')),
         );
     }
 

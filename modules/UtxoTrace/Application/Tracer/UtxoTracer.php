@@ -43,54 +43,6 @@ final readonly class UtxoTracer
     }
 
     /**
-     * Convert full traces into a map of references to avoid duplication.
-     */
-    private function buildReferences(array $traces): array
-    {
-        $map = [];
-        $refs = [];
-        $id = 1;
-
-        $process = static function (array $node) use (&$process, &$map, &$refs, &$id): string {
-            $children = array_map($process, $node['source']);
-
-            $key = $node['txid'].'|'.$node['vout'].'|'.$node['value'].'|'.implode(',', $children);
-
-            if (!isset($map[$key])) {
-                $ref = 'r'.$id++;
-                $map[$key] = $ref;
-                $refs[$ref] = [
-                    'txid' => $node['txid'],
-                    'vout' => $node['vout'],
-                    'scriptpubkey' => $node['scriptpubkey'] ?? null,
-                    'scriptpubkey_address' => $node['scriptpubkey_address'] ?? null,
-                    'scriptpubkey_type' => $node['scriptpubkey_type'] ?? null,
-                    'value' => $node['value'],
-                    'source' => $children,
-                ];
-            }
-
-            return $map[$key];
-        };
-
-        $utxos = [];
-
-        foreach ($traces as $item) {
-            $utxos[] = [
-                'utxo' => $item['utxo'],
-                'trace' => array_map($process, $item['trace']),
-            ];
-        }
-
-        uksort($refs, static fn(string $a, string $b) => (int) substr($b, 1) <=> (int) substr($a, 1));
-
-        return [
-            'utxos' => $utxos,
-            'references' => $refs,
-        ];
-    }
-
-    /**
      * Trace all UTXOs produced by a transaction.
      *
      * @return array<int, array{
@@ -137,6 +89,54 @@ final readonly class UtxoTracer
         return $result;
     }
 
+    /**
+     * Convert full traces into a map of references to avoid duplication.
+     */
+    private function buildReferences(array $traces): array
+    {
+        $map = [];
+        $refs = [];
+        $id = 1;
+
+        $process = static function (array $node) use (&$process, &$map, &$refs, &$id): string {
+            $children = array_map($process, $node['source']);
+
+            $key = $node['txid'] . '|' . $node['vout'] . '|' . $node['value'] . '|' . implode(',', $children);
+
+            if (!isset($map[$key])) {
+                $ref = 'r' . $id++;
+                $map[$key] = $ref;
+                $refs[$ref] = [
+                    'txid' => $node['txid'],
+                    'vout' => $node['vout'],
+                    'scriptpubkey' => $node['scriptpubkey'] ?? null,
+                    'scriptpubkey_address' => $node['scriptpubkey_address'] ?? null,
+                    'scriptpubkey_type' => $node['scriptpubkey_type'] ?? null,
+                    'value' => $node['value'],
+                    'source' => $children,
+                ];
+            }
+
+            return $map[$key];
+        };
+
+        $utxos = [];
+
+        foreach ($traces as $item) {
+            $utxos[] = [
+                'utxo' => $item['utxo'],
+                'trace' => array_map($process, $item['trace']),
+            ];
+        }
+
+        uksort($refs, static fn (string $a, string $b) => (int) substr($b, 1) <=> (int) substr($a, 1));
+
+        return [
+            'utxos' => $utxos,
+            'references' => $refs,
+        ];
+    }
+
     private function getTransaction(string $txid): array
     {
         static $cache = [];
@@ -145,7 +145,7 @@ final readonly class UtxoTracer
             return $cache[$txid];
         }
 
-        $url = self::BASE_URL."/tx/{$txid}";
+        $url = self::BASE_URL . "/tx/{$txid}";
         $this->logger->info('Blockstream API call', [
             'url' => $url,
         ]);
@@ -190,9 +190,9 @@ final readonly class UtxoTracer
         }
 
         return array_values(array_filter(array_map(
-            fn(array $input, int $i) => $this->traceInput($input, $depth, $level, $i, $txid),
+            fn (array $input, int $i) => $this->traceInput($input, $depth, $level, $i, $txid),
             $tx['vin'],
-            array_keys($tx['vin'])
+            array_keys($tx['vin']),
         )));
     }
 

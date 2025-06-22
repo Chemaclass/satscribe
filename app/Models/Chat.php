@@ -23,17 +23,6 @@ final class Chat extends Model
         'is_private' => 'boolean',
     ];
 
-    protected static function boot(): void
-    {
-        parent::boot();
-
-        self::creating(function ($model): void {
-            if (empty($model->ulid)) {
-                $model->ulid = strtolower((string) Str::ulid());
-            }
-        });
-    }
-
     public function getRouteKeyName(): string
     {
         return 'ulid';
@@ -131,13 +120,13 @@ final class Chat extends Model
         $messages = $this->messages->values();
         $groups = [];
 
-        for ($i = 0; $i < $messages->count() - 1; $i++) {
+        for ($i = 0; $i < $messages->count() - 1; ++$i) {
             if ($messages[$i]->role === 'user' && $messages[$i + 1]->role === 'assistant') {
                 $groups[] = [
                     'userMsg' => $messages[$i],
                     'assistantMsg' => $messages[$i + 1],
                 ];
-                $i++;
+                ++$i;
             }
         }
 
@@ -161,10 +150,21 @@ final class Chat extends Model
         $chatMessages = $this->messages()->orderBy('created_at')->get();
 
         return $chatMessages
-            ->map(fn($msg) => [
+            ->map(static fn ($msg) => [
                 'role' => $msg->role,
                 'content' => $msg->content,
             ])
             ->toArray();
+    }
+
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        self::creating(static function ($model): void {
+            if (empty($model->ulid)) {
+                $model->ulid = strtolower((string) Str::ulid());
+            }
+        });
     }
 }

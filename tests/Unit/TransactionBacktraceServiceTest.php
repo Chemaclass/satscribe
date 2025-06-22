@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Tests\Unit;
 
 use Modules\Blockchain\Domain\BlockchainFacadeInterface;
-use Modules\Blockchain\Domain\BlockchainServiceInterface;
 use Modules\Shared\Domain\Data\Blockchain\TransactionData;
 use Modules\UtxoTrace\Application\Tracer\TransactionTracer;
 use PHPUnit\Framework\TestCase;
@@ -17,7 +16,7 @@ final class TransactionBacktraceServiceTest extends TestCase
     {
         $service = new TransactionTracer(
             self::createStub(BlockchainFacadeInterface::class),
-            self::createStub(LoggerInterface::class)
+            self::createStub(LoggerInterface::class),
         );
 
         $tx1 = new TransactionData('tx1', 1, 0, [['is_coinbase' => true]], [], 0, 0, 0, true, 1, 'h1', 1);

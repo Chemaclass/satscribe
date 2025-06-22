@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Modules\Faq;
@@ -11,16 +12,12 @@ use Override;
 
 final class FaqServiceProvider extends ServiceProvider
 {
-    /**
-     * @var array<class-string, class-string>
-     */
+    /** @var array<class-string, class-string> */
     public $singletons = [
         FaqRepositoryInterface::class => FaqRepository::class,
     ];
 
-    /**
-     * @var array<class-string, class-string>
-     */
+    /** @var array<class-string, class-string> */
     public $bindings = [];
 
     /**

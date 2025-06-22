@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Modules\Payment;
@@ -15,18 +16,14 @@ use Override;
 
 final class PaymentServiceProvider extends ServiceProvider
 {
-    /**
-     * @var array<class-string, class-string>
-     */
+    /** @var array<class-string, class-string> */
     public $singletons = [
         AlbyClientInterface::class => AlbyClient::class,
         PaymentRepositoryInterface::class => PaymentRepository::class,
         CachedInvoiceValidatorInterface::class => CachedInvoiceValidator::class,
     ];
 
-    /**
-     * @var array<class-string, class-string>
-     */
+    /** @var array<class-string, class-string> */
     public $bindings = [];
 
     /**

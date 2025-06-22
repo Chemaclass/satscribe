@@ -17,8 +17,8 @@ enum PromptPersona: string
     public static function descriptions(): Collection
     {
         return collect(self::cases())
-            ->mapWithKeys(fn(self $p) => [
-                $p->value => $p->description()
+            ->mapWithKeys(static fn (self $p) => [
+                $p->value => $p->description(),
             ]);
     }
 
@@ -30,13 +30,13 @@ enum PromptPersona: string
     public static function options(): array
     {
         return array_map(
-            fn(self $persona) => [
+            static fn (self $persona) => [
                 'value' => $persona->value,
                 'label' => $persona->label(),
                 'description' => $persona->description(),
                 'enabled' => $persona->value === self::DEFAULT,
             ],
-            self::cases()
+            self::cases(),
         );
     }
 
@@ -66,15 +66,6 @@ Your role is to craft an insightful, persona-aligned response.
 - Keep each answer short and direct; avoid filler or repetition.
 - Respond in {$language}.
 PROMPT;
-    }
-
-    private static function languageName(string $locale): string
-    {
-        return match ($locale) {
-            'de' => 'German',
-            'es' => 'Spanish',
-            default => 'English',
-        };
     }
 
     public function instructions(PromptType $type): string
@@ -134,8 +125,26 @@ TEXT,
         return implode("\n\n", [
             $task,
             $context,
-            $this->buildWritingStyleInstructions()
+            $this->buildWritingStyleInstructions(),
         ]);
+    }
+
+    public function maxTokens(): int
+    {
+        return match ($this) {
+            self::Educator => 900,
+            self::Developer => 950,
+            self::Storyteller => 1000,
+        };
+    }
+
+    private static function languageName(string $locale): string
+    {
+        return match ($locale) {
+            'de' => 'German',
+            'es' => 'Spanish',
+            default => 'English',
+        };
     }
 
     private function buildWritingStyleInstructions(): string
@@ -148,14 +157,5 @@ Global Writing Guidelines:
 - Express any calculations in plain language using numbers.
 - Keep the entire response under 150 words whenever possible.
 TEXT;
-    }
-
-    public function maxTokens(): int
-    {
-        return match ($this) {
-            self::Educator => 900,
-            self::Developer => 950,
-            self::Storyteller => 1000,
-        };
     }
 }

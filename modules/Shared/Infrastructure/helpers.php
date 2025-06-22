@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use Illuminate\Support\Facades\Request;
 
-if (!function_exists('client_ip')) {
+if (!\function_exists('client_ip')) {
     function client_ip(): string
     {
         /**
@@ -15,7 +15,7 @@ if (!function_exists('client_ip')) {
     }
 }
 
-if (!function_exists('client_uuid')) {
+if (!\function_exists('client_uuid')) {
     /** @todo not implemented yet */
     function client_uuid(): string
     {
@@ -23,9 +23,9 @@ if (!function_exists('client_uuid')) {
     }
 }
 
-if (!function_exists('tracking_id')) {
+if (!\function_exists('tracking_id')) {
     function tracking_id(): string
     {
-        return hash('sha256', client_ip().client_uuid().Request::userAgent());
+        return hash('sha256', client_ip() . client_uuid() . Request::userAgent());
     }
 }

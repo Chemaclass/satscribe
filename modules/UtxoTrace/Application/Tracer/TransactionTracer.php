@@ -10,6 +10,9 @@ use Modules\Shared\Domain\Data\Chat\PromptInput;
 use Psr\Log\LoggerInterface;
 use Throwable;
 
+use function count;
+use function sprintf;
+
 final readonly class TransactionTracer
 {
     public function __construct(
@@ -19,7 +22,7 @@ final readonly class TransactionTracer
     }
 
     /**
-     * @return TransactionData[] Ordered list starting from the given tx to its ancestors.
+     * @return TransactionData[] ordered list starting from the given tx to its ancestors
      */
     public function getBacktrace(string $txid, int $maxDepth = 10): array
     {
@@ -83,6 +86,6 @@ final readonly class TransactionTracer
             $lines[] = sprintf('%d. %s', $i + 1, $tx->txid);
         }
 
-        return "Transaction Backtrace\n".implode("\n", $lines);
+        return "Transaction Backtrace\n" . implode("\n", $lines);
     }
 }

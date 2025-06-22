@@ -85,7 +85,7 @@ final readonly class CreateChatAction
             $blockchainData->current(),
             $persona,
             $cleanQuestion,
-            $isPrivate
+            $isPrivate,
         );
     }
 
@@ -95,7 +95,7 @@ final readonly class CreateChatAction
 
         if (RateLimiter::tooManyAttempts($key, $this->maxOpenAIAttempts)) {
             throw new ThrottleRequestsException(
-                "You have reached the daily OpenAI limit of {$this->maxOpenAIAttempts} requests."
+                "You have reached the daily OpenAI limit of {$this->maxOpenAIAttempts} requests.",
             );
         }
 

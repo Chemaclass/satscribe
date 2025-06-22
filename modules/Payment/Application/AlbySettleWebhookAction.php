@@ -14,6 +14,8 @@ use Psr\Log\LoggerInterface;
 use Svix\Webhook;
 use Throwable;
 
+use function is_array;
+
 final readonly class AlbySettleWebhookAction
 {
     private Webhook $webhook;
@@ -100,10 +102,9 @@ final readonly class AlbySettleWebhookAction
                 $cacheKey = IpRateLimiter::createRateLimitKey($trackingId);
                 $this->rateLimiter->clear($cacheKey);
 
-
                 $this->logger->info('Rate limit cleared for tracking ID', [
                     'trackingId' => $trackingId,
-                    'invoiceCacheKey' => $cacheKey
+                    'invoiceCacheKey' => $cacheKey,
                 ]);
             }
         }
@@ -128,7 +129,7 @@ final readonly class AlbySettleWebhookAction
                 'amount' => $payload->amount,
                 'state' => $payload->state,
                 '$invoiceCacheKey' => $invoiceCacheKey,
-            ]
+            ],
         );
     }
 

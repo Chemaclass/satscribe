@@ -55,7 +55,7 @@ final readonly class PriceService
         }
 
         return $this->cache->remember(self::CACHE_KEY, now()->addMinutes(self::CACHE_TTL_MINUTES), function () {
-            $response = $this->http->get(self::BASE_URL.'/v3/simple/price', [
+            $response = $this->http->get(self::BASE_URL . '/v3/simple/price', [
                 'ids' => 'bitcoin',
                 'vs_currencies' => 'usd,eur,cny,gbp',
             ]);

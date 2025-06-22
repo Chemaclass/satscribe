@@ -6,6 +6,8 @@ namespace Modules\Shared\Domain\Data\Blockchain;
 
 use Illuminate\Support\Collection;
 
+use function sprintf;
+
 final class BlockSummary
 {
     public function __construct(
@@ -33,13 +35,13 @@ final class BlockSummary
         $coinbaseValue = array_sum(array_column($coinbaseOutputs, 'value'));
 
         $hasOpReturn = collect($coinbaseOutputs)
-            ->contains(fn($out) => $out['scriptpubkey_type'] === 'op_return');
+            ->contains(static fn ($out) => $out['scriptpubkey_type'] === 'op_return');
 
         $topFees = collect($data->transactions)
-            ->filter(fn($tx) => isset($tx['fee']))
+            ->filter(static fn ($tx) => isset($tx['fee']))
             ->sortByDesc('fee')
             ->take(3)
-            ->map(fn($tx) => [
+            ->map(static fn ($tx) => [
                 'txid' => $tx['txid'] ?? null,
                 'fee' => $tx['fee'],
             ])
@@ -47,9 +49,9 @@ final class BlockSummary
             ->all();
 
         $walletTypes = collect($data->transactions)
-            ->flatMap(fn($tx) => $tx['vout'] ?? [])
+            ->flatMap(static fn ($tx) => $tx['vout'] ?? [])
             ->groupBy('scriptpubkey_type')
-            ->map(fn(Collection $items) => $items->count())
+            ->map(static fn (Collection $items) => $items->count())
             ->sortKeys()
             ->toArray();
 
@@ -74,7 +76,7 @@ final class BlockSummary
         $minerText = $this->miner ?? 'Unknown miner';
 
         $topTxs = collect($this->topTransactionsByFee)->map(
-            fn($tx, $i) => sprintf("%d. %s (Fee: %s sats)", $i + 1, $tx['txid'] ?? 'N/A', number_format($tx['fee']))
+            static fn ($tx, $i) => sprintf('%d. %s (Fee: %s sats)', $i + 1, $tx['txid'] ?? 'N/A', number_format($tx['fee'])),
         )->implode("\n");
 
         $walletTypeDescriptions = [
@@ -89,7 +91,7 @@ final class BlockSummary
         ];
 
         $walletSummary = collect($this->walletTypesBreakdown)->map(
-            fn($count, $type) => sprintf('- %s: %d', $walletTypeDescriptions[$type] ?? strtoupper($type), $count)
+            static fn ($count, $type) => sprintf('- %s: %d', $walletTypeDescriptions[$type] ?? strtoupper($type), $count),
         )->implode("\n");
 
         return <<<TEXT

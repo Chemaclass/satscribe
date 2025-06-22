@@ -9,12 +9,11 @@ use PHPUnit\Framework\TestCase;
 
 final class IpRateLimiterTest extends TestCase
 {
-
     public function test_create_rate_limit_key(): void
     {
         $this->assertSame(
             'ip_rate_limit_abc',
-            IpRateLimiter::createRateLimitKey('abc')
+            IpRateLimiter::createRateLimitKey('abc'),
         );
     }
 
@@ -22,7 +21,7 @@ final class IpRateLimiterTest extends TestCase
     {
         $this->assertSame(
             'invoice_tracking_mapping_123',
-            IpRateLimiter::createCacheKey('123')
+            IpRateLimiter::createCacheKey('123'),
         );
     }
 

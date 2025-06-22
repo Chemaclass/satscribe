@@ -11,6 +11,8 @@ use Modules\Payment\Domain\CachedInvoiceValidatorInterface;
 use Psr\Log\LoggerInterface;
 use Throwable;
 
+use function is_array;
+
 final readonly class CachedInvoiceValidator implements CachedInvoiceValidatorInterface
 {
     public function __construct(

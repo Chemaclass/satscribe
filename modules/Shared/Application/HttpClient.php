@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Modules\Shared\Application;
@@ -7,6 +8,8 @@ use Illuminate\Http\Client\Factory as IlluminateHttpClient;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Response;
 use Modules\Shared\Domain\HttpClientInterface;
+
+use function assert;
 
 final readonly class HttpClient implements HttpClientInterface
 {

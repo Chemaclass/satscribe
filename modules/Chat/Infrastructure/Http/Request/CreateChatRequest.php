@@ -19,11 +19,11 @@ final class CreateChatRequest extends FormRequest
     {
         return [
             'search' => [
-                'nullable', 'string', function ($attribute, $value, $fail): void {
+                'nullable', 'string', static function ($attribute, $value, $fail): void {
                     if (!preg_match('/^[a-f0-9]{64}$/i', $value) && !ctype_digit($value)) {
-                        $fail('The '.$attribute.' must be a valid Bitcoin TXID or block height.');
+                        $fail('The ' . $attribute . ' must be a valid Bitcoin TXID or block height.');
                     }
-                }
+                },
             ],
             'question' => ['nullable', 'string', 'max:200'],
         ];

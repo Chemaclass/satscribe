@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Modules\Shared;
@@ -16,16 +17,12 @@ use Override;
 
 final class SharedServiceProvider extends ServiceProvider
 {
-    /**
-     * @var array<class-string, class-string>
-     */
+    /** @var array<class-string, class-string> */
     public $singletons = [
         HttpClientInterface::class => HttpClient::class,
     ];
 
-    /**
-     * @var array<class-string, class-string>
-     */
+    /** @var array<class-string, class-string> */
     public $bindings = [];
 
     /**
@@ -34,7 +31,7 @@ final class SharedServiceProvider extends ServiceProvider
     #[Override]
     public function register(): void
     {
-        $this->app->bind(CarbonInterface::class, fn() => Carbon::now());
+        $this->app->bind(CarbonInterface::class, static fn () => Carbon::now());
 
         $this->app->when(IpRateLimiter::class)
             ->needs('$maxAttempts')

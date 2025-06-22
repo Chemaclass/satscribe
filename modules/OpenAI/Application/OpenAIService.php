@@ -14,6 +14,8 @@ use Modules\Shared\Domain\Enum\Chat\PromptType;
 use Modules\Shared\Domain\HttpClientInterface;
 use Psr\Log\LoggerInterface;
 
+use function strlen;
+
 final readonly class OpenAIService
 {
     public function __construct(
@@ -89,10 +91,10 @@ final readonly class OpenAIService
 
     private function buildBlockchainContext(BlockchainData $data, string $additional): string
     {
-        $content = "Data:\n".$data->toPrompt();
+        $content = "Data:\n" . $data->toPrompt();
 
         if ($additional !== '') {
-            $content .= "\n\n---\nAdditional Data\n".$additional;
+            $content .= "\n\n---\nAdditional Data\n" . $additional;
         }
 
         return $content;
@@ -101,7 +103,7 @@ final readonly class OpenAIService
     private function preparePrompt(
         PromptType $type,
         string $question,
-        PromptPersona $persona
+        PromptPersona $persona,
     ): string {
         return implode("\n\n", array_filter([
             ($question === '' || $question === __(ChatConstants::DEFAULT_USER_QUESTION))
@@ -115,10 +117,10 @@ final readonly class OpenAIService
     private function buildDefaultInsightPrompt(PromptType $type, PromptPersona $persona): string
     {
         return implode("\n", [
-            "Task: Summarize insights from blockchain data.",
-            "- Focus on: new, surprising, or non-obvious patterns.",
+            'Task: Summarize insights from blockchain data.',
+            '- Focus on: new, surprising, or non-obvious patterns.',
             "- Don't fabricate or repeat the raw data.",
-            "- All values are in satoshis.",
+            '- All values are in satoshis.',
             $this->getAdditionalTaskInstructions($type),
             $persona->instructions($type),
 
