@@ -11,6 +11,10 @@
             <svg data-lucide="github" class="w-4 h-4"></svg>
             {{ __('GitHub') }}
         </a>
+        @if(config('app.last_commit') !== 'unknown')
+            <span class="hidden sm:inline">•</span>
+            <div title="Released commit">{{ substr(config('app.last_commit'), 0, 7) }}</div>
+        @endif
         <span class="hidden sm:inline">•</span>
         <select class="nav-link" onchange="const p=new URLSearchParams(window.location.search);p.set('lang', this.value);window.location.search=p.toString();">
             <option value="en" @selected(app()->getLocale()==='en')>EN</option>
