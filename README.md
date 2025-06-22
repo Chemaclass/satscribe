@@ -65,10 +65,6 @@ application will fetch the blockchain data, send it to OpenAI and display a
 short summary. Every generated paragraph is stored so you can review it later in
 the **History** page.
 
-## 🧩 Modular Architecture
-
-Satscribe organizes its code into modules located under the `modules/` directory. Each module exposes its services via a dedicated service provider. The communication between modules happens exclusively via their Facade.
-
 ## 🧪 Testing
 
 Run the automated test suite with:
@@ -82,6 +78,10 @@ Static analysis can be executed with:
 ```bash
 composer phpstan
 ```
+## 🏛️ Architecture
+
+See [docs/architecture.md](docs/architecture.md) for an overview of the module structure and suggested improvements.
+
 
 ## 🤝 Contributing
 
