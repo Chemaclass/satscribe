@@ -8,17 +8,17 @@ final readonly class TransactionData implements BlockchainDataInterface
 {
     public function __construct(
         public string $txid,
-        public int $version,
-        public int $locktime,
-        public array $vin,
-        public array $vout,
-        public int $size,
-        public int $weight,
-        public int $fee,
-        public bool $confirmed,
-        public ?int $blockHeight,
-        public ?string $blockHash,
-        public ?int $blockTime,
+        public int $version = 0,
+        public int $locktime = 0,
+        public array $vin = [],
+        public array $vout = [],
+        public int $size = 0,
+        public int $weight = 0,
+        public int $fee = 0,
+        public bool $confirmed = false,
+        public ?int $blockHeight = null,
+        public ?string $blockHash = null,
+        public ?int $blockTime = null,
     ) {
     }
 

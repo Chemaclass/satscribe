@@ -19,8 +19,8 @@ final class TransactionBacktraceServiceTest extends TestCase
             self::createStub(LoggerInterface::class),
         );
 
-        $tx1 = new TransactionData('tx1', 1, 0, [['is_coinbase' => true]], [], 0, 0, 0, true, 1, 'h1', 1);
-        $tx2 = new TransactionData('tx2', 1, 0, [['txid' => 'tx1', 'is_coinbase' => false]], [], 0, 0, 0, true, 1, 'h1', 1);
+        $tx1 = new TransactionData(txid: 'tx1');
+        $tx2 = new TransactionData(txid: 'tx2');
 
         $result = $service->formatForPrompt([$tx2, $tx1]);
 
