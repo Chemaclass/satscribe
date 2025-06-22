@@ -18,7 +18,7 @@ final class PriceServiceTest extends TestCase
         $cache = self::createStub(Repository::class);
         $logger = self::createStub(LoggerInterface::class);
 
-        $service = new PriceService($http, $logger, $cache, false);
+        $service = new PriceService($http, $logger, $cache, enabled: false);
 
         $this->assertSame(0.0, $service->getCurrentBtcPriceUsd());
         $this->assertSame(0.0, $service->getCurrentBtcPriceEur());
