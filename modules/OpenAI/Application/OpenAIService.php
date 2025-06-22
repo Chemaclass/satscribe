@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Modules\OpenAI\Application;
 
 use App\Models\Chat;
-use Modules\Chat\Domain\Enum\PromptType;
-use Modules\Chat\Infrastructure\Http\Request\CreateChatRequest;
+use Modules\Chat\Domain\Enum\PromptType; // todo: fix module violation
+use Modules\Chat\Infrastructure\Http\Request\CreateChatRequest; // todo: fix module violation
 use Modules\OpenAI\Domain\Exception\OpenAIError;
 use Modules\Shared\Domain\Data\Blockchain\BlockchainData;
 use Modules\Shared\Domain\Data\Chat\PromptInput;
