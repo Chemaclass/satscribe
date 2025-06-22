@@ -12,7 +12,7 @@ enum PromptPersona: string
     case Developer = 'developer';
     case Storyteller = 'storyteller';
 
-    public const DEFAULT = self::Developer->value;
+    public const DEFAULT = self::Storyteller->value;
 
     public static function descriptions(): Collection
     {
