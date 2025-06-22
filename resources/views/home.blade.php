@@ -28,6 +28,18 @@
                 :isChat="isset($chat)"
         />
 
+        @if(!isset($chat))
+            <div
+                class="mt-6 text-center text-gray-700 space-y-2"
+                x-show="!hasSubmitted"
+                x-cloak>
+                <p>
+                    {{ __('Ever looked at a Bitcoin transaction and wondered what story it tells?') }}
+                    {{ __('Satscribe turns raw blockchain data into plain-language narratives — helping you discover the meaning behind every satoshi.') }}
+                </p>
+            </div>
+        @endif
+
         @if(isset($chat))
             @include('partials.chat', [
                 'chat' => $chat,
