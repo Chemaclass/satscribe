@@ -10,12 +10,12 @@ use Illuminate\Support\Facades\RateLimiter;
 use Modules\Blockchain\Domain\BlockchainFacadeInterface;
 use Modules\Chat\Domain\Data\CreateChatActionResult;
 use Modules\Chat\Domain\Data\UserInputSanitizer;
-use Modules\Chat\Domain\Enum\PromptPersona;
 use Modules\Chat\Domain\Repository\ChatRepositoryInterface;
 use Modules\Chat\Domain\Repository\MessageRepositoryInterface;
-use Modules\OpenAI\Application\OpenAIService;
+use Modules\OpenAI\Domain\OpenAIFacadeInterface;
 use Modules\Shared\Domain\Data\Blockchain\BlockchainData;
 use Modules\Shared\Domain\Data\Chat\PromptInput;
+use Modules\Shared\Domain\Enum\Chat\PromptPersona;
 use Psr\Log\LoggerInterface;
 
 final readonly class CreateChatAction
@@ -24,7 +24,7 @@ final readonly class CreateChatAction
 
     public function __construct(
         private BlockchainFacadeInterface $blockchainFacade,
-        private OpenAIService $openai, // @todo use OpenAIFacade
+        private OpenAIFacadeInterface $openaiFacade,
         private ChatRepositoryInterface $repository,
         private MessageRepositoryInterface $messageRepository,
         private UserInputSanitizer $userInputSanitizer,
@@ -110,7 +110,7 @@ final readonly class CreateChatAction
     ): string {
         $additional = $this->contextBuilder->build($blockchainData, $input, $cleanQuestion);
 
-        return $this->openai->generateText($blockchainData, $input, $persona, $cleanQuestion, null, $additional);
+        return $this->openaiFacade->generateText($blockchainData, $input, $persona, $cleanQuestion, null, $additional);
     }
 
     private function findOrGenerateAiResponse(

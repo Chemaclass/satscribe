@@ -4,7 +4,9 @@ declare(strict_types=1);
 namespace Modules\OpenAI;
 
 use Illuminate\Support\ServiceProvider;
+use Modules\OpenAI\Application\OpenAIFacade;
 use Modules\OpenAI\Application\OpenAIService;
+use Modules\OpenAI\Domain\OpenAIFacadeInterface;
 use Override;
 
 final class OpenAIServiceProvider extends ServiceProvider
@@ -12,7 +14,9 @@ final class OpenAIServiceProvider extends ServiceProvider
     /**
      * @var array<class-string, class-string>
      */
-    public $singletons = [];
+    public $singletons = [
+        OpenAIFacadeInterface::class => OpenAIFacade::class,
+    ];
 
     /**
      * @var array<class-string, class-string>

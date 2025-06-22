@@ -10,11 +10,11 @@ use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Support\Facades\RateLimiter;
 use Modules\Blockchain\Domain\BlockchainFacadeInterface;
 use Modules\Chat\Domain\Data\UserInputSanitizer;
-use Modules\Chat\Domain\Enum\PromptPersona;
 use Modules\Chat\Domain\Repository\ChatRepositoryInterface;
 use Modules\Chat\Domain\Repository\MessageRepositoryInterface;
-use Modules\OpenAI\Application\OpenAIService;
+use Modules\OpenAI\Domain\OpenAIFacadeInterface;
 use Modules\Shared\Domain\Data\Chat\PromptInput;
+use Modules\Shared\Domain\Enum\Chat\PromptPersona;
 use Psr\Log\LoggerInterface;
 
 final readonly class AddMessageAction
@@ -23,7 +23,7 @@ final readonly class AddMessageAction
 
     public function __construct(
         private BlockchainFacadeInterface $blockchainFacade,
-        private OpenAIService $openai,
+        private OpenAIFacadeInterface $openAIFacade,
         private ChatRepositoryInterface $chatRepository,
         private MessageRepositoryInterface $messageRepository,
         private UserInputSanitizer $userInputSanitizer,
@@ -77,7 +77,7 @@ final readonly class AddMessageAction
         $data = $this->blockchainFacade->getBlockchainData($input);
         $additional = $this->contextBuilder->build($data, $input, $cleanMsg);
 
-        return $this->openai->generateText(
+        return $this->openAIFacade->generateText(
             $data,
             $input,
             $persona,

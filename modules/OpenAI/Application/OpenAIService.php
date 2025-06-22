@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace Modules\OpenAI\Application;
 
 use App\Models\Chat;
-use Modules\Chat\Domain\Enum\PromptPersona;
 use Modules\Chat\Domain\Enum\PromptType;
 use Modules\Chat\Infrastructure\Http\Request\CreateChatRequest;
 use Modules\OpenAI\Domain\Exception\OpenAIError;
 use Modules\Shared\Domain\Data\Blockchain\BlockchainData;
 use Modules\Shared\Domain\Data\Chat\PromptInput;
 use Modules\Shared\Domain\HttpClientInterface;
+use Modules\Shared\Domain\Enum\Chat\PromptPersona;
 use Psr\Log\LoggerInterface;
 
 final readonly class OpenAIService

@@ -1,5 +1,5 @@
 @php
-    use Modules\Chat\Domain\Enum\PromptPersona;
+    use Modules\Shared\Domain\Enum\Chat\PromptPersona;
 @endphp
 
 @props([
@@ -22,12 +22,12 @@
     {{-- Left: Form --}}
     <div class="w-full sm:w-2/3">
         <form
-            id="satscribe-form"
-            method="POST"
-            action="{{ route('home.create-chat') }}"
-            @submit.prevent="submitForm($event.target); hasSubmitted = true;"
-            aria-labelledby="form-heading"
-            data-turbo="false"
+                id="satscribe-form"
+                method="POST"
+                action="{{ route('home.create-chat') }}"
+                @submit.prevent="submitForm($event.target); hasSubmitted = true;"
+                aria-labelledby="form-heading"
+                data-turbo="false"
         >
             @csrf
 
@@ -38,16 +38,16 @@
                 <div class="flex gap-2 items-start">
                     <div class="flex-grow">
                         <input
-                            id="search-input"
-                            type="text"
-                            name="search"
-                            x-model="input"
-                            @input="validate"
-                            :disabled="isSubmitting"
-                            autocomplete="off"
-                            spellcheck="false"
-                            class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-                            placeholder="{{ __('Enter txid or block height') }}"
+                                id="search-input"
+                                type="text"
+                                name="search"
+                                x-model="input"
+                                @input="validate"
+                                :disabled="isSubmitting"
+                                autocomplete="off"
+                                spellcheck="false"
+                                class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                                placeholder="{{ __('Enter txid or block height') }}"
                         />
                     </div>
 
@@ -62,9 +62,9 @@
                 {{-- Advanced options --}}
                 <div x-data="{ showAdvanced: false }" class="form-group ">
                     <button
-                        type="button"
-                        class="text-sm font-medium flex items-center cursor-pointer gap-2 mt-4"
-                        @click="showAdvanced = !showAdvanced"
+                            type="button"
+                            class="text-sm font-medium flex items-center cursor-pointer gap-2 mt-4"
+                            @click="showAdvanced = !showAdvanced"
                     >
                         <i data-lucide="sliders-horizontal"></i>
                         <span x-show="!showAdvanced">{{ __('Show advanced fields') }} ▾</span>
@@ -72,18 +72,18 @@
                     </button>
 
                     <div
-                        x-show="showAdvanced"
-                        x-cloak
-                        x-transition
-                        class="mt-4 advanced-fields rounded-lg px-4 py-3 space-y-4 shadow-sm"
+                            x-show="showAdvanced"
+                            x-cloak
+                            x-transition
+                            class="mt-4 advanced-fields rounded-lg px-4 py-3 space-y-4 shadow-sm"
                     >
                         {{-- Persona selection --}}
                         <div
-                            x-data="{
+                                x-data="{
                                 selectedPersona: '{{ $persona ?? PromptPersona::DEFAULT }}',
                                 descriptions: {{$personaDescriptions}}
                             }"
-                            class="space-y-2"
+                                class="space-y-2"
                         >
                             <label for="persona" class="persona-label block text-sm font-medium mb-1">
                                 {{ __('AI Persona') }}
@@ -94,12 +94,12 @@
                             <div class="persona-buttons flex gap-2 mt-2 w-full">
                                 @foreach (PromptPersona::cases() as $p)
                                     <button
-                                        type="button"
-                                        @click="selectedPersona = '{{ $p->value }}'"
-                                        :class="selectedPersona === '{{ $p->value }}'
+                                            type="button"
+                                            @click="selectedPersona = '{{ $p->value }}'"
+                                            :class="selectedPersona === '{{ $p->value }}'
                 ? 'persona-btn persona-btn--active'
                 : 'persona-btn'"
-                                        class="transition duration-200 ease-in-out w-1/3 text-center"
+                                            class="transition duration-200 ease-in-out w-1/3 text-center"
                                     >
                                         {{ $p->label() }}
                                     </button>
@@ -115,15 +115,15 @@
                                 {{ __('Ask a Question') }}
                             </label>
                             <input
-                                type="text"
-                                id="question"
-                                name="question"
-                                value="{{ $question }}"
-                                placeholder="{{ __($questionPlaceholder ?? 'Compare with the previous block') }}"
-                                class="form-input w-full"
-                                aria-describedby="questionHelp"
-                                autocomplete="off"
-                                maxlength="200"
+                                    type="text"
+                                    id="question"
+                                    name="question"
+                                    value="{{ $question }}"
+                                    placeholder="{{ __($questionPlaceholder ?? 'Compare with the previous block') }}"
+                                    class="form-input w-full"
+                                    aria-describedby="questionHelp"
+                                    autocomplete="off"
+                                    maxlength="200"
                             >
                             <small id="questionHelp" class="text-gray-600 text-sm mt-1 block mb-2">
                                 {{ __('Ask the AI a specific question about this transaction or block.') }}
@@ -131,8 +131,8 @@
 
                             {{-- Suggested Prompts inline --}}
                             <div
-                                x-data="{ promptType: null }"
-                                x-init="$watch('input', value => {
+                                    x-data="{ promptType: null }"
+                                    x-init="$watch('input', value => {
         if (/^[a-fA-F0-9]{64}$/.test(value)) {
             promptType = 'transaction';
         } else if (/^\d+$/.test(value)) {
@@ -146,7 +146,7 @@
                                     <div class="flex flex-wrap gap-2">
                                         @foreach ($suggestedPromptsGrouped as $type => $questions)
                                             <template
-                                                x-if="promptType === '{{ $type }}' || '{{ $type }}' === 'both'">
+                                                    x-if="promptType === '{{ $type }}' || '{{ $type }}' === 'both'">
                                                 <template x-for="prompt in @js($questions)" :key="prompt">
                                                     <button type="button"
                                                             class="suggested-question-prompt px-3 py-1 rounded-full text-sm transition cursor-pointer"
@@ -168,11 +168,11 @@
                         {{-- Refresh checkbox --}}
                         <div class="flex items-start gap-3">
                             <input
-                                type="checkbox"
-                                id="refresh"
-                                name="refresh"
-                                value="true"
-                                class="checkbox-input mt-1 cursor-pointer"
+                                    type="checkbox"
+                                    id="refresh"
+                                    name="refresh"
+                                    value="true"
+                                    class="checkbox-input mt-1 cursor-pointer"
                             >
                             <label for="refresh"
                                    class="block text-sm font-medium text-gray-900 mb-1 cursor-pointer">
@@ -186,11 +186,11 @@
                         {{-- Private checkbox --}}
                         <div class="flex items-start gap-3">
                             <input
-                                type="checkbox"
-                                id="private"
-                                name="private"
-                                value="true"
-                                class="checkbox-input mt-1 cursor-pointer"
+                                    type="checkbox"
+                                    id="private"
+                                    name="private"
+                                    value="true"
+                                    class="checkbox-input mt-1 cursor-pointer"
                             >
                             <label for="private"
                                    class="block text-sm font-medium text-gray-900 mb-1 cursor-pointer">
@@ -206,10 +206,10 @@
                 {{-- Submit + Surprise Buttons --}}
                 <div class="form-actions mt-4 mb-4 flex gap-2">
                     <button
-                        id="submit-button"
-                        type="submit"
-                        :disabled="isSubmitting"
-                        class="form-button w-3/4"
+                            id="submit-button"
+                            type="submit"
+                            :disabled="isSubmitting"
+                            class="form-button w-3/4"
                     >
                         <span x-cloak class="submit-icon sm-2">
                             <i data-lucide="zap" class="w-4 h-4"></i>
@@ -222,12 +222,12 @@
                     </button>
 
                     <button
-                        id="random-button"
-                        type="button"
-                        @click="fetchRandomBlock()"
-                        :disabled="isSubmitting"
-                        class="w-1/4 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md flex items-center justify-center gap-2 cursor-pointer"
-                        title="{{ __('Get a random block') }}"
+                            id="random-button"
+                            type="button"
+                            @click="fetchRandomBlock()"
+                            :disabled="isSubmitting"
+                            class="w-1/4 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md flex items-center justify-center gap-2 cursor-pointer"
+                            title="{{ __('Get a random block') }}"
                     >
                         <i data-lucide="shuffle" class="w-4 h-4"></i>
                         <span class="hidden md:inline"> {{ __('Random') }}</span>

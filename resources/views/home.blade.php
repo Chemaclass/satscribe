@@ -1,14 +1,13 @@
 @php
-    use Modules\Chat\Domain\Enum\PromptPersona;
-@endphp
+        @endphp
 
 @extends('layouts.base')
 
 @section('content')
     <section
-        class="satscribe-home px-2 py-6"
-        x-data="searchInputValidator('{{ old('search', $search ?? '') }}', {{ $maxBitcoinBlockHeight }})"
-        x-init="
+            class="satscribe-home px-2 py-6"
+            x-data="searchInputValidator('{{ old('search', $search ?? '') }}', {{ $maxBitcoinBlockHeight }})"
+            x-init="
             validate();
             $watch('isSubmitting', value => {
                 if (value) {
@@ -18,13 +17,13 @@
         ">
         <x-home.header/>
         <x-home.form
-            :search="old('search', $search ?? '')"
-            :question="old('question', $question ?? '')"
-            :maxBitcoinBlockHeight="$maxBitcoinBlockHeight"
-            :suggestedPromptsGrouped="$suggestedPromptsGrouped"
-            :persona="old('persona', $persona ?? PromptPersona::DEFAULT)"
-            :personaDescriptions="$personaDescriptions"
-            :isChat="isset($chat)"
+                :search="old('search', $search ?? '')"
+                :question="old('question', $question ?? '')"
+                :maxBitcoinBlockHeight="$maxBitcoinBlockHeight"
+                :suggestedPromptsGrouped="$suggestedPromptsGrouped"
+                :persona="old('persona', $persona ?? PromptPersona::DEFAULT)"
+                :personaDescriptions="$personaDescriptions"
+                :isChat="isset($chat)"
         />
 
         @if(isset($chat))

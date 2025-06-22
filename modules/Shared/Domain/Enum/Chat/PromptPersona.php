@@ -2,8 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Modules\Chat\Domain\Enum;
+namespace Modules\Shared\Domain\Enum\Chat;
 
+use Modules\Chat\Domain\Enum\PromptType;
 use Illuminate\Support\Collection;
 
 enum PromptPersona: string
@@ -12,7 +13,7 @@ enum PromptPersona: string
     case Developer = 'developer';
     case Storyteller = 'storyteller';
 
-    const DEFAULT = self::Developer->value;
+    public const DEFAULT = self::Developer->value;
 
     public static function descriptions(): Collection
     {
