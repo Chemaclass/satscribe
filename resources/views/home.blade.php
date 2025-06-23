@@ -16,8 +16,8 @@
                 }
             });
         ">
-        <x-home.header/>
         <x-home.disclaimer />
+        <x-home.header/>
         <x-home.form
                 :search="old('search', $search ?? '')"
                 :question="old('question', $question ?? '')"
