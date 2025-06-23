@@ -64,13 +64,17 @@
         ],
         "csfix": "./vendor/bin/php-cs-fixer fix",
         "csrun": "./vendor/bin/php-cs-fixer fix --dry-run",
+        "phpstan": "php -d memory_limit=512M vendor/bin/phpstan analyse",
+        "rector": "vendor/bin/rector",
+        "phpunit": "vendor/bin/phpunit",
         "fix": [
             "@rector",
             "@csfix"
         ],
-        "phpstan": "php -d memory_limit=512M vendor/bin/phpstan analyse",
-        "rector": "vendor/bin/rector",
-        "test": "vendor/bin/phpunit"
+        "test": [
+            "@phpstan",
+            "phpunit"
+        ]
     },
     "extra": {
         "laravel": {
