@@ -3,6 +3,7 @@
     "home.subheading.line1": "Satscribe traduce los datos de la blockchain a un lenguaje humano.",
     "home.subheading.line2": "Introduce cualquier TXID o altura de bloque para obtener una explicación generada por IA.",
     "home.helper_link": "¿Quieres datos en tiempo real? Explora los últimos bloques en <a href=\"https://mempool.space\" target=\"_blank\" rel=\"noopener\" class=\"hover:underline\">mempool.space</a>",
+    "home.disclaimer": "Satscribe no tiene conexión con <strong>Ordinals</strong> ni <strong>inscriptions</strong>. Es una herramienta impulsada por IA diseñada para explicar transacciones y bloques de Bitcoin en lenguaje natural.",
     "home.placeholder": "Pega aquí una TXID o altura de bloque",
     "home.narrative.line1": "¿Alguna vez te has preguntado qué significa realmente una transacción de Bitcoin?",
     "home.narrative.line2": "Satscribe usa IA para convertir datos crudos de la blockchain en historias claras y con sentido.",
@@ -116,6 +117,5 @@
     "Tell me something interesting I might miss at first glance.": "Dime algo interesante que podría pasar por alto a primera vista.",
     "Generate a title for a blog post about this.": "Genera un título para una entrada de blog sobre esto.",
     "Give me a generic overview.": "Dame un resumen general.",
-    "Satscribe has nothing to do with Ordinals or inscriptions. It's an AI-powered tool designed to explain Bitcoin transactions and blocks in natural language.": "Satscribe no tiene conexión con Ordinals ni inscriptions. Es una herramienta impulsada por IA diseñada para explicar transacciones y bloques de Bitcoin en lenguaje natural.",
     "Got it": "Entendido"
 }
