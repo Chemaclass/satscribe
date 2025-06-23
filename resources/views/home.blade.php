@@ -405,6 +405,11 @@
                     });
                 },
 
+                focusSearchInput() {
+                    const el = document.getElementById('search-input');
+                    if (el) el.focus();
+                },
+
                 typeText(element, markdownText, delay = 1) {
                     hideChatFormContainer();
 

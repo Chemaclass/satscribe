@@ -57,7 +57,7 @@
                 </div>
 
                 {{-- Helper text --}}
-                <p x-text="helperText" :class="helperClass" class="text-sm mt-1 block"></p>
+                <p x-text="helperText" :class="helperClass" class="text-sm mt-1 block cursor-pointer" @click="focusSearchInput"></p>
 
                 {{-- Advanced options --}}
                 <div x-data="{ showAdvanced: false }" class="form-group ">
