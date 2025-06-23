@@ -7,7 +7,9 @@
     <p>{!! __('home.disclaimer') !!}</p>
     <button
         type="button"
-        class="ml-4 w-20 underline"
+        class="ml-4 underline cursor-pointer"
         @click="localStorage.setItem('hideInscriptionNotice', '1'); show = false"
-    >{{ __('Got it') }}</button>
+    >
+        <i data-lucide="x" class="w-4 h-4"></i>
+    </button>
 </div>

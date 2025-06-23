@@ -24,6 +24,7 @@ import {
     Laptop,
     Lock,
     ExternalLink,
+    X,
 } from 'lucide';
 
 window.Alpine = Alpine;
@@ -52,6 +53,7 @@ const usedIcons = {
     Laptop,
     Lock,
     ExternalLink,
+    X,
 };
 
 createIcons({icons: usedIcons});
