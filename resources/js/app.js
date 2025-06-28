@@ -293,7 +293,7 @@ document.addEventListener('DOMContentLoaded', () => {
             `<input type="hidden" name="_token" value="${csrfToken}">` +
             `<button type="submit" class="flex items-center gap-1">` +
             `<svg data-lucide="log-out" class="w-5 h-5"></svg>` +
-            `<span id="nostr-logout-label" class="link-text">${pubkey.slice(0, 8)}&hellip; Logout</span>` +
+            `<span id="nostr-logout-label" class="link-text">${pubkey.slice(0, 5)}&hellip; Logout</span>` +
             `</button>`;
         loginBtn.replaceWith(form);
         form.addEventListener('submit', handleLogout);
@@ -411,7 +411,7 @@ document.addEventListener('DOMContentLoaded', () => {
             `<input type="hidden" name="_token" value="${csrfToken}">` +
             `<button type="submit" class="flex items-center gap-1">` +
             `<svg data-lucide="log-out" class="w-5 h-5"></svg>` +
-            `<span id="nostr-logout-label" class="link-text">${pubkey.slice(0, 8)}&hellip; Logout</span>` +
+            `<span id="nostr-logout-label" class="link-text">${pubkey.slice(0, 5)}&hellip; Logout</span>` +
             `</button>`;
         loginBtn.replaceWith(form);
         form.addEventListener('submit', handleLogout);
@@ -530,7 +530,7 @@ document.addEventListener('DOMContentLoaded', () => {
             `<input type="hidden" name="_token" value="${csrfToken}">` +
             `<button type="submit" class="flex items-center gap-1">` +
             `<svg data-lucide="log-out" class="w-5 h-5"></svg>` +
-            `<span id="nostr-logout-label" class="link-text">${pubkey.slice(0, 8)}&hellip; Logout</span>` +
+            `<span id="nostr-logout-label" class="link-text">${pubkey.slice(0, 5)}&hellip; Logout</span>` +
             `</button>`;
         loginBtn.replaceWith(form);
         form.addEventListener('submit', handleLogout);
@@ -644,7 +644,7 @@ document.addEventListener('DOMContentLoaded', () => {
             `<input type="hidden" name="_token" value="${csrfToken}">` +
             `<button type="submit" class="flex items-center gap-1">` +
             `<svg data-lucide="log-out" class="w-5 h-5"></svg>` +
-            `<span id="nostr-logout-label" class="link-text">${pubkey.slice(0, 8)}&hellip; Logout</span>` +
+            `<span id="nostr-logout-label" class="link-text">${pubkey.slice(0, 5)}&hellip; Logout</span>` +
             `</button>`;
         loginBtn.replaceWith(form);
         form.addEventListener('submit', handleLogout);
@@ -758,7 +758,7 @@ document.addEventListener('DOMContentLoaded', () => {
             `<input type="hidden" name="_token" value="${csrfToken}">` +
             `<button type="submit" class="flex items-center gap-1">` +
             `<svg data-lucide="log-out" class="w-5 h-5"></svg>` +
-            `<span id="nostr-logout-label" class="link-text">${pubkey.slice(0, 8)}&hellip; Logout</span>` +
+            `<span id="nostr-logout-label" class="link-text">${pubkey.slice(0, 5)}&hellip; Logout</span>` +
             `</button>`;
         loginBtn.replaceWith(form);
         form.addEventListener('submit', handleLogout);
@@ -872,7 +872,7 @@ document.addEventListener('DOMContentLoaded', () => {
             `<input type="hidden" name="_token" value="${csrfToken}">` +
             `<button type="submit" class="flex items-center gap-1">` +
             `<svg data-lucide="log-out" class="w-5 h-5"></svg>` +
-            `<span id="nostr-logout-label" class="link-text">${pubkey.slice(0, 8)}&hellip; Logout</span>` +
+            `<span id="nostr-logout-label" class="link-text">${pubkey.slice(0, 5)}&hellip; Logout</span>` +
             `</button>`;
         loginBtn.replaceWith(form);
         form.addEventListener('submit', handleLogout);
