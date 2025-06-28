@@ -14,6 +14,15 @@ const StorageClient = {
     clearNostrPubkey() {
         localStorage.removeItem('nostr_pubkey');
     },
+    getNostrName() {
+        return localStorage.getItem('nostr_name');
+    },
+    setNostrName(name) {
+        localStorage.setItem('nostr_name', name);
+    },
+    clearNostrName() {
+        localStorage.removeItem('nostr_name');
+    },
 };
 
 export default StorageClient;

@@ -34,7 +34,7 @@ final class NostrAuthController
         }
 
         $challenge = $request->session()->pull('nostr_challenge');
-        if (!$challenge || ($event['conic function show(Chat $chat): Vitent'] ?? '') !== $challenge) {
+        if (!$challenge || ($event['content'] ?? '') !== $challenge) {
             return response()->json(['error' => 'Invalid challenge'], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 

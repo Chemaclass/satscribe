@@ -25,7 +25,7 @@
                 @csrf
                 <button type="submit" class="flex items-center gap-1">
                     <svg data-lucide="log-out" class="w-5 h-5"></svg>
-                    <span class="link-text">{{ substr(nostr_pubkey(), 0, 8) }}&hellip; {{ __('Logout') }}</span>
+                    <span id="nostr-logout-label" class="link-text">{{ substr(nostr_pubkey(), 0, 8) }}&hellip; {{ __('Logout') }}</span>
                 </button>
             </form>
         @else

@@ -1,6 +1,7 @@
 import './bootstrap';
 import Alpine from 'alpinejs';
 import StorageClient from './storage-client';
+import { relayInit } from 'nostr-tools';
 import {
     BadgeCheck,
     Bitcoin,
@@ -57,6 +58,60 @@ const usedIcons = {
 };
 
 createIcons({icons: usedIcons});
+
+async function fetchNostrProfile(pubkey) {
+    try {
+        console.log('Fetching nostr profile', pubkey);
+
+        const relay = relayInit('wss://relay.damus.io');
+        await relay.connect();
+        console.log('Connected to relay');
+        return await new Promise((resolve) => {
+            console.log('Subscribing to relay');
+            const sub = relay.sub([{ kinds: [0], authors: [pubkey], limit: 1 }]);
+            let done = false;
+            const finalize = (val) => {
+                if (done) return;
+                done = true;
+                sub.unsub();
+                relay.close();
+                resolve(val);
+            };
+            sub.on('event', (ev) => {
+                try {
+                    console.log('Got event', ev);
+                    const meta = JSON.parse(ev.content);
+                    console.log('Got meta', meta);
+                    finalize(meta.display_name || meta.name || null);
+                } catch {
+                    console.error('Failed to parse metadata');
+                    finalize(null);
+                }
+            });
+            sub.on('eose', () => finalize(null));
+            setTimeout(() => finalize(null), 5000);
+        });
+    } catch (e) {
+        console.error('Failed to fetch metadata', e);
+        return null;
+    }
+}
+
+async function updateNostrLogoutLabel(pubkey) {
+    let name = StorageClient.getNostrName();
+    if (!name) {
+        name = await fetchNostrProfile(pubkey);
+        if (name) {
+            StorageClient.setNostrName(name);
+        }
+    }
+    if (name) {
+        const label = document.getElementById('nostr-logout-label');
+        if (label) {
+            label.textContent = `${name} Logout`;
+        }
+    }
+}
 
 // ---------- DOM READY ----------
 document.addEventListener('DOMContentLoaded', () => {
@@ -238,11 +293,12 @@ document.addEventListener('DOMContentLoaded', () => {
             `<input type="hidden" name="_token" value="${csrfToken}">` +
             `<button type="submit" class="flex items-center gap-1">` +
             `<svg data-lucide="log-out" class="w-5 h-5"></svg>` +
-            `<span class="link-text">${pubkey.slice(0, 8)}&hellip; Logout</span>` +
+            `<span id="nostr-logout-label" class="link-text">${pubkey.slice(0, 8)}&hellip; Logout</span>` +
             `</button>`;
         loginBtn.replaceWith(form);
         form.addEventListener('submit', handleLogout);
         window.refreshLucideIcons();
+        updateNostrLogoutLabel(pubkey);
     };
 
     const replaceLogoutWithLogin = () => {
@@ -310,11 +366,13 @@ document.addEventListener('DOMContentLoaded', () => {
             credentials: 'same-origin',
         });
         StorageClient.clearNostrPubkey();
+        StorageClient.clearNostrName();
         replaceLogoutWithLogin();
     };
 
     if (storedPk && !pubkeyMeta) {
         replaceLoginWithLogout(storedPk);
+        updateNostrLogoutLabel(storedPk);
         fetch(loginUrl, {
             method: 'POST',
             headers: {
@@ -326,6 +384,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }).catch(() => {});
     } else if (pubkeyMeta && !storedPk) {
         StorageClient.setNostrPubkey(pubkeyMeta);
+        updateNostrLogoutLabel(pubkeyMeta);
     }
 
     const loginBtn = document.getElementById('nostr-login-btn');
@@ -352,11 +411,12 @@ document.addEventListener('DOMContentLoaded', () => {
             `<input type="hidden" name="_token" value="${csrfToken}">` +
             `<button type="submit" class="flex items-center gap-1">` +
             `<svg data-lucide="log-out" class="w-5 h-5"></svg>` +
-            `<span class="link-text">${pubkey.slice(0, 8)}&hellip; Logout</span>` +
+            `<span id="nostr-logout-label" class="link-text">${pubkey.slice(0, 8)}&hellip; Logout</span>` +
             `</button>`;
         loginBtn.replaceWith(form);
         form.addEventListener('submit', handleLogout);
         window.refreshLucideIcons();
+        updateNostrLogoutLabel(pubkey);
     };
 
     const replaceLogoutWithLogin = () => {
@@ -404,6 +464,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             if (resp.ok) {
                 replaceLoginWithLogout(pk);
+                window.location.reload();
             } else {
                 console.error('Nostr login failed');
             }
@@ -424,11 +485,13 @@ document.addEventListener('DOMContentLoaded', () => {
             credentials: 'same-origin',
         });
         StorageClient.clearNostrPubkey();
+        StorageClient.clearNostrName();
         replaceLogoutWithLogin();
     };
 
     if (storedPk && !pubkeyMeta) {
         replaceLoginWithLogout(storedPk);
+        updateNostrLogoutLabel(storedPk);
         fetch('/auth/nostr/login', {
             method: 'POST',
             headers: {
@@ -440,6 +503,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }).catch(() => {});
     } else if (pubkeyMeta && !storedPk) {
         StorageClient.setNostrPubkey(pubkeyMeta);
+        updateNostrLogoutLabel(pubkeyMeta);
     }
 
     const loginBtn = document.getElementById('nostr-login-btn');
@@ -466,11 +530,12 @@ document.addEventListener('DOMContentLoaded', () => {
             `<input type="hidden" name="_token" value="${csrfToken}">` +
             `<button type="submit" class="flex items-center gap-1">` +
             `<svg data-lucide="log-out" class="w-5 h-5"></svg>` +
-            `<span class="link-text">${pubkey.slice(0, 8)}&hellip; Logout</span>` +
+            `<span id="nostr-logout-label" class="link-text">${pubkey.slice(0, 8)}&hellip; Logout</span>` +
             `</button>`;
         loginBtn.replaceWith(form);
         form.addEventListener('submit', handleLogout);
         window.refreshLucideIcons();
+        updateNostrLogoutLabel(pubkey);
     };
 
     const replaceLogoutWithLogin = () => {
@@ -516,6 +581,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({ event: signed })
             });
             replaceLoginWithLogout(pk);
+                window.location.reload();
         } catch (e) {
             console.error(e);
         }
@@ -533,11 +599,13 @@ document.addEventListener('DOMContentLoaded', () => {
             credentials: 'same-origin',
         });
         StorageClient.clearNostrPubkey();
+        StorageClient.clearNostrName();
         replaceLogoutWithLogin();
     };
 
     if (storedPk && !pubkeyMeta) {
         replaceLoginWithLogout(storedPk);
+        updateNostrLogoutLabel(storedPk);
         fetch('/auth/nostr/login', {
             method: 'POST',
             headers: {
@@ -549,6 +617,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }).catch(() => {});
     } else if (pubkeyMeta && !storedPk) {
         StorageClient.setNostrPubkey(pubkeyMeta);
+        updateNostrLogoutLabel(pubkeyMeta);
     }
 
     const loginBtn = document.getElementById('nostr-login-btn');
@@ -575,11 +644,12 @@ document.addEventListener('DOMContentLoaded', () => {
             `<input type="hidden" name="_token" value="${csrfToken}">` +
             `<button type="submit" class="flex items-center gap-1">` +
             `<svg data-lucide="log-out" class="w-5 h-5"></svg>` +
-            `<span class="link-text">${pubkey.slice(0, 8)}&hellip; Logout</span>` +
+            `<span id="nostr-logout-label" class="link-text">${pubkey.slice(0, 8)}&hellip; Logout</span>` +
             `</button>`;
         loginBtn.replaceWith(form);
         form.addEventListener('submit', handleLogout);
         window.refreshLucideIcons();
+        updateNostrLogoutLabel(pubkey);
     };
 
     const replaceLogoutWithLogin = () => {
@@ -625,6 +695,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({ event: signed })
             });
             replaceLoginWithLogout(pk);
+                window.location.reload();
         } catch (e) {
             console.error(e);
         }
@@ -642,11 +713,13 @@ document.addEventListener('DOMContentLoaded', () => {
             credentials: 'same-origin',
         });
         StorageClient.clearNostrPubkey();
+        StorageClient.clearNostrName();
         replaceLogoutWithLogin();
     };
 
     if (storedPk && !pubkeyMeta) {
         replaceLoginWithLogout(storedPk);
+        updateNostrLogoutLabel(storedPk);
         fetch('/auth/nostr/login', {
             method: 'POST',
             headers: {
@@ -658,6 +731,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }).catch(() => {});
     } else if (pubkeyMeta && !storedPk) {
         StorageClient.setNostrPubkey(pubkeyMeta);
+        updateNostrLogoutLabel(pubkeyMeta);
     }
 
     const loginBtn = document.getElementById('nostr-login-btn');
@@ -684,11 +758,12 @@ document.addEventListener('DOMContentLoaded', () => {
             `<input type="hidden" name="_token" value="${csrfToken}">` +
             `<button type="submit" class="flex items-center gap-1">` +
             `<svg data-lucide="log-out" class="w-5 h-5"></svg>` +
-            `<span class="link-text">${pubkey.slice(0, 8)}&hellip; Logout</span>` +
+            `<span id="nostr-logout-label" class="link-text">${pubkey.slice(0, 8)}&hellip; Logout</span>` +
             `</button>`;
         loginBtn.replaceWith(form);
         form.addEventListener('submit', handleLogout);
         window.refreshLucideIcons();
+        updateNostrLogoutLabel(pubkey);
     };
 
     const replaceLogoutWithLogin = () => {
@@ -734,6 +809,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({ event: signed })
             });
             replaceLoginWithLogout(pk);
+                window.location.reload();
         } catch (e) {
             console.error(e);
         }
@@ -751,11 +827,13 @@ document.addEventListener('DOMContentLoaded', () => {
             credentials: 'same-origin',
         });
         StorageClient.clearNostrPubkey();
+        StorageClient.clearNostrName();
         replaceLogoutWithLogin();
     };
 
     if (storedPk && !pubkeyMeta) {
         replaceLoginWithLogout(storedPk);
+        updateNostrLogoutLabel(storedPk);
         fetch('/auth/nostr/login', {
             method: 'POST',
             headers: {
@@ -767,6 +845,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }).catch(() => {});
     } else if (pubkeyMeta && !storedPk) {
         StorageClient.setNostrPubkey(pubkeyMeta);
+        updateNostrLogoutLabel(pubkeyMeta);
     }
 
     const loginBtn = document.getElementById('nostr-login-btn');
@@ -793,11 +872,12 @@ document.addEventListener('DOMContentLoaded', () => {
             `<input type="hidden" name="_token" value="${csrfToken}">` +
             `<button type="submit" class="flex items-center gap-1">` +
             `<svg data-lucide="log-out" class="w-5 h-5"></svg>` +
-            `<span class="link-text">${pubkey.slice(0, 8)}&hellip; Logout</span>` +
+            `<span id="nostr-logout-label" class="link-text">${pubkey.slice(0, 8)}&hellip; Logout</span>` +
             `</button>`;
         loginBtn.replaceWith(form);
         form.addEventListener('submit', handleLogout);
         window.refreshLucideIcons();
+        updateNostrLogoutLabel(pubkey);
     };
 
     const replaceLogoutWithLogin = () => {
@@ -834,6 +914,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({ pubkey: pk })
             });
             replaceLoginWithLogout(pk);
+                window.location.reload();
         } catch (e) {
             console.error(e);
         }
@@ -851,11 +932,13 @@ document.addEventListener('DOMContentLoaded', () => {
             credentials: 'same-origin',
         });
         StorageClient.clearNostrPubkey();
+        StorageClient.clearNostrName();
         replaceLogoutWithLogin();
     };
 
     if (storedPk && !pubkeyMeta) {
         replaceLoginWithLogout(storedPk);
+        updateNostrLogoutLabel(storedPk);
         fetch('/auth/nostr/login', {
             method: 'POST',
             headers: {
@@ -867,6 +950,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }).catch(() => {});
     } else if (pubkeyMeta && !storedPk) {
         StorageClient.setNostrPubkey(pubkeyMeta);
+        updateNostrLogoutLabel(pubkeyMeta);
     }
 
     const loginBtn = document.getElementById('nostr-login-btn');
@@ -891,11 +975,12 @@ document.addEventListener('DOMContentLoaded', () => {
             `<input type="hidden" name="_token" value="${csrfToken}">` +
             `<button type="submit" class="flex items-center gap-1">` +
             `<svg data-lucide="log-out" class="w-5 h-5"></svg>` +
-            `<span class="link-text">${pubkey.slice(0, 5)}&hellip; Logout</span>` +
+            `<span id="nostr-logout-label" class="link-text">${pubkey.slice(0, 5)}&hellip; Logout</span>` +
             `</button>`;
         loginBtn.replaceWith(form);
         form.addEventListener('submit', handleLogout);
         window.refreshLucideIcons();
+        updateNostrLogoutLabel(pubkey);
     };
 
     const replaceLogoutWithLogin = () => {
@@ -940,6 +1025,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({ event: signed })
             });
             replaceLoginWithLogout(pk);
+                window.location.reload();
         } catch (e) {
             console.error(e);
         }
