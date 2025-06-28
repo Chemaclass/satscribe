@@ -397,6 +397,8 @@ document.addEventListener('DOMContentLoaded', () => {
     } else if (pubkeyMeta && !storedPk) {
         StorageClient.setNostrPubkey(pubkeyMeta);
         updateNostrLogoutLabel(pubkeyMeta);
+    } else if (pubkeyMeta && storedPk) {
+        updateNostrLogoutLabel(pubkeyMeta);
     }
 
     const loginBtn = document.getElementById('nostr-login-btn');
