@@ -12,6 +12,19 @@
 <div class="chat-meta mt-2 flex justify-between items-center text-sm text-gray-500">
     <span>{{ $chat->getLastAssistantMessage()->created_at->diffForHumans() }}</span>
     <div class="flex gap-4 items-center">
+        <div x-data="{ copied: false }" class="relative">
+            <button type="button"
+                    @click="navigator.clipboard.writeText(window.location.href).then(() => { copied = true; setTimeout(() => copied = false, 2000); })"
+                    class="share-chat-btn link">
+                <span class="full-label hidden sm:inline">{{ __('Share') }}</span>
+                <span class="short-label inline sm:hidden">{{ __('Share') }}</span>
+            </button>
+            <span x-show="copied" x-transition
+                  class="absolute left-1/2 -translate-x-1/2 top-full mt-1 text-xs text-green-600 share-info"
+                  style="display: none;">
+                {{ __('Link Copied!') }}
+            </span>
+        </div>
         <a href="{{ $mempoolUrl }}" target="_blank" rel="noopener" class="link full-label hidden sm:inline">
             {{ __('View on mempool') }}
         </a>
