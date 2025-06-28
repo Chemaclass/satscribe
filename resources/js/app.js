@@ -1,7 +1,7 @@
 import './bootstrap';
 import Alpine from 'alpinejs';
 import StorageClient from './storage-client';
-import { relayInit } from 'nostr-tools';
+import { nip19, relayInit } from 'nostr-tools';
 import {
     BadgeCheck,
     Bitcoin,
@@ -12,6 +12,7 @@ import {
     Github,
     Lightbulb,
     Loader2,
+    LogOut,
     Moon,
     Scroll,
     Send,
@@ -52,6 +53,7 @@ const usedIcons = {
     ArrowUp,
     Scissors,
     Laptop,
+    LogOut,
     Lock,
     ExternalLink,
     X,
@@ -60,15 +62,28 @@ const usedIcons = {
 createIcons({icons: usedIcons});
 
 async function fetchNostrProfile(pubkey) {
+console.log('fetchNostrProfile - A');
+    let hex = pubkey;
+    console.log('Fetching nostr profile via hex - hex : '+ hex);
+    if (pubkey.startsWith('npub')) {
+        try {
+            console.log('Fetching nostr profile via npub');
+            hex = nip19.decode(pubkey).data;
+        } catch (e) {
+            console.log('Failed to decode npub', e);
+            console.error('Failed to decode npub', e);
+            return null;
+        }
+    }
+console.log('fetchNostrProfile - B');
     try {
-        console.log('Fetching nostr profile', pubkey);
-
+        console.log('Fetching nostr profile via relay');
         const relay = relayInit('wss://relay.damus.io');
         await relay.connect();
-        console.log('Connected to relay');
         return await new Promise((resolve) => {
-            console.log('Subscribing to relay');
-            const sub = relay.sub([{ kinds: [0], authors: [pubkey], limit: 1 }]);
+        console.log('Fetching nostr profile via relay - resolve - A');
+            const sub = relay.sub([{ kinds: [0], authors: [hex], limit: 1 }]);
+        console.log('Fetching nostr profile via relay - resolve - B');
             let done = false;
             const finalize = (val) => {
                 if (done) return;
@@ -77,24 +92,26 @@ async function fetchNostrProfile(pubkey) {
                 relay.close();
                 resolve(val);
             };
+        console.log('Fetching nostr profile via relay - resolve - C');
             sub.on('event', (ev) => {
+        console.log('Fetching nostr profile via relay - resolve - D');
                 try {
-                    console.log('Got event', ev);
                     const meta = JSON.parse(ev.content);
-                    console.log('Got meta', meta);
+                    console.log('meta', meta);
                     finalize(meta.display_name || meta.name || null);
                 } catch {
-                    console.error('Failed to parse metadata');
                     finalize(null);
                 }
             });
             sub.on('eose', () => finalize(null));
             setTimeout(() => finalize(null), 5000);
+        console.log('Fetching nostr profile via relay - resolve - E');
         });
     } catch (e) {
-        console.error('Failed to fetch metadata', e);
-        return null;
+        console.error('Failed relay fetch', e);
     }
+
+    return null;
 }
 
 async function updateNostrLogoutLabel(pubkey) {
@@ -103,8 +120,11 @@ async function updateNostrLogoutLabel(pubkey) {
         name = await fetchNostrProfile(pubkey);
         if (name) {
             StorageClient.setNostrName(name);
+        } else {
+            console.warn(`No nostr metadata found for pubkey ${pubkey}. Consider setting display_name via a client.`);
         }
     }
+
     if (name) {
         const label = document.getElementById('nostr-logout-label');
         if (label) {
@@ -386,664 +406,6 @@ document.addEventListener('DOMContentLoaded', () => {
         StorageClient.setNostrPubkey(pubkeyMeta);
         updateNostrLogoutLabel(pubkeyMeta);
     }
-
-    const loginBtn = document.getElementById('nostr-login-btn');
-    if (loginBtn) loginBtn.addEventListener('click', handleLogin);
-
-    const logoutForm = document.querySelector('form[action*="nostr/logout"]');
-    if (logoutForm) logoutForm.addEventListener('submit', handleLogout);
-});
-
-// ---------- NOSTR LOGIN ----------
-document.addEventListener('DOMContentLoaded', () => {
-    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
-    const pubkeyMeta = document.querySelector('meta[name="nostr-pubkey"]')?.content;
-    const storedPk = StorageClient.getNostrPubkey();
-
-    const replaceLoginWithLogout = (pubkey) => {
-        const loginBtn = document.getElementById('nostr-login-btn');
-        if (!loginBtn) return;
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = '/auth/nostr/logout';
-        form.className = 'nav-link flex items-center gap-1';
-        form.innerHTML =
-            `<input type="hidden" name="_token" value="${csrfToken}">` +
-            `<button type="submit" class="flex items-center gap-1">` +
-            `<svg data-lucide="log-out" class="w-5 h-5"></svg>` +
-            `<span id="nostr-logout-label" class="link-text">${pubkey.slice(0, 5)}&hellip; Logout</span>` +
-            `</button>`;
-        loginBtn.replaceWith(form);
-        form.addEventListener('submit', handleLogout);
-        window.refreshLucideIcons();
-        updateNostrLogoutLabel(pubkey);
-    };
-
-    const replaceLogoutWithLogin = () => {
-        const logoutForm = document.querySelector('form[action*="nostr/logout"]');
-        if (!logoutForm) return;
-        const button = document.createElement('button');
-        button.type = 'button';
-        button.id = 'nostr-login-btn';
-        button.className = 'nav-link flex items-center gap-1';
-        button.innerHTML =
-            `<svg data-lucide="log-in" class="w-5 h-5"></svg>` +
-            `<span class="link-text">Nostr Login</span>`;
-        logoutForm.replaceWith(button);
-        button.addEventListener('click', handleLogin);
-        window.refreshLucideIcons();
-    };
-
-    const handleLogin = async () => {
-        if (!window.nostr || !window.nostr.getPublicKey || !window.nostr.signEvent) {
-            alert('Nostr extension not available');
-            return;
-        }
-        try {
-            const pk = await window.nostr.getPublicKey();
-            if (!pk) return;
-            const challResp = await fetch(challengeUrl, { credentials: 'same-origin' });
-            const { challenge } = await challResp.json();
-            const event = {
-                kind: 22242,
-                pubkey: pk,
-                created_at: Math.floor(Date.now() / 1000),
-                content: challenge,
-                tags: []
-            };
-            const signed = await window.nostr.signEvent(event);
-            StorageClient.setNostrPubkey(pk);
-            const resp = await fetch('/auth/nostr/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken
-                },
-                credentials: 'same-origin',
-                body: JSON.stringify({ event: signed })
-            });
-            if (resp.ok) {
-                replaceLoginWithLogout(pk);
-                window.location.reload();
-            } else {
-                console.error('Nostr login failed');
-            }
-        } catch (e) {
-            console.error(e);
-        }
-    };
-
-    const handleLogout = async (e) => {
-        e.preventDefault();
-        const form = e.target.closest('form');
-        await fetch(form.action, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': csrfToken
-            },
-            credentials: 'same-origin',
-        });
-        StorageClient.clearNostrPubkey();
-        StorageClient.clearNostrName();
-        replaceLogoutWithLogin();
-    };
-
-    if (storedPk && !pubkeyMeta) {
-        replaceLoginWithLogout(storedPk);
-        updateNostrLogoutLabel(storedPk);
-        fetch('/auth/nostr/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': csrfToken
-            },
-            credentials: 'same-origin',
-            body: JSON.stringify({ pubkey: storedPk })
-        }).catch(() => {});
-    } else if (pubkeyMeta && !storedPk) {
-        StorageClient.setNostrPubkey(pubkeyMeta);
-        updateNostrLogoutLabel(pubkeyMeta);
-    }
-
-    const loginBtn = document.getElementById('nostr-login-btn');
-    if (loginBtn) loginBtn.addEventListener('click', handleLogin);
-
-    const logoutForm = document.querySelector('form[action*="nostr/logout"]');
-    if (logoutForm) logoutForm.addEventListener('submit', handleLogout);
-});
-
-// ---------- NOSTR LOGIN ----------
-document.addEventListener('DOMContentLoaded', () => {
-    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
-    const pubkeyMeta = document.querySelector('meta[name="nostr-pubkey"]')?.content;
-    const storedPk = StorageClient.getNostrPubkey();
-
-    const replaceLoginWithLogout = (pubkey) => {
-        const loginBtn = document.getElementById('nostr-login-btn');
-        if (!loginBtn) return;
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = '/auth/nostr/logout';
-        form.className = 'nav-link flex items-center gap-1';
-        form.innerHTML =
-            `<input type="hidden" name="_token" value="${csrfToken}">` +
-            `<button type="submit" class="flex items-center gap-1">` +
-            `<svg data-lucide="log-out" class="w-5 h-5"></svg>` +
-            `<span id="nostr-logout-label" class="link-text">${pubkey.slice(0, 5)}&hellip; Logout</span>` +
-            `</button>`;
-        loginBtn.replaceWith(form);
-        form.addEventListener('submit', handleLogout);
-        window.refreshLucideIcons();
-        updateNostrLogoutLabel(pubkey);
-    };
-
-    const replaceLogoutWithLogin = () => {
-        const logoutForm = document.querySelector('form[action*="nostr/logout"]');
-        if (!logoutForm) return;
-        const button = document.createElement('button');
-        button.type = 'button';
-        button.id = 'nostr-login-btn';
-        button.className = 'nav-link flex items-center gap-1';
-        button.innerHTML =
-            `<svg data-lucide="log-in" class="w-5 h-5"></svg>` +
-            `<span class="link-text">Nostr Login</span>`;
-        logoutForm.replaceWith(button);
-        button.addEventListener('click', handleLogin);
-        window.refreshLucideIcons();
-    };
-
-    const handleLogin = async () => {
-        if (!window.nostr || !window.nostr.getPublicKey || !window.nostr.signEvent) {
-            alert('Nostr extension not available');
-            return;
-        }
-        try {
-            const pk = await window.nostr.getPublicKey();
-            if (!pk) return;
-            const challResp = await fetch(challengeUrl, { credentials: 'same-origin' });
-            const { challenge } = await challResp.json();
-            const event = {
-                kind: 22242,
-                pubkey: pk,
-                created_at: Math.floor(Date.now() / 1000),
-                content: challenge,
-                tags: []
-            };
-            const signed = await window.nostr.signEvent(event);
-            await fetch('/auth/nostr/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken
-                },
-                credentials: 'same-origin',
-                body: JSON.stringify({ event: signed })
-            });
-            replaceLoginWithLogout(pk);
-                window.location.reload();
-        } catch (e) {
-            console.error(e);
-        }
-    };
-
-    const handleLogout = async (e) => {
-        e.preventDefault();
-        const form = e.target.closest('form');
-        await fetch(form.action, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': csrfToken
-            },
-            credentials: 'same-origin',
-        });
-        StorageClient.clearNostrPubkey();
-        StorageClient.clearNostrName();
-        replaceLogoutWithLogin();
-    };
-
-    if (storedPk && !pubkeyMeta) {
-        replaceLoginWithLogout(storedPk);
-        updateNostrLogoutLabel(storedPk);
-        fetch('/auth/nostr/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': csrfToken
-            },
-            credentials: 'same-origin',
-            body: JSON.stringify({ pubkey: storedPk })
-        }).catch(() => {});
-    } else if (pubkeyMeta && !storedPk) {
-        StorageClient.setNostrPubkey(pubkeyMeta);
-        updateNostrLogoutLabel(pubkeyMeta);
-    }
-
-    const loginBtn = document.getElementById('nostr-login-btn');
-    if (loginBtn) loginBtn.addEventListener('click', handleLogin);
-
-    const logoutForm = document.querySelector('form[action*="nostr/logout"]');
-    if (logoutForm) logoutForm.addEventListener('submit', handleLogout);
-});
-
-// ---------- NOSTR LOGIN ----------
-document.addEventListener('DOMContentLoaded', () => {
-    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
-    const pubkeyMeta = document.querySelector('meta[name="nostr-pubkey"]')?.content;
-    const storedPk = StorageClient.getNostrPubkey();
-
-    const replaceLoginWithLogout = (pubkey) => {
-        const loginBtn = document.getElementById('nostr-login-btn');
-        if (!loginBtn) return;
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = '/auth/nostr/logout';
-        form.className = 'nav-link flex items-center gap-1';
-        form.innerHTML =
-            `<input type="hidden" name="_token" value="${csrfToken}">` +
-            `<button type="submit" class="flex items-center gap-1">` +
-            `<svg data-lucide="log-out" class="w-5 h-5"></svg>` +
-            `<span id="nostr-logout-label" class="link-text">${pubkey.slice(0, 5)}&hellip; Logout</span>` +
-            `</button>`;
-        loginBtn.replaceWith(form);
-        form.addEventListener('submit', handleLogout);
-        window.refreshLucideIcons();
-        updateNostrLogoutLabel(pubkey);
-    };
-
-    const replaceLogoutWithLogin = () => {
-        const logoutForm = document.querySelector('form[action*="nostr/logout"]');
-        if (!logoutForm) return;
-        const button = document.createElement('button');
-        button.type = 'button';
-        button.id = 'nostr-login-btn';
-        button.className = 'nav-link flex items-center gap-1';
-        button.innerHTML =
-            `<svg data-lucide="log-in" class="w-5 h-5"></svg>` +
-            `<span class="link-text">Nostr Login</span>`;
-        logoutForm.replaceWith(button);
-        button.addEventListener('click', handleLogin);
-        window.refreshLucideIcons();
-    };
-
-    const handleLogin = async () => {
-        if (!window.nostr || !window.nostr.getPublicKey || !window.nostr.signEvent) {
-            alert('Nostr extension not available');
-            return;
-        }
-        try {
-            const pk = await window.nostr.getPublicKey();
-            if (!pk) return;
-            const challResp = await fetch(challengeUrl, { credentials: 'same-origin' });
-            const { challenge } = await challResp.json();
-            const event = {
-                kind: 22242,
-                pubkey: pk,
-                created_at: Math.floor(Date.now() / 1000),
-                content: challenge,
-                tags: []
-            };
-            const signed = await window.nostr.signEvent(event);
-            await fetch('/auth/nostr/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken
-                },
-                credentials: 'same-origin',
-                body: JSON.stringify({ event: signed })
-            });
-            replaceLoginWithLogout(pk);
-                window.location.reload();
-        } catch (e) {
-            console.error(e);
-        }
-    };
-
-    const handleLogout = async (e) => {
-        e.preventDefault();
-        const form = e.target.closest('form');
-        await fetch(form.action, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': csrfToken
-            },
-            credentials: 'same-origin',
-        });
-        StorageClient.clearNostrPubkey();
-        StorageClient.clearNostrName();
-        replaceLogoutWithLogin();
-    };
-
-    if (storedPk && !pubkeyMeta) {
-        replaceLoginWithLogout(storedPk);
-        updateNostrLogoutLabel(storedPk);
-        fetch('/auth/nostr/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': csrfToken
-            },
-            credentials: 'same-origin',
-            body: JSON.stringify({ pubkey: storedPk })
-        }).catch(() => {});
-    } else if (pubkeyMeta && !storedPk) {
-        StorageClient.setNostrPubkey(pubkeyMeta);
-        updateNostrLogoutLabel(pubkeyMeta);
-    }
-
-    const loginBtn = document.getElementById('nostr-login-btn');
-    if (loginBtn) loginBtn.addEventListener('click', handleLogin);
-
-    const logoutForm = document.querySelector('form[action*="nostr/logout"]');
-    if (logoutForm) logoutForm.addEventListener('submit', handleLogout);
-});
-
-// ---------- NOSTR LOGIN ----------
-document.addEventListener('DOMContentLoaded', () => {
-    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
-    const pubkeyMeta = document.querySelector('meta[name="nostr-pubkey"]')?.content;
-    const storedPk = StorageClient.getNostrPubkey();
-
-    const replaceLoginWithLogout = (pubkey) => {
-        const loginBtn = document.getElementById('nostr-login-btn');
-        if (!loginBtn) return;
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = '/auth/nostr/logout';
-        form.className = 'nav-link flex items-center gap-1';
-        form.innerHTML =
-            `<input type="hidden" name="_token" value="${csrfToken}">` +
-            `<button type="submit" class="flex items-center gap-1">` +
-            `<svg data-lucide="log-out" class="w-5 h-5"></svg>` +
-            `<span id="nostr-logout-label" class="link-text">${pubkey.slice(0, 5)}&hellip; Logout</span>` +
-            `</button>`;
-        loginBtn.replaceWith(form);
-        form.addEventListener('submit', handleLogout);
-        window.refreshLucideIcons();
-        updateNostrLogoutLabel(pubkey);
-    };
-
-    const replaceLogoutWithLogin = () => {
-        const logoutForm = document.querySelector('form[action*="nostr/logout"]');
-        if (!logoutForm) return;
-        const button = document.createElement('button');
-        button.type = 'button';
-        button.id = 'nostr-login-btn';
-        button.className = 'nav-link flex items-center gap-1';
-        button.innerHTML =
-            `<svg data-lucide="log-in" class="w-5 h-5"></svg>` +
-            `<span class="link-text">Nostr Login</span>`;
-        logoutForm.replaceWith(button);
-        button.addEventListener('click', handleLogin);
-        window.refreshLucideIcons();
-    };
-
-    const handleLogin = async () => {
-        if (!window.nostr || !window.nostr.getPublicKey || !window.nostr.signEvent) {
-            alert('Nostr extension not available');
-            return;
-        }
-        try {
-            const pk = await window.nostr.getPublicKey();
-            if (!pk) return;
-            const challResp = await fetch(challengeUrl, { credentials: 'same-origin' });
-            const { challenge } = await challResp.json();
-            const event = {
-                kind: 22242,
-                pubkey: pk,
-                created_at: Math.floor(Date.now() / 1000),
-                content: challenge,
-                tags: []
-            };
-            const signed = await window.nostr.signEvent(event);
-            await fetch('/auth/nostr/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken
-                },
-                credentials: 'same-origin',
-                body: JSON.stringify({ event: signed })
-            });
-            replaceLoginWithLogout(pk);
-                window.location.reload();
-        } catch (e) {
-            console.error(e);
-        }
-    };
-
-    const handleLogout = async (e) => {
-        e.preventDefault();
-        const form = e.target.closest('form');
-        await fetch(form.action, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': csrfToken
-            },
-            credentials: 'same-origin',
-        });
-        StorageClient.clearNostrPubkey();
-        StorageClient.clearNostrName();
-        replaceLogoutWithLogin();
-    };
-
-    if (storedPk && !pubkeyMeta) {
-        replaceLoginWithLogout(storedPk);
-        updateNostrLogoutLabel(storedPk);
-        fetch('/auth/nostr/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': csrfToken
-            },
-            credentials: 'same-origin',
-            body: JSON.stringify({ pubkey: storedPk })
-        }).catch(() => {});
-    } else if (pubkeyMeta && !storedPk) {
-        StorageClient.setNostrPubkey(pubkeyMeta);
-        updateNostrLogoutLabel(pubkeyMeta);
-    }
-
-    const loginBtn = document.getElementById('nostr-login-btn');
-    if (loginBtn) loginBtn.addEventListener('click', handleLogin);
-
-    const logoutForm = document.querySelector('form[action*="nostr/logout"]');
-    if (logoutForm) logoutForm.addEventListener('submit', handleLogout);
-});
-
-// ---------- NOSTR LOGIN ----------
-document.addEventListener('DOMContentLoaded', () => {
-    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
-    const pubkeyMeta = document.querySelector('meta[name="nostr-pubkey"]')?.content;
-    const storedPk = StorageClient.getNostrPubkey();
-
-    const replaceLoginWithLogout = (pubkey) => {
-        const loginBtn = document.getElementById('nostr-login-btn');
-        if (!loginBtn) return;
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = '/auth/nostr/logout';
-        form.className = 'nav-link flex items-center gap-1';
-        form.innerHTML =
-            `<input type="hidden" name="_token" value="${csrfToken}">` +
-            `<button type="submit" class="flex items-center gap-1">` +
-            `<svg data-lucide="log-out" class="w-5 h-5"></svg>` +
-            `<span id="nostr-logout-label" class="link-text">${pubkey.slice(0, 5)}&hellip; Logout</span>` +
-            `</button>`;
-        loginBtn.replaceWith(form);
-        form.addEventListener('submit', handleLogout);
-        window.refreshLucideIcons();
-        updateNostrLogoutLabel(pubkey);
-    };
-
-    const replaceLogoutWithLogin = () => {
-        const logoutForm = document.querySelector('form[action*="nostr/logout"]');
-        if (!logoutForm) return;
-        const button = document.createElement('button');
-        button.type = 'button';
-        button.id = 'nostr-login-btn';
-        button.className = 'nav-link flex items-center gap-1';
-        button.innerHTML =
-            `<svg data-lucide="log-in" class="w-5 h-5"></svg>` +
-            `<span class="link-text">Nostr Login</span>`;
-        logoutForm.replaceWith(button);
-        button.addEventListener('click', handleLogin);
-        window.refreshLucideIcons();
-    };
-
-    const handleLogin = async () => {
-        if (!window.nostr || !window.nostr.getPublicKey) {
-            alert('Nostr extension not available');
-            return;
-        }
-        try {
-            const pk = await window.nostr.getPublicKey();
-            if (!pk) return;
-            StorageClient.setNostrPubkey(pk);
-            await fetch('/auth/nostr/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken
-                },
-                credentials: 'same-origin',
-                body: JSON.stringify({ pubkey: pk })
-            });
-            replaceLoginWithLogout(pk);
-                window.location.reload();
-        } catch (e) {
-            console.error(e);
-        }
-    };
-
-    const handleLogout = async (e) => {
-        e.preventDefault();
-        const form = e.target.closest('form');
-        await fetch(form.action, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': csrfToken
-            },
-            credentials: 'same-origin',
-        });
-        StorageClient.clearNostrPubkey();
-        StorageClient.clearNostrName();
-        replaceLogoutWithLogin();
-    };
-
-    if (storedPk && !pubkeyMeta) {
-        replaceLoginWithLogout(storedPk);
-        updateNostrLogoutLabel(storedPk);
-        fetch('/auth/nostr/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': csrfToken
-            },
-            credentials: 'same-origin',
-            body: JSON.stringify({ pubkey: storedPk })
-        }).catch(() => {});
-    } else if (pubkeyMeta && !storedPk) {
-        StorageClient.setNostrPubkey(pubkeyMeta);
-        updateNostrLogoutLabel(pubkeyMeta);
-    }
-
-    const loginBtn = document.getElementById('nostr-login-btn');
-    if (loginBtn) loginBtn.addEventListener('click', handleLogin);
-
-    const logoutForm = document.querySelector('form[action*="nostr/logout"]');
-    if (logoutForm) logoutForm.addEventListener('submit', handleLogout);
-});
-
-// ---------- NOSTR LOGIN ----------
-document.addEventListener('DOMContentLoaded', () => {
-    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
-
-    const replaceLoginWithLogout = (pubkey) => {
-        const loginBtn = document.getElementById('nostr-login-btn');
-        if (!loginBtn) return;
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = '/auth/nostr/logout';
-        form.className = 'nav-link flex items-center gap-1';
-        form.innerHTML =
-            `<input type="hidden" name="_token" value="${csrfToken}">` +
-            `<button type="submit" class="flex items-center gap-1">` +
-            `<svg data-lucide="log-out" class="w-5 h-5"></svg>` +
-            `<span id="nostr-logout-label" class="link-text">${pubkey.slice(0, 5)}&hellip; Logout</span>` +
-            `</button>`;
-        loginBtn.replaceWith(form);
-        form.addEventListener('submit', handleLogout);
-        window.refreshLucideIcons();
-        updateNostrLogoutLabel(pubkey);
-    };
-
-    const replaceLogoutWithLogin = () => {
-        const logoutForm = document.querySelector('form[action*="nostr/logout"]');
-        if (!logoutForm) return;
-        const button = document.createElement('button');
-        button.type = 'button';
-        button.id = 'nostr-login-btn';
-        button.className = 'nav-link flex items-center gap-1';
-        button.innerHTML =
-            `<svg data-lucide="log-in" class="w-5 h-5"></svg>` +
-            `<span class="link-text">Nostr Login</span>`;
-        logoutForm.replaceWith(button);
-        button.addEventListener('click', handleLogin);
-        window.refreshLucideIcons();
-    };
-
-    const handleLogin = async () => {
-        if (!window.nostr || !window.nostr.getPublicKey || !window.nostr.signEvent) {
-            alert('Nostr extension not available');
-            return;
-        }
-        try {
-            const pk = await window.nostr.getPublicKey();
-            if (!pk) return;
-            const challResp = await fetch(challengeUrl, { credentials: 'same-origin' });
-            const { challenge } = await challResp.json();
-            const event = {
-                kind: 22242,
-                pubkey: pk,
-                created_at: Math.floor(Date.now() / 1000),
-                content: challenge,
-                tags: []
-            };
-            const signed = await window.nostr.signEvent(event);
-            await fetch('/auth/nostr/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken
-                },
-                body: JSON.stringify({ event: signed })
-            });
-            replaceLoginWithLogout(pk);
-                window.location.reload();
-        } catch (e) {
-            console.error(e);
-        }
-    };
-
-    const handleLogout = async (e) => {
-        e.preventDefault();
-        const form = e.target.closest('form');
-        await fetch(form.action, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': csrfToken
-            },
-        });
-        StorageClient.clearNostrPubkey();
-        replaceLogoutWithLogin();
-    };
 
     const loginBtn = document.getElementById('nostr-login-btn');
     if (loginBtn) loginBtn.addEventListener('click', handleLogin);
