@@ -11,6 +11,7 @@ use Modules\Blockchain\Domain\Exception\BlockchainException;
 use Modules\Chat\Domain\AddMessageActionInterface;
 use Modules\Chat\Domain\CreateChatActionInterface;
 use Modules\Chat\Domain\Data\QuestionPlaceholder;
+use Modules\Chat\Domain\Repository\ChatRepositoryInterface;
 use Modules\Chat\Infrastructure\Http\Request\CreateChatRequest;
 use Modules\OpenAI\Domain\Exception\OpenAIError;
 use Modules\Shared\Domain\Data\Chat\PromptInput;
@@ -22,6 +23,7 @@ final readonly class ChatService
         private BlockchainFacadeInterface $blockchainFacade,
         private CreateChatActionInterface $createChatAction,
         private AddMessageActionInterface $addMessageAction,
+        private ChatRepositoryInterface $chatRepository,
     ) {
     }
 
@@ -47,6 +49,7 @@ final readonly class ChatService
             'chat' => $chat,
             'search' => $firstMsg->meta['input'] ?? '',
             'persona' => $firstMsg->meta['persona'] ?? '',
+            'totalChats' => $this->chatRepository->getTotalChats(),
         ];
     }
 
@@ -77,6 +80,7 @@ final readonly class ChatService
             'suggestedPromptsGrouped' => QuestionPlaceholder::groupedPrompts(),
             'maxBitcoinBlockHeight' => $this->blockchainFacade->getMaxPossibleBlockHeight(),
             'personaDescriptions' => PromptPersona::descriptions()->toJson(),
+            'totalChats' => Chat::count(),
         ];
     }
 

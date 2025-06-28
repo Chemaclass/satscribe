@@ -117,5 +117,6 @@
     "Tell me something interesting I might miss at first glance.": "Sag mir etwas Interessantes, das ich auf den ersten Blick übersehen könnte.",
     "Generate a title for a blog post about this.": "Generiere einen Titel für einen Blogbeitrag darüber.",
     "Give me a generic overview.": "Gib mir einen allgemeinen Überblick.",
+    "home.total_chats": "Gesamtzahl der Chats: :count",
     "Got it": "Verstanden"
 }

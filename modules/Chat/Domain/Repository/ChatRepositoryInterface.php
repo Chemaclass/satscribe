@@ -26,4 +26,6 @@ interface ChatRepositoryInterface
     public function addMessageToChat(Chat $chat, string $userMessage, string $assistantResponse): void;
 
     public function getPagination(bool $showAll): Paginator;
+
+    public function getTotalChats(): int;
 }

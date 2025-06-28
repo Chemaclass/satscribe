@@ -35,6 +35,7 @@
                 x-cloak>
                 <p>{{ __('home.narrative.line1') }}</p>
                 <p>{{ __('home.narrative.line2') }}</p>
+                <p>{{ __('home.total_chats', ['count' => number_format($totalChats)]) }}</p>
             </div>
         @endif
 

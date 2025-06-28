@@ -123,4 +123,9 @@ final readonly class ChatRepository implements ChatRepositoryInterface
         return $query->latest()
             ->simplePaginate($this->perPage);
     }
+
+    public function getTotalChats(): int
+    {
+        return Chat::count();
+    }
 }
