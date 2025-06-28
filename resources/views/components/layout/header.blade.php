@@ -20,6 +20,20 @@
             <svg data-lucide="scroll" class="w-5 h-5"></svg>
             <span class="link-text">{{ __('History') }}</span>
         </a>
+        @if(nostr_pubkey())
+            <form method="POST" action="{{ route('nostr.logout') }}" class="nav-link flex items-center gap-1">
+                @csrf
+                <button type="submit" class="flex items-center gap-1">
+                    <svg data-lucide="log-out" class="w-5 h-5"></svg>
+                    <span class="link-text">{{ substr(nostr_pubkey(), 0, 8) }}&hellip; {{ __('Logout') }}</span>
+                </button>
+            </form>
+        @else
+            <button type="button" id="nostr-login-btn" class="nav-link flex items-center gap-1">
+                <svg data-lucide="log-in" class="w-5 h-5"></svg>
+                <span class="link-text">Nostr Login</span>
+            </button>
+        @endif
         <button class="nav-link flex items-center gap-1" @click="dark = !dark; $nextTick(() => refreshThemeIcon())">
             <svg :data-lucide="dark ? 'sun' : 'moon'" id="theme-icon" class="w-5 h-5"></svg>
             <span class="link-text" x-text="dark ? '{{ __('Light') }}' : '{{ __('Dark') }}'"></span>

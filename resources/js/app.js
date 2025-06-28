@@ -217,3 +217,694 @@ document.addEventListener('DOMContentLoaded', () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 });
+
+// ---------- NOSTR LOGIN ----------
+document.addEventListener('DOMContentLoaded', () => {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+    const pubkeyMeta = document.querySelector('meta[name="nostr-pubkey"]')?.content;
+    const loginUrl = document.querySelector('meta[name="nostr-login-url"]')?.content || '/auth/nostr/login';
+    const logoutUrl = document.querySelector('meta[name="nostr-logout-url"]')?.content || '/auth/nostr/logout';
+    const storedPk = StorageClient.getNostrPubkey();
+
+    const replaceLoginWithLogout = (pubkey) => {
+        const loginBtn = document.getElementById('nostr-login-btn');
+        if (!loginBtn) return;
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = logoutUrl;
+        form.className = 'nav-link flex items-center gap-1';
+        form.innerHTML =
+            `<input type="hidden" name="_token" value="${csrfToken}">` +
+            `<button type="submit" class="flex items-center gap-1">` +
+            `<svg data-lucide="log-out" class="w-5 h-5"></svg>` +
+            `<span class="link-text">${pubkey.slice(0, 8)}&hellip; Logout</span>` +
+            `</button>`;
+        loginBtn.replaceWith(form);
+        form.addEventListener('submit', handleLogout);
+        window.refreshLucideIcons();
+    };
+
+    const replaceLogoutWithLogin = () => {
+        const logoutForm = document.querySelector('form[action*="nostr/logout"]');
+        if (!logoutForm) return;
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.id = 'nostr-login-btn';
+        button.className = 'nav-link flex items-center gap-1';
+        button.innerHTML =
+            `<svg data-lucide="log-in" class="w-5 h-5"></svg>` +
+            `<span class="link-text">Nostr Login</span>`;
+        logoutForm.replaceWith(button);
+        button.addEventListener('click', handleLogin);
+        window.refreshLucideIcons();
+    };
+
+    const handleLogin = async () => {
+        if (!window.nostr || !window.nostr.getPublicKey) {
+            alert('Nostr extension not available');
+            return;
+        }
+        try {
+            const pk = await window.nostr.getPublicKey();
+            if (!pk) return;
+            StorageClient.setNostrPubkey(pk);
+            const resp = await fetch(loginUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                credentials: 'same-origin',
+                body: JSON.stringify({ pubkey: pk })
+            });
+            if (resp.ok) {
+                replaceLoginWithLogout(pk);
+            } else {
+                console.error('Nostr login failed');
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    };
+
+    const handleLogout = async (e) => {
+        e.preventDefault();
+        const form = e.target.closest('form');
+        await fetch(form.action, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken
+            },
+            credentials: 'same-origin',
+        });
+        StorageClient.clearNostrPubkey();
+        replaceLogoutWithLogin();
+    };
+
+    if (storedPk && !pubkeyMeta) {
+        replaceLoginWithLogout(storedPk);
+        fetch(loginUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken
+            },
+            credentials: 'same-origin',
+            body: JSON.stringify({ pubkey: storedPk })
+        }).catch(() => {});
+    } else if (pubkeyMeta && !storedPk) {
+        StorageClient.setNostrPubkey(pubkeyMeta);
+    }
+
+    const loginBtn = document.getElementById('nostr-login-btn');
+    if (loginBtn) loginBtn.addEventListener('click', handleLogin);
+
+    const logoutForm = document.querySelector('form[action*="nostr/logout"]');
+    if (logoutForm) logoutForm.addEventListener('submit', handleLogout);
+});
+
+// ---------- NOSTR LOGIN ----------
+document.addEventListener('DOMContentLoaded', () => {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+    const pubkeyMeta = document.querySelector('meta[name="nostr-pubkey"]')?.content;
+    const storedPk = StorageClient.getNostrPubkey();
+
+    const replaceLoginWithLogout = (pubkey) => {
+        const loginBtn = document.getElementById('nostr-login-btn');
+        if (!loginBtn) return;
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/auth/nostr/logout';
+        form.className = 'nav-link flex items-center gap-1';
+        form.innerHTML =
+            `<input type="hidden" name="_token" value="${csrfToken}">` +
+            `<button type="submit" class="flex items-center gap-1">` +
+            `<svg data-lucide="log-out" class="w-5 h-5"></svg>` +
+            `<span class="link-text">${pubkey.slice(0, 8)}&hellip; Logout</span>` +
+            `</button>`;
+        loginBtn.replaceWith(form);
+        form.addEventListener('submit', handleLogout);
+        window.refreshLucideIcons();
+    };
+
+    const replaceLogoutWithLogin = () => {
+        const logoutForm = document.querySelector('form[action*="nostr/logout"]');
+        if (!logoutForm) return;
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.id = 'nostr-login-btn';
+        button.className = 'nav-link flex items-center gap-1';
+        button.innerHTML =
+            `<svg data-lucide="log-in" class="w-5 h-5"></svg>` +
+            `<span class="link-text">Nostr Login</span>`;
+        logoutForm.replaceWith(button);
+        button.addEventListener('click', handleLogin);
+        window.refreshLucideIcons();
+    };
+
+    const handleLogin = async () => {
+        if (!window.nostr || !window.nostr.getPublicKey) {
+            alert('Nostr extension not available');
+            return;
+        }
+        try {
+            const pk = await window.nostr.getPublicKey();
+            if (!pk) return;
+            StorageClient.setNostrPubkey(pk);
+            const resp = await fetch('/auth/nostr/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                credentials: 'same-origin',
+                body: JSON.stringify({ pubkey: pk })
+            });
+            if (resp.ok) {
+                replaceLoginWithLogout(pk);
+            } else {
+                console.error('Nostr login failed');
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    };
+
+    const handleLogout = async (e) => {
+        e.preventDefault();
+        const form = e.target.closest('form');
+        await fetch(form.action, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken
+            },
+            credentials: 'same-origin',
+        });
+        StorageClient.clearNostrPubkey();
+        replaceLogoutWithLogin();
+    };
+
+    if (storedPk && !pubkeyMeta) {
+        replaceLoginWithLogout(storedPk);
+        fetch('/auth/nostr/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken
+            },
+            credentials: 'same-origin',
+            body: JSON.stringify({ pubkey: storedPk })
+        }).catch(() => {});
+    } else if (pubkeyMeta && !storedPk) {
+        StorageClient.setNostrPubkey(pubkeyMeta);
+    }
+
+    const loginBtn = document.getElementById('nostr-login-btn');
+    if (loginBtn) loginBtn.addEventListener('click', handleLogin);
+
+    const logoutForm = document.querySelector('form[action*="nostr/logout"]');
+    if (logoutForm) logoutForm.addEventListener('submit', handleLogout);
+});
+
+// ---------- NOSTR LOGIN ----------
+document.addEventListener('DOMContentLoaded', () => {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+    const pubkeyMeta = document.querySelector('meta[name="nostr-pubkey"]')?.content;
+    const storedPk = StorageClient.getNostrPubkey();
+
+    const replaceLoginWithLogout = (pubkey) => {
+        const loginBtn = document.getElementById('nostr-login-btn');
+        if (!loginBtn) return;
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/auth/nostr/logout';
+        form.className = 'nav-link flex items-center gap-1';
+        form.innerHTML =
+            `<input type="hidden" name="_token" value="${csrfToken}">` +
+            `<button type="submit" class="flex items-center gap-1">` +
+            `<svg data-lucide="log-out" class="w-5 h-5"></svg>` +
+            `<span class="link-text">${pubkey.slice(0, 8)}&hellip; Logout</span>` +
+            `</button>`;
+        loginBtn.replaceWith(form);
+        form.addEventListener('submit', handleLogout);
+        window.refreshLucideIcons();
+    };
+
+    const replaceLogoutWithLogin = () => {
+        const logoutForm = document.querySelector('form[action*="nostr/logout"]');
+        if (!logoutForm) return;
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.id = 'nostr-login-btn';
+        button.className = 'nav-link flex items-center gap-1';
+        button.innerHTML =
+            `<svg data-lucide="log-in" class="w-5 h-5"></svg>` +
+            `<span class="link-text">Nostr Login</span>`;
+        logoutForm.replaceWith(button);
+        button.addEventListener('click', handleLogin);
+        window.refreshLucideIcons();
+    };
+
+    const handleLogin = async () => {
+        if (!window.nostr || !window.nostr.getPublicKey) {
+            alert('Nostr extension not available');
+            return;
+        }
+        try {
+            const pk = await window.nostr.getPublicKey();
+            if (!pk) return;
+            StorageClient.setNostrPubkey(pk);
+            await fetch('/auth/nostr/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                credentials: 'same-origin',
+                body: JSON.stringify({ pubkey: pk })
+            });
+            replaceLoginWithLogout(pk);
+        } catch (e) {
+            console.error(e);
+        }
+    };
+
+    const handleLogout = async (e) => {
+        e.preventDefault();
+        const form = e.target.closest('form');
+        await fetch(form.action, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken
+            },
+            credentials: 'same-origin',
+        });
+        StorageClient.clearNostrPubkey();
+        replaceLogoutWithLogin();
+    };
+
+    if (storedPk && !pubkeyMeta) {
+        replaceLoginWithLogout(storedPk);
+        fetch('/auth/nostr/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken
+            },
+            credentials: 'same-origin',
+            body: JSON.stringify({ pubkey: storedPk })
+        }).catch(() => {});
+    } else if (pubkeyMeta && !storedPk) {
+        StorageClient.setNostrPubkey(pubkeyMeta);
+    }
+
+    const loginBtn = document.getElementById('nostr-login-btn');
+    if (loginBtn) loginBtn.addEventListener('click', handleLogin);
+
+    const logoutForm = document.querySelector('form[action*="nostr/logout"]');
+    if (logoutForm) logoutForm.addEventListener('submit', handleLogout);
+});
+
+// ---------- NOSTR LOGIN ----------
+document.addEventListener('DOMContentLoaded', () => {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+    const pubkeyMeta = document.querySelector('meta[name="nostr-pubkey"]')?.content;
+    const storedPk = StorageClient.getNostrPubkey();
+
+    const replaceLoginWithLogout = (pubkey) => {
+        const loginBtn = document.getElementById('nostr-login-btn');
+        if (!loginBtn) return;
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/auth/nostr/logout';
+        form.className = 'nav-link flex items-center gap-1';
+        form.innerHTML =
+            `<input type="hidden" name="_token" value="${csrfToken}">` +
+            `<button type="submit" class="flex items-center gap-1">` +
+            `<svg data-lucide="log-out" class="w-5 h-5"></svg>` +
+            `<span class="link-text">${pubkey.slice(0, 8)}&hellip; Logout</span>` +
+            `</button>`;
+        loginBtn.replaceWith(form);
+        form.addEventListener('submit', handleLogout);
+        window.refreshLucideIcons();
+    };
+
+    const replaceLogoutWithLogin = () => {
+        const logoutForm = document.querySelector('form[action*="nostr/logout"]');
+        if (!logoutForm) return;
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.id = 'nostr-login-btn';
+        button.className = 'nav-link flex items-center gap-1';
+        button.innerHTML =
+            `<svg data-lucide="log-in" class="w-5 h-5"></svg>` +
+            `<span class="link-text">Nostr Login</span>`;
+        logoutForm.replaceWith(button);
+        button.addEventListener('click', handleLogin);
+        window.refreshLucideIcons();
+    };
+
+    const handleLogin = async () => {
+        if (!window.nostr || !window.nostr.getPublicKey) {
+            alert('Nostr extension not available');
+            return;
+        }
+        try {
+            const pk = await window.nostr.getPublicKey();
+            if (!pk) return;
+            StorageClient.setNostrPubkey(pk);
+            await fetch('/auth/nostr/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                credentials: 'same-origin',
+                body: JSON.stringify({ pubkey: pk })
+            });
+            replaceLoginWithLogout(pk);
+        } catch (e) {
+            console.error(e);
+        }
+    };
+
+    const handleLogout = async (e) => {
+        e.preventDefault();
+        const form = e.target.closest('form');
+        await fetch(form.action, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken
+            },
+            credentials: 'same-origin',
+        });
+        StorageClient.clearNostrPubkey();
+        replaceLogoutWithLogin();
+    };
+
+    if (storedPk && !pubkeyMeta) {
+        replaceLoginWithLogout(storedPk);
+        fetch('/auth/nostr/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken
+            },
+            credentials: 'same-origin',
+            body: JSON.stringify({ pubkey: storedPk })
+        }).catch(() => {});
+    } else if (pubkeyMeta && !storedPk) {
+        StorageClient.setNostrPubkey(pubkeyMeta);
+    }
+
+    const loginBtn = document.getElementById('nostr-login-btn');
+    if (loginBtn) loginBtn.addEventListener('click', handleLogin);
+
+    const logoutForm = document.querySelector('form[action*="nostr/logout"]');
+    if (logoutForm) logoutForm.addEventListener('submit', handleLogout);
+});
+
+// ---------- NOSTR LOGIN ----------
+document.addEventListener('DOMContentLoaded', () => {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+    const pubkeyMeta = document.querySelector('meta[name="nostr-pubkey"]')?.content;
+    const storedPk = StorageClient.getNostrPubkey();
+
+    const replaceLoginWithLogout = (pubkey) => {
+        const loginBtn = document.getElementById('nostr-login-btn');
+        if (!loginBtn) return;
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/auth/nostr/logout';
+        form.className = 'nav-link flex items-center gap-1';
+        form.innerHTML =
+            `<input type="hidden" name="_token" value="${csrfToken}">` +
+            `<button type="submit" class="flex items-center gap-1">` +
+            `<svg data-lucide="log-out" class="w-5 h-5"></svg>` +
+            `<span class="link-text">${pubkey.slice(0, 8)}&hellip; Logout</span>` +
+            `</button>`;
+        loginBtn.replaceWith(form);
+        form.addEventListener('submit', handleLogout);
+        window.refreshLucideIcons();
+    };
+
+    const replaceLogoutWithLogin = () => {
+        const logoutForm = document.querySelector('form[action*="nostr/logout"]');
+        if (!logoutForm) return;
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.id = 'nostr-login-btn';
+        button.className = 'nav-link flex items-center gap-1';
+        button.innerHTML =
+            `<svg data-lucide="log-in" class="w-5 h-5"></svg>` +
+            `<span class="link-text">Nostr Login</span>`;
+        logoutForm.replaceWith(button);
+        button.addEventListener('click', handleLogin);
+        window.refreshLucideIcons();
+    };
+
+    const handleLogin = async () => {
+        if (!window.nostr || !window.nostr.getPublicKey) {
+            alert('Nostr extension not available');
+            return;
+        }
+        try {
+            const pk = await window.nostr.getPublicKey();
+            if (!pk) return;
+            StorageClient.setNostrPubkey(pk);
+            await fetch('/auth/nostr/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                credentials: 'same-origin',
+                body: JSON.stringify({ pubkey: pk })
+            });
+            replaceLoginWithLogout(pk);
+        } catch (e) {
+            console.error(e);
+        }
+    };
+
+    const handleLogout = async (e) => {
+        e.preventDefault();
+        const form = e.target.closest('form');
+        await fetch(form.action, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken
+            },
+            credentials: 'same-origin',
+        });
+        StorageClient.clearNostrPubkey();
+        replaceLogoutWithLogin();
+    };
+
+    if (storedPk && !pubkeyMeta) {
+        replaceLoginWithLogout(storedPk);
+        fetch('/auth/nostr/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken
+            },
+            credentials: 'same-origin',
+            body: JSON.stringify({ pubkey: storedPk })
+        }).catch(() => {});
+    } else if (pubkeyMeta && !storedPk) {
+        StorageClient.setNostrPubkey(pubkeyMeta);
+    }
+
+    const loginBtn = document.getElementById('nostr-login-btn');
+    if (loginBtn) loginBtn.addEventListener('click', handleLogin);
+
+    const logoutForm = document.querySelector('form[action*="nostr/logout"]');
+    if (logoutForm) logoutForm.addEventListener('submit', handleLogout);
+});
+
+// ---------- NOSTR LOGIN ----------
+document.addEventListener('DOMContentLoaded', () => {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+    const pubkeyMeta = document.querySelector('meta[name="nostr-pubkey"]')?.content;
+    const storedPk = StorageClient.getNostrPubkey();
+
+    const replaceLoginWithLogout = (pubkey) => {
+        const loginBtn = document.getElementById('nostr-login-btn');
+        if (!loginBtn) return;
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/auth/nostr/logout';
+        form.className = 'nav-link flex items-center gap-1';
+        form.innerHTML =
+            `<input type="hidden" name="_token" value="${csrfToken}">` +
+            `<button type="submit" class="flex items-center gap-1">` +
+            `<svg data-lucide="log-out" class="w-5 h-5"></svg>` +
+            `<span class="link-text">${pubkey.slice(0, 8)}&hellip; Logout</span>` +
+            `</button>`;
+        loginBtn.replaceWith(form);
+        form.addEventListener('submit', handleLogout);
+        window.refreshLucideIcons();
+    };
+
+    const replaceLogoutWithLogin = () => {
+        const logoutForm = document.querySelector('form[action*="nostr/logout"]');
+        if (!logoutForm) return;
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.id = 'nostr-login-btn';
+        button.className = 'nav-link flex items-center gap-1';
+        button.innerHTML =
+            `<svg data-lucide="log-in" class="w-5 h-5"></svg>` +
+            `<span class="link-text">Nostr Login</span>`;
+        logoutForm.replaceWith(button);
+        button.addEventListener('click', handleLogin);
+        window.refreshLucideIcons();
+    };
+
+    const handleLogin = async () => {
+        if (!window.nostr || !window.nostr.getPublicKey) {
+            alert('Nostr extension not available');
+            return;
+        }
+        try {
+            const pk = await window.nostr.getPublicKey();
+            if (!pk) return;
+            StorageClient.setNostrPubkey(pk);
+            await fetch('/auth/nostr/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                credentials: 'same-origin',
+                body: JSON.stringify({ pubkey: pk })
+            });
+            replaceLoginWithLogout(pk);
+        } catch (e) {
+            console.error(e);
+        }
+    };
+
+    const handleLogout = async (e) => {
+        e.preventDefault();
+        const form = e.target.closest('form');
+        await fetch(form.action, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken
+            },
+            credentials: 'same-origin',
+        });
+        StorageClient.clearNostrPubkey();
+        replaceLogoutWithLogin();
+    };
+
+    if (storedPk && !pubkeyMeta) {
+        replaceLoginWithLogout(storedPk);
+        fetch('/auth/nostr/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken
+            },
+            credentials: 'same-origin',
+            body: JSON.stringify({ pubkey: storedPk })
+        }).catch(() => {});
+    } else if (pubkeyMeta && !storedPk) {
+        StorageClient.setNostrPubkey(pubkeyMeta);
+    }
+
+    const loginBtn = document.getElementById('nostr-login-btn');
+    if (loginBtn) loginBtn.addEventListener('click', handleLogin);
+
+    const logoutForm = document.querySelector('form[action*="nostr/logout"]');
+    if (logoutForm) logoutForm.addEventListener('submit', handleLogout);
+});
+
+// ---------- NOSTR LOGIN ----------
+document.addEventListener('DOMContentLoaded', () => {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+
+    const replaceLoginWithLogout = (pubkey) => {
+        const loginBtn = document.getElementById('nostr-login-btn');
+        if (!loginBtn) return;
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/auth/nostr/logout';
+        form.className = 'nav-link flex items-center gap-1';
+        form.innerHTML =
+            `<input type="hidden" name="_token" value="${csrfToken}">` +
+            `<button type="submit" class="flex items-center gap-1">` +
+            `<svg data-lucide="log-out" class="w-5 h-5"></svg>` +
+            `<span class="link-text">${pubkey.slice(0, 5)}&hellip; Logout</span>` +
+            `</button>`;
+        loginBtn.replaceWith(form);
+        form.addEventListener('submit', handleLogout);
+        window.refreshLucideIcons();
+    };
+
+    const replaceLogoutWithLogin = () => {
+        const logoutForm = document.querySelector('form[action*="nostr/logout"]');
+        if (!logoutForm) return;
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.id = 'nostr-login-btn';
+        button.className = 'nav-link flex items-center gap-1';
+        button.innerHTML =
+            `<svg data-lucide="log-in" class="w-5 h-5"></svg>` +
+            `<span class="link-text">Nostr Login</span>`;
+        logoutForm.replaceWith(button);
+        button.addEventListener('click', handleLogin);
+        window.refreshLucideIcons();
+    };
+
+    const handleLogin = async () => {
+        if (!window.nostr || !window.nostr.getPublicKey) {
+            alert('Nostr extension not available');
+            return;
+        }
+        try {
+            const pk = await window.nostr.getPublicKey();
+            if (!pk) return;
+            StorageClient.setNostrPubkey(pk);
+            await fetch('/auth/nostr/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                body: JSON.stringify({ pubkey: pk })
+            });
+            replaceLoginWithLogout(pk);
+        } catch (e) {
+            console.error(e);
+        }
+    };
+
+    const handleLogout = async (e) => {
+        e.preventDefault();
+        const form = e.target.closest('form');
+        await fetch(form.action, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken
+            },
+        });
+        StorageClient.clearNostrPubkey();
+        replaceLogoutWithLogin();
+    };
+
+    const loginBtn = document.getElementById('nostr-login-btn');
+    if (loginBtn) loginBtn.addEventListener('click', handleLogin);
+
+    const logoutForm = document.querySelector('form[action*="nostr/logout"]');
+    if (logoutForm) logoutForm.addEventListener('submit', handleLogout);
+});

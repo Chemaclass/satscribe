@@ -47,6 +47,7 @@ final class ChatServiceProvider extends ServiceProvider
         $this->app->when(CreateChatAction::class)
             ->needs('$maxOpenAIAttempts')
             ->giveConfig('services.openai.max_attempts');
+
         $this->app->when(AddMessageAction::class)
             ->needs('$trackingId')
             ->give(tracking_id());

@@ -12,6 +12,9 @@
     <title>@yield('title', 'Satscribe – Satoshi Describer')</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="nostr-pubkey" content="{{ nostr_pubkey() }}">
+    <meta name="nostr-login-url" content="{{ route('nostr.login') }}">
+    <meta name="nostr-logout-url" content="{{ route('nostr.logout') }}">
     <script>
     if (localStorage.getItem('theme') === 'dark') {
         document.documentElement.classList.add('dark');

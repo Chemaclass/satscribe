@@ -281,7 +281,7 @@
                     this.validate();
 
 
-                    const form = document.querySelector('form');
+                    const form = document.getElementById('satscribe-form');
                     if (form) {
                         await this.submitForm(form);
                     }
