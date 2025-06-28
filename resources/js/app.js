@@ -62,28 +62,20 @@ const usedIcons = {
 createIcons({icons: usedIcons});
 
 async function fetchNostrProfile(pubkey) {
-console.log('fetchNostrProfile - A');
     let hex = pubkey;
-    console.log('Fetching nostr profile via hex - hex : '+ hex);
     if (pubkey.startsWith('npub')) {
         try {
-            console.log('Fetching nostr profile via npub');
             hex = nip19.decode(pubkey).data;
         } catch (e) {
-            console.log('Failed to decode npub', e);
             console.error('Failed to decode npub', e);
             return null;
         }
     }
-console.log('fetchNostrProfile - B');
     try {
-        console.log('Fetching nostr profile via relay');
         const relay = relayInit('wss://relay.damus.io');
         await relay.connect();
         return await new Promise((resolve) => {
-        console.log('Fetching nostr profile via relay - resolve - A');
             const sub = relay.sub([{ kinds: [0], authors: [hex], limit: 1 }]);
-        console.log('Fetching nostr profile via relay - resolve - B');
             let done = false;
             const finalize = (val) => {
                 if (done) return;
@@ -92,20 +84,20 @@ console.log('fetchNostrProfile - B');
                 relay.close();
                 resolve(val);
             };
-        console.log('Fetching nostr profile via relay - resolve - C');
             sub.on('event', (ev) => {
-        console.log('Fetching nostr profile via relay - resolve - D');
                 try {
                     const meta = JSON.parse(ev.content);
-                    console.log('meta', meta);
-                    finalize(meta.display_name || meta.name || null);
+                    finalize(
+                    Object.prototype.hasOwnProperty.call(meta, 'display_name')
+                        ? meta.display_name
+                        : meta.name ?? null
+                    );
                 } catch {
                     finalize(null);
                 }
             });
             sub.on('eose', () => finalize(null));
             setTimeout(() => finalize(null), 5000);
-        console.log('Fetching nostr profile via relay - resolve - E');
         });
     } catch (e) {
         console.error('Failed relay fetch', e);
