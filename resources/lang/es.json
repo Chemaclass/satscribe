@@ -4,7 +4,7 @@
     "home.subheading.line2": "Introduce una TXID o altura de bloque para obtener una explicación generada por IA.",
     "home.helper_link": "¿Quieres datos en tiempo real? Explora los últimos bloques en <a href=\"https://mempool.space\" target=\"_blank\" rel=\"noopener\" class=\"hover:underline\">mempool.space</a>",
     "home.disclaimer": "Satscribe no tiene relación con <strong>Ordinals</strong> ni <strong>inscriptions</strong>. Se centra únicamente en transacciones y bloques de Bitcoin.",
-    "home.placeholder": "Pega aquí una TXID o altura de bloque",
+    "home.placeholder": "Déjalo en blanco para usar el último bloque :height",
     "home.narrative.line1": "¿Alguna vez te has preguntado qué significa realmente una transacción de Bitcoin?",
     "home.narrative.line2": "Satscribe convierte datos crudos de la blockchain en historias claras y con sentido.",
     "home.footer.support": "Apoya el proyecto",

@@ -4,7 +4,7 @@
     "home.subheading.line2": "Gib eine TXID oder Blockhöhe ein, um eine KI-Erklärung zu erhalten.",
     "home.helper_link": "Du willst aktuelle Daten? Sieh dir die neuesten Blöcke auf <a href=\"https://mempool.space\" target=\"_blank\" rel=\"noopener\" class=\"hover:underline\">mempool.space</a> an",
     "home.disclaimer": "Satscribe hat nichts mit <strong>Ordinals</strong> oder <strong>Inscriptions</strong> zu tun. Es konzentriert sich ausschließlich auf Bitcoin-Transaktionen und -Blöcke.",
-    "home.placeholder": "Füge hier eine TXID oder Blockhöhe ein",
+    "home.placeholder": "Leer lassen, um den neuesten Block :height zu verwenden",
     "home.narrative.line1": "Hast du dich jemals gefragt, was eine Bitcoin-Transaktion wirklich bedeutet?",
     "home.narrative.line2": "Satscribe verwandelt rohe Blockchain-Daten in einfache, verständliche Geschichten.",
     "home.footer.support": "Unterstütze das Projekt",

@@ -22,6 +22,7 @@
                 :search="old('search', $search ?? '')"
                 :question="old('question', $question ?? '')"
                 :maxBitcoinBlockHeight="$maxBitcoinBlockHeight"
+                :latestBlockHeight="$latestBlockHeight"
                 :suggestedPromptsGrouped="$suggestedPromptsGrouped"
                 :persona="old('persona', $persona ?? PromptPersona::DEFAULT)"
                 :personaDescriptions="$personaDescriptions"
