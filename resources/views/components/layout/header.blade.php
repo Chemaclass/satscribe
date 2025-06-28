@@ -9,7 +9,7 @@
 <header class="flex justify-between select-none items-center px-4 py-3 border-gray-200 dark:border-gray-700">
     <a href="{{ url('/') }}" class="brand text-xl font-bold">Satscribe</a>
 
-    <nav class="nav-links flex items-center">
+    <nav class="nav-links flex items-center" aria-label="Main navigation">
         @if($hasFaqs)
             <a href="{{ route('faq.index') }}" class="nav-link flex items-center gap-1">
                 <svg data-lucide="lightbulb" class="w-5 h-5"></svg>
@@ -24,7 +24,6 @@
             <svg :data-lucide="dark ? 'sun' : 'moon'" id="theme-icon" class="w-5 h-5"></svg>
             <span class="link-text" x-text="dark ? '{{ __('Light') }}' : '{{ __('Dark') }}'"></span>
         </button>
-
 
         @if(!empty($btcPriceUsd))
             <div
