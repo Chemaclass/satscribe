@@ -224,6 +224,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const pubkeyMeta = document.querySelector('meta[name="nostr-pubkey"]')?.content;
     const loginUrl = document.querySelector('meta[name="nostr-login-url"]')?.content || '/auth/nostr/login';
     const logoutUrl = document.querySelector('meta[name="nostr-logout-url"]')?.content || '/auth/nostr/logout';
+    const challengeUrl = document.querySelector('meta[name="nostr-challenge-url"]')?.content || '/auth/nostr/challenge';
     const storedPk = StorageClient.getNostrPubkey();
 
     const replaceLoginWithLogout = (pubkey) => {
@@ -260,13 +261,23 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const handleLogin = async () => {
-        if (!window.nostr || !window.nostr.getPublicKey) {
+        if (!window.nostr || !window.nostr.getPublicKey || !window.nostr.signEvent) {
             alert('Nostr extension not available');
             return;
         }
         try {
             const pk = await window.nostr.getPublicKey();
             if (!pk) return;
+            const challResp = await fetch(challengeUrl, { credentials: 'same-origin' });
+            const { challenge } = await challResp.json();
+            const event = {
+                kind: 22242,
+                pubkey: pk,
+                created_at: Math.floor(Date.now() / 1000),
+                content: challenge,
+                tags: []
+            };
+            const signed = await window.nostr.signEvent(event);
             StorageClient.setNostrPubkey(pk);
             const resp = await fetch(loginUrl, {
                 method: 'POST',
@@ -275,7 +286,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     'X-CSRF-TOKEN': csrfToken
                 },
                 credentials: 'same-origin',
-                body: JSON.stringify({ pubkey: pk })
+                body: JSON.stringify({ event: signed })
             });
             if (resp.ok) {
                 replaceLoginWithLogout(pk);
@@ -364,13 +375,23 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const handleLogin = async () => {
-        if (!window.nostr || !window.nostr.getPublicKey) {
+        if (!window.nostr || !window.nostr.getPublicKey || !window.nostr.signEvent) {
             alert('Nostr extension not available');
             return;
         }
         try {
             const pk = await window.nostr.getPublicKey();
             if (!pk) return;
+            const challResp = await fetch(challengeUrl, { credentials: 'same-origin' });
+            const { challenge } = await challResp.json();
+            const event = {
+                kind: 22242,
+                pubkey: pk,
+                created_at: Math.floor(Date.now() / 1000),
+                content: challenge,
+                tags: []
+            };
+            const signed = await window.nostr.signEvent(event);
             StorageClient.setNostrPubkey(pk);
             const resp = await fetch('/auth/nostr/login', {
                 method: 'POST',
@@ -379,7 +400,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     'X-CSRF-TOKEN': csrfToken
                 },
                 credentials: 'same-origin',
-                body: JSON.stringify({ pubkey: pk })
+                body: JSON.stringify({ event: signed })
             });
             if (resp.ok) {
                 replaceLoginWithLogout(pk);
@@ -468,14 +489,23 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const handleLogin = async () => {
-        if (!window.nostr || !window.nostr.getPublicKey) {
+        if (!window.nostr || !window.nostr.getPublicKey || !window.nostr.signEvent) {
             alert('Nostr extension not available');
             return;
         }
         try {
             const pk = await window.nostr.getPublicKey();
             if (!pk) return;
-            StorageClient.setNostrPubkey(pk);
+            const challResp = await fetch(challengeUrl, { credentials: 'same-origin' });
+            const { challenge } = await challResp.json();
+            const event = {
+                kind: 22242,
+                pubkey: pk,
+                created_at: Math.floor(Date.now() / 1000),
+                content: challenge,
+                tags: []
+            };
+            const signed = await window.nostr.signEvent(event);
             await fetch('/auth/nostr/login', {
                 method: 'POST',
                 headers: {
@@ -483,7 +513,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     'X-CSRF-TOKEN': csrfToken
                 },
                 credentials: 'same-origin',
-                body: JSON.stringify({ pubkey: pk })
+                body: JSON.stringify({ event: signed })
             });
             replaceLoginWithLogout(pk);
         } catch (e) {
@@ -568,14 +598,23 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const handleLogin = async () => {
-        if (!window.nostr || !window.nostr.getPublicKey) {
+        if (!window.nostr || !window.nostr.getPublicKey || !window.nostr.signEvent) {
             alert('Nostr extension not available');
             return;
         }
         try {
             const pk = await window.nostr.getPublicKey();
             if (!pk) return;
-            StorageClient.setNostrPubkey(pk);
+            const challResp = await fetch(challengeUrl, { credentials: 'same-origin' });
+            const { challenge } = await challResp.json();
+            const event = {
+                kind: 22242,
+                pubkey: pk,
+                created_at: Math.floor(Date.now() / 1000),
+                content: challenge,
+                tags: []
+            };
+            const signed = await window.nostr.signEvent(event);
             await fetch('/auth/nostr/login', {
                 method: 'POST',
                 headers: {
@@ -583,7 +622,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     'X-CSRF-TOKEN': csrfToken
                 },
                 credentials: 'same-origin',
-                body: JSON.stringify({ pubkey: pk })
+                body: JSON.stringify({ event: signed })
             });
             replaceLoginWithLogout(pk);
         } catch (e) {
@@ -668,14 +707,23 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const handleLogin = async () => {
-        if (!window.nostr || !window.nostr.getPublicKey) {
+        if (!window.nostr || !window.nostr.getPublicKey || !window.nostr.signEvent) {
             alert('Nostr extension not available');
             return;
         }
         try {
             const pk = await window.nostr.getPublicKey();
             if (!pk) return;
-            StorageClient.setNostrPubkey(pk);
+            const challResp = await fetch(challengeUrl, { credentials: 'same-origin' });
+            const { challenge } = await challResp.json();
+            const event = {
+                kind: 22242,
+                pubkey: pk,
+                created_at: Math.floor(Date.now() / 1000),
+                content: challenge,
+                tags: []
+            };
+            const signed = await window.nostr.signEvent(event);
             await fetch('/auth/nostr/login', {
                 method: 'POST',
                 headers: {
@@ -683,7 +731,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     'X-CSRF-TOKEN': csrfToken
                 },
                 credentials: 'same-origin',
-                body: JSON.stringify({ pubkey: pk })
+                body: JSON.stringify({ event: signed })
             });
             replaceLoginWithLogout(pk);
         } catch (e) {
@@ -866,21 +914,30 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const handleLogin = async () => {
-        if (!window.nostr || !window.nostr.getPublicKey) {
+        if (!window.nostr || !window.nostr.getPublicKey || !window.nostr.signEvent) {
             alert('Nostr extension not available');
             return;
         }
         try {
             const pk = await window.nostr.getPublicKey();
             if (!pk) return;
-            StorageClient.setNostrPubkey(pk);
+            const challResp = await fetch(challengeUrl, { credentials: 'same-origin' });
+            const { challenge } = await challResp.json();
+            const event = {
+                kind: 22242,
+                pubkey: pk,
+                created_at: Math.floor(Date.now() / 1000),
+                content: challenge,
+                tags: []
+            };
+            const signed = await window.nostr.signEvent(event);
             await fetch('/auth/nostr/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': csrfToken
                 },
-                body: JSON.stringify({ pubkey: pk })
+                body: JSON.stringify({ event: signed })
             });
             replaceLoginWithLogout(pk);
         } catch (e) {

@@ -6,6 +6,7 @@ namespace Modules\Chat\Infrastructure\Http\Controller;
 
 use App\Models\Chat;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 use Modules\Blockchain\Domain\Exception\BlockchainException;
 use Modules\Chat\Application\ChatService;

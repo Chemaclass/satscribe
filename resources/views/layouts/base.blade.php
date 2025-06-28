@@ -15,6 +15,7 @@
     <meta name="nostr-pubkey" content="{{ nostr_pubkey() }}">
     <meta name="nostr-login-url" content="{{ route('nostr.login') }}">
     <meta name="nostr-logout-url" content="{{ route('nostr.logout') }}">
+    <meta name="nostr-challenge-url" content="{{ route('nostr.challenge') }}">
     <script>
     if (localStorage.getItem('theme') === 'dark') {
         document.documentElement.classList.add('dark');

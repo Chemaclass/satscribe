@@ -40,18 +40,18 @@ final class ChatServiceProvider extends ServiceProvider
     #[Override]
     public function register(): void
     {
+        $trackingId = tracking_id();
+
         $this->app->when(CreateChatAction::class)
             ->needs('$trackingId')
-            ->give(tracking_id());
-
+            ->give($trackingId);
         $this->app->when(CreateChatAction::class)
             ->needs('$maxOpenAIAttempts')
             ->giveConfig('services.openai.max_attempts');
 
         $this->app->when(AddMessageAction::class)
             ->needs('$trackingId')
-            ->give(tracking_id());
-
+            ->give($trackingId);
         $this->app->when(AddMessageAction::class)
             ->needs('$maxOpenAIAttempts')
             ->giveConfig('services.openai.max_attempts');
@@ -59,9 +59,8 @@ final class ChatServiceProvider extends ServiceProvider
         $this->app->when(ChatRepository::class)
             ->needs('$perPage')
             ->giveConfig('app.pagination.per_page');
-
         $this->app->when(ChatRepository::class)
             ->needs('$trackingId')
-            ->give(tracking_id());
+            ->give($trackingId);
     }
 }

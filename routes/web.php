@@ -27,5 +27,6 @@ Route::get('history/{messageId}/raw', [HistoryController::class, 'getRaw'])->nam
 Route::get('faq', [FaqController::class, 'index'])->name('faq.index');
 Route::get('trace-utxo', [TraceUtxoPageController::class,'index'])->name('trace-utxo.page');
 
+Route::get('auth/nostr/challenge', [NostrAuthController::class, 'challenge'])->name('nostr.challenge');
 Route::post('auth/nostr/login', [NostrAuthController::class, 'login'])->name('nostr.login');
 Route::post('auth/nostr/logout', [NostrAuthController::class, 'logout'])->name('nostr.logout');
