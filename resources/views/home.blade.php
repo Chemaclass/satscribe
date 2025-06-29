@@ -5,8 +5,9 @@
 @extends('layouts.base')
 
 @section('content')
+    <x-home.disclaimer />
     <section
-            class="satscribe-home px-2 py-6"
+            class="satscribe-home px-2"
             x-data="searchInputValidator('{{ old('search', $search ?? '') }}', {{ $maxBitcoinBlockHeight }})"
             x-init="
             validate();
@@ -16,7 +17,6 @@
                 }
             });
         ">
-        <x-home.disclaimer />
         <x-home.header/>
         <x-home.form
                 :search="old('search', $search ?? '')"

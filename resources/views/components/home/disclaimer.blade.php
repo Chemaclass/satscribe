@@ -2,7 +2,7 @@
     x-data="{ show: localStorage.getItem('hideInscriptionNotice') !== '1' }"
     x-show="show"
     x-cloak
-    class="mb-4 p-3 rounded-md bg-yellow-100 border border-yellow-200 text-yellow-800 text-sm flex justify-between items-start"
+    class="mb-4 p-2 rounded-md bg-yellow-100 border border-yellow-200 text-yellow-800 text-sm flex justify-between items-start"
 >
     <p>{!! __('home.disclaimer') !!}</p>
     <button
