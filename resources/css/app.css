@@ -58,9 +58,14 @@ body {
     font-family: var(--font-sans);
     background: var(--btc-bg-light);
     color: var(--btc-text-dark);
-    padding: 2rem;
-    max-width: 900px;
+    padding: 1.5rem;
+    max-width: 1000px;
     margin: auto;
+}
+
+.body-container {
+    max-width: 800px;
+    margin: 0 auto;
 }
 
 .dark body {

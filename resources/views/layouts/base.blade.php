@@ -55,11 +55,13 @@
         :has-faqs="$hasFaqs"
     />
 
-    <main class="flex-grow">
-        @yield('content')
-    </main>
+    <div class="body-container flex flex-col flex-grow">
+        <main class="flex-grow">
+            @yield('content')
+        </main>
 
-    <x-layout.footer />
+        <x-layout.footer />
+    </div>
     <x-layout.scroll-to-top />
     @stack('scripts')
 </body>
