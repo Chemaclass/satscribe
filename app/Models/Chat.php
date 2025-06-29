@@ -16,11 +16,13 @@ class Chat extends Model
         'title',
         'ulid',
         'tracking_id',
-        'is_private',
+        'is_public',
+        'is_shared',
     ];
 
     protected $casts = [
-        'is_private' => 'boolean',
+        'is_public' => 'boolean',
+        'is_shared' => 'boolean',
     ];
 
     public function getRouteKeyName(): string
@@ -157,6 +159,10 @@ class Chat extends Model
             ->toArray();
     }
 
+    public function canShow(string $trackingId): bool
+    {
+        return $trackingId !== $this->tracking_id && !$this->is_public && !$this->is_shared;
+    }
     protected static function boot(): void
     {
         parent::boot();

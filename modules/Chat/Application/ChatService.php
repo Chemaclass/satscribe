@@ -99,14 +99,14 @@ final readonly class ChatService
         $persona = $this->getPromptPersona($request);
         $question = $request->getQuestionInput();
         $refreshEnabled = $request->isRefreshEnabled();
-        $isPrivate = $request->isPrivate();
+        $isPublic = !$request->isPrivate();
 
         $actionResult = $this->createChatAction->execute(
             $search,
             $persona,
             $question,
             $refreshEnabled,
-            $isPrivate,
+            $isPublic,
         );
 
         return [

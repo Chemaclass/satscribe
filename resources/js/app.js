@@ -27,6 +27,7 @@ import {
     Scissors,
     Laptop,
     Lock,
+    Unlock,
     ExternalLink,
     X,
 } from 'lucide';
@@ -57,6 +58,7 @@ const usedIcons = {
     Scissors,
     Laptop,
     Lock,
+    Unlock,
     LogIn,
     LogOut,
     ExternalLink,
@@ -409,7 +411,41 @@ document.addEventListener('click', async (event) => {
             toggleRawBlockVisibility(button, rawBlock, !isVisible);
         }
     }
-});
+
+    // Toggle chat visibility
+    const visBtn = event.target.closest('.chat-visibility-btn');
+    if (visBtn) {
+        event.preventDefault();
+        event.stopPropagation();
+        event.stopImmediatePropagation();
+        await toggleChatVisibility(visBtn);
+    }
+}, true);
+
+async function toggleChatVisibility(button) {
+    try {
+        const { data } = await axios.post(button.dataset.url);
+        const isPublic = data.is_public;
+
+        button.dataset.public = isPublic ? '1' : '0';
+
+        const icon = button.querySelector('[data-lucide]');
+        if (icon) {
+            const newIcon = isPublic ? 'unlock' : 'lock';
+            icon.setAttribute('data-lucide', newIcon);
+            icon.setAttribute('aria-label', isPublic ? 'Public chat' : 'Private chat');
+        }
+
+        const tooltip = button.querySelector('.tooltip-content');
+        if (tooltip) {
+            tooltip.textContent = isPublic ? 'Public chat' : 'Private chat';
+        }
+
+        window.refreshLucideIcons?.();
+    } catch (e) {
+        console.error('Failed to toggle visibility', e);
+    }
+}
 
 // ---------- FETCH INTERCEPT ----------
 window.addEventListener('load', () => {

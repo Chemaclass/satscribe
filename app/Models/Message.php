@@ -32,7 +32,7 @@ class Message extends Model
 
     public function isBlock(): bool
     {
-        return $this->meta['type'] === 'block';
+        return $this->getTypeAttribute() === 'block';
     }
 
     public function getTypeAttribute(): ?string

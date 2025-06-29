@@ -41,7 +41,7 @@ final readonly class CreateChatAction implements CreateChatActionInterface
         PromptPersona $persona,
         string $question,
         bool $refreshEnabled = false,
-        bool $isPrivate = false,
+        bool $isPublic = false,
     ): CreateChatActionResult {
         $this->logger->info('Create chat action started', [
             'input' => $input->text,
@@ -58,7 +58,7 @@ final readonly class CreateChatAction implements CreateChatActionInterface
             }
         }
 
-        $result = $this->createNewChat($input, $persona, $question, $refreshEnabled, $isPrivate);
+        $result = $this->createNewChat($input, $persona, $question, $refreshEnabled, $isPublic);
         $this->logger->info('New chat created', ['chat_id' => $result->id]);
 
         return new CreateChatActionResult($result, isFresh: true);
@@ -69,7 +69,7 @@ final readonly class CreateChatAction implements CreateChatActionInterface
         PromptPersona $persona,
         string $question,
         bool $refreshEnabled,
-        bool $isPrivate,
+        bool $isPublic,
     ): Chat {
         $this->enforceRateLimit();
 
@@ -86,7 +86,7 @@ final readonly class CreateChatAction implements CreateChatActionInterface
             $blockchainData->current(),
             $persona,
             $cleanQuestion,
-            $isPrivate,
+            $isPublic,
         );
     }
 
