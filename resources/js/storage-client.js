@@ -23,6 +23,15 @@ const StorageClient = {
     clearNostrName() {
         localStorage.removeItem('nostr_name');
     },
+    getNostrImage() {
+        return localStorage.getItem('nostr_image');
+    },
+    setNostrImage(url) {
+        localStorage.setItem('nostr_image', url);
+    },
+    clearNostrImage() {
+        localStorage.removeItem('nostr_image');
+    },
 };
 
 export default StorageClient;

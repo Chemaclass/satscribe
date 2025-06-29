@@ -116,6 +116,11 @@
                         const userMessage = rawQuestion?.trim() ? rawQuestion.trim() : @js(__('Give me a generic overview.'));
 
                         // Render user input
+                        const nostrImg = StorageClient.getNostrImage();
+                        const userIcon = nostrImg ?
+                            `<img src="${nostrImg}" alt="user" class="w-6 h-6 rounded-full nostr-avatar">` :
+                            `<i data-lucide="user" class="w-6 h-6"></i>`;
+
                         const userHtml = `
             <div class="chat-message-group mb-6">
                 <div class="user-message mb-2 text-right">
@@ -123,7 +128,7 @@
                         <div class="inline-block rounded px-3 py-2">
                             ${this.escapeHtml(userMessage)}
                         </div>
-                        <i data-lucide="user" class="w-6 h-6"></i>
+                        ${userIcon}
                     </div>
                 </div>
                 <div id="assistant-message-${assistantMsgCount}" class="assistant-message loading-spinner-group text-left">
@@ -133,6 +138,7 @@
         `;
                         chatContainer.insertAdjacentHTML('beforeend', userHtml);
                         window.refreshLucideIcons?.();
+                        window.setUserAvatar?.(StorageClient.getNostrImage());
 
                         // Send to backend
                         const {data} = await axios.post(form.action, formData, {
@@ -295,6 +301,11 @@
                     const assistantMsgCount = document.querySelectorAll('.assistant-message').length;
 
                     // 1. Add the user message
+                    const nostrImg = StorageClient.getNostrImage();
+                    const userIcon = nostrImg ?
+                        `<img src="${nostrImg}" alt="user" class="w-6 h-6 rounded-full nostr-avatar">` :
+                        `<i data-lucide="user" class="w-6 h-6"></i>`;
+
                     const userHtml = `
             <div class="chat-message-group mb-6">
                 <div class="user-message mb-2 text-right">
@@ -302,7 +313,7 @@
                         <div class="inline-block rounded px-3 py-2">
                             ${this.escapeHtml(message)}
                         </div>
-                        <i data-lucide="user" class="w-6 h-6"></i>
+                        ${userIcon}
                     </div>
                 </div>
                 <!-- Assistant will be appended here -->
@@ -313,6 +324,7 @@
         `;
                     chatGroups.insertAdjacentHTML('beforeend', userHtml);
                     window.refreshLucideIcons?.();
+                    window.setUserAvatar?.(StorageClient.getNostrImage());
 
                     // 2. Clear the input
                     document.getElementById('customFollowUp').value = "";

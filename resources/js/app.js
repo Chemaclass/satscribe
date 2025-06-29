@@ -60,6 +60,7 @@ const usedIcons = {
 };
 
 createIcons({icons: usedIcons});
+applyNostrAvatarToMessages();
 
 async function fetchNostrProfile(pubkey) {
     let hex = pubkey;
@@ -87,11 +88,12 @@ async function fetchNostrProfile(pubkey) {
             sub.on('event', (ev) => {
                 try {
                     const meta = JSON.parse(ev.content);
-                    finalize(
-                    Object.prototype.hasOwnProperty.call(meta, 'display_name')
-                        ? meta.display_name
-                        : meta.name ?? null
-                    );
+                    finalize({
+                        name: Object.prototype.hasOwnProperty.call(meta, 'display_name')
+                            ? meta.display_name
+                            : meta.name ?? null,
+                        image: meta.image || meta.picture || null,
+                    });
                 } catch {
                     finalize(null);
                 }
@@ -108,10 +110,18 @@ async function fetchNostrProfile(pubkey) {
 
 async function updateNostrLogoutLabel(pubkey) {
     let name = StorageClient.getNostrName();
-    if (!name) {
-        name = await fetchNostrProfile(pubkey);
-        if (name) {
-            StorageClient.setNostrName(name);
+    let image = StorageClient.getNostrImage();
+    if (!name || !image) {
+        const profile = await fetchNostrProfile(pubkey);
+        if (profile) {
+            if (!name && profile.name) {
+                name = profile.name;
+                StorageClient.setNostrName(name);
+            }
+            if (!image && profile.image) {
+                image = profile.image;
+                StorageClient.setNostrImage(image);
+            }
         } else {
             console.warn(`No nostr metadata found for pubkey ${pubkey}. Consider setting display_name via a client.`);
         }
@@ -123,11 +133,50 @@ async function updateNostrLogoutLabel(pubkey) {
             label.textContent = `${name} Logout`;
         }
     }
+
+    if (image) {
+        const avatar = document.getElementById('nostr-avatar');
+        if (avatar) {
+            avatar.src = image;
+        }
+    }
+
+    applyNostrAvatarToMessages();
+}
+
+function applyNostrAvatarToMessages() {
+    const pubkey = StorageClient.getNostrPubkey();
+    const image = StorageClient.getNostrImage();
+
+    if (pubkey && image) {
+        document.querySelectorAll('.user-message [data-lucide="user"]').forEach(el => {
+            const img = document.createElement('img');
+            img.src = image;
+            img.className = 'w-6 h-6 rounded-full user-avatar';
+            el.replaceWith(img);
+        });
+        document.querySelectorAll('.user-message img.user-avatar').forEach(img => {
+            img.src = image;
+        });
+    } else {
+        const replaced = [];
+        document.querySelectorAll('.user-message img.user-avatar').forEach(img => {
+            const icon = document.createElement('i');
+            icon.setAttribute('data-lucide', 'user');
+            icon.setAttribute('class', 'w-6 h-6');
+            img.replaceWith(icon);
+            replaced.push(icon);
+        });
+        if (replaced.length > 0) {
+            createIcons({icons: usedIcons});
+        }
+    }
 }
 
 // ---------- DOM READY ----------
 document.addEventListener('DOMContentLoaded', () => {
     createIcons({icons: usedIcons});
+    applyNostrAvatarToMessages();
 
     setupBlockchainToggle();
     setupDescriptionToggle();
@@ -140,7 +189,10 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     window.refreshLucideIcons = () => {
-        requestAnimationFrame(() => createIcons({icons: usedIcons}));
+        requestAnimationFrame(() => {
+            createIcons({icons: usedIcons});
+            applyNostrAvatarToMessages();
+        });
     };
 });
 
@@ -379,6 +431,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         StorageClient.clearNostrPubkey();
         StorageClient.clearNostrName();
+        StorageClient.clearNostrImage();
         replaceLogoutWithLogin();
     };
 
@@ -396,8 +449,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }).catch(() => {});
     } else if (pubkeyMeta && !storedPk) {
         StorageClient.setNostrPubkey(pubkeyMeta);
-        updateNostrLogoutLabel(pubkeyMeta);
-    } else if (pubkeyMeta && storedPk) {
         updateNostrLogoutLabel(pubkeyMeta);
     }
 
