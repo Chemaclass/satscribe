@@ -43,7 +43,7 @@ final readonly class CreateChatAction implements CreateChatActionInterface
         bool $refreshEnabled = false,
         bool $isPublic = false,
     ): CreateChatActionResult {
-        $this->logger->info('Create chat action started', [
+        $this->logger->debug('Create chat action started', [
             'input' => $input->text,
             'persona' => $persona->value,
             'refresh' => $refreshEnabled,
@@ -53,7 +53,7 @@ final readonly class CreateChatAction implements CreateChatActionInterface
             $chat = $this->repository->findByCriteria($input, $persona, $question);
 
             if ($chat instanceof Chat && !$chat->force_refresh) {
-                $this->logger->info('Returning cached chat', ['chat_id' => $chat->id]);
+                $this->logger->debug('Returning cached chat', ['chat_id' => $chat->id]);
                 return new CreateChatActionResult($chat, isFresh: false);
             }
         }

@@ -22,11 +22,11 @@ final readonly class HistoryService
      */
     public function getHistory(bool $showAll): Paginator
     {
-        $this->logger->info('Fetching chat history', ['all' => $showAll]);
+        $this->logger->debug('Fetching chat history', ['all' => $showAll]);
 
         $pagination = $this->repository->getPagination($showAll);
 
-        $this->logger->info('Chat history fetched');
+        $this->logger->debug('Chat history fetched');
 
         return $pagination;
     }
@@ -36,13 +36,13 @@ final readonly class HistoryService
      */
     public function getRawMessageData(int $messageId): ?array
     {
-        $this->logger->info('Fetching raw message data', ['message_id' => $messageId]);
+        $this->logger->debug('Fetching raw message data', ['message_id' => $messageId]);
 
         $message = Message::find($messageId);
 
         $raw = $message->meta['raw_data'] ?? null;
 
-        $this->logger->info('Raw message data fetched', ['exists' => $raw !== null]);
+        $this->logger->debug('Raw message data fetched', ['exists' => $raw !== null]);
 
         return $raw;
     }

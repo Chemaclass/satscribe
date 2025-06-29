@@ -39,7 +39,7 @@ final readonly class TransactionTracer
             try {
                 $data = $this->blockchainFacade->getBlockchainData(PromptInput::fromRaw($current));
                 $tx = $data->transaction;
-                $this->logger->info('Generating Backtrace', [
+                $this->logger->debug('Generating Backtrace', [
                     'count(trace)' => count($trace),
                     'maxDepth' => $maxDepth,
                     'tx' => $tx instanceof TransactionData ? $tx->txid : 'null',

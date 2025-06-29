@@ -27,7 +27,7 @@ final readonly class UtxoTracer
     public function getBacktrace(string $txid, int $depth = 1): array
     {
         if (($cached = $this->repository->find($txid, $depth)) instanceof UtxoTrace) {
-            $this->logger->info('Loaded UTXO trace from DB', [
+            $this->logger->debug('Loaded UTXO trace from DB', [
                 'txid' => $txid,
                 'depth' => $depth,
             ]);
@@ -57,7 +57,7 @@ final readonly class UtxoTracer
     public function buildBacktrace(string $txid, int $depth = 2): array
     {
         // todo: consider make this method private and/or extract to class to keep unit tests
-        $this->logger->info('Starting UTXO trace', [
+        $this->logger->debug('Starting UTXO trace', [
             'txid' => $txid,
             'depth' => $depth,
         ]);
@@ -72,7 +72,7 @@ final readonly class UtxoTracer
 
         $result = [];
         foreach ($tx['vout'] as $output) {
-            $this->logger->info('Tracing output', ['output' => $output]);
+            $this->logger->debug('Tracing output', ['output' => $output]);
             $result[] = [
                 'utxo' => [
                     'txid' => $txid,
@@ -146,7 +146,7 @@ final readonly class UtxoTracer
         }
 
         $url = self::BASE_URL . "/tx/{$txid}";
-        $this->logger->info('Blockstream API call', [
+        $this->logger->debug('Blockstream API call', [
             'url' => $url,
         ]);
 
@@ -167,14 +167,14 @@ final readonly class UtxoTracer
     private function traceInputs(string $txid, int $depth, int $level): array
     {
         if ($depth <= 0) {
-            $this->logger->info('Reached max depth', [
+            $this->logger->debug('Reached max depth', [
                 'txid' => $txid,
                 'level' => $level,
             ]);
             return [];
         }
 
-        $this->logger->info('Fetching transaction', [
+        $this->logger->debug('Fetching transaction', [
             'txid' => $txid,
             'level' => $level,
         ]);
@@ -213,7 +213,7 @@ final readonly class UtxoTracer
 
         $voutArray = $this->getVout($prevTxid, $vout);
 
-        $this->logger->info('Tracing input', [
+        $this->logger->debug('Tracing input', [
             'txid' => $prevTxid,
             'vout' => $vout,
             'index' => $index,

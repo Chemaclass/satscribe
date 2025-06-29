@@ -50,7 +50,7 @@ final readonly class ChatController
 
     public function createChat(CreateChatRequest $request): JsonResponse
     {
-        $this->logger->info('Creating chat request', [
+        $this->logger->debug('Creating chat request', [
             'search' => $request->hasSearchInput() ? $request->getSearchInput() : null,
             'persona' => $request->getPersonaInput(),
             'ip' => $request->ip(),

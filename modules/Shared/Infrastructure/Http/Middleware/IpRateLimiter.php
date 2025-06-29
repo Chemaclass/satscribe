@@ -74,7 +74,7 @@ final readonly class IpRateLimiter
 
     private function logTracking(string $trackingId, string $cacheKey): void
     {
-        $this->logger->info('Tracking request', [
+        $this->logger->debug('Tracking request', [
             'tracking_id' => $trackingId,
             'invoiceCacheKey' => $cacheKey,
         ]);
@@ -101,7 +101,7 @@ final readonly class IpRateLimiter
         $cachedInvoice = $this->cache->get($invoiceCacheKey);
 
         if ($this->invoiceValidator->isValidCachedInvoice($cachedInvoice)) {
-            $this->logger->info('Using valid cached invoice', ['invoice' => $cachedInvoice]);
+            $this->logger->debug('Using valid cached invoice', ['invoice' => $cachedInvoice]);
             return $this->buildRateLimitedResponse($rateLimitKey, $cachedInvoice, $maxAttempts);
         }
 
@@ -133,7 +133,7 @@ final readonly class IpRateLimiter
 
     private function cacheInvoice(string $key, array $invoice): void
     {
-        $this->logger->info('Caching new invoice', ['invoiceCacheKey' => $key]);
+        $this->logger->debug('Caching new invoice', ['invoiceCacheKey' => $key]);
 
         $this->cache->put(
             $key,
@@ -144,7 +144,7 @@ final readonly class IpRateLimiter
 
     private function logRateLimitHit(string $key): void
     {
-        $this->logger->info('Rate limiter hit', [
+        $this->logger->debug('Rate limiter hit', [
             'key' => $key,
             'attempts' => RateLimiter::attempts($key),
         ]);

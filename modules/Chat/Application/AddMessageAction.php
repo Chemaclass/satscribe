@@ -37,7 +37,7 @@ final readonly class AddMessageAction implements AddMessageActionInterface
 
     public function execute(Chat $chat, string $message): void
     {
-        $this->logger->info('Adding message to chat', ['chat_id' => $chat->id]);
+        $this->logger->debug('Adding message to chat', ['chat_id' => $chat->id]);
         $this->enforceRateLimit();
         $firstUserMessage = $chat->getFirstUserMessage();
 
@@ -48,7 +48,7 @@ final readonly class AddMessageAction implements AddMessageActionInterface
         $aiResponse = $this->generateAiResponse($input, $persona, $cleanMsg, $chat);
 
         $this->chatRepository->addMessageToChat($chat, $cleanMsg, $aiResponse);
-        $this->logger->info('Message added to chat', ['chat_id' => $chat->id]);
+        $this->logger->debug('Message added to chat', ['chat_id' => $chat->id]);
     }
 
     private function enforceRateLimit(): void

@@ -38,7 +38,7 @@ final readonly class AlbySettleWebhookAction
     ): void {
         $verified = $this->verifySignature($payload, $svixId, $svixTimestamp, $svixSignature);
 
-        $this->logger->info('Webhook payload received', ['payload' => $verified->toArray()]);
+        $this->logger->debug('Webhook payload received', ['payload' => $verified->toArray()]);
 
         if ($verified->type !== 'incoming') {
             $this->logger->warning('Unhandled webhook type', ['type' => $verified->type]);
@@ -66,7 +66,7 @@ final readonly class AlbySettleWebhookAction
                 'svix-signature' => $svixSignature,
             ]);
 
-            $this->logger->info('Webhook signature successfully verified');
+            $this->logger->debug('Webhook signature successfully verified');
 
             $data = json_decode($payload, true, flags: JSON_THROW_ON_ERROR);
             return AlbySettleWebhookPayload::fromArray($data);
@@ -93,7 +93,7 @@ final readonly class AlbySettleWebhookAction
             }
 
             if ($cached !== null) {
-                $this->logger->info('Tracking data found for short hash', ['shortHash' => $shortHash]);
+                $this->logger->debug('Tracking data found for short hash', ['shortHash' => $shortHash]);
             } else {
                 $this->logger->warning('No tracking data found for short hash', ['shortHash' => $shortHash]);
             }
@@ -102,7 +102,7 @@ final readonly class AlbySettleWebhookAction
                 $cacheKey = IpRateLimiter::createRateLimitKey($trackingId);
                 $this->rateLimiter->clear($cacheKey);
 
-                $this->logger->info('Rate limit cleared for tracking ID', [
+                $this->logger->debug('Rate limit cleared for tracking ID', [
                     'trackingId' => $trackingId,
                     'invoiceCacheKey' => $cacheKey,
                 ]);

@@ -34,10 +34,10 @@ final readonly class CachedInvoiceValidator implements CachedInvoiceValidatorInt
         }
 
         $expiresAt = Carbon::parse($cached['created_at'])->addSeconds((int) $cached['expiry']);
-        $this->logger->info('Cached invoice expiry', ['expires_at' => $expiresAt->toDateTimeString()]);
+        $this->logger->debug('Cached invoice expiry', ['expires_at' => $expiresAt->toDateTimeString()]);
 
         if ($this->now->greaterThanOrEqualTo($expiresAt)) {
-            $this->logger->info('Cached invoice expired');
+            $this->logger->debug('Cached invoice expired');
 
             return false;
         }
