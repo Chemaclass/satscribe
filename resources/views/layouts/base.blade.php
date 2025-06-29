@@ -1,3 +1,10 @@
+@props([
+    'btcPriceUsd' => 0,
+    'btcPriceEur' => 0,
+    'btcPriceCny' => 0,
+    'btcPriceGbp' => 0,
+    'hasFaqs' => false,
+])
 <!DOCTYPE html>
 <html lang="en"
       x-data="{ dark: localStorage.getItem('theme') === 'dark' }"
