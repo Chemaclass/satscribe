@@ -7,12 +7,17 @@ namespace Modules\NostrAuth\Infrastructure\Http\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
+use Modules\NostrAuth\Application\EventSignatureVerifier;
+
 use Symfony\Component\HttpFoundation\Response;
 
 use function is_array;
 
-final class NostrAuthController
+final readonly class NostrAuthController
 {
+    public function __construct(private EventSignatureVerifier $verifier)
+    {
+    }
     public function challenge(Request $request): JsonResponse
     {
         $challenge = bin2hex(random_bytes(32));
@@ -39,7 +44,9 @@ final class NostrAuthController
             return response()->json(['error' => 'Invalid challenge'], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
-        // TODO: verify signature
+        if (!$this->verifier->verify($event)) {
+            return response()->json(['error' => 'Invalid signature'], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
 
         $request->session()->put('nostr_pubkey', $pubkey);
 
