@@ -5,13 +5,10 @@ declare(strict_types=1);
 namespace Tests\Feature;
 
 use App\Models\Faq;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 final class FaqVisibilityTest extends TestCase
 {
-    use RefreshDatabase;
-
     public function test_faq_page_renders_when_faqs_exist(): void
     {
         config(['features.btc_price' => false]);

@@ -5,14 +5,11 @@ declare(strict_types=1);
 namespace Tests\Feature;
 
 use App\Models\Chat;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
 
 final class ChatVisibilityTest extends TestCase
 {
-    use RefreshDatabase;
-
     public function test_owner_can_view_private_chat(): void
     {
         $chat = $this->createChat(['tracking_id' => 'owner']);
