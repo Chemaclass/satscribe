@@ -310,7 +310,44 @@ export function initNostrAuth() {
 
         const handleLogin = async () => {
             if (!window.nostr || !window.nostr.getPublicKey || !window.nostr.signEvent) {
-                alert('Nostr extension not available');
+                try {
+                    const challResp = await fetch(challengeUrl, { credentials: 'same-origin' });
+                    const { challenge } = await challResp.json();
+                    const copy = prompt(
+                        'No Nostr extension detected.\n' +
+                        'Copy the text below and sign it with your Nostr client:',
+                        challenge
+                    );
+                    if (copy === null) return;
+                    const entered = prompt('Paste the signed event JSON here:');
+                    if (!entered) return;
+                    let event;
+                    try {
+                        event = JSON.parse(entered);
+                    } catch {
+                        alert('Invalid JSON');
+                        return;
+                    }
+                    const resp = await fetch(loginUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken
+                        },
+                        credentials: 'same-origin',
+                        body: JSON.stringify({ event })
+                    });
+                    if (resp.ok) {
+                        const { pubkey } = await resp.json();
+                        StorageClient.setNostrPubkey(pubkey);
+                        replaceLoginWithLogout(pubkey);
+                        window.location.reload();
+                    } else {
+                        alert('Login failed');
+                    }
+                } catch (e) {
+                    console.error(e);
+                }
                 return;
             }
             try {

@@ -12,6 +12,7 @@
 - 💾 Saves each description to the database
 - 🗂️ View and paginate all previous descriptions
 - 🔐 Login via Nostr extension with challenge signing
+- 🔑 Manual login by pasting a signed Nostr event when no extension is available
 
 ## 🖼️ Demo
 
@@ -65,6 +66,15 @@ browser. Enter a Bitcoin transaction ID or block height in the form and the
 application will fetch the blockchain data, send it to OpenAI and display a
 short summary. Every generated paragraph is stored so you can review it later in
 the **History** page.
+
+## 🔑 Manual Nostr Login
+
+If your browser doesn't have a Nostr extension, you can still sign in:
+
+1. Click **Login → Nostr** and copy the challenge text that appears.
+2. Use any external Nostr app (for example a mobile wallet) to sign a `kind 22242` event with that challenge as the content.
+3. Copy the full JSON of the signed event and paste it back in the next prompt.
+4. Submit and you're logged in with your Nostr pubkey.
 
 ## 🧪 Testing
 
