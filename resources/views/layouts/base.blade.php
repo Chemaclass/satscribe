@@ -33,7 +33,8 @@
         showRawData: "{{ __('Show raw data') }}",
         hideRawData: "{{ __('Hide raw data') }}",
         hide: "{{ __('Hide') }}",
-        raw: "{{ __('Raw') }}"
+        raw: "{{ __('Raw') }}",
+        loading: "{{ __('Loading...') }}"
     };
     </script>
     <x-preload-assets />

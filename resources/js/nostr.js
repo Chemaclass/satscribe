@@ -95,9 +95,13 @@ export async function updateNostrLogoutLabel(pubkey) {
         }
     }
 
-    if (name) {
-        const label = document.getElementById('nostr-logout-label');
-        if (label) label.textContent = `${name}`;
+    const label = document.getElementById('nostr-logout-label');
+    if (label) {
+        if (name) {
+            label.textContent = `${name}`;
+        } else {
+            label.textContent = pubkey.slice(0, 5);
+        }
     }
 
     const avatar = document.getElementById('nostr-avatar');
@@ -248,7 +252,7 @@ export function initNostrAuth() {
             wrapper.innerHTML =
                 `<button type="button" class="nav-link flex items-center gap-1" @click="open = !open">` +
                 `<img id="nostr-avatar" src="" alt="nostr avatar" class="w-5 h-5 rounded-full hidden" />` +
-                `<span id="nostr-logout-label" class="link-text">${pubkey.slice(0, 5)}</span>` +
+                `<span id="nostr-logout-label" class="link-text">${window.i18n.loading}</span>` +
                 `<svg id="nostr-menu-icon" data-lucide="chevron-down" class="w-5 h-5"></svg>` +
                 `</button>` +
                 `<div x-show="open" x-cloak @click.away="open = false" class="absolute right-0 mt-2 w-36 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 z-50">` +
