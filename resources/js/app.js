@@ -134,11 +134,34 @@ async function updateNostrLogoutLabel(pubkey) {
         }
     }
 
+    const $avatar = document.getElementById('nostr-avatar');
+    const $icon = document.getElementById('nostr-logout-icon');
+console.log('Updating nostr avatar', name, image);
+        console.log('Setting avatar - A');
     if (image) {
-        const avatar = document.getElementById('nostr-avatar');
-        if (avatar) {
-            avatar.src = image;
+        console.log('Setting avatar - B');
+        if ($avatar) {
+        console.log('Setting avatar - C');
+            console.log('Setting avatar', image);
+            $avatar.src = image;
+            $avatar.classList.remove('hidden');
         }
+        if ($icon) {
+        console.log('Setting avatar - D');
+            console.log('Setting icon', image);
+            $icon.classList.add('hidden');
+        }
+    } else {
+        console.log('Setting avatar - E');
+        if ($avatar) {
+        console.log('Setting avatar - F');
+            $avatar.classList.add('hidden');
+        }
+        if ($icon) {
+        console.log('Setting avatar - G');
+            $icon.classList.remove('hidden');
+        }
+        console.log('Setting avatar - H');
     }
 
     applyNostrAvatarToMessages();

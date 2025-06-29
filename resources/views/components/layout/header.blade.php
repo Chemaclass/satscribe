@@ -55,9 +55,10 @@
         @if(nostr_pubkey())
             <form method="POST" action="{{ route('nostr.logout') }}" class="nav-link flex items-center gap-1">
                 @csrf
-                <button type="submit" class="flex items-center gap-1">
-                    <svg data-lucide="log-out" class="w-5 h-5"></svg>
-                    <span id="nostr-logout-label" class="link-text">{{ substr(nostr_pubkey(), 0, 5) }}&hellip; {{ __('Logout') }}</span>
+                <button type="submit" class="flex items-center gap-1 cursor-pointer">
+                    <img id="nostr-avatar" src="" alt="nostr avatar" class="w-5 h-5 rounded-full hidden" />
+                    <span id="nostr-logout-label" class="link-text">{{ substr(nostr_pubkey(), 0, 5) }}</span>
+                    <svg id="nostr-logout-icon" data-lucide="log-out" class="w-5 h-5"></svg>
                 </button>
             </form>
         @else
