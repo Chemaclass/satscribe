@@ -82,7 +82,7 @@ final readonly class ChatService
             'maxBitcoinBlockHeight' => $this->blockchainFacade->getMaxPossibleBlockHeight(),
             'latestBlockHeight' => $this->blockchainFacade->getCurrentBlockHeight(),
             'personaDescriptions' => PromptPersona::descriptions()->toJson(),
-            'totalChats' => Chat::count(),
+            'totalMessages' => Message::count(),
         ];
     }
 

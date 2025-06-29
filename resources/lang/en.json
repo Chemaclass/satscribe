@@ -120,6 +120,6 @@
     "Tell me something interesting I might miss at first glance.": "Tell me something interesting I might miss at first glance.",
     "Generate a title for a blog post about this.": "Generate a title for a blog post about this.",
     "Give me a generic overview.": "Give me a generic overview.",
-    "home.total_chats": "Total chats so far: :count",
+    "home.total_messages": "Total messages so far: :count",
     "Got it": "Got it"
 }
