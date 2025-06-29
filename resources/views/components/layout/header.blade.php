@@ -56,9 +56,14 @@
                     class="profile-menu absolute right-0 text-left mt-2 w-36 rounded-md shadow-lg border border-gray-300 dark:border-gray-600 z-50 flex flex-col items-start"
                 >
                     <a href="{{ route('history.index') }}"
-                       class="flex items-center gap-1 px-4 py-2 nav-link w-full text-left border-b border-gray-200 dark:border-gray-700">
+                           class="flex items-center gap-1 px-4 py-2 nav-link w-full text-left border-b border-gray-200 dark:border-gray-700">
                         <svg data-lucide="scroll" class="w-5 h-5"></svg>
                         <span>{{ __('History') }}</span>
+                    </a>
+
+                    <a href="{{ route('profile.index') }}" class="flex items-center gap-1 px-4 py-2 nav-link w-full text-left">
+                        <svg data-lucide="user" class="w-5 h-5"></svg>
+                        <span>{{ __('Profile') }}</span>
                     </a>
 
                     <button type="button"
