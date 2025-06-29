@@ -60,7 +60,7 @@
             </div>
         </div>
     </div>
-    <div class="chat-body relative collapsed" data-target="{{ $entryId }}">
+    <div class="chat-body relative cursor-pointer" onclick="window.location.href='{{ route('chat.show', $chat) }}'">
         <div class="user-message mb-2 text-right" data-owned="{{ $owned ? '1' : '0' }}">
             <div class="flex items-center gap-1 justify-end">
                 <div class="inline-block rounded px-3 py-2">
@@ -90,12 +90,6 @@
             <a href="{{ $mempoolUrl }}" target="_blank" rel="noopener" class="link short-label inline sm:hidden">
                 {{ __('Mempool') }}
             </a>
-            <button type="button"
-                    class="toggle-chat-btn link"
-                    data-target="{{ $entryId }}">
-                <span class="full-label hidden sm:inline">{{ __('Show full response') }}</span>
-                <span class="short-label inline sm:hidden">{{ __('Full') }}</span>
-            </button>
             <button type="button"
                     class="toggle-history-raw-btn link"
                     data-target="raw-{{ $assistantMsg->id }}"

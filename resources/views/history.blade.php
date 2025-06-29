@@ -35,48 +35,5 @@
         @endif
     </section>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const toggleDescription = (targetId) => {
-                const body = document.querySelector(`.chat-body[data-target="${targetId}"]`);
-                const content = document.getElementById(targetId);
-                const button = document.querySelector(`.toggle-chat-btn[data-target="${targetId}"]`);
 
-                if (!body || !content) return;
-
-                const isCollapsed = body.classList.toggle('collapsed');
-                content.classList.toggle('max-h-[8.5rem]', isCollapsed);
-
-                if (button) {
-                    const fullLabel = button.querySelector('.full-label');
-                    const shortLabel = button.querySelector('.short-label');
-
-                    if (fullLabel) fullLabel.textContent = isCollapsed
-                        ? {!! json_encode(__('Show full response')) !!}
-                        : {!! json_encode(__('Hide full response')) !!};
-
-                    if (shortLabel) shortLabel.textContent = isCollapsed
-                        ? {!! json_encode(__('Full')) !!}
-                        : {!! json_encode(__('Hide')) !!};
-                }
-            };
-
-            // Event delegation for better performance (especially on pagination)
-            const historySection = document.getElementById('history');
-
-            historySection.addEventListener('click', (event) => {
-                const body = event.target.closest('.chat-body');
-                const button = event.target.closest('.toggle-chat-btn');
-
-                if (button) {
-                    event.stopPropagation();
-                    const targetId = button.dataset.target;
-                    if (targetId) toggleDescription(targetId);
-                } else if (body) {
-                    const targetId = body.dataset.target;
-                    if (targetId) toggleDescription(targetId);
-                }
-            });
-        });
-    </script>
 @endsection
