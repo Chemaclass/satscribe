@@ -415,7 +415,9 @@ document.addEventListener('click', async (event) => {
     // Toggle chat visibility
     const visBtn = event.target.closest('.chat-visibility-btn');
     if (visBtn) {
+        event.preventDefault();
         event.stopPropagation();
+        event.stopImmediatePropagation();
         try {
             const { data } = await axios.post(visBtn.dataset.url);
             const isPublic = data.is_public;
@@ -433,7 +435,7 @@ document.addEventListener('click', async (event) => {
         }
         return;
     }
-});
+}, true);
 
 // ---------- FETCH INTERCEPT ----------
 window.addEventListener('load', () => {

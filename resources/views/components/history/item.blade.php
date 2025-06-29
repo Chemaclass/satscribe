@@ -26,7 +26,7 @@
             </div>
             <div class="flex gap-1 items-center">
                 @if($owned)
-                    <button type="button" onclick="event.stopPropagation()"
+                    <button type="button"
                             class="chat-visibility-btn relative group"
                             data-url="{{ route('chat.toggle-visibility', $chat) }}"
                             data-public="{{ $chat->is_public ? '1' : '0' }}">
