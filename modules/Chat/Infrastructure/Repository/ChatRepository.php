@@ -63,6 +63,7 @@ final readonly class ChatRepository implements ChatRepositoryInterface
             'title' => ucfirst($input->type->value) . ':' . $input->text,
             'tracking_id' => $this->trackingId,
             'is_public' => $isPublic,
+            'is_shared' => false,
         ]);
 
         $chat->addUserMessage($question, [
@@ -113,8 +114,9 @@ final readonly class ChatRepository implements ChatRepositoryInterface
 
         if ($showAll) {
             $query->where(function (Builder $q): void {
-                $q->where('is_public', true)
-                    ->orWhere('tracking_id', $this->trackingId);
+                $q->where('tracking_id', $this->trackingId)
+                    ->orWhere('is_public', true)
+                    ->orWhere('is_shared', true);
             });
         } else {
             $query->where('tracking_id', $this->trackingId);

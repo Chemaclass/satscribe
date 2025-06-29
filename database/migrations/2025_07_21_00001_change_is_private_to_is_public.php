@@ -12,6 +12,7 @@ return new class() extends Migration {
     {
         Schema::table('chats', static function (Blueprint $table): void {
             $table->boolean('is_public')->default(false)->after('tracking_id');
+            $table->boolean('is_shared')->default(false)->after('is_public');
         });
 
         DB::table('chats')->update([
@@ -35,6 +36,7 @@ return new class() extends Migration {
 
         Schema::table('chats', static function (Blueprint $table): void {
             $table->dropColumn('is_public');
+            $table->dropColumn('is_shared');
         });
     }
 };

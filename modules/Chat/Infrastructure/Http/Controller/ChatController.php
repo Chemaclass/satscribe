@@ -25,6 +25,10 @@ final readonly class ChatController
 
     public function show(Chat $chat): View
     {
+        if ($chat->canShow(tracking_id())) {
+            abort(403, 'You are not allowed to view this chat.');
+        }
+
         return view('home', $this->chatService->getChatData($chat));
     }
 
@@ -71,5 +75,17 @@ final readonly class ChatController
         }
 
         return response()->json($data);
+    }
+
+    public function share(Chat $chat): JsonResponse
+    {
+        if (tracking_id() !== $chat->tracking_id) {
+            abort(403, 'You are not allowed to share this chat.');
+        }
+
+        $chat->is_shared = true;
+        $chat->save();
+
+        return response()->json(['shared' => true]);
     }
 }
