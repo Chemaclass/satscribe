@@ -24,6 +24,7 @@ import {
     Laptop,
     Lock,
     Unlock,
+    Share2,
     ExternalLink,
     X,
 } from 'lucide';
@@ -53,6 +54,7 @@ export const icons = {
     Unlock,
     LogIn,
     LogOut,
+    Share2,
     ExternalLink,
     X,
 };

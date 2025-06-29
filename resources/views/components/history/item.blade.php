@@ -59,21 +59,36 @@
                         </span>
                     </span>
                 @endif
-                @if($owned)
-                    <span class="relative group">
-                        <i data-lucide="badge-check"
-                           class="text-orange-500 w-6 h-6 cursor-pointer"
-                           aria-label="This chat belongs to you"
-                           aria-hidden="false"
-                           role="img"></i>
 
-                        <span class="tooltip-content absolute z-10 bottom-full mb-1 left-1/2 -translate-x-1/2
-                                     bg-gray-800 text-white text-xs font-medium px-2 py-1 rounded shadow-lg
-                                     whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-200 ease-out
-                                     pointer-events-none">
-                            This chat belongs to you
-                        </span>
+                @if($owned)
+                <span class="relative group cursor-default">
+                    <i data-lucide="share-2"
+                       class="{{ $chat->is_shared ? 'text-orange-600' : 'text-gray-400' }} w-6 h-6"
+                       aria-label="{{ $chat->is_shared ? 'Shared chat' : 'Not shared' }}"
+                       aria-hidden="false"
+                       role="img"></i>
+
+                    <span class="tooltip-content absolute z-10 bottom-full mb-1 left-1/2 -translate-x-1/2
+                                 bg-gray-800 text-white text-xs font-medium px-2 py-1 rounded shadow-lg
+                                 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-200 ease-out
+                                 pointer-events-none">
+                        {{ $chat->is_shared ? 'Shared chat' : 'Not shared' }}
                     </span>
+                </span>
+                <span class="relative group cursor-default">
+                    <i data-lucide="badge-check"
+                       class="text-orange-500 w-6 h-6"
+                       aria-label="This chat belongs to you"
+                       aria-hidden="false"
+                       role="img"></i>
+
+                    <span class="tooltip-content absolute z-10 bottom-full mb-1 left-1/2 -translate-x-1/2
+                                 bg-gray-800 text-white text-xs font-medium px-2 py-1 rounded shadow-lg
+                                 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-200 ease-out
+                                 pointer-events-none">
+                        This chat belongs to you
+                    </span>
+                </span>
                 @endif
             </div>
         </div>
