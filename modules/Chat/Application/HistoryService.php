@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace Modules\Chat\Application;
 
+use App\Models\Chat;
 use App\Models\Message;
 use Illuminate\Contracts\Pagination\Paginator;
 use Modules\Chat\Domain\Repository\ChatRepositoryInterface;
+use Modules\Chat\Domain\ViewModel\HistoryChatItem;
 use Psr\Log\LoggerInterface;
 
 final readonly class HistoryService
@@ -25,6 +27,11 @@ final readonly class HistoryService
         $this->logger->debug('Fetching chat history', ['all' => $showAll]);
 
         $pagination = $this->repository->getPagination($showAll);
+
+        $trackingId = tracking_id();
+        $pagination->through(
+            static fn (Chat $chat) => HistoryChatItem::fromChat($chat, $trackingId),
+        );
 
         $this->logger->debug('Chat history fetched');
 

@@ -24,11 +24,8 @@
             <x-history.empty/>
         @else
             <ul class="chat-list">
-                @foreach($chats as $chat)
-                    <x-history.item
-                        :chat="$chat"
-                        :owned="($chat->tracking_id === tracking_id())"
-                    />
+                @foreach($chats as $item)
+                    <x-history.item :item="$item" />
                 @endforeach
             </ul>
             <x-history.pagination :paginator="$chats"/>

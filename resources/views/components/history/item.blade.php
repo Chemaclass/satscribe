@@ -1,38 +1,32 @@
-@props(['chat', 'owned'])
+@props(['item'])
 
 @php
     use Illuminate\Support\Str;
-
-    /** @var \App\Models\Chat $chat */
-    $userMsg = $chat->getFirstUserMessage();
-    $assistantMsg = $chat->getFirstAssistantMessage();
-    $entryId = 'entry-' . $assistantMsg->id;
-    $rawData = $assistantMsg->rawData ?? [];
-    $mempoolUrl = $assistantMsg->isBlock()
-        ? 'https://mempool.space/block/' . ($rawData['hash'] ?? $assistantMsg->input)
-        : 'https://mempool.space/tx/' . ($rawData['txid'] ?? $assistantMsg->input);
+    use Modules\Chat\Domain\ViewModel\HistoryChatItem;
+    /** @var HistoryChatItem $item */
+    $entryId = 'entry-' . $item->assistantMessageId;
 @endphp
 
 <li class="chat-item">
     <div class="cursor-pointer w-full rounded-lg p-3 transition-colors duration-300"
-         onclick="window.location.href='{{ route('chat.show', $chat) }}'"
+         onclick="window.location.href='{{ route('chat.show', $item->ulid) }}'"
     >
         <div class="chat-header font-medium mb-1 flex justify-between items-start gap-2">
             <div>
-                <strong>{{ ucfirst($chat->type) }}:</strong>
+                <strong>{{ ucfirst($item->type) }}:</strong>
                 <span class="truncate overflow-hidden text-ellipsis block link text-left">
-                    {{ $chat->input }}
+                    {{ $item->input }}
                 </span>
             </div>
             <div class="flex gap-1 items-center">
-                @if($owned)
+                @if($item->owned)
                     <button type="button"
                             class="chat-visibility-btn relative group"
-                            data-url="{{ route('chat.toggle-visibility', $chat) }}"
-                            data-public="{{ $chat->is_public ? '1' : '0' }}">
-                        <i data-lucide="{{ $chat->is_public ? 'unlock' : 'lock' }}"
+                            data-url="{{ route('chat.toggle-visibility', $item->ulid) }}"
+                            data-public="{{ $item->isPublic ? '1' : '0' }}">
+                        <i data-lucide="{{ $item->isPublic ? 'unlock' : 'lock' }}"
                            class="text-orange-700 w-6 h-6 cursor-pointer"
-                           aria-label="{{ $chat->is_public ? 'Public chat' : 'Private chat' }}"
+                           aria-label="{{ $item->isPublic ? 'Public chat' : 'Private chat' }}"
                            aria-hidden="false"
                            role="img"></i>
 
@@ -40,10 +34,10 @@
                                      bg-gray-800 text-white text-xs font-medium px-2 py-1 rounded shadow-lg
                                      whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-200 ease-out
                                      pointer-events-none">
-                            {{ $chat->is_public ? 'Public chat' : 'Private chat' }}
+                            {{ $item->isPublic ? 'Public chat' : 'Private chat' }}
                         </span>
                     </button>
-                @elseif(!$chat->is_public)
+                @elseif(!$item->isPublic)
                     <span class="relative group">
                         <i data-lucide="lock"
                            class="text-orange-700 w-6 h-6 cursor-pointer"
@@ -60,15 +54,15 @@
                     </span>
                 @endif
 
-                @if($owned)
+                @if($item->owned)
                 <button type="button"
                         class="share-chat-toggle relative group cursor-pointer"
-                        data-url="{{ route('chat.share', $chat) }}"
-                        data-link="{{ route('chat.show', $chat) }}"
-                        data-shared="{{ $chat->is_shared ? '1' : '0' }}">
+                        data-url="{{ route('chat.share', $item->ulid) }}"
+                        data-link="{{ route('chat.show', $item->ulid) }}"
+                        data-shared="{{ $item->isShared ? '1' : '0' }}">
                     <i data-lucide="share-2"
-                       class="{{ $chat->is_shared ? 'text-orange-600' : 'text-gray-400' }} w-6 h-6"
-                       aria-label="{{ $chat->is_shared ? 'Shared chat' : 'Not shared' }}"
+                       class="{{ $item->isShared ? 'text-orange-600' : 'text-gray-400' }} w-6 h-6"
+                       aria-label="{{ $item->isShared ? 'Shared chat' : 'Not shared' }}"
                        aria-hidden="false"
                        role="img"></i>
 
@@ -76,7 +70,7 @@
                                  bg-gray-800 text-white text-xs font-medium px-2 py-1 rounded shadow-lg
                                  whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-200 ease-out
                                  pointer-events-none">
-                        {{ $chat->is_shared ? 'Shared chat' : 'Not shared' }}
+                        {{ $item->isShared ? 'Shared chat' : 'Not shared' }}
                     </span>
                 </button>
                 <span class="relative group cursor-default">
@@ -97,11 +91,11 @@
             </div>
         </div>
     </div>
-    <div class="chat-body relative cursor-pointer" onclick="window.location.href='{{ route('chat.show', $chat) }}'">
-        <div class="user-message mb-2 text-right" data-owned="{{ $owned ? '1' : '0' }}">
+    <div class="chat-body relative cursor-pointer" onclick="window.location.href='{{ route('chat.show', $item->ulid) }}'">
+        <div class="user-message mb-2 text-right" data-owned="{{ $item->owned ? '1' : '0' }}">
             <div class="flex items-center gap-1 justify-end">
                 <div class="inline-block rounded px-3 py-2">
-                    {{ $userMsg->content }}
+                    {{ $item->userMessage }}
                 </div>
                 <i data-lucide="user" class="w-6 h-6"></i>
             </div>
@@ -114,29 +108,29 @@
             </span>
 
             <div  id="{{ $entryId }}" class="inline-block rounded prose markdown-content overflow-hidden max-h-[8.5rem] transition-all duration-300">
-                {!! Str::markdown($assistantMsg->content) !!}
+                {!! Str::markdown($item->assistantMessage) !!}
             </div>
         </div>
     </div>
     <div class="chat-meta mt-2 flex justify-between items-center text-sm text-gray-500">
-        <span>{{ $chat->created_at->diffForHumans() }}</span>
+        <span>{{ $item->createdAt->diffForHumans() }}</span>
         <div class="flex gap-4 items-center">
-            <a href="{{ $mempoolUrl }}" target="_blank" rel="noopener" class="link full-label hidden sm:inline">
+            <a href="{{ $item->mempoolUrl }}" target="_blank" rel="noopener" class="link full-label hidden sm:inline">
                 {{ __('View on mempool') }}
             </a>
-            <a href="{{ $mempoolUrl }}" target="_blank" rel="noopener" class="link short-label inline sm:hidden">
+            <a href="{{ $item->mempoolUrl }}" target="_blank" rel="noopener" class="link short-label inline sm:hidden">
                 {{ __('Mempool') }}
             </a>
             <button type="button"
                     class="toggle-history-raw-btn link"
-                    data-target="raw-{{ $assistantMsg->id }}"
-                    data-id="{{ $assistantMsg->id }}">
+                    data-target="raw-{{ $item->assistantMessageId }}"
+                    data-id="{{ $item->assistantMessageId }}">
                 <span class="full-label hidden sm:inline">{{ __('Show raw data') }}</span>
                 <span class="short-label inline sm:hidden">{{ __('Raw') }}</span>
             </button>
         </div>
     </div>
-    <pre id="raw-{{ $assistantMsg->id }}"
+    <pre id="raw-{{ $item->assistantMessageId }}"
          class="hidden bg-gray-100 text-xs p-3 rounded overflow-auto max-h-96 whitespace-pre-wrap"
          data-loaded="false">
 <span class="loading">Loading...</span>
