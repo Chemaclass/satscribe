@@ -93,10 +93,15 @@ async function fetchNostrProfile(pubkey) {
                 try {
                     const meta = JSON.parse(ev.content);
                     finalize({
-                        name: Object.prototype.hasOwnProperty.call(meta, 'display_name')
-                            ? meta.display_name
-                            : meta.name ?? null,
+                        name: meta.name ?? null,
+                        display_name: meta.display_name ?? null,
+                        about: meta.about ?? null,
+                        picture: meta.picture || meta.image || null,
                         image: meta.image || meta.picture || null,
+                        banner: meta.banner ?? null,
+                        website: meta.website || meta.url || null,
+                        nip05: meta.nip05 ?? null,
+                        lud16: meta.lud16 ?? meta.lud06 ?? null,
                     });
                 } catch {
                     finalize(null);
@@ -118,13 +123,14 @@ async function updateNostrLogoutLabel(pubkey) {
 
     if (!name || !image) {
         const profile = await fetchNostrProfile(pubkey);
+        console.log('Nostr profile', profile);
         if (profile) {
-            if (!name && profile.name) {
-                name = profile.name;
+            if (!name && (profile.display_name || profile.name)) {
+                name = profile.display_name || profile.name;
                 StorageClient.setNostrName(name);
             }
-            if (!image && profile.image) {
-                image = profile.image;
+            if (!image && (profile.picture || profile.image)) {
+                image = profile.picture || profile.image;
                 StorageClient.setNostrImage(image);
             }
         } else {
@@ -182,10 +188,75 @@ function applyNostrAvatarToMessages() {
     }
 }
 
+async function updateProfilePage() {
+    const metaTag = document.querySelector('meta[name="nostr-pubkey"]');
+    const pubkey = metaTag?.content;
+    if (!pubkey) return;
+
+    const profile = await fetchNostrProfile(pubkey);
+    if (!profile) return;
+
+    const container = document.getElementById('nostr-profile-meta');
+    if (!container) return;
+
+    if (profile.picture) {
+        const img = document.getElementById('profile-avatar');
+        if (img) {
+            img.src = profile.picture;
+            img.classList.remove('hidden');
+        }
+    }
+
+    const displayName = profile.display_name || profile.name;
+    if (displayName) {
+        const el = document.getElementById('profile-name');
+        if (el) el.textContent = displayName;
+    }
+
+    if (profile.name) {
+        const el = document.getElementById('profile-username');
+        if (el) el.textContent = profile.name;
+    }
+
+    if (profile.website) {
+        const el = document.getElementById('profile-url');
+        if (el) {
+            el.textContent = profile.website;
+            el.href = profile.website;
+            el.classList.remove('hidden');
+        }
+    }
+
+    if (profile.nip05) {
+        const el = document.getElementById('profile-nip05');
+        if (el) {
+            el.textContent = profile.nip05;
+            el.classList.remove('hidden');
+        }
+    }
+
+    if (profile.lud16) {
+        const el = document.getElementById('profile-lud16');
+        if (el) {
+            el.textContent = profile.lud16;
+            el.classList.remove('hidden');
+        }
+    }
+
+    if (profile.about) {
+        const el = document.getElementById('profile-about');
+        if (el) {
+            el.textContent = profile.about;
+            el.classList.remove('hidden');
+        }
+    }
+}
+
 // ---------- DOM READY ----------
 document.addEventListener('DOMContentLoaded', () => {
     createIcons({icons: usedIcons});
     applyNostrAvatarToMessages();
+    updateProfilePage();
 
     setupBlockchainToggle();
     setupDescriptionToggle();
