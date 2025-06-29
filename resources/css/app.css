@@ -523,6 +523,46 @@ a:hover,
 /* =============================================================================
    Prose Styling (Markdown / Rich Text)
 ============================================================================= */
+/* General prose styles for standalone pages */
+.prose ul > li {
+    position: relative;
+    padding-left: 1.5em;
+    margin-bottom: 0.5em;
+}
+
+.prose ul > li::before {
+    content: '•';
+    position: absolute;
+    left: 0;
+    color: var(--btc-orange, orange);
+    font-weight: bold;
+}
+
+.prose ol {
+    list-style: decimal inside;
+}
+
+.prose ol > li {
+    padding-left: 0.5em;
+    margin-bottom: 0.5em;
+}
+
+.prose p {
+    margin-bottom: 1rem;
+}
+
+.prose h2,
+.prose h3,
+.prose h4 {
+    font-weight: 700;
+    line-height: 1.2;
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.prose h2 { font-size: 1.5rem; }
+.prose h3 { font-size: 1.25rem; }
+.prose h4 { font-size: 1.125rem; }
 #chat-container ul > li {
     position: relative;
     padding-left: 1.5em;

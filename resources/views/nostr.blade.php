@@ -17,7 +17,7 @@
 
             <h2>Using a Browser Extension (Alby)</h2>
             <ol>
-                <li>Install the <a href="https://getalby.com/extension">Alby browser extension</a> for Chrome, Brave or Firefox.</li>
+                <li>Install the <a href="https://getalby.com/products/browser-extension" target="_blank">Alby browser extension</a> for Chrome, Brave or Firefox.</li>
                 <li>Create or import your Nostr identity when prompted.</li>
                 <li>Visit Satscribe and click <strong>Login &rarr; Nostr</strong>. The extension will ask for permission to share your pubkey and sign the challenge.</li>
                 <li>Approve the request and you will be logged in.</li>
@@ -33,7 +33,7 @@
                 <li>Paste the JSON back into Satscribe when prompted and submit.</li>
                 <li>If the signature is valid you will be logged in using your Nostr pubkey.</li>
             </ol>
-            <p>This manual method provides the same level of security without needing a browser extension.</p>
+            <p>This manual method provides the same level of security without needing a browser extension - but requires a lot more effort and technical knowledge. It's recommended using a browser extension.</p>
         </div>
     </section>
 @endsection
