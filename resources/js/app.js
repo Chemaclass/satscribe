@@ -8,10 +8,12 @@ import {
     Bot,
     ChevronLeft,
     ChevronRight,
+    ChevronDown,
     createIcons,
     Github,
     Lightbulb,
     Loader2,
+    LogIn,
     LogOut,
     Moon,
     Scroll,
@@ -36,6 +38,7 @@ Alpine.start();
 const usedIcons = {
     ChevronLeft,
     ChevronRight,
+    ChevronDown,
     Bitcoin,
     Bot,
     Loader2,
@@ -53,8 +56,9 @@ const usedIcons = {
     ArrowUp,
     Scissors,
     Laptop,
-    LogOut,
     Lock,
+    LogIn,
+    LogOut,
     ExternalLink,
     X,
 };
@@ -136,23 +140,14 @@ async function updateNostrLogoutLabel(pubkey) {
     }
 
     const $avatar = document.getElementById('nostr-avatar');
-    const $icon = document.getElementById('nostr-logout-icon');
 
     if (image) {
         if ($avatar) {
             $avatar.src = image;
             $avatar.classList.remove('hidden');
         }
-        if ($icon) {
-            $icon.classList.add('hidden');
-        }
-    } else {
-        if ($avatar) {
-            $avatar.classList.add('hidden');
-        }
-        if ($icon) {
-            $icon.classList.remove('hidden');
-        }
+    } else if ($avatar) {
+        $avatar.classList.add('hidden');
     }
 
     applyNostrAvatarToMessages();
@@ -361,37 +356,68 @@ document.addEventListener('DOMContentLoaded', () => {
     const storedPk = StorageClient.getNostrPubkey();
 
     const replaceLoginWithLogout = (pubkey) => {
-        const loginBtn = document.getElementById('nostr-login-btn');
-        if (!loginBtn) return;
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = logoutUrl;
-        form.className = 'nav-link flex items-center gap-1';
-        form.innerHTML =
-            `<input type="hidden" name="_token" value="${csrfToken}">` +
-            `<button type="submit" class="flex items-center gap-1">` +
+        const menu = document.querySelector('[data-nostr-menu]');
+        if (!menu) return;
+        const wrapper = document.createElement('div');
+        wrapper.className = 'relative';
+        wrapper.setAttribute('x-data', '{ open: false }');
+        wrapper.setAttribute('data-nostr-menu', '');
+        wrapper.innerHTML =
+            `<button type="button" class="nav-link flex items-center gap-1" @click="open = !open">` +
             `<img id="nostr-avatar" src="" alt="nostr avatar" class="w-5 h-5 rounded-full hidden" />` +
-            `<svg id="nostr-logout-icon" data-lucide="log-out" class="w-5 h-5"></svg>` +
             `<span id="nostr-logout-label" class="link-text">${pubkey.slice(0, 5)}</span>` +
-            `</button>`;
-        loginBtn.replaceWith(form);
+            `<svg id="nostr-menu-icon" data-lucide="chevron-down" class="w-5 h-5"></svg>` +
+            `</button>` +
+            `<div x-show="open" x-cloak @click.away="open = false" class="absolute right-0 mt-2 w-36 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 z-50">` +
+            `<a href="/history" class="flex items-center gap-1 px-4 py-2 nav-link text-left">` +
+            `<svg data-lucide="scroll" class="w-5 h-5"></svg>` +
+            `<span class="ml-1">History</span>` +
+            `</a>` +
+            `<button type="button" class="w-full text-left px-4 py-2 nav-link flex items-center gap-1" @click="dark = !dark; $nextTick(() => refreshThemeIcon()); open = false;">` +
+            `<svg :data-lucide="dark ? 'sun' : 'moon'" id="theme-icon" class="w-5 h-5"></svg>` +
+            `<span class="ml-1">Theme</span>` +
+            `</button>` +
+            `<form method="POST" action="${logoutUrl}" class="mt-1">` +
+            `<input type="hidden" name="_token" value="${csrfToken}">` +
+            `<button type="submit" class="w-full text-left px-4 py-2 nav-link flex items-center gap-1">` +
+            `<svg data-lucide="log-out" class="w-5 h-5"></svg>` +
+            `<span class="ml-1">Logout</span>` +
+            `</button>` +
+            `</form>` +
+            `</div>`;
+        menu.replaceWith(wrapper);
+        const form = wrapper.querySelector('form');
         form.addEventListener('submit', handleLogout);
         window.refreshLucideIcons();
         updateNostrLogoutLabel(pubkey);
     };
 
     const replaceLogoutWithLogin = () => {
-        const logoutForm = document.querySelector('form[action*="nostr/logout"]');
-        if (!logoutForm) return;
-        const button = document.createElement('button');
-        button.type = 'button';
-        button.id = 'nostr-login-btn';
-        button.className = 'nav-link flex items-center gap-1';
-        button.innerHTML =
+        const menu = document.querySelector('[data-nostr-menu]');
+        if (!menu) return;
+        const wrapper = document.createElement('div');
+        wrapper.className = 'relative';
+        wrapper.setAttribute('x-data', '{ open: false }');
+        wrapper.setAttribute('data-nostr-menu', '');
+        wrapper.innerHTML =
+            `<button type="button" class="nav-link flex items-center gap-1" @click="open = !open">` +
+            `<svg data-lucide="user" class="w-5 h-5"></svg>` +
+            `<span class="link-text">Login</span>` +
+            `<svg data-lucide="chevron-down" class="w-5 h-5"></svg>` +
+            `</button>` +
+            `<div x-show="open" x-cloak @click.away="open = false" class="absolute right-0 mt-2 w-36 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 z-50">` +
+            `<button type="button" id="nostr-login-btn" class="w-full text-left px-4 py-2 nav-link flex items-center gap-1">` +
             `<svg data-lucide="log-in" class="w-5 h-5"></svg>` +
-            `<span class="link-text">Nostr Login</span>`;
-        logoutForm.replaceWith(button);
-        button.addEventListener('click', handleLogin);
+            `<span class="ml-1">Nostr</span>` +
+            `</button>` +
+            `<button type="button" class="w-full text-left px-4 py-2 nav-link flex items-center gap-1" @click="dark = !dark; $nextTick(() => refreshThemeIcon()); open = false;">` +
+            `<svg :data-lucide="dark ? 'sun' : 'moon'" id="theme-icon" class="w-5 h-5"></svg>` +
+            `<span class="ml-1">Theme</span>` +
+            `</button>` +
+            `</div>`;
+        menu.replaceWith(wrapper);
+        const btn = wrapper.querySelector('#nostr-login-btn');
+        btn.addEventListener('click', handleLogin);
         window.refreshLucideIcons();
     };
 
@@ -425,6 +451,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             if (resp.ok) {
                 replaceLoginWithLogout(pk);
+                window.location.reload();
             } else {
                 console.error('Nostr login failed');
             }

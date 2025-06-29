@@ -16,10 +16,6 @@
                 <span class="link-text">{{ __('FAQ') }}</span>
             </a>
         @endif
-        <a href="{{ route('history.index') }}" class="nav-link flex items-center gap-1">
-            <svg data-lucide="scroll" class="w-5 h-5"></svg>
-            <span class="link-text">{{ __('History') }}</span>
-        </a>
 
         @if(!empty($btcPriceUsd))
             <div
@@ -53,23 +49,73 @@
         @endif
 
         @if(nostr_pubkey())
-            <form method="POST" action="{{ route('nostr.logout') }}" class="nav-link flex items-center gap-1">
-                @csrf
-                <button type="submit" class="flex items-center gap-1 cursor-pointer">
+            <div class="relative" x-data="{ open: false }" data-nostr-menu @keydown.escape.window="open = false">
+                <button type="button" class="nav-link flex items-center gap-1" @click="open = !open">
                     <img id="nostr-avatar" src="" alt="nostr avatar" class="w-5 h-5 rounded-full hidden" />
                     <span id="nostr-logout-label" class="link-text">{{ substr(nostr_pubkey(), 0, 5) }}</span>
-                    <svg id="nostr-logout-icon" data-lucide="log-out" class="w-5 h-5"></svg>
+                    <svg id="nostr-menu-icon" data-lucide="chevron-down" class="w-5 h-5"></svg>
                 </button>
-            </form>
-        @else
-            <button type="button" id="nostr-login-btn" class="nav-link flex items-center gap-1">
-                <svg data-lucide="log-in" class="w-5 h-5"></svg>
-                <span class="link-text">Nostr Login</span>
-            </button>
-        @endif
 
-        <button class="nav-link flex items-center gap-1" @click="dark = !dark; $nextTick(() => refreshThemeIcon())">
-            <svg :data-lucide="dark ? 'sun' : 'moon'" id="theme-icon" class="w-5 h-5"></svg>
-        </button>
+                <div
+                    x-show="open"
+                    x-cloak
+                    @click.away="open = false"
+                    class="absolute right-0 text-left mt-2 w-36 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 z-50 flex flex-col items-start"
+                >
+                    <a href="{{ route('history.index') }}" class="flex items-center gap-1 px-4 py-2 nav-link w-full text-left">
+                        <svg data-lucide="scroll" class="w-5 h-5"></svg>
+                        <span>{{ __('History') }}</span>
+                    </a>
+
+                    <button type="button" class="w-full text-left px-4 py-2 nav-link flex items-center gap-1"
+                            @click="dark = !dark; $nextTick(() => refreshThemeIcon()); open = false;">
+                        <svg :data-lucide="dark ? 'sun' : 'moon'" id="theme-icon" class="w-5 h-5"></svg>
+                        <span class="ml-1">{{ __('Theme') }}</span>
+                    </button>
+
+                    <form method="POST" action="{{ route('nostr.logout') }}" class="mt-1">
+                        @csrf
+                        <button type="submit" class="w-full text-left px-4 py-2 nav-link flex items-center gap-1">
+                            <svg data-lucide="log-out" class="w-5 h-5"></svg>
+                            <span class="ml-1">{{ __('Logout') }}</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        @else
+            <div class="relative" x-data="{ open: false }" data-nostr-menu >
+                <button type="button" class="nav-link flex items-center gap-1" @click="open = !open">
+                    <svg data-lucide="user" class="w-5 h-5"></svg>
+                    <span class="link-text">{{ __('Login') }}</span>
+                    <svg data-lucide="chevron-down" class="w-5 h-5"></svg>
+                </button>
+
+                <div
+                    x-show="open"
+                    x-cloak
+                    @click.away="open = false"
+                    class="absolute right-0 mt-2 w-36 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 z-50"
+                >
+
+                    <button type="button" id="nostr-login-btn"
+                            class="w-full text-left px-4 py-2 nav-link flex items-center gap-1">
+                        <svg data-lucide="log-in" class="w-5 h-5"></svg>
+                        <span class="ml-1">{{ __('Nostr') }}</span>
+                    </button>
+
+                    <a href="{{ route('history.index') }}" class="flex items-center gap-1 px-4 py-2 nav-link w-full text-left">
+                        <svg data-lucide="scroll" class="w-5 h-5"></svg>
+                        <span>{{ __('History') }}</span>
+                    </a>
+
+                    <button type="button" class="w-full text-left px-4 py-2 nav-link flex items-center gap-1"
+                            @click="dark = !dark; $nextTick(() => refreshThemeIcon()); open = false;">
+                        <svg :data-lucide="dark ? 'sun' : 'moon'" id="theme-icon" class="w-5 h-5"></svg>
+                        <span class="ml-1">{{ __('Theme') }}</span>
+                    </button>
+
+                </div>
+            </div>
+        @endif
     </nav>
 </header>

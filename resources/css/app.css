@@ -124,12 +124,7 @@ header {
 }
 
 .nav-links a {
-    margin-left: 0.5rem;
     text-decoration: none;
-}
-
-.nav-links * {
-    font-size: 1.1rem;
 }
 
 .nav-links .link-text {
