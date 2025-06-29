@@ -6,13 +6,20 @@ namespace Modules\NostrAuth\Infrastructure\Http\Controller;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-
+use Modules\NostrAuth\Domain\EventSignatureVerifierInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Response;
 
 use function is_array;
 
-final class NostrAuthController
+final readonly class NostrAuthController
 {
+    public function __construct(
+        private EventSignatureVerifierInterface $verifier,
+        private LoggerInterface $logger,
+    ) {
+    }
+
     public function challenge(Request $request): JsonResponse
     {
         $challenge = bin2hex(random_bytes(32));
@@ -24,22 +31,34 @@ final class NostrAuthController
     public function login(Request $request): JsonResponse
     {
         $event = $request->input('event');
+
         if (!is_array($event)) {
+            $this->logger->debug('NostrAuth login failed: event not array');
             return response()->json(['error' => 'Invalid event'], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
         $pubkey = strtolower((string) ($event['pubkey'] ?? ''));
 
         if (!preg_match('/^[0-9a-f]{64}$/', $pubkey)) {
+            $this->logger->debug('NostrAuth login failed: invalid pubkey', ['pubkey' => $pubkey]);
             return response()->json(['error' => 'Invalid pubkey'], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
         $challenge = $request->session()->pull('nostr_challenge');
         if (!$challenge || ($event['content'] ?? '') !== $challenge) {
+            $this->logger->debug('NostrAuth login failed: invalid challenge', [
+                'expected' => $challenge,
+                'received' => $event['content'] ?? null,
+            ]);
             return response()->json(['error' => 'Invalid challenge'], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
-        // TODO: verify signature
+        if (!$this->verifier->verify($event)) {
+            $this->logger->debug('NostrAuth login failed: invalid signature', [
+                'id' => $event['id'] ?? null,
+            ]);
+            return response()->json(['error' => 'Invalid signature'], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
 
         $request->session()->put('nostr_pubkey', $pubkey);
 
