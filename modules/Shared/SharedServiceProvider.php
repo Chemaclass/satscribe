@@ -48,7 +48,7 @@ final class SharedServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        if (app()->environment('prod')) {
+        if (app()->environment('production')) {
             URL::forceScheme('https');
         }
 
