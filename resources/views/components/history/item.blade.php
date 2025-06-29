@@ -25,7 +25,25 @@
                 </span>
             </div>
             <div class="flex gap-1 items-center">
-                @if(!$chat->is_public)
+                @if($owned)
+                    <button type="button" onclick="event.stopPropagation()"
+                            class="chat-visibility-btn relative group"
+                            data-url="{{ route('chat.toggle-visibility', $chat) }}"
+                            data-public="{{ $chat->is_public ? '1' : '0' }}">
+                        <i data-lucide="{{ $chat->is_public ? 'unlock' : 'lock' }}"
+                           class="text-orange-700 w-6 h-6 cursor-pointer"
+                           aria-label="{{ $chat->is_public ? 'Public chat' : 'Private chat' }}"
+                           aria-hidden="false"
+                           role="img"></i>
+
+                        <span class="tooltip-content absolute z-10 bottom-full mb-1 left-1/2 -translate-x-1/2
+                                     bg-gray-800 text-white text-xs font-medium px-2 py-1 rounded shadow-lg
+                                     whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-200 ease-out
+                                     pointer-events-none">
+                            {{ $chat->is_public ? 'Public chat' : 'Private chat' }}
+                        </span>
+                    </button>
+                @elseif(!$chat->is_public)
                     <span class="relative group">
                         <i data-lucide="lock"
                            class="text-orange-700 w-6 h-6 cursor-pointer"

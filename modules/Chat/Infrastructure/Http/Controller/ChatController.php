@@ -26,7 +26,7 @@ final readonly class ChatController
     public function show(Chat $chat): View
     {
         if ($chat->canShow(tracking_id())) {
-            abort(403, 'You are not allowed to view this chat.');
+            abort(Response::HTTP_FORBIDDEN, 'You are not allowed to view this chat.');
         }
 
         return view('home', $this->chatService->getChatData($chat));
@@ -35,7 +35,7 @@ final readonly class ChatController
     public function addMessage(Request $request, Chat $chat): JsonResponse
     {
         if (tracking_id() !== $chat->tracking_id) {
-            abort(403, 'You are not allowed to send messages to this chat.');
+            abort(Response::HTTP_FORBIDDEN, 'You are not allowed to send messages to this chat.');
         }
 
         return response()->json(
@@ -80,12 +80,24 @@ final readonly class ChatController
     public function share(Chat $chat): JsonResponse
     {
         if (tracking_id() !== $chat->tracking_id) {
-            abort(403, 'You are not allowed to share this chat.');
+            abort(Response::HTTP_FORBIDDEN, 'You are not allowed to share this chat.');
         }
 
         $chat->is_shared = true;
         $chat->save();
 
         return response()->json(['shared' => true]);
+    }
+
+    public function toggleVisibility(Chat $chat): JsonResponse
+    {
+        if (tracking_id() !== $chat->tracking_id) {
+            abort(Response::HTTP_FORBIDDEN, 'You are not allowed to change this chat visibility.');
+        }
+
+        $chat->is_public = !$chat->is_public;
+        $chat->save();
+
+        return response()->json(['is_public' => $chat->is_public]);
     }
 }

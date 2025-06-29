@@ -27,6 +27,7 @@ import {
     Scissors,
     Laptop,
     Lock,
+    Unlock,
     ExternalLink,
     X,
 } from 'lucide';
@@ -57,6 +58,7 @@ const usedIcons = {
     Scissors,
     Laptop,
     Lock,
+    Unlock,
     LogIn,
     LogOut,
     ExternalLink,
@@ -408,6 +410,28 @@ document.addEventListener('click', async (event) => {
         } else {
             toggleRawBlockVisibility(button, rawBlock, !isVisible);
         }
+    }
+
+    // Toggle chat visibility
+    const visBtn = event.target.closest('.chat-visibility-btn');
+    if (visBtn) {
+        event.stopPropagation();
+        try {
+            const { data } = await axios.post(visBtn.dataset.url);
+            const isPublic = data.is_public;
+            visBtn.dataset.public = isPublic ? '1' : '0';
+            const icon = visBtn.querySelector('[data-lucide]');
+            if (icon) {
+                icon.setAttribute('data-lucide', isPublic ? 'unlock' : 'lock');
+                icon.setAttribute('aria-label', isPublic ? 'Public chat' : 'Private chat');
+            }
+            const tooltip = visBtn.querySelector('.tooltip-content');
+            if (tooltip) tooltip.textContent = isPublic ? 'Public chat' : 'Private chat';
+            window.refreshLucideIcons?.();
+        } catch (e) {
+            console.error('Failed to toggle visibility', e);
+        }
+        return;
     }
 });
 

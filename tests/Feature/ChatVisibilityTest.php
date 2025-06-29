@@ -6,6 +6,7 @@ namespace Tests\Feature;
 
 use App\Models\Chat;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
 
 final class ChatVisibilityTest extends TestCase
@@ -27,7 +28,7 @@ final class ChatVisibilityTest extends TestCase
 
         $response = $this->withSession(['nostr_pubkey' => 'guest'])->get(route('chat.show', $chat));
 
-        $response->assertStatus(403);
+        $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
     public function test_guest_can_view_public_chat(): void

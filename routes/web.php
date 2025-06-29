@@ -22,6 +22,7 @@ Route::post('chats/{chat}/messages', [ChatController::class, 'addMessage'])
     ->name('chat.add-message')
     ->middleware(IpRateLimiter::class);
 Route::post('chats/{chat}/share', [ChatController::class, 'share'])->name('chat.share');
+Route::post('chats/{chat}/visibility', [ChatController::class, 'toggleVisibility'])->name('chat.toggle-visibility');
 
 Route::get('history', [HistoryController::class, 'index'])->name('history.index');
 Route::get('history/{messageId}/raw', [HistoryController::class, 'getRaw'])->name('history.get-raw');
