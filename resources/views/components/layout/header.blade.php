@@ -19,7 +19,7 @@
 
         @if(!empty($btcPriceUsd))
             <div
-                class="nav-link sm:inline-flex items-center gap-1 px-1 py-1 text-sm whitespace-nowrap"
+                class="profile-menu nav-link sm:inline-flex items-center gap-1 px-1 py-1 text-sm whitespace-nowrap"
                 x-data="{
                 currency: StorageClient.getFiatCurrency() || 'usd',
                 toggle() {
@@ -32,18 +32,10 @@
                 x-cloak
             >
                 <span class="cursor-pointer" @click="toggle()">
-                    <span x-show="currency === 'usd'" x-cloak>
-                        ${{ number_format($btcPriceUsd, 0) }}
-                    </span>
-                    <span x-show="currency === 'eur'" x-cloak>
-                        &euro;{{ number_format($btcPriceEur, 0) }}
-                    </span>
-                    <span x-show="currency === 'cny'" x-cloak>
-                        &yen;{{ number_format($btcPriceCny, 0) }}
-                    </span>
-                    <span x-show="currency === 'gbp'" x-cloak>
-                        &pound;{{ number_format($btcPriceGbp, 0) }}
-                    </span>
+                    <span x-show="currency === 'usd'" x-cloak>${{ number_format($btcPriceUsd, 0) }}</span>
+                    <span x-show="currency === 'eur'" x-cloak>&euro;{{ number_format($btcPriceEur, 0) }}</span>
+                    <span x-show="currency === 'cny'" x-cloak>&yen;{{ number_format($btcPriceCny, 0) }}</span>
+                    <span x-show="currency === 'gbp'" x-cloak>&pound;{{ number_format($btcPriceGbp, 0) }}</span>
                 </span>
             </div>
         @endif
@@ -60,22 +52,26 @@
                     x-show="open"
                     x-cloak
                     @click.away="open = false"
-                    class="absolute right-0 text-left mt-2 w-36 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 z-50 flex flex-col items-start"
+                    :class="dark ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'"
+                    class="profile-menu absolute right-0 text-left mt-2 w-36 rounded-md shadow-lg border border-gray-300 dark:border-gray-600 z-50 flex flex-col items-start"
                 >
-                    <a href="{{ route('history.index') }}" class="flex items-center gap-1 px-4 py-2 nav-link w-full text-left">
+                    <a href="{{ route('history.index') }}"
+                       class="flex items-center gap-1 px-4 py-2 nav-link w-full text-left border-b border-gray-200 dark:border-gray-700">
                         <svg data-lucide="scroll" class="w-5 h-5"></svg>
                         <span>{{ __('History') }}</span>
                     </a>
 
-                    <button type="button" class="w-full text-left px-4 py-2 nav-link flex items-center gap-1"
+                    <button type="button"
+                            class="w-full text-left px-4 py-2 nav-link flex items-center gap-1 border-b border-gray-200 dark:border-gray-700"
                             @click="dark = !dark; $nextTick(() => refreshThemeIcon()); open = false;">
                         <svg :data-lucide="dark ? 'sun' : 'moon'" id="theme-icon" class="w-5 h-5"></svg>
                         <span class="ml-1">{{ __('Theme') }}</span>
                     </button>
 
-                    <form method="POST" action="{{ route('nostr.logout') }}" class="mt-1">
+                    <form method="POST" action="{{ route('nostr.logout') }}" class="w-full">
                         @csrf
-                        <button type="submit" class="w-full text-left px-4 py-2 nav-link flex items-center gap-1">
+                        <button type="submit"
+                                class="w-full text-left px-4 py-2 nav-link flex items-center gap-1 border-b border-gray-200 dark:border-gray-700 last:border-b-0">
                             <svg data-lucide="log-out" class="w-5 h-5"></svg>
                             <span class="ml-1">{{ __('Logout') }}</span>
                         </button>
@@ -83,7 +79,7 @@
                 </div>
             </div>
         @else
-            <div class="relative" x-data="{ open: false }" data-nostr-menu >
+            <div class="relative" x-data="{ open: false }" data-nostr-menu>
                 <button type="button" class="nav-link flex items-center gap-1" @click="open = !open">
                     <svg data-lucide="user" class="w-5 h-5"></svg>
                     <span class="link-text">{{ __('Login') }}</span>
@@ -94,26 +90,27 @@
                     x-show="open"
                     x-cloak
                     @click.away="open = false"
-                    class="absolute right-0 mt-2 w-36 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 z-50"
+                    :class="dark ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'"
+                    class="profile-menu absolute right-0 text-left mt-2 w-36 rounded-md shadow-lg border border-gray-300 dark:border-gray-600 z-50 flex flex-col items-start"
                 >
-
                     <button type="button" id="nostr-login-btn"
-                            class="w-full text-left px-4 py-2 nav-link flex items-center gap-1">
+                            class="w-full text-left px-4 py-2 nav-link flex items-center gap-1 border-b border-gray-200 dark:border-gray-700">
                         <svg data-lucide="log-in" class="w-5 h-5"></svg>
                         <span class="ml-1">{{ __('Nostr') }}</span>
                     </button>
 
-                    <a href="{{ route('history.index') }}" class="flex items-center gap-1 px-4 py-2 nav-link w-full text-left">
+                    <a href="{{ route('history.index') }}"
+                       class="flex items-center gap-1 px-4 py-2 nav-link w-full text-left border-b border-gray-200 dark:border-gray-700">
                         <svg data-lucide="scroll" class="w-5 h-5"></svg>
                         <span>{{ __('History') }}</span>
                     </a>
 
-                    <button type="button" class="w-full text-left px-4 py-2 nav-link flex items-center gap-1"
+                    <button type="button"
+                            class="w-full text-left px-4 py-2 nav-link flex items-center gap-1 border-b border-gray-200 dark:border-gray-700 last:border-b-0"
                             @click="dark = !dark; $nextTick(() => refreshThemeIcon()); open = false;">
                         <svg :data-lucide="dark ? 'sun' : 'moon'" id="theme-icon" class="w-5 h-5"></svg>
                         <span class="ml-1">{{ __('Theme') }}</span>
                     </button>
-
                 </div>
             </div>
         @endif

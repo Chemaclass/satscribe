@@ -154,6 +154,11 @@ header {
     color: var(--btc-orange-light);
 }
 
+.profile-menu a.nav-link:hover,
+.profile-menu button.nav-link:hover {
+    color: var(--btc-orange-dark);
+}
+
 /* Mobile nav tweaks */
 @media (max-width: 640px) {
     .nav-links {
