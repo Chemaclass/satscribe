@@ -185,7 +185,6 @@ header {
 footer {
     border-top: 1px solid var(--btc-border-default);
     font-size: 0.9rem;
-    text-align: center;
     color: var(--btc-gray);
     margin-top: auto;
     padding-top: 2rem;
