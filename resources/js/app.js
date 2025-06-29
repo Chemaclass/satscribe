@@ -76,10 +76,12 @@ async function fetchNostrProfile(pubkey) {
             return null;
         }
     }
+
+    let meta = null;
     try {
         const relay = relayInit('wss://relay.damus.io');
         await relay.connect();
-        return await new Promise((resolve) => {
+        meta = await new Promise((resolve) => {
             const sub = relay.sub([{ kinds: [0], authors: [hex], limit: 1 }]);
             let done = false;
             const finalize = (val) => {
@@ -91,17 +93,17 @@ async function fetchNostrProfile(pubkey) {
             };
             sub.on('event', (ev) => {
                 try {
-                    const meta = JSON.parse(ev.content);
+                    const m = JSON.parse(ev.content);
                     finalize({
-                        name: meta.name ?? null,
-                        display_name: meta.display_name ?? null,
-                        about: meta.about ?? null,
-                        picture: meta.picture || meta.image || null,
-                        image: meta.image || meta.picture || null,
-                        banner: meta.banner ?? null,
-                        website: meta.website || meta.url || null,
-                        nip05: meta.nip05 ?? null,
-                        lud16: meta.lud16 ?? meta.lud06 ?? null,
+                        name: m.name ?? null,
+                        display_name: m.display_name ?? null,
+                        about: m.about ?? null,
+                        picture: m.picture || m.image || null,
+                        image: m.image || m.picture || null,
+                        banner: m.banner ?? null,
+                        website: m.website || m.url || null,
+                        nip05: m.nip05 ?? null,
+                        lud16: m.lud16 ?? m.lud06 ?? null,
                     });
                 } catch {
                     finalize(null);
@@ -114,6 +116,26 @@ async function fetchNostrProfile(pubkey) {
         console.error('Failed relay fetch', e);
     }
 
+    let stats = null;
+    try {
+        const resp = await fetch(`https://api.nostr.band/v0/profiles/${hex}`);
+        if (resp.ok) {
+            const data = await resp.json();
+            stats = {
+                followers: data.followers ?? null,
+                following: data.following ?? null,
+            };
+        }
+    } catch (e) {
+        console.error('Failed stats fetch', e);
+    }
+
+    if (meta || stats) {
+        return {
+            ...(meta || {}),
+            ...(stats || {}),
+        };
+    }
     return null;
 }
 
@@ -199,7 +221,15 @@ async function updateProfilePage() {
     const container = document.getElementById('nostr-profile-meta');
     if (!container) return;
 
-    if (profile.picture) {
+    if (profile && profile.banner) {
+        const banner = document.getElementById('profile-banner');
+        if (banner) {
+            banner.style.backgroundImage = `url(${profile.banner})`;
+            banner.classList.remove('hidden');
+        }
+    }
+
+    if (profile && profile.picture) {
         const img = document.getElementById('profile-avatar');
         if (img) {
             img.src = profile.picture;
@@ -207,18 +237,18 @@ async function updateProfilePage() {
         }
     }
 
-    const displayName = profile.display_name || profile.name;
+    const displayName = profile ? (profile.display_name || profile.name) : null;
     if (displayName) {
         const el = document.getElementById('profile-name');
         if (el) el.textContent = displayName;
     }
 
-    if (profile.name) {
+    if (profile && profile.name) {
         const el = document.getElementById('profile-username');
         if (el) el.textContent = profile.name;
     }
 
-    if (profile.website) {
+    if (profile && profile.website) {
         const el = document.getElementById('profile-url');
         if (el) {
             el.textContent = profile.website;
@@ -227,7 +257,7 @@ async function updateProfilePage() {
         }
     }
 
-    if (profile.nip05) {
+    if (profile && profile.nip05) {
         const el = document.getElementById('profile-nip05');
         if (el) {
             el.textContent = profile.nip05;
@@ -235,7 +265,7 @@ async function updateProfilePage() {
         }
     }
 
-    if (profile.lud16) {
+    if (profile && profile.lud16) {
         const el = document.getElementById('profile-lud16');
         if (el) {
             el.textContent = profile.lud16;
@@ -243,11 +273,28 @@ async function updateProfilePage() {
         }
     }
 
-    if (profile.about) {
+    if (profile && profile.about) {
         const el = document.getElementById('profile-about');
         if (el) {
             el.textContent = profile.about;
             el.classList.remove('hidden');
+        }
+    }
+
+    if (profile && (profile.followers || profile.following)) {
+        if (profile.followers) {
+            const el = document.getElementById('profile-followers');
+            if (el) {
+                el.textContent = `${profile.followers} followers`;
+                el.classList.remove('hidden');
+            }
+        }
+        if (profile.following) {
+            const el = document.getElementById('profile-following');
+            if (el) {
+                el.textContent = `${profile.following} following`;
+                el.classList.remove('hidden');
+            }
         }
     }
 }
