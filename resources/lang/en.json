@@ -121,5 +121,7 @@
     "Generate a title for a blog post about this.": "Generate a title for a blog post about this.",
     "Give me a generic overview.": "Give me a generic overview.",
     "home.total_messages": "Total messages so far: :count",
-    "Got it": "Got it"
+    "Got it": "Got it",
+    "login.benefits": "Log in with Nostr to get more requests for fewer sats and early access to upcoming features.",
+    "login.nostr_vs_guest_tip": "Nostr users unlock twice the requests for the same sats."
 }

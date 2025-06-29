@@ -36,6 +36,9 @@
 
             <!-- Subtitle -->
             <p class="text-sm text-gray-400" x-text="`Consider tipping ${invoice.amount} sats to support development!`"></p>
+            @if(!nostr_pubkey())
+                <p class="text-xs text-gray-500 mt-1">{{ __('login.benefits') }}</p>
+            @endif
 
             <!-- QR Code -->
             <div x-show="invoice?.qr_code_svg" x-transition class="flex justify-center">
