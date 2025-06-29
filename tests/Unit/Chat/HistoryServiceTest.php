@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Chat;
 
-use Illuminate\Contracts\Pagination\Paginator;
+use Illuminate\Pagination\Paginator;
 use Modules\Chat\Application\HistoryService;
 use Modules\Chat\Domain\Repository\ChatRepositoryInterface;
-use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
+use Tests\TestCase;
 
 final class HistoryServiceTest extends TestCase
 {
