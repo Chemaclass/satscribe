@@ -1,8 +1,9 @@
 @props([
     'userMsg',
+    'owned' => false,
 ])
 
-<div class="user-message mb-2 text-right">
+<div class="user-message mb-2 text-right" data-owned="{{ $owned ? '1' : '0' }}">
     <div class="flex items-center gap-1 justify-end group relative">
         @php
             $userCreatedAt = $userMsg->created_at;

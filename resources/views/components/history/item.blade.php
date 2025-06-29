@@ -61,7 +61,7 @@
         </div>
     </div>
     <div class="chat-body relative collapsed" data-target="{{ $entryId }}">
-        <div class="user-message mb-2 text-right">
+        <div class="user-message mb-2 text-right" data-owned="{{ $owned ? '1' : '0' }}">
             <div class="flex items-center gap-1 justify-end">
                 <div class="inline-block rounded px-3 py-2">
                     {{ $userMsg->content }}

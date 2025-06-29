@@ -123,7 +123,7 @@
 
                         const userHtml = `
             <div class="chat-message-group mb-6">
-                <div class="user-message mb-2 text-right">
+                <div class="user-message mb-2 text-right" data-owned="1">
                     <div class="flex items-center gap-1 justify-end">
                         <div class="inline-block rounded px-3 py-2">
                             ${this.escapeHtml(userMessage)}
@@ -308,7 +308,7 @@
 
                     const userHtml = `
             <div class="chat-message-group mb-6">
-                <div class="user-message mb-2 text-right">
+                <div class="user-message mb-2 text-right" data-owned="1">
                     <div class="flex items-center gap-1 justify-end">
                         <div class="inline-block rounded px-3 py-2">
                             ${this.escapeHtml(message)}

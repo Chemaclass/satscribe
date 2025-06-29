@@ -149,18 +149,18 @@ function applyNostrAvatarToMessages() {
     const image = StorageClient.getNostrImage();
 
     if (pubkey && image) {
-        document.querySelectorAll('.user-message [data-lucide="user"]').forEach(el => {
+        document.querySelectorAll('.user-message[data-owned="1"] [data-lucide="user"]').forEach(el => {
             const img = document.createElement('img');
             img.src = image;
             img.className = 'w-6 h-6 rounded-full user-avatar';
             el.replaceWith(img);
         });
-        document.querySelectorAll('.user-message img.user-avatar').forEach(img => {
+        document.querySelectorAll('.user-message[data-owned="1"] img.user-avatar').forEach(img => {
             img.src = image;
         });
     } else {
         const replaced = [];
-        document.querySelectorAll('.user-message img.user-avatar').forEach(img => {
+        document.querySelectorAll('.user-message[data-owned="1"] img.user-avatar').forEach(img => {
             const icon = document.createElement('i');
             icon.setAttribute('data-lucide', 'user');
             icon.setAttribute('class', 'w-6 h-6');
@@ -433,6 +433,7 @@ document.addEventListener('DOMContentLoaded', () => {
         StorageClient.clearNostrName();
         StorageClient.clearNostrImage();
         replaceLogoutWithLogin();
+        window.location.reload();
     };
 
     if (storedPk && !pubkeyMeta) {
