@@ -67,6 +67,60 @@ async function toggleChatVisibility(button) {
     }
 }
 
+function showShareToast() {
+    const toast = document.getElementById('share-toast');
+    if (!toast) return;
+
+    toast.style.display = 'block';
+    requestAnimationFrame(() => {
+        toast.classList.remove('opacity-0');
+        toast.classList.add('opacity-100');
+    });
+
+    setTimeout(() => {
+        toast.classList.remove('opacity-100');
+        toast.classList.add('opacity-0');
+        setTimeout(() => {
+            toast.style.display = 'none';
+        }, 300);
+    }, 2000);
+}
+
+async function toggleShare(button) {
+    const isShared = button.dataset.shared === '1';
+
+    try {
+        await axios.post(button.dataset.url, {
+            shared: isShared,
+        });
+    } catch (e) {
+        console.error('Failed to share chat', e);
+        return;
+    }
+
+    button.dataset.shared = isShared ? '0' : '1';
+
+    const icon = button.querySelector('[data-lucide]');
+    if (icon) {
+        icon.classList.toggle('text-orange-600', isShared);
+        icon.classList.toggle('text-gray-400', !isShared);
+        icon.setAttribute('aria-label', isShared ? 'Shared chat' : 'Not shared');
+    }
+
+    const tooltip = button.querySelector('.tooltip-content');
+    if (tooltip) {
+        tooltip.textContent = isShared ? 'Shared chat' : 'Not shared';
+    }
+
+    window.refreshLucideIcons?.();
+
+    if (isShared) {
+        navigator.clipboard.writeText(button.dataset.link).then(() => {
+            showShareToast();
+        });
+    }
+}
+
 function setupEventDelegation() {
     document.addEventListener('click', async (event) => {
         if (event.target.matches('.load-more-btn')) {
@@ -108,6 +162,16 @@ function setupEventDelegation() {
             event.stopPropagation();
             event.stopImmediatePropagation();
             await toggleChatVisibility(visBtn);
+            return;
+        }
+
+        const shareBtn = event.target.closest('.share-chat-toggle');
+        if (shareBtn) {
+            event.preventDefault();
+            event.stopPropagation();
+            event.stopImmediatePropagation();
+            await toggleShare(shareBtn);
+            return;
         }
     }, true);
 }

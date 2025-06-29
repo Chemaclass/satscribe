@@ -61,7 +61,11 @@
                 @endif
 
                 @if($owned)
-                <span class="relative group cursor-default">
+                <button type="button"
+                        class="share-chat-toggle relative group cursor-pointer"
+                        data-url="{{ route('chat.share', $chat) }}"
+                        data-link="{{ route('chat.show', $chat) }}"
+                        data-shared="{{ $chat->is_shared ? '1' : '0' }}">
                     <i data-lucide="share-2"
                        class="{{ $chat->is_shared ? 'text-orange-600' : 'text-gray-400' }} w-6 h-6"
                        aria-label="{{ $chat->is_shared ? 'Shared chat' : 'Not shared' }}"
@@ -74,7 +78,7 @@
                                  pointer-events-none">
                         {{ $chat->is_shared ? 'Shared chat' : 'Not shared' }}
                     </span>
-                </span>
+                </button>
                 <span class="relative group cursor-default">
                     <i data-lucide="badge-check"
                        class="text-orange-500 w-6 h-6"

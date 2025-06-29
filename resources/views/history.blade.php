@@ -35,5 +35,11 @@
         @endif
     </section>
 
+    <div id="share-toast"
+         class="fixed top-6 right-6 bg-orange-400 text-white text-sm px-4 py-2 rounded shadow-lg z-50 opacity-0 transition-opacity"
+         style="display: none;">
+        {{ __('Link Copied!') }}
+    </div>
+
 
 @endsection

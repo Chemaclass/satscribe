@@ -161,7 +161,9 @@ class Chat extends Model
 
     public function canShow(string $trackingId): bool
     {
-        return $trackingId !== $this->tracking_id && !$this->is_public && !$this->is_shared;
+        return $trackingId === $this->tracking_id
+            || $this->is_public
+            || $this->is_shared;
     }
     protected static function boot(): void
     {
