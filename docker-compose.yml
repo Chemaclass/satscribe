@@ -1,0 +1,12 @@
+services:
+  satscribe-app:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./:/var/www/html
+    environment:
+      APP_ENV: local
+      APP_DEBUG: 'true'
+    command: >
+      sh -c "composer install && npm install && npm run build && php artisan migrate && php artisan serve --host=0.0.0.0 --port=8000"

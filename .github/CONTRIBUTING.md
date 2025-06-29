@@ -38,3 +38,43 @@ To change the configuration for the project we use the `.env` file if you would 
 ```bash
 cp .env.example .env
 ```
+
+## Setting up the project
+
+You can run the application either with Docker or directly on your machine.
+
+### Using Docker
+
+1. Make sure Docker and Docker Compose are available.
+2. Build and start the container:
+
+```bash
+docker-compose up --build
+```
+
+This command installs the PHP and Node dependencies, runs the database migrations and serves the app at `http://localhost:8000`.
+
+### Local setup
+
+If you prefer to work without Docker, run the following commands:
+
+```bash
+composer install
+npm install
+cp .env.example .env
+php artisan key:generate
+php artisan migrate
+composer dev
+```
+
+### How to help
+
+- Open issues for any bugs you find or features you would like to see.
+- Submit pull requests from a topic branch and include tests for new functionality.
+- Review open pull requests and help improve the codebase.
+
+Run the tests locally with:
+
+```bash
+composer fix && composer test
+```
