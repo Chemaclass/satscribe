@@ -50,7 +50,7 @@ final readonly class ChatRepository implements ChatRepositoryInterface
         BlockchainDataInterface $blockchainData,
         PromptPersona $persona,
         string $question,
-        bool $isPrivate,
+        bool $isPublic,
     ): Chat {
         $raw = $blockchainData->toArray();
 
@@ -62,7 +62,7 @@ final readonly class ChatRepository implements ChatRepositoryInterface
         $chat = Chat::create([
             'title' => ucfirst($input->type->value) . ':' . $input->text,
             'tracking_id' => $this->trackingId,
-            'is_private' => $isPrivate,
+            'is_public' => $isPublic,
         ]);
 
         $chat->addUserMessage($question, [
@@ -113,7 +113,7 @@ final readonly class ChatRepository implements ChatRepositoryInterface
 
         if ($showAll) {
             $query->where(function (Builder $q): void {
-                $q->where('is_private', false)
+                $q->where('is_public', true)
                     ->orWhere('tracking_id', $this->trackingId);
             });
         } else {

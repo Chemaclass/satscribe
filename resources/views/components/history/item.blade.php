@@ -25,7 +25,7 @@
                 </span>
             </div>
             <div class="flex gap-1 items-center">
-                @if($chat->is_private)
+                @if(!$chat->is_public)
                     <span class="relative group">
                         <i data-lucide="lock"
                            class="text-orange-700 w-6 h-6 cursor-pointer"

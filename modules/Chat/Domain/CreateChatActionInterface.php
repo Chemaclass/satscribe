@@ -15,6 +15,6 @@ interface CreateChatActionInterface
         PromptPersona $persona,
         string $question,
         bool $refreshEnabled = false,
-        bool $isPrivate = false,
+        bool $isPublic = false,
     ): CreateChatActionResult;
 }

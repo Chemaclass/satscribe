@@ -16,11 +16,11 @@ class Chat extends Model
         'title',
         'ulid',
         'tracking_id',
-        'is_private',
+        'is_public',
     ];
 
     protected $casts = [
-        'is_private' => 'boolean',
+        'is_public' => 'boolean',
     ];
 
     public function getRouteKeyName(): string
