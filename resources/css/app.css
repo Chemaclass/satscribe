@@ -124,12 +124,7 @@ header {
 }
 
 .nav-links a {
-    margin-left: 0.5rem;
     text-decoration: none;
-}
-
-.nav-links * {
-    font-size: 1.1rem;
 }
 
 .nav-links .link-text {
@@ -157,6 +152,11 @@ header {
 
 .dark .nav-link:hover {
     color: var(--btc-orange-light);
+}
+
+.profile-menu a.nav-link:hover,
+.profile-menu button.nav-link:hover {
+    color: var(--btc-orange-dark);
 }
 
 /* Mobile nav tweaks */

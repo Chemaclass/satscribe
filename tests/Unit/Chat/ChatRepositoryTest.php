@@ -48,7 +48,7 @@ final class ChatRepositoryTest extends TestCase
             ->method('addAssistantMessage')
             ->with('answer', $this->anything());
 
-        $repo = new ChatRepository(perPage: 10, trackingId: 't');
+        $repo = new ChatRepository(perPage: 10, trackingId: 'tracking-id');
         $repo->addMessageToChat($chat, 'new question', 'answer');
 
         $this->assertSame('abc', $capturedMeta['input']);

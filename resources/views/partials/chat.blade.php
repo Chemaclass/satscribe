@@ -19,6 +19,7 @@
             <x-chat.message-group
                 :userMsg="$group['userMsg']"
                 :assistantMsg="$group['assistantMsg']"
+                :owned="tracking_id() === $chat->tracking_id"
             />
         @endforeach
     </div>

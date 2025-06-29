@@ -11,6 +11,7 @@
 - ⛓️ Uses the [Blockstream.info API](https://github.com/Blockstream/esplora/blob/master/API.md) for Bitcoin data
 - 💾 Saves each description to the database
 - 🗂️ View and paginate all previous descriptions
+- 🔐 Login via Nostr extension with challenge signing
 
 ## 🖼️ Demo
 

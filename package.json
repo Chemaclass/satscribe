@@ -15,6 +15,7 @@
     },
     "dependencies": {
         "alpinejs": "^3.14.9",
-        "lucide": "^0.501.0"
+        "lucide": "^0.501.0",
+        "nostr-tools": "^1.17"
     }
 }

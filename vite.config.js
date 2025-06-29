@@ -11,7 +11,7 @@ export default defineConfig({
         tailwindcss(),
     ],
     optimizeDeps: {
-        include: ['alpinejs'],
+        include: ['alpinejs', 'nostr-tools'],
     },
     build: {
         rollupOptions: {

@@ -1,16 +1,20 @@
 import './bootstrap';
 import Alpine from 'alpinejs';
 import StorageClient from './storage-client';
+import { nip19, relayInit } from 'nostr-tools';
 import {
     BadgeCheck,
     Bitcoin,
     Bot,
     ChevronLeft,
     ChevronRight,
+    ChevronDown,
     createIcons,
     Github,
     Lightbulb,
     Loader2,
+    LogIn,
+    LogOut,
     Moon,
     Scroll,
     Send,
@@ -34,6 +38,7 @@ Alpine.start();
 const usedIcons = {
     ChevronLeft,
     ChevronRight,
+    ChevronDown,
     Bitcoin,
     Bot,
     Loader2,
@@ -52,15 +57,135 @@ const usedIcons = {
     Scissors,
     Laptop,
     Lock,
+    LogIn,
+    LogOut,
     ExternalLink,
     X,
 };
 
 createIcons({icons: usedIcons});
+applyNostrAvatarToMessages();
+
+async function fetchNostrProfile(pubkey) {
+    let hex = pubkey;
+    if (pubkey.startsWith('npub')) {
+        try {
+            hex = nip19.decode(pubkey).data;
+        } catch (e) {
+            console.error('Failed to decode npub', e);
+            return null;
+        }
+    }
+    try {
+        const relay = relayInit('wss://relay.damus.io');
+        await relay.connect();
+        return await new Promise((resolve) => {
+            const sub = relay.sub([{ kinds: [0], authors: [hex], limit: 1 }]);
+            let done = false;
+            const finalize = (val) => {
+                if (done) return;
+                done = true;
+                sub.unsub();
+                relay.close();
+                resolve(val);
+            };
+            sub.on('event', (ev) => {
+                try {
+                    const meta = JSON.parse(ev.content);
+                    finalize({
+                        name: Object.prototype.hasOwnProperty.call(meta, 'display_name')
+                            ? meta.display_name
+                            : meta.name ?? null,
+                        image: meta.image || meta.picture || null,
+                    });
+                } catch {
+                    finalize(null);
+                }
+            });
+            sub.on('eose', () => finalize(null));
+            setTimeout(() => finalize(null), 5000);
+        });
+    } catch (e) {
+        console.error('Failed relay fetch', e);
+    }
+
+    return null;
+}
+
+async function updateNostrLogoutLabel(pubkey) {
+    let name = StorageClient.getNostrName();
+    let image = StorageClient.getNostrImage();
+
+    if (!name || !image) {
+        const profile = await fetchNostrProfile(pubkey);
+        if (profile) {
+            if (!name && profile.name) {
+                name = profile.name;
+                StorageClient.setNostrName(name);
+            }
+            if (!image && profile.image) {
+                image = profile.image;
+                StorageClient.setNostrImage(image);
+            }
+        } else {
+            console.warn(`No nostr metadata found for pubkey ${pubkey}. Consider setting display_name via a client.`);
+        }
+    }
+
+    if (name) {
+        const label = document.getElementById('nostr-logout-label');
+        if (label) {
+            label.textContent = `${name}`;
+        }
+    }
+
+    const $avatar = document.getElementById('nostr-avatar');
+
+    if (image) {
+        if ($avatar) {
+            $avatar.src = image;
+            $avatar.classList.remove('hidden');
+        }
+    } else if ($avatar) {
+        $avatar.classList.add('hidden');
+    }
+
+    applyNostrAvatarToMessages();
+}
+
+function applyNostrAvatarToMessages() {
+    const pubkey = StorageClient.getNostrPubkey();
+    const image = StorageClient.getNostrImage();
+
+    if (pubkey && image) {
+        document.querySelectorAll('.user-message[data-owned="1"] [data-lucide="user"]').forEach(el => {
+            const img = document.createElement('img');
+            img.src = image;
+            img.className = 'w-6 h-6 rounded-full user-avatar';
+            el.replaceWith(img);
+        });
+        document.querySelectorAll('.user-message[data-owned="1"] img.user-avatar').forEach(img => {
+            img.src = image;
+        });
+    } else {
+        const replaced = [];
+        document.querySelectorAll('.user-message[data-owned="1"] img.user-avatar').forEach(img => {
+            const icon = document.createElement('i');
+            icon.setAttribute('data-lucide', 'user');
+            icon.setAttribute('class', 'w-6 h-6');
+            img.replaceWith(icon);
+            replaced.push(icon);
+        });
+        if (replaced.length > 0) {
+            createIcons({icons: usedIcons});
+        }
+    }
+}
 
 // ---------- DOM READY ----------
 document.addEventListener('DOMContentLoaded', () => {
     createIcons({icons: usedIcons});
+    applyNostrAvatarToMessages();
 
     setupBlockchainToggle();
     setupDescriptionToggle();
@@ -73,7 +198,10 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     window.refreshLucideIcons = () => {
-        requestAnimationFrame(() => createIcons({icons: usedIcons}));
+        requestAnimationFrame(() => {
+            createIcons({icons: usedIcons});
+            applyNostrAvatarToMessages();
+        });
     };
 });
 
@@ -216,4 +344,162 @@ document.addEventListener('DOMContentLoaded', () => {
     scrollBtn.addEventListener('click', () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     });
+});
+
+// ---------- NOSTR LOGIN ----------
+document.addEventListener('DOMContentLoaded', () => {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+    const pubkeyMeta = document.querySelector('meta[name="nostr-pubkey"]')?.content;
+    const loginUrl = document.querySelector('meta[name="nostr-login-url"]')?.content || '/auth/nostr/login';
+    const logoutUrl = document.querySelector('meta[name="nostr-logout-url"]')?.content || '/auth/nostr/logout';
+    const challengeUrl = document.querySelector('meta[name="nostr-challenge-url"]')?.content || '/auth/nostr/challenge';
+    const storedPk = StorageClient.getNostrPubkey();
+
+    const replaceLoginWithLogout = (pubkey) => {
+        const menu = document.querySelector('[data-nostr-menu]');
+        if (!menu) return;
+        const wrapper = document.createElement('div');
+        wrapper.className = 'relative';
+        wrapper.setAttribute('x-data', '{ open: false }');
+        wrapper.setAttribute('data-nostr-menu', '');
+        wrapper.innerHTML =
+            `<button type="button" class="nav-link flex items-center gap-1" @click="open = !open">` +
+            `<img id="nostr-avatar" src="" alt="nostr avatar" class="w-5 h-5 rounded-full hidden" />` +
+            `<span id="nostr-logout-label" class="link-text">${pubkey.slice(0, 5)}</span>` +
+            `<svg id="nostr-menu-icon" data-lucide="chevron-down" class="w-5 h-5"></svg>` +
+            `</button>` +
+            `<div x-show="open" x-cloak @click.away="open = false" class="absolute right-0 mt-2 w-36 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 z-50">` +
+            `<a href="/history" class="flex items-center gap-1 px-4 py-2 nav-link text-left">` +
+            `<svg data-lucide="scroll" class="w-5 h-5"></svg>` +
+            `<span class="ml-1">History</span>` +
+            `</a>` +
+            `<button type="button" class="w-full text-left px-4 py-2 nav-link flex items-center gap-1" @click="dark = !dark; $nextTick(() => refreshThemeIcon()); open = false;">` +
+            `<svg :data-lucide="dark ? 'sun' : 'moon'" id="theme-icon" class="w-5 h-5"></svg>` +
+            `<span class="ml-1">Theme</span>` +
+            `</button>` +
+            `<form method="POST" action="${logoutUrl}" class="mt-1">` +
+            `<input type="hidden" name="_token" value="${csrfToken}">` +
+            `<button type="submit" class="w-full text-left px-4 py-2 nav-link flex items-center gap-1">` +
+            `<svg data-lucide="log-out" class="w-5 h-5"></svg>` +
+            `<span class="ml-1">Logout</span>` +
+            `</button>` +
+            `</form>` +
+            `</div>`;
+        menu.replaceWith(wrapper);
+        const form = wrapper.querySelector('form');
+        form.addEventListener('submit', handleLogout);
+        window.refreshLucideIcons();
+        updateNostrLogoutLabel(pubkey);
+    };
+
+    const replaceLogoutWithLogin = () => {
+        const menu = document.querySelector('[data-nostr-menu]');
+        if (!menu) return;
+        const wrapper = document.createElement('div');
+        wrapper.className = 'relative';
+        wrapper.setAttribute('x-data', '{ open: false }');
+        wrapper.setAttribute('data-nostr-menu', '');
+        wrapper.innerHTML =
+            `<button type="button" class="nav-link flex items-center gap-1" @click="open = !open">` +
+            `<svg data-lucide="user" class="w-5 h-5"></svg>` +
+            `<span class="link-text">Login</span>` +
+            `<svg data-lucide="chevron-down" class="w-5 h-5"></svg>` +
+            `</button>` +
+            `<div x-show="open" x-cloak @click.away="open = false" class="absolute right-0 mt-2 w-36 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 z-50">` +
+            `<button type="button" id="nostr-login-btn" class="w-full text-left px-4 py-2 nav-link flex items-center gap-1">` +
+            `<svg data-lucide="log-in" class="w-5 h-5"></svg>` +
+            `<span class="ml-1">Nostr</span>` +
+            `</button>` +
+            `<button type="button" class="w-full text-left px-4 py-2 nav-link flex items-center gap-1" @click="dark = !dark; $nextTick(() => refreshThemeIcon()); open = false;">` +
+            `<svg :data-lucide="dark ? 'sun' : 'moon'" id="theme-icon" class="w-5 h-5"></svg>` +
+            `<span class="ml-1">Theme</span>` +
+            `</button>` +
+            `</div>`;
+        menu.replaceWith(wrapper);
+        const btn = wrapper.querySelector('#nostr-login-btn');
+        btn.addEventListener('click', handleLogin);
+        window.refreshLucideIcons();
+    };
+
+    const handleLogin = async () => {
+        if (!window.nostr || !window.nostr.getPublicKey || !window.nostr.signEvent) {
+            alert('Nostr extension not available');
+            return;
+        }
+        try {
+            const pk = await window.nostr.getPublicKey();
+            if (!pk) return;
+            const challResp = await fetch(challengeUrl, { credentials: 'same-origin' });
+            const { challenge } = await challResp.json();
+            const event = {
+                kind: 22242,
+                pubkey: pk,
+                created_at: Math.floor(Date.now() / 1000),
+                content: challenge,
+                tags: []
+            };
+            const signed = await window.nostr.signEvent(event);
+            StorageClient.setNostrPubkey(pk);
+            const resp = await fetch(loginUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                credentials: 'same-origin',
+                body: JSON.stringify({ event: signed })
+            });
+            if (resp.ok) {
+                replaceLoginWithLogout(pk);
+                window.location.reload();
+            } else {
+                console.error('Nostr login failed');
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    };
+
+    const handleLogout = async (e) => {
+        e.preventDefault();
+        const form = e.target.closest('form');
+        await fetch(form.action, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken
+            },
+            credentials: 'same-origin',
+        });
+        StorageClient.clearNostrPubkey();
+        StorageClient.clearNostrName();
+        StorageClient.clearNostrImage();
+        replaceLogoutWithLogin();
+        window.location.reload();
+    };
+
+    if (pubkeyMeta) {
+        if (!storedPk) {
+            StorageClient.setNostrPubkey(pubkeyMeta);
+        }
+        updateNostrLogoutLabel(pubkeyMeta);
+    } else if (storedPk) {
+        replaceLoginWithLogout(storedPk);
+        updateNostrLogoutLabel(storedPk);
+        fetch(loginUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken
+            },
+            credentials: 'same-origin',
+            body: JSON.stringify({ pubkey: storedPk })
+        }).catch(() => {});
+    }
+
+    const loginBtn = document.getElementById('nostr-login-btn');
+    if (loginBtn) loginBtn.addEventListener('click', handleLogin);
+
+    const logoutForm = document.querySelector('form[action*="nostr/logout"]');
+    if (logoutForm) logoutForm.addEventListener('submit', handleLogout);
 });

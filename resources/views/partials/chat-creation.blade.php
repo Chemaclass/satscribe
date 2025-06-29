@@ -19,6 +19,7 @@
         <x-chat.message-group
             :userMsg="$chat->getFirstUserMessage()"
             :assistantMsg="$assistantMsg"
+            :owned="tracking_id() === $chat->tracking_id"
         />
     </div>
 

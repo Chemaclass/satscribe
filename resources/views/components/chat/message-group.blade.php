@@ -1,11 +1,12 @@
 @props([
     'userMsg',
     'assistantMsg',
+    'owned' => false,
 ])
 
 <div class="chat-message-group mb-6">
     @if ($userMsg)
-        <x-chat.user-message :userMsg="$userMsg"/>
+        <x-chat.user-message :userMsg="$userMsg" :owned="$owned"/>
     @endif
 
     @if ($assistantMsg)

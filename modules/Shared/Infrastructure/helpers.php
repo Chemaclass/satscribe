@@ -26,6 +26,13 @@ if (!\function_exists('client_uuid')) {
 if (!\function_exists('tracking_id')) {
     function tracking_id(): string
     {
-        return hash('sha256', client_ip() . client_uuid() . Request::userAgent());
+        return nostr_pubkey() ?: hash('sha256', client_ip() . client_uuid() . Request::userAgent());
+    }
+}
+
+if (!\function_exists('nostr_pubkey')) {
+    function nostr_pubkey(): ?string
+    {
+        return session('nostr_pubkey');
     }
 }
