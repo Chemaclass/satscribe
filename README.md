@@ -79,6 +79,16 @@ Static analysis can be executed with:
 ```bash
 composer phpstan
 ```
+
+## 🔧 Git hooks
+
+Run formatting and tests automatically before each commit by enabling the
+provided pre-commit hook:
+
+```bash
+git config core.hooksPath githooks
+```
+
 ## 🏛️ Architecture
 
 See [docs/architecture.md](docs/architecture.md) for an overview of the module structure and suggested improvements.

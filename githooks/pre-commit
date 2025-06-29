@@ -1,0 +1,5 @@
+#!/bin/sh
+
+# Run code formatter and tests before committing
+
+composer fix && composer test
