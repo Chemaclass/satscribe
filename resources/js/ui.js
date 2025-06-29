@@ -87,34 +87,35 @@ function showShareToast() {
 }
 
 async function toggleShare(button) {
-    const isShared = button.dataset.shared === '1';
+    const currentlyShared = button.dataset.shared === '1';
+    const newShared = !currentlyShared;
 
     try {
         await axios.post(button.dataset.url, {
-            shared: isShared,
+            shared: newShared,
         });
     } catch (e) {
         console.error('Failed to share chat', e);
         return;
     }
 
-    button.dataset.shared = isShared ? '0' : '1';
+    button.dataset.shared = newShared ? '1' : '0';
 
     const icon = button.querySelector('[data-lucide]');
     if (icon) {
-        icon.classList.toggle('text-orange-600', isShared);
-        icon.classList.toggle('text-gray-400', !isShared);
-        icon.setAttribute('aria-label', isShared ? 'Shared chat' : 'Not shared');
+        icon.classList.toggle('text-orange-600', newShared);
+        icon.classList.toggle('text-gray-400', !newShared);
+        icon.setAttribute('aria-label', newShared ? 'Shared chat' : 'Not shared');
     }
 
     const tooltip = button.querySelector('.tooltip-content');
     if (tooltip) {
-        tooltip.textContent = isShared ? 'Shared chat' : 'Not shared';
+        tooltip.textContent = newShared ? 'Shared chat' : 'Not shared';
     }
 
     window.refreshLucideIcons?.();
 
-    if (isShared) {
+    if (newShared) {
         navigator.clipboard.writeText(button.dataset.link).then(() => {
             showShareToast();
         });
