@@ -9,7 +9,8 @@
         "php": "^8.2",
         "laravel/framework": "^12.9",
         "laravel/tinker": "^2.10.1",
-        "svix/svix": "^1.64"
+        "svix/svix": "^1.64",
+        "swentel/nostr-php": "^1.9"
     },
     "require-dev": {
         "fakerphp/faker": "^1.24",
