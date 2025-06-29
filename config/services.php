@@ -47,8 +47,14 @@ return [
     ],
 
     'rate_limit' => [
-        'max_attempts' => (int) env('RATE_LIMIT_MAX_ATTEMPTS', 20),
-        'invoice_amount' => (int) env('RATE_LIMIT_INVOICE_AMOUNT', 1000),
-        'invoice_expiry' => (int) env('RATE_LIMIT_INVOICE_EXPIRY_SECONDS', 300)
+        'guest' => [
+            'max_attempts' => (int) env('GUEST_RATE_LIMIT_MAX_ATTEMPTS', 5),
+            'invoice_amount' => (int) env('GUEST_RATE_LIMIT_INVOICE_AMOUNT', 150),
+        ],
+        'nostr' => [
+            'max_attempts' => (int) env('NOSTR_RATE_LIMIT_MAX_ATTEMPTS', 15),
+            'invoice_amount' => (int) env('NOSTR_RATE_LIMIT_INVOICE_AMOUNT', 210),
+        ],
+        'invoice_expiry' => (int) env('RATE_LIMIT_INVOICE_EXPIRY_SECONDS', 300),
     ],
 ];

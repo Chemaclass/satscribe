@@ -25,8 +25,6 @@ final readonly class IpRateLimiter
         private CacheRepository $cache,
         private LoggerInterface $logger,
         private CarbonInterface $now,
-        private int $maxAttempts,
-        private int $lnInvoiceAmountInSats,
         private int $lnInvoiceExpirySeconds,
     ) {
     }
@@ -41,8 +39,21 @@ final readonly class IpRateLimiter
         $this->logTracking($trackingId, $invoiceCacheKey);
         $this->cacheTrackingMapping($shortHash, $trackingId);
 
-        if (RateLimiter::tooManyAttempts($rateLimitKey, $this->maxAttempts)) {
-            return $this->handleRateLimited($rateLimitKey, $invoiceCacheKey, $shortHash);
+        $config = nostr_pubkey()
+            ? config('services.rate_limit.nostr')
+            : config('services.rate_limit.guest');
+
+        $maxAttempts = (int) ($config['max_attempts'] ?? 0);
+        $invoiceAmount = (int) ($config['invoice_amount'] ?? 0);
+
+        if (RateLimiter::tooManyAttempts($rateLimitKey, $maxAttempts)) {
+            return $this->handleRateLimited(
+                $rateLimitKey,
+                $invoiceCacheKey,
+                $shortHash,
+                $invoiceAmount,
+                $maxAttempts,
+            );
         }
 
         $this->logRateLimitHit($rateLimitKey);
@@ -78,38 +89,43 @@ final readonly class IpRateLimiter
         );
     }
 
-    private function handleRateLimited(string $rateLimitKey, string $invoiceCacheKey, string $shortHash): Response
-    {
+    private function handleRateLimited(
+        string $rateLimitKey,
+        string $invoiceCacheKey,
+        string $shortHash,
+        int $invoiceAmount,
+        int $maxAttempts,
+    ): Response {
         $this->logger->info('Too many attempts, preparing invoice', ['key' => $rateLimitKey]);
 
         $cachedInvoice = $this->cache->get($invoiceCacheKey);
 
         if ($this->invoiceValidator->isValidCachedInvoice($cachedInvoice)) {
             $this->logger->info('Using valid cached invoice', ['invoice' => $cachedInvoice]);
-            return $this->buildRateLimitedResponse($rateLimitKey, $cachedInvoice);
+            return $this->buildRateLimitedResponse($rateLimitKey, $cachedInvoice, $maxAttempts);
         }
 
-        $invoice = $this->buildInvoice($shortHash);
+        $invoice = $this->buildInvoice($shortHash, $invoiceAmount);
         $this->cacheInvoice($invoiceCacheKey, $invoice);
 
-        return $this->buildRateLimitedResponse($rateLimitKey, $invoice);
+        return $this->buildRateLimitedResponse($rateLimitKey, $invoice, $maxAttempts);
     }
 
-    private function buildRateLimitedResponse(string $key, array $invoice): Response
+    private function buildRateLimitedResponse(string $key, array $invoice, int $maxAttempts): Response
     {
         return response()->json([
             'status' => 'rate_limited',
             'key' => $key,
             'retryAfter' => RateLimiter::availableIn($key),
-            'maxAttempts' => $this->maxAttempts,
+            'maxAttempts' => $maxAttempts,
             'invoice' => $invoice,
         ], Response::HTTP_TOO_MANY_REQUESTS);
     }
 
-    private function buildInvoice(string $shortHash): array
+    private function buildInvoice(string $shortHash, int $invoiceAmount): array
     {
         return $this->albyClient->createInvoice(new InvoiceData(
-            amount: $this->lnInvoiceAmountInSats,
+            amount: $invoiceAmount,
             memo: sprintf('Zap to keep Satscribe alive ⚡️ #%s', $shortHash),
             expiry: $this->lnInvoiceExpirySeconds,
         ));

@@ -145,7 +145,6 @@ async function updateNostrLogoutLabel(pubkey) {
 
     if (!name || !image) {
         const profile = await fetchNostrProfile(pubkey);
-        console.log('Nostr profile', profile);
         if (profile) {
             if (!name && (profile.display_name || profile.name)) {
                 name = profile.display_name || profile.name;

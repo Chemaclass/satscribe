@@ -34,14 +34,6 @@ final class SharedServiceProvider extends ServiceProvider
         $this->app->bind(CarbonInterface::class, static fn () => Carbon::now());
 
         $this->app->when(IpRateLimiter::class)
-            ->needs('$maxAttempts')
-            ->giveConfig('services.rate_limit.max_attempts');
-
-        $this->app->when(IpRateLimiter::class)
-            ->needs('$lnInvoiceAmountInSats')
-            ->giveConfig('services.rate_limit.invoice_amount');
-
-        $this->app->when(IpRateLimiter::class)
             ->needs('$lnInvoiceExpirySeconds')
             ->giveConfig('services.rate_limit.invoice_expiry');
     }
