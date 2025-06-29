@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Controllers;
+namespace Modules\NostrAuth\Infrastructure\Http\Controller;
 
 use App\Models\Chat;
 use App\Models\Message;

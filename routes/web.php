@@ -4,10 +4,11 @@ use Illuminate\Support\Facades\Route;
 use Modules\Chat\Infrastructure\Http\Controller\ChatController;
 use Modules\Chat\Infrastructure\Http\Controller\HistoryController;
 use Modules\Faq\Infrastructure\Http\Controller\FaqController;
+use Modules\NostrAuth\Infrastructure\Http\Controller\NostrAuthController;
+use Modules\NostrAuth\Infrastructure\Http\Controller\NostrPageController;
+use Modules\NostrAuth\Infrastructure\Http\Controller\ProfileController;
 use Modules\Shared\Infrastructure\Http\Middleware\IpRateLimiter;
 use Modules\UtxoTrace\Infrastructure\Http\Controller\TraceUtxoPageController;
-use Modules\NostrAuth\Infrastructure\Http\Controller\NostrAuthController;
-use App\Http\Controllers\ProfileController;
 
 Route::redirect('generate', '/');
 Route::redirect('describe', '/');
@@ -30,6 +31,7 @@ Route::get('history/{messageId}/raw', [HistoryController::class, 'getRaw'])->nam
 Route::get('faq', [FaqController::class, 'index'])->name('faq.index');
 Route::get('trace-utxo', [TraceUtxoPageController::class,'index'])->name('trace-utxo.page');
 Route::get('profile', [ProfileController::class, 'index'])->name('profile.index');
+Route::get('nostr', [NostrPageController::class, 'index'])->name('nostr.index');
 
 Route::get('auth/nostr/challenge', [NostrAuthController::class, 'challenge'])->name('nostr.challenge');
 Route::post('auth/nostr/login', [NostrAuthController::class, 'login'])->name('nostr.login');
