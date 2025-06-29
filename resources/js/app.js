@@ -111,6 +111,7 @@ async function fetchNostrProfile(pubkey) {
 async function updateNostrLogoutLabel(pubkey) {
     let name = StorageClient.getNostrName();
     let image = StorageClient.getNostrImage();
+
     if (!name || !image) {
         const profile = await fetchNostrProfile(pubkey);
         if (profile) {
@@ -130,38 +131,28 @@ async function updateNostrLogoutLabel(pubkey) {
     if (name) {
         const label = document.getElementById('nostr-logout-label');
         if (label) {
-            label.textContent = `${name} Logout`;
+            label.textContent = `${name}`;
         }
     }
 
     const $avatar = document.getElementById('nostr-avatar');
     const $icon = document.getElementById('nostr-logout-icon');
-console.log('Updating nostr avatar', name, image);
-        console.log('Setting avatar - A');
+
     if (image) {
-        console.log('Setting avatar - B');
         if ($avatar) {
-        console.log('Setting avatar - C');
-            console.log('Setting avatar', image);
             $avatar.src = image;
             $avatar.classList.remove('hidden');
         }
         if ($icon) {
-        console.log('Setting avatar - D');
-            console.log('Setting icon', image);
             $icon.classList.add('hidden');
         }
     } else {
-        console.log('Setting avatar - E');
         if ($avatar) {
-        console.log('Setting avatar - F');
             $avatar.classList.add('hidden');
         }
         if ($icon) {
-        console.log('Setting avatar - G');
             $icon.classList.remove('hidden');
         }
-        console.log('Setting avatar - H');
     }
 
     applyNostrAvatarToMessages();
@@ -379,8 +370,9 @@ document.addEventListener('DOMContentLoaded', () => {
         form.innerHTML =
             `<input type="hidden" name="_token" value="${csrfToken}">` +
             `<button type="submit" class="flex items-center gap-1">` +
-            `<svg data-lucide="log-out" class="w-5 h-5"></svg>` +
-            `<span id="nostr-logout-label" class="link-text">${pubkey.slice(0, 5)}&hellip; Logout</span>` +
+            `<img id="nostr-avatar" src="" alt="nostr avatar" class="w-5 h-5 rounded-full hidden" />` +
+            `<svg id="nostr-logout-icon" data-lucide="log-out" class="w-5 h-5"></svg>` +
+            `<span id="nostr-logout-label" class="link-text">${pubkey.slice(0, 5)}</span>` +
             `</button>`;
         loginBtn.replaceWith(form);
         form.addEventListener('submit', handleLogout);
@@ -459,7 +451,12 @@ document.addEventListener('DOMContentLoaded', () => {
         window.location.reload();
     };
 
-    if (storedPk && !pubkeyMeta) {
+    if (pubkeyMeta) {
+        if (!storedPk) {
+            StorageClient.setNostrPubkey(pubkeyMeta);
+        }
+        updateNostrLogoutLabel(pubkeyMeta);
+    } else if (storedPk) {
         replaceLoginWithLogout(storedPk);
         updateNostrLogoutLabel(storedPk);
         fetch(loginUrl, {
@@ -471,9 +468,6 @@ document.addEventListener('DOMContentLoaded', () => {
             credentials: 'same-origin',
             body: JSON.stringify({ pubkey: storedPk })
         }).catch(() => {});
-    } else if (pubkeyMeta && !storedPk) {
-        StorageClient.setNostrPubkey(pubkeyMeta);
-        updateNostrLogoutLabel(pubkeyMeta);
     }
 
     const loginBtn = document.getElementById('nostr-login-btn');
