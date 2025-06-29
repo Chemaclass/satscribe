@@ -42,14 +42,14 @@ final class ChatServiceProvider extends ServiceProvider
     {
         $this->app->when(CreateChatAction::class)
             ->needs('$trackingId')
-            ->give(fn () => tracking_id());
+            ->give(static fn () => tracking_id());
         $this->app->when(CreateChatAction::class)
             ->needs('$maxOpenAIAttempts')
             ->giveConfig('services.openai.max_attempts');
 
         $this->app->when(AddMessageAction::class)
             ->needs('$trackingId')
-            ->give(fn () => tracking_id());
+            ->give(static fn () => tracking_id());
         $this->app->when(AddMessageAction::class)
             ->needs('$maxOpenAIAttempts')
             ->giveConfig('services.openai.max_attempts');
@@ -59,6 +59,6 @@ final class ChatServiceProvider extends ServiceProvider
             ->giveConfig('app.pagination.per_page');
         $this->app->when(ChatRepository::class)
             ->needs('$trackingId')
-            ->give(fn () => tracking_id());
+            ->give(static fn () => tracking_id());
     }
 }

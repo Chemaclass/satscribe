@@ -8,6 +8,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 use Symfony\Component\HttpFoundation\Response;
+
 use function is_array;
 
 final class NostrAuthController
