@@ -349,6 +349,22 @@ pre,
     @apply bg-gray-700 text-orange-100 ring-1 ring-gray-700;
 }
 
+.profile-card {
+    @apply bg-white text-gray-900 border border-gray-200 rounded-lg shadow;
+}
+
+.dark .profile-card {
+    @apply bg-gray-800 text-gray-100 border-gray-700;
+}
+
+.profile-stat {
+    @apply p-4 rounded-lg bg-white text-gray-900 border border-gray-200 shadow;
+}
+
+.dark .profile-stat {
+    @apply bg-gray-800 text-gray-100 border-gray-700;
+}
+
 label {
     color: var(--btc-bg-lighter-dark);
 }
