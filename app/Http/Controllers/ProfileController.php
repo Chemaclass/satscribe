@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 use App\Models\Chat;
 use App\Models\Message;
 use App\Models\Payment;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 final readonly class ProfileController
@@ -23,7 +24,7 @@ final readonly class ProfileController
             })->count(),
             'totalZaps' => Payment::where('status', 'SETTLED')
                 ->where('tracking_id', $trackingId)
-                ->count(),
+                ->sum('amount'),
         ]);
     }
 }
