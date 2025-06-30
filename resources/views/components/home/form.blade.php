@@ -19,7 +19,7 @@
 </script>
 
 {{-- Form + Icon Side-by-Side --}}
-<div class="flex flex-col sm:flex-row sm:justify-between items-start sm:items-start gap-6 max-w-5xl my-6">
+<div class="flex flex-col sm:flex-row sm:justify-between items-start sm:items-start gap-6 max-w-5xl my-12">
     {{-- Left: Form --}}
     <div class="w-full sm:w-2/3">
         <form
