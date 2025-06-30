@@ -19,10 +19,6 @@
                             <p id="profile-nip05" class="text-sm hidden"></p>
                             <p id="profile-lud16" class="text-sm hidden"></p>
                             <p id="profile-about" class="text-sm hidden"></p>
-                            <div class="flex gap-4 text-sm">
-                                <p id="profile-followers" class="hidden"></p>
-                                <p id="profile-following" class="hidden"></p>
-                            </div>
                         </div>
                     </div>
                 </div>

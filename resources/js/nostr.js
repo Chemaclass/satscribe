@@ -1,6 +1,22 @@
-import { nip19, relayInit } from 'nostr-tools';
+import {nip19, SimplePool} from 'nostr-tools';
 import StorageClient from './storage-client';
-import { refreshIcons } from './icons';
+import {refreshIcons} from './icons';
+
+const RELAYS = [
+    'wss://atlas.nostr.land',
+    'wss://eden.nostr.land',
+    'wss://no.str.cr',
+    'wss://nos.lol',
+    'wss://nostr.azte.co',
+    'wss://nostr.mom',
+    'wss://nostr.wine',
+    'wss://puravida.nostr.land',
+    'wss://relay.damus.io',
+    'wss://relay.nostr.band',
+    'wss://nostr.fmt.wiz.biz',
+    'wss://nostr.oxtr.dev',
+    'wss://nostr.bitcoiner.social',
+];
 
 export async function fetchNostrProfile(pubkey) {
     let hex = pubkey;
@@ -13,65 +29,31 @@ export async function fetchNostrProfile(pubkey) {
         }
     }
 
-    let meta = null;
     try {
-        const relay = relayInit('wss://relay.damus.io');
-        await relay.connect();
-        meta = await new Promise((resolve) => {
-            const sub = relay.sub([{ kinds: [0], authors: [hex], limit: 1 }]);
-            let done = false;
-            const finalize = (val) => {
-                if (done) return;
-                done = true;
-                sub.unsub();
-                relay.close();
-                resolve(val);
+        const pool = new SimplePool();
+        const event = await Promise.race([
+            pool.get(RELAYS, { kinds: [0], authors: [hex], limit: 1 }),
+            new Promise((resolve) => setTimeout(() => resolve(null), 3000)),
+        ]);
+        pool.close(RELAYS);
+        if (event) {
+            const m = JSON.parse(event.content);
+            return {
+                name: m.name ?? null,
+                display_name: m.display_name ?? null,
+                about: m.about ?? null,
+                picture: m.picture || m.image || null,
+                image: m.image || m.picture || null,
+                banner: m.banner ?? null,
+                website: m.website || m.url || null,
+                nip05: m.nip05 ?? null,
+                lud16: m.lud16 ?? m.lud06 ?? null,
             };
-            sub.on('event', (ev) => {
-                try {
-                    const m = JSON.parse(ev.content);
-                    finalize({
-                        name: m.name ?? null,
-                        display_name: m.display_name ?? null,
-                        about: m.about ?? null,
-                        picture: m.picture || m.image || null,
-                        image: m.image || m.picture || null,
-                        banner: m.banner ?? null,
-                        website: m.website || m.url || null,
-                        nip05: m.nip05 ?? null,
-                        lud16: m.lud16 ?? m.lud06 ?? null,
-                    });
-                } catch {
-                    finalize(null);
-                }
-            });
-            sub.on('eose', () => finalize(null));
-            setTimeout(() => finalize(null), 5000);
-        });
+        }
     } catch (e) {
         console.error('Failed relay fetch', e);
     }
 
-    let stats = null;
-    try {
-        const resp = await fetch(`https://api.nostr.band/v0/profiles/${hex}`);
-        if (resp.ok) {
-            const data = await resp.json();
-            stats = {
-                followers: data.followers ?? null,
-                following: data.following ?? null,
-            };
-        }
-    } catch (e) {
-        console.error('Failed stats fetch', e);
-    }
-
-    if (meta || stats) {
-        return {
-            ...(meta || {}),
-            ...(stats || {}),
-        };
-    }
     return null;
 }
 
@@ -215,22 +197,6 @@ export async function updateProfilePage() {
         }
     }
 
-    if (profile.followers || profile.following) {
-        if (profile.followers) {
-            const el = document.getElementById('profile-followers');
-            if (el) {
-                el.textContent = `${profile.followers} followers`;
-                el.classList.remove('hidden');
-            }
-        }
-        if (profile.following) {
-            const el = document.getElementById('profile-following');
-            if (el) {
-                el.textContent = `${profile.following} following`;
-                el.classList.remove('hidden');
-            }
-        }
-    }
 }
 
 export function initNostrAuth() {
