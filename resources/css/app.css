@@ -784,3 +784,10 @@ a:hover,
 .share-info {
     white-space: nowrap;
 }
+
+/* ---------------------------------------------------------------------------
+   Skeleton Loading
+----------------------------------------------------------------------------*/
+.skeleton {
+    @apply bg-gray-200 dark:bg-gray-700 animate-pulse text-transparent;
+}

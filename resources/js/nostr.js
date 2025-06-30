@@ -144,7 +144,7 @@ export async function updateProfilePage(force = false) {
         const banner = document.getElementById('profile-banner');
         if (banner) {
             banner.style.backgroundImage = `url(${profile.banner})`;
-            banner.classList.remove('hidden');
+            banner.classList.remove('skeleton', 'hidden');
         }
     }
 
@@ -152,19 +152,25 @@ export async function updateProfilePage(force = false) {
         const img = document.getElementById('profile-avatar');
         if (img) {
             img.src = profile.picture;
-            img.classList.remove('hidden');
+            img.classList.remove('skeleton', 'hidden');
         }
     }
 
     const displayName = profile.display_name || profile.name;
     if (displayName) {
         const el = document.getElementById('profile-name');
-        if (el) el.textContent = displayName;
+        if (el) {
+            el.textContent = displayName;
+            el.classList.remove('skeleton');
+        }
     }
 
     if (profile.name) {
         const el = document.getElementById('profile-username');
-        if (el) el.textContent = profile.name;
+        if (el) {
+            el.textContent = profile.name;
+            el.classList.remove('skeleton');
+        }
     }
 
     if (profile.website) {
