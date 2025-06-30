@@ -251,7 +251,26 @@ export function initUI() {
 
         const refreshBtn = document.getElementById('profile-refresh');
         if (refreshBtn) {
-            refreshBtn.addEventListener('click', () => updateProfilePage(true));
+            const original = refreshBtn.innerHTML;
+
+            refreshBtn.classList.add("flex", "items-center", "gap-1"); // ensures horizontal alignment and spacing
+
+            refreshBtn.addEventListener("click", async () => {
+                refreshBtn.disabled = true;
+                refreshBtn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>Refreshing...</span>`;
+                refreshIcons();
+
+                await updateProfilePage(true);
+
+                refreshBtn.innerHTML = `<i data-lucide="badge-check" class="w-4 h-4"></i><span>Refreshed</span>`;
+                refreshIcons();
+
+                setTimeout(() => {
+                    refreshBtn.innerHTML = original;
+                    refreshBtn.disabled = false;
+                    refreshIcons();
+                }, 1500);
+            });
         }
 
         window.refreshThemeIcon = () => {
