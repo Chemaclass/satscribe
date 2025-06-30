@@ -249,6 +249,11 @@ export function initUI() {
         setupBlockchainToggle();
         setupDescriptionToggle();
 
+        const refreshBtn = document.getElementById('profile-refresh');
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', () => updateProfilePage(true));
+        }
+
         window.refreshThemeIcon = () => {
             const icon = document.getElementById('theme-icon');
             if (icon) refreshIcons();

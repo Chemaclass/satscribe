@@ -58,24 +58,18 @@ export async function fetchNostrProfile(pubkey) {
 }
 
 export async function updateNostrLogoutLabel(pubkey) {
-    let name = StorageClient.getNostrName();
-    let image = StorageClient.getNostrImage();
-
-    if (!name || !image) {
-        const profile = await fetchNostrProfile(pubkey);
+    let profile = StorageClient.getNostrProfile();
+    if (!profile) {
+        profile = await fetchNostrProfile(pubkey);
         if (profile) {
-            if (!name && (profile.display_name || profile.name)) {
-                name = profile.display_name || profile.name;
-                StorageClient.setNostrName(name);
-            }
-            if (!image && (profile.picture || profile.image)) {
-                image = profile.picture || profile.image;
-                StorageClient.setNostrImage(image);
-            }
+            StorageClient.setNostrProfile(profile);
         } else {
             console.warn(`No nostr metadata found for pubkey ${pubkey}. Consider setting display_name via a client.`);
         }
     }
+
+    const name = StorageClient.getNostrName();
+    const image = StorageClient.getNostrImage();
 
     const label = document.getElementById('nostr-logout-label');
     if (label) {
@@ -126,12 +120,21 @@ export function applyNostrAvatarToMessages() {
     }
 }
 
-export async function updateProfilePage() {
+export async function updateProfilePage(force = false) {
     const metaTag = document.querySelector('meta[name="nostr-pubkey"]');
     const pubkey = metaTag?.content;
     if (!pubkey) return;
 
-    const profile = await fetchNostrProfile(pubkey);
+    let profile = null;
+    if (!force) {
+        profile = StorageClient.getNostrProfile();
+    }
+    if (!profile) {
+        profile = await fetchNostrProfile(pubkey);
+        if (profile) {
+            StorageClient.setNostrProfile(profile);
+        }
+    }
     if (!profile) return;
 
     const container = document.getElementById('nostr-profile-meta');
@@ -362,8 +365,7 @@ export function initNostrAuth() {
                 credentials: 'same-origin',
             });
             StorageClient.clearNostrPubkey();
-            StorageClient.clearNostrName();
-            StorageClient.clearNostrImage();
+            StorageClient.clearNostrProfile();
             replaceLogoutWithLogin();
             window.location.reload();
         };

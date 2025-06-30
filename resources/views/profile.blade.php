@@ -8,6 +8,9 @@
 
         <div class="space-y-4 text-gray-700 dark:text-gray-300">
             @if($pubkey)
+                <button type="button" id="profile-refresh" class="px-3 py-1 rounded border text-sm link">
+                    Refresh profile
+                </button>
                 <div id="nostr-profile-meta" class="profile-card overflow-hidden">
                     <div id="profile-banner" class="h-32 bg-cover bg-center hidden"></div>
                     <div class="p-4 flex items-start gap-4">
