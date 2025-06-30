@@ -15,22 +15,33 @@ const StorageClient = {
         localStorage.removeItem('nostr_pubkey');
     },
     getNostrName() {
-        return localStorage.getItem('nostr_name');
-    },
-    setNostrName(name) {
-        localStorage.setItem('nostr_name', name);
-    },
-    clearNostrName() {
-        localStorage.removeItem('nostr_name');
+        const profile = this.getNostrProfile();
+        if (profile) {
+            return profile.display_name || profile.name || null;
+        }
+        return null;
     },
     getNostrImage() {
-        return localStorage.getItem('nostr_image');
+        const profile = this.getNostrProfile();
+        if (profile) {
+            return profile.picture || profile.image || null;
+        }
+        return null;
     },
-    setNostrImage(url) {
-        localStorage.setItem('nostr_image', url);
+    getNostrProfile() {
+        const json = localStorage.getItem('nostr_profile');
+        if (!json) return null;
+        try {
+            return JSON.parse(json);
+        } catch {
+            return null;
+        }
     },
-    clearNostrImage() {
-        localStorage.removeItem('nostr_image');
+    setNostrProfile(profile) {
+        localStorage.setItem('nostr_profile', JSON.stringify(profile));
+    },
+    clearNostrProfile() {
+        localStorage.removeItem('nostr_profile');
     },
 };
 
