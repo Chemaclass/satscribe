@@ -14,7 +14,7 @@
     <div class="flex gap-4 items-center">
         <div x-data="{ copied: false }" class="relative">
             <button type="button"
-                    @click="axios.post('{{ route('chat.share', $chat) }}'); navigator.clipboard.writeText(window.location.href).then(() => { copied = true; setTimeout(() => copied = false, 2000); })"
+                    @click="axios.post('{{ route('chat.share', $chat) }}', { shared: true }); navigator.clipboard.writeText(window.location.href).then(() => { copied = true; setTimeout(() => copied = false, 2000); })"
                     class="share-chat-btn link">
                 <span class="full-label hidden sm:inline">{{ __('Share') }}</span>
                 <span class="short-label inline sm:hidden">{{ __('Share') }}</span>
