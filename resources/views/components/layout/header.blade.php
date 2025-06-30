@@ -25,13 +25,6 @@
             <span>{{ __('Nostr') }}</span>
         </a>
 
-        <button type="button"
-                class="nav-link flex items-center gap-1"
-                @click="dark = !dark; $nextTick(() => refreshThemeIcon());">
-            <svg :data-lucide="dark ? 'sun' : 'moon'" id="theme-icon" class="w-5 h-5"></svg>
-            <span class="ml-1">{{ __('Theme') }}</span>
-        </button>
-
         @if(nostr_pubkey())
             <div class="relative" x-data="{ open: false }" data-nostr-menu @keydown.escape.window="open = false">
                 <button type="button" class="nav-link flex items-center gap-1" @click="open = !open">
@@ -97,5 +90,12 @@
                 </div>
             </div>
         @endif
+
+        <button type="button"
+                class="nav-link flex items-center gap-1"
+                @click="dark = !dark; $nextTick(() => refreshThemeIcon());">
+            <svg :data-lucide="dark ? 'sun' : 'moon'" id="theme-icon" class="w-5 h-5"></svg>
+            <span class="sr-only">{{ __('Theme') }}</span>
+        </button>
     </nav>
 </header>

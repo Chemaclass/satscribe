@@ -256,14 +256,14 @@ export function initNostrAuth() {
                 `<svg id="nostr-menu-icon" data-lucide="chevron-down" class="w-5 h-5"></svg>` +
                 `</button>` +
                 `<div x-show="open" x-cloak @click.away="open = false" class="absolute right-0 mt-2 w-36 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 z-50">` +
-                `<a href="/history" class="flex items-center gap-1 px-4 py-2 nav-link text-left">` +
+                `<a href="/history" class="flex items-center gap-1 px-4 py-2 nav-link text-left border-b border-gray-200 dark:border-gray-700">` +
                 `<svg data-lucide="scroll" class="w-5 h-5"></svg>` +
                 `<span class="ml-1">History</span>` +
                 `</a>` +
-                `<button type="button" class="w-full text-left px-4 py-2 nav-link flex items-center gap-1" @click="dark = !dark; $nextTick(() => window.refreshThemeIcon?.()); open = false;">` +
-                `<svg :data-lucide="dark ? 'sun' : 'moon'" id="theme-icon" class="w-5 h-5"></svg>` +
-                `<span class="ml-1">Theme</span>` +
-                `</button>` +
+                `<a href="/profile" class="flex items-center gap-1 px-4 py-2 nav-link text-left">` +
+                `<svg data-lucide="user" class="w-5 h-5"></svg>` +
+                `<span class="ml-1">Profile</span>` +
+                `</a>` +
                 `<form method="POST" action="${logoutUrl}" class="mt-1">` +
                 `<input type="hidden" name="_token" value="${csrfToken}">` +
                 `<button type="submit" class="w-full text-left px-4 py-2 nav-link flex items-center gap-1">` +
@@ -293,14 +293,14 @@ export function initNostrAuth() {
                 `<svg data-lucide="chevron-down" class="w-5 h-5"></svg>` +
                 `</button>` +
                 `<div x-show="open" x-cloak @click.away="open = false" class="absolute right-0 mt-2 w-36 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 z-50">` +
-                `<button type="button" id="nostr-login-btn" class="w-full text-left px-4 py-2 nav-link flex items-center gap-1">` +
+                `<button type="button" id="nostr-login-btn" class="w-full text-left px-4 py-2 nav-link flex items-center gap-1 border-b border-gray-200 dark:border-gray-700">` +
                 `<svg data-lucide="log-in" class="w-5 h-5"></svg>` +
                 `<span class="ml-1">Nostr</span>` +
                 `</button>` +
-                `<button type="button" class="w-full text-left px-4 py-2 nav-link flex items-center gap-1" @click="dark = !dark; $nextTick(() => window.refreshThemeIcon?.()); open = false;">` +
-                `<svg :data-lucide="dark ? 'sun' : 'moon'" id="theme-icon" class="w-5 h-5"></svg>` +
-                `<span class="ml-1">Theme</span>` +
-                `</button>` +
+                `<a href="/history" class="flex items-center gap-1 px-4 py-2 nav-link text-left border-b border-gray-200 dark:border-gray-700">` +
+                `<svg data-lucide="scroll" class="w-5 h-5"></svg>` +
+                `<span class="ml-1">History</span>` +
+                `</a>` +
                 `</div>`;
             menu.replaceWith(wrapper);
             const btn = wrapper.querySelector('#nostr-login-btn');
