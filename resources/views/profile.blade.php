@@ -8,20 +8,26 @@
 
         <div class="space-y-4 text-gray-700 dark:text-gray-300">
             @if($pubkey)
-                <button type="button" id="profile-refresh" class="px-3 py-1 rounded border text-sm link">
-                    Refresh profile
-                </button>
                 <div id="nostr-profile-meta" class="profile-card overflow-hidden">
                     <div id="profile-banner" class="h-32 bg-cover bg-center hidden"></div>
                     <div class="p-4 flex items-start gap-4">
-                        <img id="profile-avatar" class="w-24 h-24 rounded-full -mt-16 border-4 border-white dark:border-gray-800 hidden" alt="avatar" />
-                        <div class="space-y-1">
-                            <p id="profile-name" class="text-xl font-semibold"></p>
-                            <p class="text-sm text-gray-500" id="profile-username"></p>
-                            <p class="text-sm"><a id="profile-url" href="#" class="text-blue-600 hover:underline hidden" target="_blank"></a></p>
-                            <p id="profile-nip05" class="text-sm hidden"></p>
-                            <p id="profile-lud16" class="text-sm hidden"></p>
-                            <p id="profile-about" class="text-sm hidden"></p>
+                        <img id="profile-avatar" class="w-24 h-24 rounded-full -mt-16 border-4 hidden" alt="avatar" />
+                        <div class="p-4 flex items-start gap-4 w-full relative">
+                            <img id="profile-avatar" class="w-24 h-24 rounded-full -mt-16 border-4 hidden" alt="avatar" />
+
+                            <div class="flex-1">
+                                <div class="flex justify-between items-start">
+                                    <p id="profile-name" class="text-xl font-semibold">Loading name...</p>
+                                    <button type="button" id="profile-refresh" class="px-3 py-1 rounded border text-sm link">
+                                        {{ __('Refresh profile') }}
+                                    </button>
+                                </div>
+                                <p class="text-sm text-gray-500" id="profile-username">Loading username...</p>
+                                <p class="text-sm"><a id="profile-url" href="#" class="text-blue-600 hover:underline hidden" target="_blank"></a></p>
+                                <p id="profile-nip05" class="text-sm hidden">Loading nip05...</p>
+                                <p id="profile-lud16" class="text-sm hidden">Loading lud16...</p>
+                                <p id="profile-about" class="text-sm hidden">Loading about...</p>
+                            </div>
                         </div>
                     </div>
                 </div>
