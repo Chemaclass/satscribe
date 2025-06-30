@@ -60,9 +60,9 @@
         <main class="flex-grow">
             @yield('content')
         </main>
-
-        <x-layout.footer />
     </div>
+
+    <x-layout.footer />
     <x-layout.scroll-to-top />
     @stack('scripts')
 </body>

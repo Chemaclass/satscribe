@@ -59,12 +59,12 @@ body {
     background: var(--btc-bg-light);
     color: var(--btc-text-dark);
     padding: 1.5rem;
-    max-width: 1000px;
+    max-width: 1440px;
     margin: auto;
 }
 
 .body-container {
-    max-width: 800px;
+    max-width: 1000px;
     margin: 0 auto;
 }
 
