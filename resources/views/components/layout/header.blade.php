@@ -20,6 +20,11 @@
             </a>
         @endif
 
+        <a href="{{ route('nostr.index') }}" class="nav-link flex items-center gap-1">
+            <svg data-lucide="zap" class="w-5 h-5"></svg>
+            <span>{{ __('Nostr') }}</span>
+        </a>
+
         <button type="button"
                 class="nav-link flex items-center gap-1"
                 @click="dark = !dark; $nextTick(() => refreshThemeIcon());">
