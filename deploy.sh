@@ -30,11 +30,24 @@ echo "$COMMIT" > "$NEW_RELEASE_DIR/storage/last_commit.txt"
 
 # Run install script if it exists
 cd "$NEW_RELEASE_DIR"
-if [ -f ./install.sh ]; then
-  ./install.sh
-else
-  echo "⚠️ No install.sh found. Skipping setup."
-fi
+echo "🎼 Running composer install..."
+composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
+
+echo "📦 Installing npm dependencies..."
+npm install
+
+echo "🛠 Building frontend assets..."
+npm run build
+
+echo "🧹 Clearing and caching Laravel config..."
+php artisan route:clear
+php artisan view:clear
+
+php artisan route:cache
+php artisan view:cache
+
+echo "🗄️ Running database migrations..."
+php artisan migrate --force
 
 # Atomically switch the 'current' symlink to new release
 echo "🔁 Switching current symlink to $NEW_RELEASE_DIR"
