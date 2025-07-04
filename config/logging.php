@@ -127,6 +127,13 @@ return [
             'path' => storage_path('logs/laravel.log'),
         ],
 
+        'custom_daily' => [
+            'driver' => 'daily',
+            'path' => env('LOG_PATH', storage_path('logs/laravel.log')) . '/laravel.log',
+            'level' => env('LOG_LEVEL', 'debug'),
+            'days' => env('LOG_RETENTION_DAYS', 7),
+        ],
+
     ],
 
 ];
