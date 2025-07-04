@@ -17,6 +17,4 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           port: 22
-          script: |
-            cd /var/www/html/satscribe
-            ./deploy.sh
+          script: deploy-satscribe
