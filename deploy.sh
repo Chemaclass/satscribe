@@ -23,20 +23,28 @@ echo "🔄 Deploying latest Satscribe to $PROJECT_DIR (branch: $BRANCH)"
 cd "$PROJECT_DIR"
 
 echo "📥 Pulling latest changes from Git..."
+# Clean working directory to avoid pull issues
+git reset --hard HEAD
+git clean -fd
 git fetch origin
 git checkout "$BRANCH"
-git pull origin "$BRANCH"
+git reset --hard "origin/$BRANCH"
 
 # Update LAST_RELEASE_COMMIT in .env
 if [ -f .env ]; then
-    LATEST_COMMIT=$(git rev-parse HEAD)
-    if grep -q '^LAST_RELEASE_COMMIT=' .env; then
-        sed -i "s/^LAST_RELEASE_COMMIT=.*/LAST_RELEASE_COMMIT=$LATEST_COMMIT/" .env
-    else
-        echo "LAST_RELEASE_COMMIT=$LATEST_COMMIT" >> .env
-    fi
+  LATEST_COMMIT=$(git rev-parse HEAD)
+  if grep -q '^LAST_RELEASE_COMMIT=' .env; then
+    sed -i "s/^LAST_RELEASE_COMMIT=.*/LAST_RELEASE_COMMIT=$LATEST_COMMIT/" .env
+  else
+    echo "LAST_RELEASE_COMMIT=$LATEST_COMMIT" >> .env
+  fi
 fi
 
-./install.sh
+# Install/update dependencies or run build
+if [ -f ./install.sh ]; then
+  ./install.sh
+else
+  echo "⚠️ No install.sh script found. Skipping installation step."
+fi
 
 echo "✅ Deployment finished!"
