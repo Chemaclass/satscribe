@@ -35,14 +35,6 @@ else
   echo "⚠️ No install.sh found. Skipping setup."
 fi
 
-# Run Laravel database migrations
-if [ -f artisan ]; then
-  echo "📂 Running Laravel migrations"
-  php artisan migrate --force
-else
-  echo "⚠️ artisan not found. Skipping migrations."
-fi
-
 # Update LAST_RELEASE_COMMIT in .env
 if [ -f .env ]; then
   COMMIT=$(git rev-parse HEAD)
@@ -58,8 +50,5 @@ ln -sfn "$NEW_RELEASE_DIR" "$CURRENT_LINK"
 echo "🧹 Cleaning old releases (keeping latest 10)"
 cd "$RELEASES_DIR"
 ls -1dt */ | tail -n +11 | xargs -r rm -rf --
-
-cd "$NEW_RELEASE_DIR"
-php artisan key:generate
 
 echo "✅ Deployment complete: now serving $CURRENT_LINK"
