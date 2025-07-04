@@ -23,13 +23,10 @@ echo "🔗 Linking shared .env and storage"
 ln -sfn "$BASE_DIR/shared/.env" "$NEW_RELEASE_DIR/.env"
 ln -sfn "$BASE_DIR/shared/storage" "$NEW_RELEASE_DIR/storage"
 
-# Update LAST_RELEASE_COMMIT in shared .env
-if [ -f "$BASE_DIR/shared/.env" ]; then
-  COMMIT=$(cd "$NEW_RELEASE_DIR" && git rev-parse HEAD)
-  echo "🔄 Updating LAST_RELEASE_COMMIT=$COMMIT"
-  sed -i "/^LAST_RELEASE_COMMIT=/d" "$BASE_DIR/shared/.env"
-  echo "LAST_RELEASE_COMMIT=$COMMIT" >> "$BASE_DIR/shared/.env"
-fi
+# Persist the deployed commit hash outside of the cached config
+COMMIT=$(cd "$NEW_RELEASE_DIR" && git rev-parse HEAD)
+echo "🔄 Writing last_commit with $COMMIT"
+echo "$COMMIT" > "$NEW_RELEASE_DIR/storage/last_commit.txt"
 
 # Run install script if it exists
 cd "$NEW_RELEASE_DIR"

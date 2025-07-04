@@ -105,7 +105,9 @@ return [
         ),
     ],
 
-    'last_commit' => env('LAST_RELEASE_COMMIT', 'unknown'),
+    'last_commit' => file_exists(storage_path('last_commit.txt'))
+        ? trim(file_get_contents(storage_path('last_commit.txt')))
+        : 'unknown',
 
     /*
     |--------------------------------------------------------------------------
