@@ -19,12 +19,10 @@ echo "📥 Cloning branch '$BRANCH' to $NEW_RELEASE_DIR"
 git clone --branch "$BRANCH" --depth 1 "$REPO_URL" "$NEW_RELEASE_DIR"
 
 # Link shared resources before making the release active
-echo "🔗 Linking shared .env, storage, and database"
+echo "🔗 Linking shared .env, storage"
 
 ln -sfn "$BASE_DIR/shared/.env" "$NEW_RELEASE_DIR/.env"
 ln -sfn "$BASE_DIR/shared/storage" "$NEW_RELEASE_DIR/storage"
-mkdir -p "$NEW_RELEASE_DIR/database"
-ln -sfn "$BASE_DIR/shared/database/database.sqlite" "$NEW_RELEASE_DIR/database/database.sqlite"
 
 # Run install script if it exists
 cd "$NEW_RELEASE_DIR"
