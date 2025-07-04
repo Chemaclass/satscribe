@@ -18,19 +18,18 @@ mkdir -p "$RELEASES_DIR"
 echo "📥 Cloning branch '$BRANCH' to $NEW_RELEASE_DIR"
 git clone --branch "$BRANCH" --depth 1 "$REPO_URL" "$NEW_RELEASE_DIR"
 
-# Link shared resources before making the release active
-echo "🔗 Linking shared .env, storage"
+# Link shared resources before anything Laravel-related
+echo "🔗 Linking shared .env and storage"
+ln -sfn "$BASE_DIR/shared/.env" "$NEW_RELEASE_DIR/.env"
+ln -sfn "$BASE_DIR/shared/storage" "$NEW_RELEASE_DIR/storage"
 
-# Update LAST_RELEASE_COMMIT in .env
+# Update LAST_RELEASE_COMMIT in shared .env
 if [ -f "$BASE_DIR/shared/.env" ]; then
   COMMIT=$(cd "$NEW_RELEASE_DIR" && git rev-parse HEAD)
-  echo "COMMIT=$COMMIT"
+  echo "🔄 Updating LAST_RELEASE_COMMIT=$COMMIT"
   sed -i "/^LAST_RELEASE_COMMIT=/d" "$BASE_DIR/shared/.env"
   echo "LAST_RELEASE_COMMIT=$COMMIT" >> "$BASE_DIR/shared/.env"
 fi
-
-ln -sfn "$BASE_DIR/shared/.env" "$NEW_RELEASE_DIR/.env"
-ln -sfn "$BASE_DIR/shared/storage" "$NEW_RELEASE_DIR/storage"
 
 # Run install script if it exists
 cd "$NEW_RELEASE_DIR"
