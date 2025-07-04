@@ -22,8 +22,9 @@ git clone --branch "$BRANCH" --depth 1 "$REPO_URL" "$NEW_RELEASE_DIR"
 echo "🔗 Linking shared .env, storage"
 
 # Update LAST_RELEASE_COMMIT in .env
-if [ -f .env ]; then
-  COMMIT=$(git rev-parse HEAD)
+if [ -f "$BASE_DIR/shared/.env" ]; then
+  COMMIT=$(cd "$NEW_RELEASE_DIR" && git rev-parse HEAD)
+  echo "COMMIT=$COMMIT"
   sed -i "/^LAST_RELEASE_COMMIT=/d" "$BASE_DIR/shared/.env"
   echo "LAST_RELEASE_COMMIT=$COMMIT" >> "$BASE_DIR/shared/.env"
 fi
