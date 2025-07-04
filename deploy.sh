@@ -45,13 +45,4 @@ echo "🧹 Cleaning old releases (keeping latest 10)"
 cd "$RELEASES_DIR"
 ls -1dt */ | tail -n +11 | xargs -r rm -rf --
 
-# Reload PHP-FPM to apply new config
-PHP_FPM_SERVICE=$(systemctl list-units --type=service | grep php | grep fpm | awk '{print $1}' | head -n1)
-if [[ -n "$PHP_FPM_SERVICE" ]]; then
-  echo "🔁 Reloading $PHP_FPM_SERVICE to apply changes"
-  sudo /bin/systemctl reload "$PHP_FPM_SERVICE"
-else
-  echo "⚠️ Could not detect PHP-FPM service name. Please reload manually."
-fi
-
 echo "✅ Deployment complete: now serving $CURRENT_LINK"
