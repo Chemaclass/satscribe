@@ -18,9 +18,13 @@ mkdir -p "$RELEASES_DIR"
 echo "📥 Cloning branch '$BRANCH' to $NEW_RELEASE_DIR"
 git clone --branch "$BRANCH" --depth 1 "$REPO_URL" "$NEW_RELEASE_DIR"
 
-cd "$NEW_RELEASE_DIR"
+# Link shared resources before making the release active
+echo "🔗 Linking shared .env and storage"
+ln -sfn "$BASE_DIR/shared/.env" "$NEW_RELEASE_DIR/.env"
+ln -sfn "$BASE_DIR/shared/storage" "$NEW_RELEASE_DIR/storage"
 
-# Run install if needed
+# Run install script if it exists
+cd "$NEW_RELEASE_DIR"
 if [ -f ./install.sh ]; then
   echo "🔧 Running install.sh"
   ./install.sh
@@ -28,14 +32,28 @@ else
   echo "⚠️ No install.sh found. Skipping setup."
 fi
 
-# Set last release commit
+# Run Laravel database migrations
+if [ -f artisan ]; then
+  echo "📂 Running Laravel migrations"
+  php artisan migrate --force
+else
+  echo "⚠️ artisan not found. Skipping migrations."
+fi
+
+# Update LAST_RELEASE_COMMIT in .env
 if [ -f .env ]; then
   COMMIT=$(git rev-parse HEAD)
   sed -i "/^LAST_RELEASE_COMMIT=/d" .env
   echo "LAST_RELEASE_COMMIT=$COMMIT" >> .env
 fi
 
-echo "🔁 Switching current symlink"
+# Atomically switch the 'current' symlink to new release
+echo "🔁 Switching current symlink to $NEW_RELEASE_DIR"
 ln -sfn "$NEW_RELEASE_DIR" "$CURRENT_LINK"
+
+# Clean up older releases, keeping only the 10 most recent
+echo "🧹 Cleaning old releases (keeping latest 10)"
+cd "$RELEASES_DIR"
+ls -1dt */ | tail -n +11 | xargs -r rm -rf --
 
 echo "✅ Deployment complete: now serving $CURRENT_LINK"
