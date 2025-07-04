@@ -1,66 +1,41 @@
 #!/bin/bash
 set -euo pipefail
 
-echo "🛠 Starting deploy.sh..."
+echo "🛠 Starting zero-downtime deployment..."
 
-# Verbose logging to troubleshoot issues
-exec 1> >(tee -a /tmp/deploy.log) 2>&1
-
-# Allow PROJECT_DIR override via env, fallback to auto-detect
-PROJECT_DIR="${PROJECT_DIR:-}"
-
-if [[ -z "$PROJECT_DIR" ]]; then
-  if [[ -d "$HOME/Code/satscribe" ]]; then
-    PROJECT_DIR="$HOME/Code/satscribe"
-  elif [[ -d "/var/www/html/satscribe" ]]; then
-    PROJECT_DIR="/var/www/html/satscribe"
-  else
-    echo "❌ Could not determine PROJECT_DIR. Set it manually via environment variable."
-    exit 1
-  fi
-fi
-
-# Allow BRANCH override via CLI or env
+# CONFIG
+REPO_URL="git@github.com:Chemaclass/satscribe.git"
 BRANCH="${1:-${BRANCH:-main}}"
+BASE_DIR="/var/www/html/satscribe"
+RELEASES_DIR="$BASE_DIR/releases"
+CURRENT_LINK="$BASE_DIR/current"
+TIMESTAMP=$(date +"%Y%m%d%H%M%S")
+NEW_RELEASE_DIR="$RELEASES_DIR/$TIMESTAMP"
 
-echo "🔄 Deploying latest Satscribe to $PROJECT_DIR (branch: $BRANCH)"
-cd "$PROJECT_DIR"
+# Ensure base dirs exist
+mkdir -p "$RELEASES_DIR"
 
-echo "🧼 Cleaning working directory (before reset)"
-git status
+echo "📥 Cloning branch '$BRANCH' to $NEW_RELEASE_DIR"
+git clone --branch "$BRANCH" --depth 1 "$REPO_URL" "$NEW_RELEASE_DIR"
 
-echo "🧹 git reset --hard HEAD"
-git reset --hard HEAD || { echo "❌ git reset failed"; exit 1; }
+cd "$NEW_RELEASE_DIR"
 
-echo "🧽 git clean -xfd"
-git clean -xfd || { echo "❌ git clean failed"; exit 1; }
-
-echo "🔄 Fetching latest..."
-git fetch origin || { echo "❌ fetch failed"; exit 1; }
-
-echo "📌 Checking out $BRANCH"
-git checkout "$BRANCH" || { echo "❌ checkout failed"; exit 1; }
-
-echo "🚿 Resetting to origin/$BRANCH"
-git reset --hard "origin/$BRANCH" || { echo "❌ reset to remote failed"; exit 1; }
-
-echo "✅ git status after cleanup:"
-git status
-
-# Update LAST_RELEASE_COMMIT in .env
-if [ -f .env ]; then
-  LATEST_COMMIT=$(git rev-parse HEAD)
-  if grep -q '^LAST_RELEASE_COMMIT=' .env; then
-    sed -i "s/^LAST_RELEASE_COMMIT=.*/LAST_RELEASE_COMMIT=$LATEST_COMMIT/" .env
-  else
-    echo "LAST_RELEASE_COMMIT=$LATEST_COMMIT" >> .env
-  fi
-fi
-
+# Run install if needed
 if [ -f ./install.sh ]; then
+  echo "🔧 Running install.sh"
   ./install.sh
 else
-  echo "⚠️ No install.sh found, skipping"
+  echo "⚠️ No install.sh found. Skipping setup."
 fi
 
-echo "✅ Deployment finished!"
+# Set last release commit
+if [ -f .env ]; then
+  COMMIT=$(git rev-parse HEAD)
+  sed -i "/^LAST_RELEASE_COMMIT=/d" .env
+  echo "LAST_RELEASE_COMMIT=$COMMIT" >> .env
+fi
+
+echo "🔁 Switching current symlink"
+ln -sfn "$NEW_RELEASE_DIR" "$CURRENT_LINK"
+
+echo "✅ Deployment complete: now serving $CURRENT_LINK"
