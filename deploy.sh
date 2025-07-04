@@ -26,7 +26,7 @@ ln -sfn "$BASE_DIR/shared/storage" "$NEW_RELEASE_DIR/storage"
 # Persist the deployed commit hash outside of the cached config
 COMMIT=$(cd "$NEW_RELEASE_DIR" && git rev-parse HEAD)
 echo "🔄 Writing last_commit with $COMMIT"
-echo "$COMMIT" > "$NEW_RELEASE_DIR/storage/last_commit.txt"
+echo "$COMMIT" > "$BASE_DIR/shared/storage/last_commit.txt"
 
 # Run install script if it exists
 cd "$NEW_RELEASE_DIR"
