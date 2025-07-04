@@ -59,4 +59,7 @@ echo "🧹 Cleaning old releases (keeping latest 10)"
 cd "$RELEASES_DIR"
 ls -1dt */ | tail -n +11 | xargs -r rm -rf --
 
+cd "$NEW_RELEASE_DIR"
+php artisan key:generate
+
 echo "✅ Deployment complete: now serving $CURRENT_LINK"
