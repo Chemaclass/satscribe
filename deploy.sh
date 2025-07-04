@@ -21,23 +21,22 @@ git clone --branch "$BRANCH" --depth 1 "$REPO_URL" "$NEW_RELEASE_DIR"
 # Link shared resources before making the release active
 echo "🔗 Linking shared .env, storage"
 
+# Update LAST_RELEASE_COMMIT in .env
+if [ -f .env ]; then
+  COMMIT=$(git rev-parse HEAD)
+  sed -i "/^LAST_RELEASE_COMMIT=/d" "$BASE_DIR/shared/.env"
+  echo "LAST_RELEASE_COMMIT=$COMMIT" >> "$BASE_DIR/shared/.env"
+fi
+
 ln -sfn "$BASE_DIR/shared/.env" "$NEW_RELEASE_DIR/.env"
 ln -sfn "$BASE_DIR/shared/storage" "$NEW_RELEASE_DIR/storage"
 
 # Run install script if it exists
 cd "$NEW_RELEASE_DIR"
 if [ -f ./install.sh ]; then
-  echo "🔧 Running install.sh"
   ./install.sh
 else
   echo "⚠️ No install.sh found. Skipping setup."
-fi
-
-# Update LAST_RELEASE_COMMIT in .env
-if [ -f .env ]; then
-  COMMIT=$(git rev-parse HEAD)
-  sed -i "/^LAST_RELEASE_COMMIT=/d" .env
-  echo "LAST_RELEASE_COMMIT=$COMMIT" >> .env
 fi
 
 # Atomically switch the 'current' symlink to new release
