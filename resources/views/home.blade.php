@@ -31,7 +31,7 @@
 
         @if(!isset($chat))
             <div
-                class="mt-6 text-center text-gray-500 text-sm space-y-2 home-narrative"
+                class="mt-6 mb-6 text-center text-gray-500 text-sm space-y-2 home-narrative"
                 x-show="!hasSubmitted"
                 x-cloak>
                 <p>{{ __('home.narrative.line1') }}</p>

@@ -1,18 +1,20 @@
 <footer class="py-2 border-t border-gray-200 dark:border-gray-700 text-sm text-gray-600 dark:text-gray-400">
     <div class="flex flex-col sm:flex-row justify-between items-center gap-2 flex-wrap">
-        <div class="flex items-center gap-2 flex-wrap">
+        <div class="flex items-center gap-2 flex-wrap footer-left">
             <span>&copy;{{ date('Y') }} Built by <a href="https://chemaclass.com/" target="_blank" class="hover:underline">Chema</a></span>
         </div>
 
-        <div class="flex items-center gap-2 flex-wrap">
+        <div class="flex items-center gap-2 flex-wrap footer-right">
             <a href="https://getalby.com/p/chemaclass" target="_blank" class="flex items-center gap-1 hover:underline">
                 <i data-lucide="bitcoin" class="w-4 h-4 text-orange-500 dark:text-[--btc-orange-dark]"></i>
-                {{ __("home.footer.support") }}
+                <span class="sm:hidden">{{ __("home.footer.support") }}</span>
+                <span class="hidden sm:inline">{{ __("home.footer.support_the_project") }}</span>
             </a>
             <span class="hidden sm:inline">•</span>
 
             @if(!empty($btcPriceUsd))
                 <span
+                    class="hidden sm:inline"
                     data-btc-price-item
                     title="1 BTC in fiat currency"
                     x-data="{
@@ -43,7 +45,7 @@
             <span class="hidden sm:inline">•</span>
 
             @if(config('app.last_commit') !== 'unknown')
-                <div title="Released commit">{{ substr(config('app.last_commit'), 0, 7) }}</div>
+                <div class="hidden sm:block" title="Released commit">{{ substr(config('app.last_commit'), 0, 7) }}</div>
                 <span class="hidden sm:inline">•</span>
             @endif
 
