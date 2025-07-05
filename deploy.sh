@@ -31,6 +31,8 @@ echo "$COMMIT" > "$BASE_DIR/shared/storage/last_commit.txt"
 
 # Run install script if it exists
 cd "$NEW_RELEASE_DIR"
+php artisan cache:forget last_commit || true
+
 echo "🎼 Running composer install..."
 composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
 
