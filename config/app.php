@@ -105,9 +105,7 @@ return [
         ),
     ],
 
-    'last_commit' => file_exists(storage_path('last_commit.txt'))
-        ? trim(file_get_contents(storage_path('last_commit.txt')))
-        : 'unknown',
+    'last_commit' => env('LAST_COMMIT_HASH', 'unknown'),
 
     /*
     |--------------------------------------------------------------------------

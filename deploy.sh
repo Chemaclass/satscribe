@@ -24,14 +24,18 @@ ln -sfn "$BASE_DIR/shared/.env" "$NEW_RELEASE_DIR/.env"
 rm -rf "$NEW_RELEASE_DIR/storage"
 ln -sfn "$BASE_DIR/shared/storage" "$NEW_RELEASE_DIR/storage"
 
-# Persist the deployed commit hash outside of the cached config
+# Persist the deployed commit hash into the shared .env file
 COMMIT=$(cd "$NEW_RELEASE_DIR" && git rev-parse HEAD)
-echo "🔄 Writing last_commit with $COMMIT"
-echo "$COMMIT" > "$BASE_DIR/shared/storage/last_commit.txt"
+echo "🔄 Writing LAST_COMMIT_HASH=$COMMIT to shared .env"
+# Replace existing line or append if it doesn't exist
+if grep -q '^LAST_COMMIT_HASH=' "$BASE_DIR/shared/.env"; then
+    sed -i "s/^LAST_COMMIT_HASH=.*/LAST_COMMIT_HASH=$COMMIT/" "$BASE_DIR/shared/.env"
+else
+    echo "LAST_COMMIT_HASH=$COMMIT" >> "$BASE_DIR/shared/.env"
+fi
 
 # Run install script if it exists
 cd "$NEW_RELEASE_DIR"
-php artisan cache:forget last_commit || true
 
 echo "🎼 Running composer install..."
 composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
