@@ -16,18 +16,18 @@
                data-faq-item
                class="nav-link flex items-center gap-1">
                 <svg data-lucide="lightbulb" class="w-5 h-5"></svg>
-                <span>{{ __('FAQ') }}</span>
+                <span class="link-text">{{ __('FAQ') }}</span>
             </a>
         @endif
 
-        <a href="{{ route('nostr.index') }}" class="nav-link flex items-center gap-1">
+        <a href="{{ route('nostr.index') }}" class="nav-link flex items-center ml-2">
             <svg data-lucide="zap" class="w-5 h-5"></svg>
-            <span>{{ __('Nostr') }}</span>
+            <span class="link-text">{{ __('Nostr') }}</span>
         </a>
 
         @if(nostr_pubkey())
             <div class="relative" x-data="{ open: false }" data-nostr-menu @keydown.escape.window="open = false">
-                <button type="button" class="nav-link flex items-center gap-1" @click="open = !open">
+                <button type="button" class="nav-link flex items-center gap-1 ml-5" @click="open = !open">
                     <img id="nostr-avatar" src="" alt="nostr avatar" class="w-5 h-5 rounded-full hidden" />
                     <span id="nostr-logout-label" class="link-text">{{ __('Loading...') }}</span>
                     <svg id="nostr-menu-icon" data-lucide="chevron-down" class="w-5 h-5"></svg>
@@ -63,7 +63,7 @@
             </div>
         @else
             <div class="relative" x-data="{ open: false }" data-nostr-menu>
-                <button type="button" class="nav-link flex items-center gap-1" @click="open = !open">
+                <button type="button" class="nav-link flex items-center gap-1 ml-2" @click="open = !open">
                     <svg data-lucide="user" class="w-5 h-5"></svg>
                     <span class="link-text">{{ __('Login') }}</span>
                     <svg data-lucide="chevron-down" class="w-5 h-5"></svg>
