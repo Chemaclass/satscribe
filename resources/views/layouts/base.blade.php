@@ -7,7 +7,8 @@
 ])
 <!DOCTYPE html>
 <html lang="en"
-      x-data="{ dark: localStorage.getItem('theme') === 'dark' }"
+      x-data="{ dark: (localStorage.getItem('theme') === 'dark') ||
+                     (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches) }"
       x-init="$watch('dark', val => {
           localStorage.setItem('theme', val ? 'dark' : 'light');
           document.documentElement.classList.toggle('dark', val);
@@ -24,7 +25,9 @@
     <meta name="nostr-logout-url" content="{{ route('nostr.logout') }}">
     <meta name="nostr-challenge-url" content="{{ route('nostr.challenge') }}">
     <script>
-    if (localStorage.getItem('theme') === 'dark') {
+    const savedTheme = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (savedTheme === 'dark' || (savedTheme === null && prefersDark)) {
         document.documentElement.classList.add('dark');
     }
     window.i18n = {
