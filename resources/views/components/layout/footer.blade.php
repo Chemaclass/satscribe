@@ -14,7 +14,7 @@
 
             <button
                 type="button"
-                class="hidden lg:flex items-center gap-1 hover:underline"
+                class="hidden lg:flex items-center gap-1 hover:underline cursor-pointer"
                 @click="window.dispatchEvent(new CustomEvent('open-feedback'))"
             >
                 {{ __('Give Feedback') }}
