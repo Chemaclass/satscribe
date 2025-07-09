@@ -7,6 +7,7 @@ use Modules\Faq\Infrastructure\Http\Controller\FaqController;
 use Modules\NostrAuth\Infrastructure\Http\Controller\NostrAuthController;
 use Modules\NostrAuth\Infrastructure\Http\Controller\NostrPageController;
 use Modules\NostrAuth\Infrastructure\Http\Controller\ProfileController;
+use Modules\Feedback\Infrastructure\Http\Controller\FeedbackController;
 use Modules\Shared\Infrastructure\Http\Middleware\IpRateLimiter;
 use Modules\UtxoTrace\Infrastructure\Http\Controller\TraceUtxoPageController;
 
@@ -36,3 +37,5 @@ Route::get('nostr', [NostrPageController::class, 'index'])->name('nostr.index');
 Route::get('auth/nostr/challenge', [NostrAuthController::class, 'challenge'])->name('nostr.challenge');
 Route::post('auth/nostr/login', [NostrAuthController::class, 'login'])->name('nostr.login');
 Route::post('auth/nostr/logout', [NostrAuthController::class, 'logout'])->name('nostr.logout');
+
+Route::post('feedback', [FeedbackController::class, 'store'])->name('feedback.store');

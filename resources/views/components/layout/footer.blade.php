@@ -12,6 +12,15 @@
             </a>
             <span class="hidden sm:inline">•</span>
 
+            <button
+                type="button"
+                class="hidden lg:flex items-center gap-1 hover:underline"
+                @click="window.dispatchEvent(new CustomEvent('open-feedback'))"
+            >
+                {{ __('Give Feedback') }}
+            </button>
+            <span class="hidden lg:inline">•</span>
+
             @if(!empty($btcPriceUsd))
                 <span
                     class="hidden sm:inline"
