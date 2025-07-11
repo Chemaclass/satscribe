@@ -11,11 +11,7 @@ echo "🛠 Building frontend assets..."
 npm run build
 
 echo "🧹 Clearing and caching Laravel config..."
-php artisan route:clear
-php artisan view:clear
-
-php artisan route:cache
-php artisan view:cache
+php artisan optimize
 
 echo "🗄️ Running database migrations..."
 php artisan migrate --force
