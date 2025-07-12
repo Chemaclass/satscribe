@@ -93,7 +93,7 @@
 
         <button type="button"
                 class="nav-link flex items-center gap-1"
-                @click="dark = !dark; $nextTick(() => refreshThemeIcon());">
+                @click="toggle(); $nextTick(() => refreshThemeIcon());">
             <svg :data-lucide="dark ? 'sun' : 'moon'" id="theme-icon" class="w-5 h-5"></svg>
             <span class="sr-only">{{ __('Theme') }}</span>
         </button>

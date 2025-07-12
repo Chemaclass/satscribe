@@ -7,14 +7,9 @@
 ])
 <!DOCTYPE html>
 <html lang="en"
-      x-data="{ dark: (localStorage.getItem('theme') === 'dark') ||
-                     (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches) }"
-      x-init="$watch('dark', val => {
-          localStorage.setItem('theme', val ? 'dark' : 'light');
-          document.documentElement.classList.toggle('dark', val);
-      })"
-      :class="{ 'dark': dark }"
->
+      x-data="themeSwitcher()"
+      x-init="init()"
+      :class="{ 'dark': dark }">
 <head>
     <meta charset="UTF-8">
     <title>@yield('title', __('Unlock the Story Behind Every Satoshi') . ' – Satscribe')</title>
@@ -26,8 +21,7 @@
     <meta name="nostr-challenge-url" content="{{ route('nostr.challenge') }}">
     <script>
     const savedTheme = localStorage.getItem('theme');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    if (savedTheme === 'dark' || (savedTheme === null && prefersDark)) {
+    if (savedTheme === 'dark') {
         document.documentElement.classList.add('dark');
     }
     window.i18n = {
