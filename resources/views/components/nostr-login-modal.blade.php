@@ -3,10 +3,10 @@
      x-init="window.nostrLoginModal = $data"
      x-show="show"
      @keydown.escape.window="closeModal"
-     class="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm bg-black/40 dark:bg-black/60"
+     class="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm bg-black/40 "
      style="display: none;"
      x-cloak>
-    <div class="relative w-full max-w-md p-6 rounded-2xl shadow-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700"
+    <div class="relative w-full max-w-md p-6 rounded-2xl shadow-2xl bg-white  text-gray-900  border border-gray-300"
          @click.away="closeModal"
          x-transition:enter="transition ease-out duration-300 transform"
          x-transition:enter-start="opacity-0 scale-95"
@@ -14,7 +14,7 @@
          x-transition:leave="transition ease-in duration-200 transform"
          x-transition:leave-start="opacity-100 scale-100"
          x-transition:leave-end="opacity-0 scale-95">
-        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">{{ __('Login with Nostr') }}</h2>
+        <h2 class="text-xl font-bold mb-4">{{ __('Login with Nostr') }}</h2>
 
         <template x-if="error">
             <p class="mb-3 text-red-500" x-text="error"></p>
@@ -23,11 +23,11 @@
         <div class="space-y-6">
             <div>
                 <h3 class="font-semibold">{{ __('Browser extension (recommended)') }}</h3>
-                <p class="text-sm text-gray-700 dark:text-gray-300 mb-2">
+                <p class="text-sm text-gray-600 mb-2">
                     Good security. Requires a plug-in like
-                    <a href="https://getalby.com/products/browser-extension" target="_blank" class="underline">Alby</a>
+                    <a href="https://getalby.com/products/browser-extension" target="_blank" class="underline text-blue-600 ">Alby</a>
                     or
-                    <a href="https://github.com/fiatjaf/nos2x" target="_blank" class="underline">nos2x</a>
+                    <a href="https://github.com/fiatjaf/nos2x" target="_blank" class="underline text-blue-600 ">nos2x</a>
                 </p>
                 <button @click="loginExtension"
                         class="w-full bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded">{{ __('Use Browser Extension') }}</button>
@@ -35,16 +35,16 @@
 
             <div>
                 <h3 class="font-semibold">{{ __('Private key') }}</h3>
-                <p class="text-sm text-gray-700 dark:text-gray-300 mb-2">{{ __('Less secure. Enter a private key.') }}</p>
+                <p class="text-sm text-gray-600 mb-2">{{ __('Less secure. Enter a private key.') }}</p>
                 <input type="password" x-model="privKey"
-                       class="w-full p-2 text-sm bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-white rounded mb-2"
-                       placeholder="nsec..."/>
+                       class="w-full p-2 text-sm bg-white  border border-gray-300 text-gray-900 rounded mb-2"
+                       placeholder="nsec..." />
                 <button @click="loginPrivKey"
                         class="w-full bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded">{{ __('Login with Key') }}</button>
             </div>
 
             <button @click="closeModal"
-                    class="w-full bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded">{{ __('Cancel') }}</button>
+                    class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded">{{ __('Cancel') }}</button>
         </div>
     </div>
 </div>
