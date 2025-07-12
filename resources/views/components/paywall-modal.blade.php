@@ -9,7 +9,7 @@
 >
     <!-- Modal Content -->
     <div
-        class="relative w-full max-w-md p-8 rounded-2xl shadow-2xl bg-gray-800 dark:bg-gray-900 border border-gray-700"
+        class="relative w-full max-w-md p-8 rounded-2xl shadow-2xl bg-gray-800 border border-gray-700"
         @click.away="closeModal"
         x-transition:enter="transition ease-out duration-300 transform"
         x-transition:enter-start="opacity-0 scale-95"

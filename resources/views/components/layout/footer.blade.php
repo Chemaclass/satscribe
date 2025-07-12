@@ -1,4 +1,4 @@
-<footer class="py-2 border-t border-gray-200 dark:border-gray-700 text-sm text-gray-600 dark:text-gray-400">
+<footer class="py-2 border-t border-gray-200 text-sm text-gray-600">
     <div class="flex flex-col sm:flex-row justify-between items-center gap-2 flex-wrap">
         <div class="flex items-center gap-2 flex-wrap footer-left order-2 sm:order-1">
             <span>&copy;{{ date('Y') }} Built by <a href="https://chemaclass.com/" target="_blank" class="hover:underline">Chema</a></span>
@@ -6,7 +6,7 @@
 
         <div class="flex items-center gap-2 flex-wrap footer-right order-1 sm:order-2">
             <a href="https://getalby.com/p/chemaclass" target="_blank" class="flex items-center gap-1 hover:underline">
-                <i data-lucide="bitcoin" class="w-4 h-4 text-orange-500 dark:text-[--btc-orange-dark]"></i>
+                <i data-lucide="bitcoin" class="w-4 h-4 text-orange-500"></i>
                 <span class="sm:hidden">{{ __("home.footer.support") }}</span>
                 <span class="hidden sm:inline">{{ __("home.footer.support_the_project") }}</span>
             </a>

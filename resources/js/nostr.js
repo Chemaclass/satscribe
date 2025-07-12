@@ -230,8 +230,8 @@ export function initNostrAuth() {
                 `<span id="nostr-logout-label" class="link-text">${window.i18n.loading}</span>` +
                 `<svg id="nostr-menu-icon" data-lucide="chevron-down" class="w-5 h-5"></svg>` +
                 `</button>` +
-                `<div x-show="open" x-cloak @click.away="open = false" class="absolute right-0 mt-2 w-36 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 z-50">` +
-                `<a href="/history" class="flex items-center gap-1 px-4 py-2 nav-link text-left border-b border-gray-200 dark:border-gray-700">` +
+                `<div x-show="open" x-cloak @click.away="open = false" class="absolute right-0 mt-2 w-36 rounded-md shadow-lg border border-gray-200 bg-white z-50">` +
+                `<a href="/history" class="flex items-center gap-1 px-4 py-2 nav-link text-left border-b border-gray-200">` +
                 `<svg data-lucide="scroll" class="w-5 h-5"></svg>` +
                 `<span class="ml-1">History</span>` +
                 `</a>` +
@@ -267,12 +267,12 @@ export function initNostrAuth() {
                 `<span class="link-text">Login</span>` +
                 `<svg data-lucide="chevron-down" class="w-5 h-5"></svg>` +
                 `</button>` +
-                `<div x-show="open" x-cloak @click.away="open = false" class="absolute right-0 mt-2 w-36 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 z-50">` +
-                `<button type="button" id="nostr-login-btn" class="w-full text-left px-4 py-2 nav-link flex items-center gap-1 border-b border-gray-200 dark:border-gray-700">` +
+                `<div x-show="open" x-cloak @click.away="open = false" class="absolute right-0 mt-2 w-36 rounded-md shadow-lg border border-gray-200 bg-white z-50">` +
+                `<button type="button" id="nostr-login-btn" class="w-full text-left px-4 py-2 nav-link flex items-center gap-1 border-b border-gray-200">` +
                 `<svg data-lucide="log-in" class="w-5 h-5"></svg>` +
                 `<span class="ml-1">Nostr</span>` +
                 `</button>` +
-                `<a href="/history" class="flex items-center gap-1 px-4 py-2 nav-link text-left border-b border-gray-200 dark:border-gray-700">` +
+                `<a href="/history" class="flex items-center gap-1 px-4 py-2 nav-link text-left border-b border-gray-200">` +
                 `<svg data-lucide="scroll" class="w-5 h-5"></svg>` +
                 `<span class="ml-1">History</span>` +
                 `</a>` +

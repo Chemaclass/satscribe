@@ -5,7 +5,7 @@
 @section('content')
     <section class="px-4 py-6" x-data="traceUtxoComponent()">
         <x-page.header title="{{ __('Trace UTXO') }}" containerClass="max-w-xl">
-            <p class="subtitle text-base sm:text-lg leading-relaxed text-gray-700 dark:text-gray-300">
+              <p class="subtitle text-base sm:text-lg leading-relaxed text-gray-700">
                 {{ __('Enter a TXID to trace its UTXOs.') }}
             </p>
         </x-page.header>
@@ -31,13 +31,13 @@
             <div class="border-b mb-4 flex gap-4">
                 <button type="button"
                         class="pb-2"
-                        :class="tab === 'view' ? 'border-b-2 border-orange-500 text-orange-600 font-medium' : 'text-gray-600 dark:text-gray-400'"
+                        :class="tab === 'view' ? 'border-b-2 border-orange-500 text-orange-600 font-medium' : 'text-gray-600'"
                         @click="tab = 'view'">
                     View
                 </button>
                 <button type="button"
                         class="pb-2"
-                        :class="tab === 'raw' ? 'border-b-2 border-orange-500 text-orange-600 font-medium' : 'text-gray-600 dark:text-gray-400'"
+                        :class="tab === 'raw' ? 'border-b-2 border-orange-500 text-orange-600 font-medium' : 'text-gray-600'"
                         @click="tab = 'raw'">
                     {{ __('Raw') }}
                 </button>
@@ -51,7 +51,7 @@
                 <template x-if="trace.utxos">
                     <div class="space-y-4">
                         <template x-for="(item, idx) in trace.utxos" :key="idx">
-                            <div class="bg-gray-50 dark:bg-gray-800 rounded p-4">
+                            <div class="bg-gray-50 rounded p-4">
                                 <h3 class="font-semibold mb-2">UTXO <span x-text="idx + 1"></span></h3>
                                 <ul class="ml-4 text-sm space-y-1">
                                     <li>
@@ -85,7 +85,7 @@
                         <h3 class="font-semibold mt-2 mb-2">References</h3>
                         <div class="space-y-4">
                             <template x-for="(ref, key) in trace.references" :key="key">
-                                <div :id="key" class="bg-gray-50 dark:bg-gray-800 rounded p-4">
+<div :id="key" class="bg-gray-50 rounded p-4">
                                     <strong x-text="key"></strong>
                                     <ul class="ml-4 text-sm space-y-1 mt-1">
                                         <li>
@@ -117,7 +117,7 @@
             </div>
 
             <div x-show="tab === 'raw'" x-cloak>
-                <pre @click="showRaw = !showRaw" :class="showRaw ? '' : 'max-h-[250px] overflow-y-auto cursor-pointer'" class="p-4 bg-gray-100 dark:bg-gray-800 rounded text-sm">
+                <pre @click="showRaw = !showRaw" :class="showRaw ? '' : 'max-h-[250px] overflow-y-auto cursor-pointer'" class="p-4 bg-gray-100 rounded text-sm">
 <code x-text="JSON.stringify(trace, null, 2)"></code>
                 </pre>
             </div>

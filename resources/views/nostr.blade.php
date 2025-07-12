@@ -5,7 +5,7 @@
 @section('content')
     <section class="px-4 sm:px-6 lg:px-8 py-6 space-y-6">
         <x-page.header title="Login with Nostr" />
-        <div class="prose dark:prose-invert max-w-none space-y-4">
+        <div class="prose max-w-none space-y-4">
             <p>
                 At Satscribe, we believe in privacy and user ownership. That’s why we use
                 <a href="https://nostr.com" target="_blank">Nostr</a>—a simple, open protocol for a more private web.

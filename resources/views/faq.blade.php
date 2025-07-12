@@ -14,7 +14,7 @@
                 {{ __('From quick summaries to deeper insights, Satscribe turns raw blockchain data into something anyone') }}
                 {{ __('can understand.') }}
             </p>
-            <p class="subtitle text-base sm:text-lg text-gray-700 dark:text-gray-400 mt-4">
+            <p class="subtitle text-base sm:text-lg text-gray-700 mt-4">
                 {{ __('Use the search or browse by topic to explore more.') }}
             </p>
         </x-page.header>
@@ -40,8 +40,8 @@
                 <button
                     class="answer-level-btn font-medium"
                     :class="globalAnswerLevel === '{{ $level }}'
-                        ? 'bg-orange-200 text-orange-900 border-orange-400 dark:bg-orange-200 dark:text-orange-900 dark:border-orange-100'
-                        : 'bg-white border-gray-300 hover:bg-gray-100 dark:bg-transparent dark:text-gray-500 dark:border-gray-600 dark:hover:bg-gray-300'"
+                        ? 'bg-orange-200 text-orange-900 border-orange-400'
+                        : 'bg-white border-gray-300 hover:bg-gray-100'"
                     @click="setGlobalAnswerLevel('{{ $level }}')"
                 >
                     <i data-lucide="{{ $meta['icon'] }}" class="w-4 h-4"></i>
@@ -54,7 +54,7 @@
         <div class="space-y-6">
             <template x-for="faq in filteredFaqs()" :key="faq.id">
                 <div
-                    class="faq-card rounded-lg p-4 shadow-sm transition-colors duration-150 hover:bg-orange-50 dark:hover:bg-gray-800"
+                    class="faq-card rounded-lg p-4 shadow-sm transition-colors duration-150 hover:bg-orange-50"
                     x-data="{
                 answerLevel: 'advance',
                 init() {
@@ -65,7 +65,7 @@
              }"
                 >
                     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
-                        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+                        <h2 class="text-lg font-semibold text-gray-900">
                             <span x-html="faq.highlighted_question"></span>
                             <template x-if="faq.highlight">
                                 <span class="faq-highlight ml-2 block sm:inline">★ Highlight</span>
@@ -75,8 +75,8 @@
                             <div class="flex flex-wrap items-center gap-1 sm:text-right">
                                 <template x-for="cat in faq.categories.split(',')">
                                     <button
-                                        class="category-badge transition-colors duration-150 px-2 py-0.5 text-xs font-medium rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-orange-200 dark:hover:bg-orange-300 flex items-center gap-1 cursor-pointer"
-                                        :class="category === cat.trim() ? 'bg-orange-300 text-white dark:bg-orange-400' : ''"
+                                        class="category-badge transition-colors duration-150 px-2 py-0.5 text-xs font-medium rounded bg-gray-200 text-gray-800 hover:bg-orange-200 flex items-center gap-1 cursor-pointer"
+                                        :class="category === cat.trim() ? 'bg-orange-300 text-white' : ''"
                                         @click="category === cat.trim() ? category = '' : category = cat.trim()"
                                     >
                                         <template x-if="category === cat.trim()">
@@ -95,7 +95,7 @@
 
                     <template x-if="faq.link">
                         <a :href="faq.link" target="_blank"
-                           class="text-sm text-orange-600 hover:underline inline-block mt-2 dark:text-orange-400">
+                           class="text-sm text-orange-600 hover:underline inline-block mt-2">
                             {{ __('Learn more') }}
                         </a>
                     </template>
