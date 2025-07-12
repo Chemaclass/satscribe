@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Blockchain\Application\Coingecko;
 
+use Carbon\Carbon;
 use Carbon\CarbonInterface;
 use Illuminate\Contracts\Cache\Repository as Cache;
 use Modules\Blockchain\Domain\PriceServiceInterface;
@@ -18,7 +19,6 @@ final readonly class PriceService implements PriceServiceInterface
     private const BASE_URL = 'https://api.coingecko.com/api';
     private const CACHE_KEY = 'btc_prices';
     private const CACHE_TTL_MINUTES = 15;
-    private const HISTORICAL_LIMIT_SECONDS = 31_536_000; // 365 days
     private const SUPPORTED_CURRENCIES = ['usd', 'eur', 'cny', 'gbp'];
 
     public function __construct(
@@ -104,7 +104,7 @@ final readonly class PriceService implements PriceServiceInterface
             return 0.0;
         }
 
-        if ($timestamp < ($this->now->timestamp - self::HISTORICAL_LIMIT_SECONDS)) {
+        if (Carbon::createFromTimestamp($timestamp)->lt($this->now->copy()->subYear())) {
             return 0.0; // Out of free historical range
         }
 
