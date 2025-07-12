@@ -67,6 +67,7 @@
 
     <x-layout.footer />
     <x-layout.scroll-to-top />
+    <x-nostr-login-modal />
     @stack('scripts')
 </body>
 </html>

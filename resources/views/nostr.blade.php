@@ -66,7 +66,7 @@
                 <li><strong>Use your ID anywhere</strong>: The same login works across many Nostr-enabled platforms.</li>
             </ol>
 
-            <h2>🛡️ Privacy by Default</h2>
+            <h2>Privacy by Default</h2>
             <p>
                 With Nostr, there’s nothing to forget, reset, or compromise. You prove who you are by signing a message with your key—safely stored on your device.
                 All the tech behind this is <strong>open source</strong>. You can read the code, understand how it works, and even contribute.
