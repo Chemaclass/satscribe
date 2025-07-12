@@ -40,6 +40,8 @@ final class QuestionPlaceholder
         ],
         'both' => [
             "Explain this like I'm five.",
+            'Create a story for kids.',
+            'Create a horror story.',
             "What's unusual or interesting here?",
             'Write a short, simple summary.',
             'Can you identify any trends or anomalies?',

@@ -86,7 +86,7 @@ h1 {
 }
 
 h2 {
-    color: var(--btc-bg-lighter-dark);
+    color: var(--btc-bg-light);
 }
 
 .dark h2 {

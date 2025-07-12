@@ -7,18 +7,14 @@
 ])
 <!DOCTYPE html>
 <html lang="en"
-      x-data="{ dark: (localStorage.getItem('theme') === 'dark') ||
-                     (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches) }"
-      x-init="$watch('dark', val => {
-          localStorage.setItem('theme', val ? 'dark' : 'light');
-          document.documentElement.classList.toggle('dark', val);
-      })"
-      :class="{ 'dark': dark }"
->
+      x-data="themeSwitcher()"
+      x-init="init()"
+      :class="{ 'dark': dark }">
 <head>
     <meta charset="UTF-8">
     <title>@yield('title', __('Unlock the Story Behind Every Satoshi') . ' – Satscribe')</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light dark">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="nostr-pubkey" content="{{ nostr_pubkey() }}">
     <meta name="nostr-login-url" content="{{ route('nostr.login') }}">
@@ -26,9 +22,12 @@
     <meta name="nostr-challenge-url" content="{{ route('nostr.challenge') }}">
     <script>
     const savedTheme = localStorage.getItem('theme');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    if (savedTheme === 'dark' || (savedTheme === null && prefersDark)) {
+    const useDark = savedTheme === 'dark';
+    if (useDark) {
         document.documentElement.classList.add('dark');
+        document.documentElement.style.colorScheme = 'dark';
+    } else {
+        document.documentElement.style.colorScheme = 'light';
     }
     window.i18n = {
         showMore: "{{ __('Show more') }}",
@@ -67,6 +66,7 @@
 
     <x-layout.footer />
     <x-layout.scroll-to-top />
+    <x-nostr-login-modal />
     @stack('scripts')
 </body>
 </html>

@@ -1,7 +1,8 @@
 #!/bin/bash
 set -euo pipefail
+IFS=$'\n\t'
 
-echo "🛠 Starting zero-downtime deployment..."
+echo "🛠 $(date +'%F %T') - Starting zero-downtime deployment..."
 
 # CONFIG
 REPO_URL="git@github.com:Chemaclass/satscribe.git"
@@ -9,62 +10,67 @@ BRANCH="${1:-${BRANCH:-main}}"
 BASE_DIR="/var/www/html/satscribe"
 RELEASES_DIR="$BASE_DIR/releases"
 CURRENT_LINK="$BASE_DIR/current"
+SHARED_ENV="$BASE_DIR/shared/.env"
+SHARED_STORAGE="$BASE_DIR/shared/storage"
 TIMESTAMP=$(date +"%Y%m%d%H%M%S")
 NEW_RELEASE_DIR="$RELEASES_DIR/$TIMESTAMP"
 
-# Ensure base dirs exist
+# Trap to clean up on error
+trap 'echo "❌ $(date +%F %T) - Deployment failed. Cleaning up..."; rm -rf "$NEW_RELEASE_DIR"; exit 1' ERR
+
 mkdir -p "$RELEASES_DIR"
 
-echo "📥 Cloning branch '$BRANCH' to $NEW_RELEASE_DIR"
+echo "📥 $(date +'%T') - Cloning '$BRANCH' into $NEW_RELEASE_DIR"
 git clone --branch "$BRANCH" --depth 1 "$REPO_URL" "$NEW_RELEASE_DIR"
 
-# Link shared resources before anything Laravel-related
-echo "🔗 Linking shared .env and storage"
-ln -sfn "$BASE_DIR/shared/.env" "$NEW_RELEASE_DIR/.env"
+echo "🔗 $(date +'%T') - Linking shared .env and storage"
+ln -sfn "$SHARED_ENV" "$NEW_RELEASE_DIR/.env"
 rm -rf "$NEW_RELEASE_DIR/storage"
-ln -sfn "$BASE_DIR/shared/storage" "$NEW_RELEASE_DIR/storage"
+ln -sfn "$SHARED_STORAGE" "$NEW_RELEASE_DIR/storage"
 
-# Persist the deployed commit hash into the shared .env file
-COMMIT=$(cd "$NEW_RELEASE_DIR" && git rev-parse HEAD)
-echo "🔄 Writing LAST_COMMIT_HASH=$COMMIT to shared .env"
-# Replace existing line or append if it doesn't exist
-if grep -q '^LAST_COMMIT_HASH=' "$BASE_DIR/shared/.env"; then
-    sed -i "s/^LAST_COMMIT_HASH=.*/LAST_COMMIT_HASH=$COMMIT/" "$BASE_DIR/shared/.env"
+# Capture and store commit hash
+cd "$NEW_RELEASE_DIR"
+COMMIT=$(git rev-parse HEAD)
+echo "🔄 $(date +'%T') - Saving LAST_COMMIT_HASH=$COMMIT"
+if grep -q '^LAST_COMMIT_HASH=' "$SHARED_ENV"; then
+    sed -i "s|^LAST_COMMIT_HASH=.*|LAST_COMMIT_HASH=$COMMIT|" "$SHARED_ENV"
 else
-    echo "LAST_COMMIT_HASH=$COMMIT" >> "$BASE_DIR/shared/.env"
+    echo "LAST_COMMIT_HASH=$COMMIT" >> "$SHARED_ENV"
 fi
 
-# Run install script if it exists
-cd "$NEW_RELEASE_DIR"
+echo "📦 $(date +'%T') - Running composer install"
+composer install --no-dev --no-scripts --optimize-autoloader --no-interaction --no-progress
 
-echo "🎼 Running composer install..."
-composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
+echo "📦 $(date +'%T') - Installing npm dependencies"
+npm ci --prefer-offline --no-audit
 
-echo "📦 Installing npm dependencies..."
-npm install
-
-echo "🛠 Building frontend assets..."
+echo "🛠 $(date +'%T') - Building frontend assets"
 npm run build
 
-echo "🧹 Clearing and caching Laravel config..."
-php artisan config:clear
-php artisan route:clear
-php artisan view:clear
+echo "🗄️  $(date +'%T') - Running database migrations"
+php artisan migrate --force
 
+echo "🔁 $(date +'%T') - Switching current symlink to $NEW_RELEASE_DIR"
+ln -sfn "$NEW_RELEASE_DIR" "$CURRENT_LINK"
+
+echo "🧹 $(date +'%T') - Clearing and caching Laravel config"
+cd "$CURRENT_LINK"
+php artisan config:clear
 php artisan config:cache
 php artisan route:cache
 php artisan view:cache
 
-echo "🗄️ Running database migrations..."
-php artisan migrate --force
-
-# Atomically switch the 'current' symlink to new release
-echo "🔁 Switching current symlink to $NEW_RELEASE_DIR"
-ln -sfn "$NEW_RELEASE_DIR" "$CURRENT_LINK"
-
-# Clean up older releases, keeping only the 10 most recent
-echo "🧹 Cleaning old releases (keeping latest 10)"
+echo "🧹 $(date +'%T') - Cleaning up old releases (keeping 10)"
 cd "$RELEASES_DIR"
 ls -1dt */ | tail -n +11 | xargs -r rm -rf --
 
-echo "✅ Deployment complete: now serving $CURRENT_LINK"
+# Reload PHP-FPM to ensure the new config is picked up
+PHP_FPM_SERVICE=$(systemctl list-units --type=service | grep php | grep fpm | awk '{print $1}' | head -n1)
+if [[ -n "$PHP_FPM_SERVICE" ]]; then
+  echo "🔁 $(date +'%T') - Reloading $PHP_FPM_SERVICE to apply changes"
+  sudo systemctl reload "$PHP_FPM_SERVICE"
+else
+  echo "⚠️ $(date +'%T') - Could not detect PHP-FPM service name. Please reload manually."
+fi
+
+echo "✅ $(date +'%F %T') - Deployment complete: now serving $CURRENT_LINK"

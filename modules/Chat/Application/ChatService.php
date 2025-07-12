@@ -24,6 +24,7 @@ final readonly class ChatService
         private CreateChatActionInterface $createChatAction,
         private AddMessageActionInterface $addMessageAction,
         private ChatRepositoryInterface $chatRepository,
+        private SuggestedPromptService $promptService,
     ) {
     }
 
@@ -41,7 +42,7 @@ final readonly class ChatService
 
         return [
             'questionPlaceholder' => QuestionPlaceholder::rand(),
-            'suggestedPromptsGrouped' => QuestionPlaceholder::groupedPrompts(),
+            'suggestedPromptsGrouped' => $this->promptService->getGroupedPrompts($chat),
             'suggestions' => $firstMsg->isBlock() ? QuestionPlaceholder::forBlock() : QuestionPlaceholder::forTx(),
             'maxBitcoinBlockHeight' => $this->blockchainFacade->getMaxPossibleBlockHeight(),
             'latestBlockHeight' => $this->blockchainFacade->getCurrentBlockHeight(),
@@ -78,7 +79,7 @@ final readonly class ChatService
     {
         return [
             'questionPlaceholder' => QuestionPlaceholder::rand(),
-            'suggestedPromptsGrouped' => QuestionPlaceholder::groupedPrompts(),
+            'suggestedPromptsGrouped' => $this->promptService->getGroupedPrompts(),
             'maxBitcoinBlockHeight' => $this->blockchainFacade->getMaxPossibleBlockHeight(),
             'latestBlockHeight' => $this->blockchainFacade->getCurrentBlockHeight(),
             'personaDescriptions' => PromptPersona::descriptions()->toJson(),

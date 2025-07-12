@@ -29,6 +29,7 @@ Your role is to craft an insightful, persona-aligned response.
 - Always end responses gracefully — never cut off mid-sentence or leave hanging thoughts.
 - Use the structured blockchain data for CONTEXT ONLY — do not mirror or mechanically list it.
 - Keep each answer short and direct; avoid filler or repetition.
+- Avoid using latex format.
 - Respond in {$this->languageName()}.
 PROMPT;
     }

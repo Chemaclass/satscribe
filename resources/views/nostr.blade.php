@@ -42,7 +42,10 @@
                 <li>Approve the login request in the extension.</li>
             </ol>
             <p>
-                Other compatible extensions like Flamingo or nos2x work similarly.
+                Other compatible extensions like
+                <a href="https://github.com/fiatjaf/nos2x" target="_blank">nos2x</a> or
+                <a href="https://github.com/t4t5/flamingo" target="_blank">Flamingo</a>
+                work similarly.
             </p>
 
             <h3>Option 2: Manual Login</h3>
@@ -66,7 +69,7 @@
                 <li><strong>Use your ID anywhere</strong>: The same login works across many Nostr-enabled platforms.</li>
             </ol>
 
-            <h2>🛡️ Privacy by Default</h2>
+            <h2>Privacy by Default</h2>
             <p>
                 With Nostr, there’s nothing to forget, reset, or compromise. You prove who you are by signing a message with your key—safely stored on your device.
                 All the tech behind this is <strong>open source</strong>. You can read the code, understand how it works, and even contribute.

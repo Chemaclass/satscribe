@@ -134,6 +134,9 @@
                 </div>
                 <div id="assistant-message-${assistantMsgCount}" class="assistant-message loading-spinner-group text-left">
                     <x-chat.assistant-loading-prompt/>
+                    <div class="loading-message text-gray-600 mt-1">
+                        ${this.escapeHtml(this.loadingMessage)}
+                    </div>
                 </div>
             </div>
         `;
