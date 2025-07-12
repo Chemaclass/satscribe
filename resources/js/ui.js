@@ -273,10 +273,6 @@ export function initUI() {
             });
         }
 
-        window.refreshThemeIcon = () => {
-            const icon = document.getElementById('theme-icon');
-            if (icon) refreshIcons();
-        };
 
         window.refreshLucideIcons = () => {
             requestAnimationFrame(() => {

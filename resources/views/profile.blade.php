@@ -6,7 +6,7 @@
     <section class="px-4 sm:px-6 lg:px-8 py-6 space-y-6">
         <x-page.header title="Profile" />
 
-        <div class="space-y-4 text-gray-700 dark:text-gray-300">
+        <div class="space-y-4 text-gray-700">
             @if($pubkey)
                 <div id="nostr-profile-meta" class="profile-card overflow-hidden">
                     <div id="profile-banner" class="h-32 bg-cover bg-center skeleton"></div>
@@ -32,19 +32,19 @@
 
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div class="profile-stat">
-                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Pubkey</p>
+                        <p class="text-sm font-medium text-gray-500">Pubkey</p>
                         <p class="break-all text-sm mt-1">{{ $pubkey }}</p>
                     </div>
                     <div class="profile-stat">
-                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total chats</p>
+                        <p class="text-sm font-medium text-gray-500">Total chats</p>
                         <p class="text-xl font-semibold mt-1">{{ number_format($totalChats) }}</p>
                     </div>
                     <div class="profile-stat">
-                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total messages</p>
+                        <p class="text-sm font-medium text-gray-500">Total messages</p>
                         <p class="text-xl font-semibold mt-1">{{ number_format($totalMessages) }}</p>
                     </div>
                     <div class="profile-stat sm:col-span-3">
-                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total zaps</p>
+                        <p class="text-sm font-medium text-gray-500">Total zaps</p>
                         <p class="text-xl font-semibold mt-1">{{ number_format($totalZaps) }}</p>
                     </div>
                 </div>

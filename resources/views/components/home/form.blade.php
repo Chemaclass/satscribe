@@ -178,7 +178,7 @@
                             <label for="refresh"
                                    class="block text-sm font-medium text-gray-900 mb-1 cursor-pointer">
                                 {{ __('Fetch the latest data from the blockchain') }}<br>
-                                <small class="checkbox-help text-gray-600 dark:text-gray-400">
+                                 <small class="checkbox-help text-gray-600">
                                     {{ __('(Skips cached data and requests fresh live data from the blockchain and OpenAI)') }}
                                 </small>
                             </label>
@@ -196,7 +196,7 @@
                             <label for="private"
                                    class="block text-sm font-medium text-gray-900 mb-1 cursor-pointer">
                                 {{ __('Keep this chat private') }}<br>
-                                <small class="checkbox-help text-gray-600 dark:text-gray-400">
+                                 <small class="checkbox-help text-gray-600">
                                     {{ __('(When enabled, this chat will not appear in the public archive)') }}
                                 </small>
                             </label>

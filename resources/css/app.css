@@ -75,10 +75,6 @@ body {
     }
 }
 
-.dark body {
-    background: var(--btc-bg-dark);
-    color: var(--btc-text-light);
-}
 
 h1 {
     font-size: 2rem;
@@ -89,9 +85,6 @@ h2 {
     color: var(--btc-bg-light);
 }
 
-.dark h2 {
-    color: var(--btc-text-light);
-}
 
 button:disabled {
     pointer-events: none;
@@ -111,9 +104,6 @@ header {
     border-bottom: 1px solid var(--btc-border-default);
 }
 
-.dark header {
-    border-color: var(--btc-border-dark);
-}
 
 .brand {
     font-size: 1.5rem;
@@ -131,9 +121,6 @@ header {
     color: var(--btc-border-dark);
 }
 
-.dark .nav-links {
-    color: var(--btc-muted);
-}
 
 .nav-links a {
     text-decoration: none;
@@ -153,18 +140,12 @@ header {
     transition: color 0.3s ease;
 }
 
-.dark .nav-link {
-    color: var(--btc-muted);
-}
 
 .nav-link:hover {
     color: var(--btc-orange-dark);
     text-decoration: none;
 }
 
-.dark .nav-link:hover {
-    color: var(--btc-orange-light);
-}
 
 .profile-menu a.nav-link:hover,
 .profile-menu button.nav-link:hover {
@@ -197,10 +178,6 @@ footer {
     padding-top: 2rem;
 }
 
-.dark footer {
-    border-color: var(--btc-border-dark);
-    color: var(--btc-muted);
-}
 
 /* =============================================================================
    Form Elements
@@ -218,16 +195,6 @@ pre,
     border-radius: 0.375rem;
 }
 
-.dark select,
-.dark .form-checkbox,
-.dark .form-input,
-.dark .box,
-.dark pre,
-.dark .code-block {
-    background: var(--btc-bg-lighter-dark);
-    border-color: var(--btc-border-dark);
-    color: var(--btc-text-light);
-}
 
 .form-button {
     @apply inline-flex items-center justify-center gap-1;
@@ -259,12 +226,6 @@ pre,
     color: var(--btc-gray);
 }
 
-.dark .subtitle,
-.dark .form-help,
-.dark .checkbox-help,
-.dark .checkbox-label {
-    color: var(--btc-muted);
-}
 
 /* =============================================================================
    Alerts & Error Messages
@@ -277,18 +238,11 @@ pre,
     margin-bottom: 1.5rem;
 }
 
-.dark .alert-warning {
-    background-color: #7c2d12;
-    color: var(--btc-text-light);
-}
 
 .error {
     color: #dc2626;
 }
 
-.dark .error {
-    color: #f87171;
-}
 
 /* =============================================================================
    FAQ Section
@@ -298,18 +252,11 @@ pre,
     color: var(--btc-bg-lighter-dark);
 }
 
-.dark .faq-card {
-    background-color: var(--btc-bg-lighter-dark);
-    color: var(--btc-text-light);
-}
 
 .faq-answer {
     color: var(--btc-border-dark);
 }
 
-.dark .faq-answer {
-    color: var(--btc-border-light);
-}
 
 .faq-highlight {
     color: var(--btc-orange-dark);
@@ -319,9 +266,6 @@ pre,
     letter-spacing: 0.03em;
 }
 
-.dark .faq-highlight {
-    color: var(--btc-orange-light);
-}
 
 /* =============================================================================
    Custom Components
@@ -336,53 +280,33 @@ pre,
     border: 1px solid var(--btc-border-light);
 }
 
-.dark .category-badge {
-    background-color: var(--btc-bg-lighter-dark);
-    color: var(--btc-text-light);
-    border-color: var(--btc-border-dark);
-}
 
 .chat-item {
     @apply p-5 rounded-lg shadow-sm transition hover:shadow-md mb-4;
     @apply bg-white text-gray-900;
 }
 
-.dark .chat-item {
-    @apply bg-gray-800 text-gray-100;
-}
 
 .chat-question {
     @apply mb-2 text-sm italic px-3 py-2 rounded;
     @apply bg-orange-50 text-orange-700;
 }
 
-.dark .chat-question {
-    @apply bg-gray-700 text-orange-100 ring-1 ring-gray-700;
-}
 
 .profile-card {
     @apply bg-white text-gray-900 border border-gray-200 rounded-lg shadow;
 }
 
-.dark .profile-card {
-    @apply bg-gray-800 text-gray-100 border-gray-700;
-}
 
 .profile-stat {
     @apply p-4 rounded-lg bg-white text-gray-900 border border-gray-200 shadow;
 }
 
-.dark .profile-stat {
-    @apply bg-gray-800 text-gray-100 border-gray-700;
-}
 
 label {
     color: var(--btc-bg-lighter-dark);
 }
 
-.dark label {
-    color: var(--btc-text-light);
-}
 
 /* =============================================================================
    Utilities & Animations
@@ -483,16 +407,15 @@ body.modal-open {
 @layer components {
     .answer-level-btn {
         @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium border transition-colors duration-150 cursor-pointer;
-        @apply text-[color:var(--btc-text-dark)] dark:text-[color:var(--btc-text-light)] dark:focus:ring-orange-100;
+        @apply text-[color:var(--btc-text-dark)];
     }
 
     .answer-level-active {
-        @apply bg-orange-100 text-orange-800 border-orange-300 dark:bg-orange-200 dark:text-orange-900 dark:border-orange-400;
+        @apply bg-orange-100 text-orange-800 border-orange-300;
     }
 
     .answer-level-inactive {
         @apply bg-transparent text-gray-600 border-gray-300 hover:bg-gray-100;
-        @apply dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700;
     }
     .persona-btn {
         @apply px-3 py-2 rounded-md text-sm font-medium border cursor-pointer transition;
@@ -502,16 +425,8 @@ body.modal-open {
         border-color: var(--btc-border-light);
     }
 
-    .dark .persona-btn {
-        @apply bg-gray-800 text-gray-100 border-gray-600;
-    }
-
     .persona-btn--active {
         @apply bg-orange-100 text-orange-800 border-orange-300;
-    }
-
-    .dark .persona-btn--active {
-        @apply bg-orange-200 text-orange-900 border-orange-400;
     }
 }
 
@@ -601,14 +516,6 @@ a:hover,
     color: var(--btc-text-dark);
 }
 
-.dark #chat-container pre {
-    background-color: #1a1a1a;
-    color: #f8f8f8;
-    padding: 1em;
-    border-radius: 0.5em;
-    overflow-x: auto;
-    font-size: 0.875rem;
-}
 
 #chat-container blockquote {
     border-left: 4px solid var(--btc-orange, orange);
@@ -696,14 +603,6 @@ a:hover,
 }
 
 /* Dark mode overrides */
-.dark .chat-body.collapsed::after {
-    background: linear-gradient(
-        to bottom,
-        rgba(31, 41, 55, 0) 0%,
-        rgba(31, 41, 55, 1) 100%
-    );
-    opacity: 1;
-}
 
 /* ============================================================================
    Suggested Question Prompt Styles (Light & Dark Modes)
@@ -721,10 +620,6 @@ a:hover,
     color: var(--btc-text-dark);
 }
 
-.dark .suggested-question-prompt {
-    background-color: var(--btc-border-dark);
-    color: var(--btc-text-light);
-}
 
 .suggested-question-prompt:not(:disabled):hover {
     background-color: var(--btc-orange-light);
@@ -789,5 +684,5 @@ a:hover,
    Skeleton Loading
 ----------------------------------------------------------------------------*/
 .skeleton {
-    @apply bg-gray-200 dark:bg-gray-700 animate-pulse text-transparent;
+    @apply bg-gray-200 animate-pulse text-transparent;
 }

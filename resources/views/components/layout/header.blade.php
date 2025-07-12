@@ -6,7 +6,7 @@
     'hasFaqs' => false,
 ])
 
-<header class="flex justify-between select-none items-center px-4 py-3 border-gray-200 dark:border-gray-700">
+<header class="flex justify-between select-none items-center px-4 py-3 border-gray-200">
     <a href="{{ url('/') }}" class="brand text-xl font-bold">Satscribe</a>
 
     <nav class="nav-links flex items-center" aria-label="Main navigation">
@@ -37,11 +37,10 @@
                     x-show="open"
                     x-cloak
                     @click.away="open = false"
-                    :class="dark ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'"
-                    class="profile-menu absolute right-0 text-left mt-2 w-36 rounded-md shadow-lg border border-gray-300 dark:border-gray-600 z-50 flex flex-col items-start"
+                    class="profile-menu absolute right-0 text-left mt-2 w-36 rounded-md shadow-lg border border-gray-300 z-50 flex flex-col items-start bg-white text-gray-900"
                 >
                     <a href="{{ route('history.index') }}"
-                           class="flex items-center gap-1 px-4 py-2 nav-link w-full text-left border-b border-gray-200 dark:border-gray-700">
+                           class="flex items-center gap-1 px-4 py-2 nav-link w-full text-left border-b border-gray-200">
                         <svg data-lucide="scroll" class="w-5 h-5"></svg>
                         <span>{{ __('History') }}</span>
                     </a>
@@ -54,7 +53,7 @@
                     <form method="POST" action="{{ route('nostr.logout') }}" class="w-full">
                         @csrf
                         <button type="submit"
-                                class="w-full text-left px-4 py-2 nav-link flex items-center gap-1 border-b border-gray-200 dark:border-gray-700 last:border-b-0">
+                                class="w-full text-left px-4 py-2 nav-link flex items-center gap-1 border-b border-gray-200 last:border-b-0">
                             <svg data-lucide="log-out" class="w-5 h-5"></svg>
                             <span class="ml-1">{{ __('Logout') }}</span>
                         </button>
@@ -73,17 +72,16 @@
                     x-show="open"
                     x-cloak
                     @click.away="open = false"
-                    :class="dark ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'"
-                    class="profile-menu absolute right-0 text-left mt-2 w-36 rounded-md shadow-lg border border-gray-300 dark:border-gray-600 z-50 flex flex-col items-start"
+                    class="profile-menu absolute right-0 text-left mt-2 w-36 rounded-md shadow-lg border border-gray-300 z-50 flex flex-col items-start bg-white text-gray-900"
                 >
                     <button type="button" id="nostr-login-btn"
-                            class="w-full text-left px-4 py-2 nav-link flex items-center gap-1 border-b border-gray-200 dark:border-gray-700">
+                            class="w-full text-left px-4 py-2 nav-link flex items-center gap-1 border-b border-gray-200">
                         <svg data-lucide="log-in" class="w-5 h-5"></svg>
                         <span class="ml-1">{{ __('Nostr') }}</span>
                     </button>
 
                     <a href="{{ route('history.index') }}"
-                       class="flex items-center gap-1 px-4 py-2 nav-link w-full text-left border-b border-gray-200 dark:border-gray-700">
+                       class="flex items-center gap-1 px-4 py-2 nav-link w-full text-left border-b border-gray-200">
                         <svg data-lucide="scroll" class="w-5 h-5"></svg>
                         <span>{{ __('History') }}</span>
                     </a>
@@ -91,11 +89,5 @@
             </div>
         @endif
 
-        <button type="button"
-                class="nav-link flex items-center gap-1"
-                @click="toggle(); $nextTick(() => refreshThemeIcon());">
-            <svg :data-lucide="dark ? 'sun' : 'moon'" id="theme-icon" class="w-5 h-5"></svg>
-            <span class="sr-only">{{ __('Theme') }}</span>
-        </button>
     </nav>
 </header>
