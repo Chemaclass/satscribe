@@ -60,6 +60,7 @@ final class OpenAIFacadeTest extends TestCase
             $logger,
             new PersonaPromptBuilder('en'),
             self::createStub(PriceServiceInterface::class),
+            now(),
             openAiApiKey: 'key',
             openAiModel: 'model',
         );

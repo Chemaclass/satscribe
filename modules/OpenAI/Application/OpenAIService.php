@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Modules\OpenAI\Application;
 
 use App\Models\Chat;
+use Carbon\Carbon;
+use Carbon\CarbonInterface;
 use Modules\Blockchain\Domain\PriceServiceInterface;
 use Modules\OpenAI\Domain\Exception\OpenAIError;
 use Modules\Shared\Domain\Chat\ChatConstants;
@@ -27,6 +29,7 @@ final readonly class OpenAIService
         private LoggerInterface $logger,
         private PersonaPromptBuilder $promptBuilder,
         private PriceServiceInterface $priceService, // @todo use BlockchainFacade instead
+        private CarbonInterface $now,
         private string $openAiApiKey,
         private string $openAiModel,
     ) {
@@ -115,10 +118,23 @@ final readonly class OpenAIService
 
     private function buildPriceLine(int $timestamp): string
     {
-        $historicUsd = $this->priceService->getBtcPriceUsdAt($timestamp);
-        $historicEur = $this->priceService->getBtcPriceEurAt($timestamp);
         $currentUsd = $this->priceService->getCurrentBtcPriceUsd();
         $currentEur = $this->priceService->getCurrentBtcPriceEur();
+
+        if (Carbon::createFromTimestamp($timestamp)->lt($this->now->copy()->subYear())) {
+            if ($currentUsd <= 0 && $currentEur <= 0) {
+                return '';
+            }
+
+            return sprintf(
+                'Today 1 BTC is about $%s USD or €%s EUR.',
+                number_format($currentUsd, 0),
+                number_format($currentEur, 0),
+            );
+        }
+
+        $historicUsd = $this->priceService->getBtcPriceUsdAt($timestamp);
+        $historicEur = $this->priceService->getBtcPriceEurAt($timestamp);
 
         if ($historicUsd <= 0 && $historicEur <= 0) {
             return '';
