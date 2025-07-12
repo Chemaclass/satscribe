@@ -56,17 +56,17 @@ final class OpenAIServiceTest extends TestCase
         $data = BlockchainData::forBlock($block);
         $input = new PromptInput(PromptType::Block, '1');
 
-        $price = $this->createStub(PriceServiceInterface::class);
-        $price->method('getBtcPriceUsdAt')->willReturn(10000.0);
-        $price->method('getBtcPriceEurAt')->willReturn(9000.0);
-        $price->method('getCurrentBtcPriceUsd')->willReturn(30000.0);
-        $price->method('getCurrentBtcPriceEur')->willReturn(27000.0);
+        $priceService = $this->createStub(PriceServiceInterface::class);
+        $priceService->method('getBtcPriceUsdAt')->willReturn(10000.0);
+        $priceService->method('getBtcPriceEurAt')->willReturn(9000.0);
+        $priceService->method('getCurrentBtcPriceUsd')->willReturn(30000.0);
+        $priceService->method('getCurrentBtcPriceEur')->willReturn(27000.0);
 
         $service = new OpenAIService(
             $http,
             $logger,
             new PersonaPromptBuilder('en'),
-            $price,
+            $priceService,
             openAiApiKey: 'api-key',
             openAiModel: 'model',
         );
@@ -96,17 +96,17 @@ final class OpenAIServiceTest extends TestCase
         $data = BlockchainData::forBlock($block);
         $input = new PromptInput(PromptType::Block, '1');
 
-        $price = $this->createStub(PriceServiceInterface::class);
-        $price->method('getBtcPriceUsdAt')->willReturn(10000.0);
-        $price->method('getBtcPriceEurAt')->willReturn(9000.0);
-        $price->method('getCurrentBtcPriceUsd')->willReturn(30000.0);
-        $price->method('getCurrentBtcPriceEur')->willReturn(27000.0);
+        $priceService = $this->createStub(PriceServiceInterface::class);
+        $priceService->method('getBtcPriceUsdAt')->willReturn(10000.0);
+        $priceService->method('getBtcPriceEurAt')->willReturn(9000.0);
+        $priceService->method('getCurrentBtcPriceUsd')->willReturn(30000.0);
+        $priceService->method('getCurrentBtcPriceEur')->willReturn(27000.0);
 
         $service = new OpenAIService(
             $http,
             $logger,
             new PersonaPromptBuilder('en'),
-            $price,
+            $priceService,
             openAiApiKey: 'api-key',
             openAiModel: 'model',
         );
@@ -137,17 +137,17 @@ final class OpenAIServiceTest extends TestCase
         $data = BlockchainData::forBlock($block);
         $input = new PromptInput(PromptType::Block, '1');
 
-        $price = $this->createStub(PriceServiceInterface::class);
-        $price->method('getBtcPriceUsdAt')->willReturn(10000.0);
-        $price->method('getBtcPriceEurAt')->willReturn(9000.0);
-        $price->method('getCurrentBtcPriceUsd')->willReturn(30000.0);
-        $price->method('getCurrentBtcPriceEur')->willReturn(27000.0);
+        $priceService = $this->createStub(PriceServiceInterface::class);
+        $priceService->method('getBtcPriceUsdAt')->willReturn(10000.0);
+        $priceService->method('getBtcPriceEurAt')->willReturn(9000.0);
+        $priceService->method('getCurrentBtcPriceUsd')->willReturn(30000.0);
+        $priceService->method('getCurrentBtcPriceEur')->willReturn(27000.0);
 
         $service = new OpenAIService(
             $http,
             $logger,
             new PersonaPromptBuilder('en'),
-            $price,
+            $priceService,
             openAiApiKey: 'api-key',
             openAiModel: 'model',
         );
@@ -186,17 +186,17 @@ final class OpenAIServiceTest extends TestCase
         $data = BlockchainData::forBlock($block);
         $input = new PromptInput(PromptType::Block, '1');
 
-        $price = $this->createStub(PriceServiceInterface::class);
-        $price->method('getBtcPriceUsdAt')->willReturn(25000.0);
-        $price->method('getBtcPriceEurAt')->willReturn(23000.0);
-        $price->method('getCurrentBtcPriceUsd')->willReturn(30000.0);
-        $price->method('getCurrentBtcPriceEur')->willReturn(27000.0);
+        $priceService = $this->createStub(PriceServiceInterface::class);
+        $priceService->method('getBtcPriceUsdAt')->willReturn(25000.0);
+        $priceService->method('getBtcPriceEurAt')->willReturn(23000.0);
+        $priceService->method('getCurrentBtcPriceUsd')->willReturn(30000.0);
+        $priceService->method('getCurrentBtcPriceEur')->willReturn(27000.0);
 
         $service = new OpenAIService(
             $http,
             $logger,
             new PersonaPromptBuilder('en'),
-            $price,
+            $priceService,
             openAiApiKey: 'api-key',
             openAiModel: 'model',
         );
