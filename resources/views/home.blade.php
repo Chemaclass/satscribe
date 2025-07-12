@@ -51,6 +51,7 @@
 
     </section>
     <x-paywall-modal/>
+    <x-feedback-modal/>
 @endsection
 
 @push('scripts')

@@ -124,5 +124,13 @@
     "home.total_messages": "Total messages so far: :count",
     "Got it": "Got it",
     "login.benefits": "Log in with Nostr to get more requests for fewer sats and early access to upcoming features.",
-    "login.nostr_vs_guest_tip": "Nostr users unlock twice the requests for the same sats."
+    "login.nostr_vs_guest_tip": "Nostr users unlock twice the requests for the same sats.",
+    "Give Feedback": "Give Feedback",
+    "Send Feedback": "Send Feedback",
+    "Nickname": "Nickname",
+    "Email (optional)": "Email (optional)",
+    "Message": "Message",
+    "Prove you are human": "Prove you are human",
+    "Invalid captcha answer.": "Invalid captcha answer.",
+    "Thanks for your feedback!": "Thanks for your feedback!"
 }

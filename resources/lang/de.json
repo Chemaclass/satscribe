@@ -122,5 +122,13 @@
     "Generate a title for a blog post about this.": "Generiere einen Titel für einen Blogbeitrag darüber.",
     "Give me a generic overview.": "Gib mir einen allgemeinen Überblick.",
     "home.total_messages": "Gesamtzahl der Nachrichten: :count",
-    "Got it": "Verstanden"
+    "Got it": "Verstanden",
+    "Give Feedback": "Feedback geben",
+    "Send Feedback": "Feedback senden",
+    "Nickname": "Spitzname",
+    "Email (optional)": "E-Mail (optional)",
+    "Message": "Nachricht",
+    "Prove you are human": "Beweise, dass du ein Mensch bist",
+    "Invalid captcha answer.": "Ungültige Captcha-Antwort",
+    "Thanks for your feedback!": "Vielen Dank für dein Feedback!"
 }
