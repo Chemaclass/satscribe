@@ -3,7 +3,7 @@
      x-init="window.nostrLoginModal = $data"
      x-show="show"
      @keydown.escape.window="closeModal"
-     class="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm"
+     class="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm bg-black/40 dark:bg-black/60"
      style="display: none;"
      x-cloak>
     <div class="relative w-full max-w-md p-6 rounded-2xl shadow-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700"
@@ -23,7 +23,12 @@
         <div class="space-y-6">
             <div>
                 <h3 class="font-semibold">{{ __('Browser extension (recommended)') }}</h3>
-                <p class="text-sm text-gray-700 dark:text-gray-300 mb-2">{{ __('Good security. Requires a plug-in like Alby or nos2x') }}</p>
+                <p class="text-sm text-gray-700 dark:text-gray-300 mb-2">
+                    Good security. Requires a plug-in like
+                    <a href="https://getalby.com/products/browser-extension" target="_blank" class="underline">Alby</a>
+                    or
+                    <a href="https://github.com/fiatjaf/nos2x" target="_blank" class="underline">nos2x</a>
+                </p>
                 <button @click="loginExtension"
                         class="w-full bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded">{{ __('Use Browser Extension') }}</button>
             </div>
@@ -33,12 +38,13 @@
                 <p class="text-sm text-gray-700 dark:text-gray-300 mb-2">{{ __('Less secure. Enter a private key.') }}</p>
                 <input type="password" x-model="privKey"
                        class="w-full p-2 text-sm bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-white rounded mb-2"
-                       placeholder="nsec..." />
+                       placeholder="nsec..."/>
                 <button @click="loginPrivKey"
                         class="w-full bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded">{{ __('Login with Key') }}</button>
             </div>
 
-            <button @click="closeModal" class="w-full bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded">{{ __('Cancel') }}</button>
+            <button @click="closeModal"
+                    class="w-full bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded">{{ __('Cancel') }}</button>
         </div>
     </div>
 </div>
@@ -56,10 +62,11 @@
                 this.error = '';
                 this.privKey = '';
                 try {
-                    const r = await fetch(this.challengeUrl, { credentials: 'same-origin' });
+                    const r = await fetch(this.challengeUrl, {credentials: 'same-origin'});
                     const data = await r.json();
                     this.challenge = data.challenge;
-                } catch {}
+                } catch {
+                }
                 this.show = true;
                 document.body.classList.add('modal-open');
             },
@@ -95,10 +102,10 @@
                             'X-CSRF-TOKEN': this.csrf
                         },
                         credentials: 'same-origin',
-                        body: JSON.stringify({ event })
+                        body: JSON.stringify({event})
                     });
                     if (resp.ok) {
-                        const { pubkey } = await resp.json();
+                        const {pubkey} = await resp.json();
                         StorageClient.setNostrPubkey(pubkey);
                         window.location.reload();
                     } else {
@@ -132,11 +139,11 @@
                             'X-CSRF-TOKEN': this.csrf
                         },
                         credentials: 'same-origin',
-                        body: JSON.stringify({ event })
+                        body: JSON.stringify({event})
                     });
                     this.privKey = '';
                     if (resp.ok) {
-                        const { pubkey } = await resp.json();
+                        const {pubkey} = await resp.json();
                         StorageClient.setNostrPubkey(pubkey);
                         window.location.reload();
                     } else {
@@ -144,6 +151,7 @@
                     }
                 } catch (e) {
                     this.error = 'Invalid private key';
+                } finally {
                     this.privKey = '';
                 }
             }
