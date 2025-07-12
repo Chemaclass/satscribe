@@ -5,15 +5,19 @@ declare(strict_types=1);
 namespace Modules\OpenAI\Application;
 
 use App\Models\Chat;
+use Modules\Blockchain\Domain\PriceServiceInterface;
 use Modules\OpenAI\Domain\Exception\OpenAIError;
 use Modules\Shared\Domain\Chat\ChatConstants;
 use Modules\Shared\Domain\Data\Blockchain\BlockchainData;
+use Modules\Shared\Domain\Data\Blockchain\BlockData;
+use Modules\Shared\Domain\Data\Blockchain\TransactionData;
 use Modules\Shared\Domain\Data\Chat\PromptInput;
 use Modules\Shared\Domain\Enum\Chat\PromptPersona;
 use Modules\Shared\Domain\Enum\Chat\PromptType;
 use Modules\Shared\Domain\HttpClientInterface;
 use Psr\Log\LoggerInterface;
 
+use function sprintf;
 use function strlen;
 
 final readonly class OpenAIService
@@ -22,6 +26,7 @@ final readonly class OpenAIService
         private HttpClientInterface $http,
         private LoggerInterface $logger,
         private PersonaPromptBuilder $promptBuilder,
+        private PriceServiceInterface $priceService, // @todo use BlockchainFacade instead
         private string $openAiApiKey,
         private string $openAiModel,
     ) {
@@ -44,6 +49,13 @@ final readonly class OpenAIService
             ->values()
             ->all();
 
+        $timestamp = 0;
+        if ($data->block instanceof BlockData) {
+            $timestamp = $data->block->timestamp;
+        } elseif ($data->transaction instanceof TransactionData) {
+            $timestamp = $data->transaction->blockTime ?? 0;
+        }
+
         $messages = [
             [
                 'role' => 'system',
@@ -56,7 +68,7 @@ final readonly class OpenAIService
             ],
             [
                 'role' => 'user',
-                'content' => $this->preparePrompt($input->type, $question, $persona),
+                'content' => $this->preparePrompt($input->type, $question, $persona, $timestamp),
             ],
         ];
 
@@ -101,12 +113,34 @@ final readonly class OpenAIService
         return $content;
     }
 
+    private function buildPriceLine(int $timestamp): string
+    {
+        $historicUsd = $this->priceService->getBtcPriceUsdAt($timestamp);
+        $historicEur = $this->priceService->getBtcPriceEurAt($timestamp);
+        $currentUsd = $this->priceService->getCurrentBtcPriceUsd();
+        $currentEur = $this->priceService->getCurrentBtcPriceEur();
+
+        if ($historicUsd <= 0 && $historicEur <= 0) {
+            return '';
+        }
+
+        return sprintf(
+            'At that time, 1 BTC was about $%s USD or €%s EUR. Today it is about $%s USD or €%s EUR.',
+            number_format($historicUsd, 0),
+            number_format($historicEur, 0),
+            number_format($currentUsd, 0),
+            number_format($currentEur, 0),
+        );
+    }
+
     private function preparePrompt(
         PromptType $type,
         string $question,
         PromptPersona $persona,
+        int $timestamp,
     ): string {
         return implode("\n\n", array_filter([
+            $this->buildPriceLine($timestamp),
             ($question === '' || $question === __(ChatConstants::DEFAULT_USER_QUESTION))
                 ? $this->buildDefaultInsightPrompt($type, $persona)
                 : $this->buildQuestionPrompt($question),
