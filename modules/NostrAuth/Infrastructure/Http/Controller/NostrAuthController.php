@@ -11,6 +11,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Response;
 
 use function is_array;
+use function is_string;
 
 final readonly class NostrAuthController
 {
@@ -31,6 +32,13 @@ final readonly class NostrAuthController
     public function login(Request $request): JsonResponse
     {
         $event = $request->input('event');
+
+        if (is_string($event)) {
+            $decoded = json_decode($event, true);
+            if (is_array($decoded)) {
+                $event = $decoded;
+            }
+        }
 
         if (!is_array($event)) {
             $this->logger->debug('NostrAuth login failed: event not array');

@@ -42,7 +42,10 @@
                 <li>Approve the login request in the extension.</li>
             </ol>
             <p>
-                Other compatible extensions like Flamingo or nos2x work similarly.
+                Other compatible extensions like
+                <a href="https://github.com/fiatjaf/nos2x" target="_blank">nos2x</a> or
+                <a href="https://github.com/t4t5/flamingo" target="_blank">Flamingo</a>
+                work similarly.
             </p>
 
             <h3>Option 2: Manual Login</h3>
