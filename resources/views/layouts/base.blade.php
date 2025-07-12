@@ -14,6 +14,7 @@
     <meta charset="UTF-8">
     <title>@yield('title', __('Unlock the Story Behind Every Satoshi') . ' – Satscribe')</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light dark">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="nostr-pubkey" content="{{ nostr_pubkey() }}">
     <meta name="nostr-login-url" content="{{ route('nostr.login') }}">
@@ -21,8 +22,12 @@
     <meta name="nostr-challenge-url" content="{{ route('nostr.challenge') }}">
     <script>
     const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark') {
+    const useDark = savedTheme === 'dark';
+    if (useDark) {
         document.documentElement.classList.add('dark');
+        document.documentElement.style.colorScheme = 'dark';
+    } else {
+        document.documentElement.style.colorScheme = 'light';
     }
     window.i18n = {
         showMore: "{{ __('Show more') }}",
