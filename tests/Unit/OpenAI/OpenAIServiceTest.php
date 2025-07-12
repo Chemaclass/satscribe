@@ -7,6 +7,7 @@ namespace Tests\Unit\OpenAI;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Response;
 use Illuminate\Translation\Translator;
+use Modules\Blockchain\Domain\PriceServiceInterface;
 use Modules\OpenAI\Application\OpenAIService;
 use Modules\OpenAI\Application\PersonaPromptBuilder;
 use Modules\OpenAI\Domain\Exception\OpenAIError;
@@ -55,10 +56,18 @@ final class OpenAIServiceTest extends TestCase
         $data = BlockchainData::forBlock($block);
         $input = new PromptInput(PromptType::Block, '1');
 
+        $priceService = $this->createStub(PriceServiceInterface::class);
+        $priceService->method('getBtcPriceUsdAt')->willReturn(10000.0);
+        $priceService->method('getBtcPriceEurAt')->willReturn(9000.0);
+        $priceService->method('getCurrentBtcPriceUsd')->willReturn(30000.0);
+        $priceService->method('getCurrentBtcPriceEur')->willReturn(27000.0);
+
         $service = new OpenAIService(
             $http,
             $logger,
             new PersonaPromptBuilder('en'),
+            $priceService,
+            now(),
             openAiApiKey: 'api-key',
             openAiModel: 'model',
         );
@@ -88,10 +97,18 @@ final class OpenAIServiceTest extends TestCase
         $data = BlockchainData::forBlock($block);
         $input = new PromptInput(PromptType::Block, '1');
 
+        $priceService = $this->createStub(PriceServiceInterface::class);
+        $priceService->method('getBtcPriceUsdAt')->willReturn(10000.0);
+        $priceService->method('getBtcPriceEurAt')->willReturn(9000.0);
+        $priceService->method('getCurrentBtcPriceUsd')->willReturn(30000.0);
+        $priceService->method('getCurrentBtcPriceEur')->willReturn(27000.0);
+
         $service = new OpenAIService(
             $http,
             $logger,
             new PersonaPromptBuilder('en'),
+            $priceService,
+            now(),
             openAiApiKey: 'api-key',
             openAiModel: 'model',
         );
@@ -122,10 +139,18 @@ final class OpenAIServiceTest extends TestCase
         $data = BlockchainData::forBlock($block);
         $input = new PromptInput(PromptType::Block, '1');
 
+        $priceService = $this->createStub(PriceServiceInterface::class);
+        $priceService->method('getBtcPriceUsdAt')->willReturn(10000.0);
+        $priceService->method('getBtcPriceEurAt')->willReturn(9000.0);
+        $priceService->method('getCurrentBtcPriceUsd')->willReturn(30000.0);
+        $priceService->method('getCurrentBtcPriceEur')->willReturn(27000.0);
+
         $service = new OpenAIService(
             $http,
             $logger,
             new PersonaPromptBuilder('en'),
+            $priceService,
+            now(),
             openAiApiKey: 'api-key',
             openAiModel: 'model',
         );
@@ -133,5 +158,114 @@ final class OpenAIServiceTest extends TestCase
         $this->expectException(OpenAIError::class);
 
         $service->generateText($data, $input, PromptPersona::Developer, 'Question');
+    }
+
+    public function test_includes_price_in_prompt(): void
+    {
+        $response = $this->createMock(Response::class);
+        $response->method('failed')->willReturn(false);
+        $response->method('json')->willReturnCallback(static fn (string $key) => match ($key) {
+            'choices.0.message.content' => 'Done',
+            'error.message' => null,
+            default => null,
+        });
+
+        $captured = [];
+        $pending = $this->createMock(PendingRequest::class);
+        $pending->expects($this->once())
+            ->method('post')
+            ->with('https://api.openai.com/v1/chat/completions', $this->callback(static function ($body) use (&$captured) {
+                $captured = $body['messages'];
+                return true;
+            }))
+            ->willReturn($response);
+
+        $http = $this->createMock(HttpClientInterface::class);
+        $http->method('withToken')->willReturn($pending);
+
+        $logger = $this->createStub(LoggerInterface::class);
+
+        $block = new BlockData('h', height: 1, timestamp: time(), merkleRoot: 'm');
+        $data = BlockchainData::forBlock($block);
+        $input = new PromptInput(PromptType::Block, '1');
+
+        $priceService = $this->createStub(PriceServiceInterface::class);
+        $priceService->method('getBtcPriceUsdAt')->willReturn(25000.0);
+        $priceService->method('getBtcPriceEurAt')->willReturn(23000.0);
+        $priceService->method('getCurrentBtcPriceUsd')->willReturn(30000.0);
+        $priceService->method('getCurrentBtcPriceEur')->willReturn(27000.0);
+
+        $service = new OpenAIService(
+            $http,
+            $logger,
+            new PersonaPromptBuilder('en'),
+            $priceService,
+            now(),
+            openAiApiKey: 'api-key',
+            openAiModel: 'model',
+        );
+
+        $service->generateText($data, $input, PromptPersona::Developer, '');
+
+        $this->assertNotEmpty($captured);
+        $this->assertStringContainsString(
+            '1 BTC was about $25,000 USD or €23,000 EUR. Today it is about $30,000 USD or €27,000 EUR.',
+            $captured[2]['content'],
+        );
+    }
+
+    public function test_uses_current_price_for_old_timestamps(): void
+    {
+        $response = $this->createMock(Response::class);
+        $response->method('failed')->willReturn(false);
+        $response->method('json')->willReturnCallback(static fn (string $key) => match ($key) {
+            'choices.0.message.content' => 'Done',
+            'error.message' => null,
+            default => null,
+        });
+
+        $captured = [];
+        $pending = $this->createMock(PendingRequest::class);
+        $pending->expects($this->once())
+            ->method('post')
+            ->with('https://api.openai.com/v1/chat/completions', $this->callback(static function ($body) use (&$captured) {
+                $captured = $body['messages'];
+                return true;
+            }))
+            ->willReturn($response);
+
+        $http = $this->createMock(HttpClientInterface::class);
+        $http->method('withToken')->willReturn($pending);
+
+        $logger = $this->createStub(LoggerInterface::class);
+
+        $oldTimestamp = time() - 366 * 24 * 60 * 60;
+        $block = new BlockData('h', height: 1, timestamp: $oldTimestamp, merkleRoot: 'm');
+        $data = BlockchainData::forBlock($block);
+        $input = new PromptInput(PromptType::Block, '1');
+
+        $priceService = $this->createMock(PriceServiceInterface::class);
+        $priceService->expects($this->never())->method('getBtcPriceUsdAt');
+        $priceService->expects($this->never())->method('getBtcPriceEurAt');
+        $priceService->method('getCurrentBtcPriceUsd')->willReturn(30000.0);
+        $priceService->method('getCurrentBtcPriceEur')->willReturn(27000.0);
+
+        $service = new OpenAIService(
+            $http,
+            $logger,
+            new PersonaPromptBuilder('en'),
+            $priceService,
+            now(),
+            openAiApiKey: 'api-key',
+            openAiModel: 'model',
+        );
+
+        $service->generateText($data, $input, PromptPersona::Developer, '');
+
+        $this->assertNotEmpty($captured);
+        $this->assertStringContainsString(
+            'Today 1 BTC is about $30,000 USD or €27,000 EUR.',
+            $captured[2]['content'],
+        );
     }
 }

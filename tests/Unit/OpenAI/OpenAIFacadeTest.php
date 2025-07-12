@@ -7,6 +7,7 @@ namespace Tests\Unit\OpenAI;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Response;
 use Illuminate\Translation\Translator;
+use Modules\Blockchain\Domain\PriceServiceInterface;
 use Modules\OpenAI\Application\OpenAIFacade;
 use Modules\OpenAI\Application\OpenAIService;
 use Modules\OpenAI\Application\PersonaPromptBuilder;
@@ -48,7 +49,7 @@ final class OpenAIFacadeTest extends TestCase
             ->method('withToken')
             ->willReturn($pending);
 
-        $logger = $this->createStub(LoggerInterface::class);
+        $logger = self::createStub(LoggerInterface::class);
 
         $block = new BlockData('h', height: 1, merkleRoot: 'm');
         $data = BlockchainData::forBlock($block);
@@ -58,6 +59,8 @@ final class OpenAIFacadeTest extends TestCase
             $http,
             $logger,
             new PersonaPromptBuilder('en'),
+            self::createStub(PriceServiceInterface::class),
+            now(),
             openAiApiKey: 'key',
             openAiModel: 'model',
         );
