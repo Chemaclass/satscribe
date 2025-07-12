@@ -313,18 +313,6 @@ export function initNostrAuth() {
                 StorageClient.setNostrPubkey(pubkeyMeta);
             }
             updateNostrLogoutLabel(pubkeyMeta);
-        } else if (storedPk) {
-            replaceLoginWithLogout(storedPk);
-            updateNostrLogoutLabel(storedPk);
-            fetch(loginUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken
-                },
-                credentials: 'same-origin',
-                body: JSON.stringify({ pubkey: storedPk })
-            }).catch(() => {});
         }
 
         const loginBtn = document.getElementById('nostr-login-btn');
