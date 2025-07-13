@@ -180,6 +180,13 @@
                     const name = `Satscriber #${random}`;
                     await window.publishProfileEvent(sk, name);
 
+                    // Fetch the freshly published profile so the navbar name updates
+                    const profile = await window.fetchNostrProfile(pubkey);
+                    if (profile) {
+                        StorageClient.setNostrProfile(profile);
+                        window.updateNostrLogoutLabel(pubkey);
+                    }
+
                     this.redirectUrl = '/profile';
                     await this.submitEvent(event);
                 } catch (err) {
