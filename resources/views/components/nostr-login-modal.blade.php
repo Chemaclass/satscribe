@@ -62,16 +62,6 @@
                 </button>
             </div>
 
-            <!-- Generate Key -->
-            <div>
-                <h3 class="font-semibold">{{ __('Sign up with new key') }}</h3>
-                <p class="text-sm text-gray-600 mb-2">{{ __('Creates a nostr key pair locally.') }}</p>
-                <button @click="signupWithNewKey"
-                        class="w-full bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded">
-                    {{ __('Generate New Key') }}
-                </button>
-            </div>
-
             <!-- Cancel -->
             <button @click="closeModal"
                     class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded">
