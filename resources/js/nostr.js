@@ -524,6 +524,14 @@ export async function initProfileEdit() {
     const addRelayBtn = document.getElementById('add-relay');
     const newRelayInput = document.getElementById('new-relay');
 
+    let relays = StorageClient.getRelays();
+    if (relays.length === 0) {
+        relays = await fetchRelayList(pubkey);
+        if (relays.length > 0) {
+            StorageClient.setRelays(relays);
+        }
+    }
+
     function renderRelays() {
         if (!relaysContainer) return;
         relaysContainer.innerHTML = '';
@@ -612,19 +620,17 @@ export async function initProfileEdit() {
                 event.sig = signed.sig;
                 await publishSignedEvent(event);
 
-                if (relays.length > 0) {
-                    const rEvent = {
-                        kind: 10002,
-                        pubkey: pk,
-                        created_at: Math.floor(Date.now() / 1000),
-                        content: '',
-                        tags: relays.map(r => ['r', r]),
-                    };
-                    const signedRelays = await window.nostr.signEvent(rEvent);
-                    rEvent.id = signedRelays.id;
-                    rEvent.sig = signedRelays.sig;
-                    await publishSignedEvent(rEvent);
-                }
+                const rEvent = {
+                    kind: 10002,
+                    pubkey: pk,
+                    created_at: Math.floor(Date.now() / 1000),
+                    content: '',
+                    tags: relays.map(r => ['r', r]),
+                };
+                const signedRelays = await window.nostr.signEvent(rEvent);
+                rEvent.id = signedRelays.id;
+                rEvent.sig = signedRelays.sig;
+                await publishSignedEvent(rEvent);
 
                 StorageClient.setNostrProfile(data);
                 StorageClient.setRelays(relays);
@@ -646,9 +652,7 @@ export async function initProfileEdit() {
                 try { sk = nip19.decode(sk).data; } catch {}
             }
             await publishProfileMetadata(sk, data);
-            if (relays.length > 0) {
-                await publishRelayList(sk, relays);
-            }
+            await publishRelayList(sk, relays);
             StorageClient.setNostrProfile(data);
             StorageClient.setRelays(relays);
             window.location.href = '/profile';
