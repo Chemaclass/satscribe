@@ -46,8 +46,8 @@
         :has-faqs="$hasFaqs"
     />
 
-    <div class="body-container flex flex-col flex-grow">
-        <main class="flex-grow">
+    <div class="flex flex-col flex-grow">
+        <main class="body-container flex-grow">
             @yield('content')
         </main>
     </div>
