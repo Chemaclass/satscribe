@@ -1,18 +1,24 @@
 # 🧠 Satscribe
 
-**Satscribe** is a PHP app that takes a Bitcoin transaction ID or block height, fetches blockchain data, and generates an AI-written paragraph describing it — using OpenAI's GPT models. It also stores all descriptions in a database for easy reference.
+**Satscribe** is a web application that transforms Bitcoin blocks and transactions into insightful, human-readable conversations.
+
+Enter a transaction ID , block hash, or block height. The app fetches the blockchain data via the Blockstream API and generates a plain-language explanation using OpenAI. Each chat is stored, so you can revisit or share it anytime.
+
+Satscribe doesn’t require user accounts or passwords. Instead, it leverages the Nostr protocol to establish ownership of chats in a decentralized, privacy-friendly way.
 
 ---
 
 ## 🚀 Features
 
-- 🔎 Input a **TXID** or **block height**
-- 🧠 AI-generated paragraph using GPT-4
-- ⛓️ Uses the [Blockstream.info API](https://github.com/Blockstream/esplora/blob/master/API.md) for Bitcoin data
-- 💾 Saves each description to the database
-- 🗂️ View and paginate all previous descriptions
-- 🔐 Login via Nostr extension with challenge signing
-- 🔑 Manual login by pasting a signed Nostr event when no extension is available
+- 🔎 Search the blockchain by **txID**, **block hash** or **height**
+- 🤖 Chat-powered summaries using GPT-4o
+- 🌐 Fetches data from Blockstream and CoinGecko
+- 💬 Ask follow-up questions and pick a persona (Educator, Developer, Storyteller)
+- 💾 Chats are saved and can be shared or kept private
+- 📈 Shows the latest block height and BTC price
+- ⚡️ Lightning tipping after the free quota is reached
+- 🗂️ View and search your previous chats
+- 🔐 Login via Nostr
 
 ## 🖼️ Demo
 
@@ -26,8 +32,9 @@
 
 - PHP 8.2+
 - Composer
+- Node.js 20+ and npm
 - SQLite
-- Laravel 12+
+- Laravel 12.x
 - OpenAI API Key
 
 ---
@@ -39,6 +46,7 @@ git clone https://github.com/Chemaclass/satscribe.git
 cd satscribe
 
 composer install
+npm install
 cp .env.example .env
 php artisan key:generate
 ```
@@ -47,7 +55,7 @@ Then configure your .env
 DB_CONNECTION=sqlite
 
 OPENAI_API_KEY=sk-...
-OPENAI_MODEL=gpt-4o-mini
+OPENAI_MODEL=gpt-4o
 ```
 And migrate the DB:
 ```bash
@@ -61,33 +69,18 @@ composer dev
 
 ## ▶️ Usage
 
-Once the development server is running visit **http://localhost:8000** in your
-browser. Enter a Bitcoin transaction ID or block height in the form and the
-application will fetch the blockchain data, send it to OpenAI and display a
-short summary. Every generated paragraph is stored so you can review it later in
-the **History** page.
+Once the server is running, open **http://localhost:8000** and start a chat by entering a TXID, block hash or height. The assistant summarizes the data, and you can ask follow-up questions. All chats are stored and listed on the **History** page.
 
-## 🔑 Manual Nostr Login
+## 🔑 Nostr Login
 
-If your browser doesn't have a Nostr extension, you can still sign in:
-
-1. Click **Login → Nostr** and copy the challenge text that appears.
-2. Use any external Nostr app (for example a mobile wallet) to sign a `kind 22242` event with that challenge as the content.
-3. Copy the full JSON of the signed event and paste it back in the next prompt.
-4. Submit and you're logged in with your Nostr pubkey.
+If your browser doesn't have a Nostr extension, you can still sign in with your private key or generate a new priv/public key to be temp stored in your local storage – more about it [here](https://satscribe.app/nostr).
 
 ## 🧪 Testing
 
 Run the automated test suite with:
 
 ```bash
-composer test
-```
-
-Static analysis can be executed with:
-
-```bash
-composer phpstan
+composer fix && composer test
 ```
 
 ## 🔧 Git hooks
