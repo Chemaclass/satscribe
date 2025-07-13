@@ -47,6 +47,9 @@
                         class="w-full bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded">
                     {{ __('Login with Key') }}
                 </button>
+                <p class="text-xs text-gray-600 mt-2">
+                    {{ __('Note: While you can sign in by pasting your secret key, using a browser extension is recommended.') }}
+                </p>
             </div>
 
             <!-- Cancel -->
