@@ -26,4 +26,11 @@ final readonly class ProfileController
                 ->sum('amount'),
         ]);
     }
+
+    public function edit(): View
+    {
+        return view('profile-edit', [
+            'pubkey' => nostr_pubkey(),
+        ]);
+    }
 }

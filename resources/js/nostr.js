@@ -343,3 +343,114 @@ export function initNostrAuth() {
         });
     });
 }
+
+function publishSignedEvent(event) {
+    return new Promise(resolve => {
+        try {
+            const pool = new SimplePool();
+            const pub = pool.publish(RELAYS, event);
+
+            let finished = false;
+            const finish = () => {
+                if (!finished) {
+                    finished = true;
+                    setTimeout(() => pool.close(RELAYS), 100);
+                    resolve();
+                }
+            };
+
+            pub.on('ok', finish);
+            pub.on('seen', finish);
+            pub.on('failed', finish);
+            setTimeout(finish, 3000);
+        } catch (e) {
+            console.error('Failed to publish event', e);
+            resolve();
+        }
+    });
+}
+
+export function publishProfileMetadata(privkey, metadata) {
+    const pubkey = getPublicKey(privkey);
+    const event = {
+        kind: 0,
+        pubkey,
+        created_at: Math.floor(Date.now() / 1000),
+        content: JSON.stringify(metadata),
+        tags: [],
+    };
+    event.id = getEventHash(event);
+    event.sig = getSignature(event, privkey);
+
+    return publishSignedEvent(event);
+}
+
+export async function initProfileEdit() {
+    const form = document.getElementById('nostr-profile-form');
+    if (!form) return;
+
+    const pubkey = document.querySelector('meta[name="nostr-pubkey"]')?.content;
+    if (!pubkey) return;
+
+    const profile = await getOrFetchProfile(pubkey);
+    const fields = ['name','display_name','about','picture','image','banner','website','nip05','lud16'];
+
+    if (profile) {
+        fields.forEach(f => {
+            const input = document.getElementById(`edit-${f}`);
+            if (input && profile[f]) input.value = profile[f];
+        });
+    }
+
+    form.addEventListener('submit', async e => {
+        e.preventDefault();
+        const data = {};
+        fields.forEach(f => {
+            const val = document.getElementById(`edit-${f}`)?.value.trim();
+            if (val) data[f] = val;
+        });
+
+        console.log('Submitting profile update', data);
+
+        let sk = StorageClient.getNostrPrivkey();
+
+        if (!sk && window.nostr?.signEvent) {
+            try {
+                const pk = await window.nostr.getPublicKey();
+                const event = {
+                    kind: 0,
+                    pubkey: pk,
+                    created_at: Math.floor(Date.now() / 1000),
+                    content: JSON.stringify(data),
+                    tags: [],
+                };
+                const signed = await window.nostr.signEvent(event);
+                event.id = signed.id;
+                event.sig = signed.sig;
+                await publishSignedEvent(event);
+                StorageClient.setNostrProfile(data);
+                window.location.href = '/profile';
+                return;
+            } catch (err) {
+                console.error('Failed to sign with extension', err);
+                alert('Failed to update profile.');
+                return;
+            }
+        }
+
+        if (!sk) {
+            sk = prompt('Enter your private key to update your profile');
+        }
+
+        if (sk) {
+            if (sk.startsWith('nsec')) {
+                try { sk = nip19.decode(sk).data; } catch {}
+            }
+            await publishProfileMetadata(sk, data);
+            StorageClient.setNostrProfile(data);
+            window.location.href = '/profile';
+        } else {
+            alert('No private key provided.');
+        }
+    });
+}
