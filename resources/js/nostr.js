@@ -176,6 +176,18 @@ export async function updateProfilePage(force = false) {
     const pubkey = document.querySelector('meta[name="nostr-pubkey"]')?.content;
     if (!pubkey) return;
 
+    const npubEl = document.getElementById('profile-npub');
+    if (npubEl) {
+        try {
+            const npub = window.nostrTools.nip19.npubEncode
+                ? window.nostrTools.nip19.npubEncode(pubkey)
+                : window.nostrTools.nip19.encode({ type: 'npub', data: pubkey });
+            npubEl.textContent = npub;
+        } catch (e) {
+            npubEl.textContent = pubkey;
+        }
+    }
+
     const profile = force ? await fetchNostrProfile(pubkey) : await getOrFetchProfile(pubkey);
     if (!profile) return;
 

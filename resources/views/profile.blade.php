@@ -72,6 +72,14 @@
                     </div>
                 </div>
 
+                {{-- npub key --}}
+                <div class="mt-6">
+                    <h3 class="text-sm font-medium text-gray-600 uppercase tracking-wide">npub</h3>
+                    <div id="profile-npub" class="mt-1 px-3 py-2 bg-gray-100 rounded-md text-sm font-mono text-gray-800 break-all border border-gray-200">
+                        Loading...
+                    </div>
+                </div>
+
                 {{-- Secret Key (local only) --}}
                 <div class="mt-6 hidden" id="secret-key-container">
                     <h3 class="text-sm font-medium text-gray-600 uppercase tracking-wide">Secret key</h3>
