@@ -55,6 +55,14 @@
                 for you directly. Keep your private key safe and never share it with anyone.
             </p>
 
+            <h3>Option 3: Generate a Key with Satscribe</h3>
+            <p>
+                Need a key? You can generate one on Satscribe. The private key is created
+                in your browser and stored only in your storage application client (local storage).
+                We never store it on our servers. Save the <code>nsec</code> in a password manager,
+                then delete it from local storage for safety.
+            </p>
+
             <h2>New to All This?</h2>
             <ol>
                 <li><strong>Start with Alby</strong>: Quick and beginner-friendly.</li>
