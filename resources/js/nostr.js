@@ -220,39 +220,7 @@ export function initNostrAuth() {
     document.addEventListener('DOMContentLoaded', () => {
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
         const pubkeyMeta = document.querySelector('meta[name="nostr-pubkey"]')?.content;
-        const loginUrl = document.querySelector('meta[name="nostr-login-url"]')?.content || '/auth/nostr/login';
-        const logoutUrl = document.querySelector('meta[name="nostr-logout-url"]')?.content || '/auth/nostr/logout';
-        const challengeUrl = document.querySelector('meta[name="nostr-challenge-url"]')?.content || '/auth/nostr/challenge';
         const storedPk = StorageClient.getNostrPubkey();
-
-        const replaceLogoutWithLogin = () => {
-            const menu = document.querySelector('[data-nostr-menu]');
-            if (!menu) return;
-            const wrapper = document.createElement('div');
-            wrapper.className = 'relative';
-            wrapper.setAttribute('x-data', '{ open: false }');
-            wrapper.setAttribute('data-nostr-menu', '');
-            wrapper.innerHTML =
-                `<button type="button" class="nav-link flex items-center gap-1" @click="open = !open">` +
-                `<svg data-lucide="user" class="w-5 h-5"></svg>` +
-                `<span class="link-text">Login</span>` +
-                `<svg data-lucide="chevron-down" class="w-5 h-5"></svg>` +
-                `</button>` +
-                `<div x-show="open" x-cloak @click.away="open = false" class="absolute right-0 mt-2 w-36 rounded-md shadow-lg border border-gray-200 bg-white z-50">` +
-                `<button type="button" id="nostr-login-btn" class="w-full text-left px-4 py-2 nav-link flex items-center gap-1 border-b border-gray-200">` +
-                `<svg data-lucide="log-in" class="w-5 h-5"></svg>` +
-                `<span class="ml-1">Nostr</span>` +
-                `</button>` +
-                `<a href="/history" class="flex items-center gap-1 px-4 py-2 nav-link text-left border-b border-gray-200">` +
-                `<svg data-lucide="scroll" class="w-5 h-5"></svg>` +
-                `<span class="ml-1">History</span>` +
-                `</a>` +
-                `</div>`;
-            menu.replaceWith(wrapper);
-            const btn = wrapper.querySelector('#nostr-login-btn');
-            btn.addEventListener('click', handleLogin);
-            refreshIcons();
-        };
 
         const handleLogin = async () => {
             if (window.nostrLoginModal && window.nostrLoginModal.open) {
@@ -275,7 +243,6 @@ export function initNostrAuth() {
             });
             StorageClient.clearNostrPubkey();
             StorageClient.clearNostrProfile();
-            replaceLogoutWithLogin();
             window.location.reload();
         };
 
