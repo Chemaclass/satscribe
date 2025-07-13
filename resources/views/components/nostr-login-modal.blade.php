@@ -56,9 +56,19 @@
             <div>
                 <h3 class="font-semibold">{{ __('Sign up with new key') }}</h3>
                 <p class="text-sm text-gray-600 mb-2">{{ __('Creates a nostr key pair locally.') }}</p>
-                <button @click="signupWithNewKey"
-                        class="w-full bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded">
-                    {{ __('Generate New Key') }}
+                <button @click="signupWithNewKey" :disabled="generating"
+                        class="relative h-10 w-full bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded">
+                    <span x-show="!generating">{{ __('Generate New Key') }}</span>
+                    <span x-show="generating" class="absolute inset-0 flex items-center justify-center" x-cloak>
+                        <span class="dots-loader">
+                            <span class="dot"></span>
+                            <span class="dot"></span>
+                            <span class="dot"></span>
+                            <span class="dot"></span>
+                            <span class="dot"></span>
+                            <span class="dot"></span>
+                        </span>
+                    </span>
                 </button>
             </div>
 
@@ -78,6 +88,7 @@
             privKey: '',
             challenge: '',
             error: '',
+            generating: false,
             loginUrl: document.querySelector('meta[name="nostr-login-url"]').content,
             challengeUrl: document.querySelector('meta[name="nostr-challenge-url"]').content,
             csrf: document.querySelector('meta[name="csrf-token"]').content,
@@ -164,7 +175,9 @@
             },
 
             async signupWithNewKey() {
+                if (this.generating) return;
                 this.error = '';
+                this.generating = true;
                 try {
                     const sk = window.nostrTools.generatePrivateKey();
                     const nsec = window.nostrTools.nip19.nsecEncode
@@ -192,6 +205,8 @@
                 } catch (err) {
                     console.error(err);
                     this.error = 'Signup failed.';
+                } finally {
+                    this.generating = false;
                 }
             },
 

@@ -215,6 +215,8 @@ export async function updateProfilePage(force = false) {
                 skCopy.dataset.bound = '1';
                 skCopy.addEventListener('click', () => {
                     navigator.clipboard.writeText(skValue.value).catch(() => {});
+                    skCopy.classList.add('bg-orange-400', 'text-white');
+                    setTimeout(() => skCopy.classList.remove('bg-orange-400', 'text-white'), 500);
                 });
             }
             if (skToggle && !skToggle.dataset.bound) {
@@ -227,6 +229,8 @@ export async function updateProfilePage(force = false) {
                         skValue.type = 'password';
                         skToggle.textContent = 'Show';
                     }
+                    skToggle.classList.add('bg-orange-400');
+                    setTimeout(() => skToggle.classList.remove('bg-orange-400'), 500);
                 });
             }
         } else {
