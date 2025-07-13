@@ -75,9 +75,24 @@
                 {{-- Secret Key (local only) --}}
                 <div class="mt-6 hidden" id="secret-key-container">
                     <h3 class="text-sm font-medium text-gray-600 uppercase tracking-wide">Secret key</h3>
-                    <div class="mt-1 px-3 py-2 bg-yellow-50 rounded-md text-sm font-mono text-gray-800 break-all border border-yellow-200" id="secret-key-value"></div>
+                    <div class="mt-1 flex items-center gap-2">
+                        <input type="password"
+                               readonly
+                               class="flex-1 px-3 py-2 bg-yellow-50 rounded-md text-sm font-mono text-gray-800 break-all border border-yellow-200"
+                               id="secret-key-value" />
+                        <button type="button"
+                                id="secret-key-copy"
+                                class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-2 py-1 rounded">
+                            Copy
+                        </button>
+                        <button type="button"
+                                id="secret-key-toggle"
+                                class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-2 py-1 rounded">
+                            Show
+                        </button>
+                    </div>
                     <p class="text-xs text-red-600 mt-2 font-semibold">
-                        IMPORTANT: save this key in your password manager and delete it from local storage afterwards.
+                        <strong>IMPORTANT</strong>: save this key in your password manager and delete it from local storage afterwards.
                         <strong>Satscribe will not store it for you.</strong>
                     </p>
                     <button type="button" id="secret-key-delete" class="mt-2 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">

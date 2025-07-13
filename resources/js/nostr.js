@@ -185,15 +185,37 @@ export async function updateProfilePage(force = false) {
     const skContainer = $('secret-key-container');
     const skValue = $('secret-key-value');
     const skDelete = $('secret-key-delete');
+    const skCopy = $('secret-key-copy');
+    const skToggle = $('secret-key-toggle');
     if (skContainer && skValue) {
         if (sk) {
-            skValue.textContent = sk;
+            skValue.value = sk;
+            skValue.type = 'password';
             skContainer.classList.remove('hidden');
-            if (skDelete) {
+            if (skDelete && !skDelete.dataset.bound) {
+                skDelete.dataset.bound = '1';
                 skDelete.addEventListener('click', () => {
                     StorageClient.clearNostrPrivkey();
                     skContainer.classList.add('hidden');
-                }, { once: true });
+                });
+            }
+            if (skCopy && !skCopy.dataset.bound) {
+                skCopy.dataset.bound = '1';
+                skCopy.addEventListener('click', () => {
+                    navigator.clipboard.writeText(skValue.value).catch(() => {});
+                });
+            }
+            if (skToggle && !skToggle.dataset.bound) {
+                skToggle.dataset.bound = '1';
+                skToggle.addEventListener('click', () => {
+                    if (skValue.type === 'password') {
+                        skValue.type = 'text';
+                        skToggle.textContent = 'Hide';
+                    } else {
+                        skValue.type = 'password';
+                        skToggle.textContent = 'Show';
+                    }
+                });
             }
         } else {
             skContainer.classList.add('hidden');
