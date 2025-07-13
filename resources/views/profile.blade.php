@@ -17,9 +17,9 @@
             {{-- Main Card --}}
             <div class="bg-white mt-2 rounded-lg p-6 shadow space-y-6">
                 {{-- Header --}}
-                <div class="flex justify-between items-center">
+                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
                     <h2 id="profile-displayname" class="text-xl font-semibold text-gray-900">Profile</h2>
-                    <button type="button" id="profile-refresh" class="px-3 py-1 rounded border text-sm link">
+                    <button type="button" id="profile-refresh" class="px-2 py-1 rounded border text-sm link">
                         {{ __('Refresh profile') }}
                     </button>
                 </div>
@@ -83,21 +83,23 @@
                 {{-- Secret Key (local only) --}}
                 <div class="mt-6 hidden" id="secret-key-container">
                     <h3 class="text-sm font-medium text-gray-600 uppercase tracking-wide">Secret key</h3>
-                    <div class="mt-1 flex items-center gap-2">
+                    <div class="mt-1 flex flex-col sm:flex-row items-start sm:items-center gap-2">
                         <input type="password"
                                readonly
-                               class="flex-1 px-3 py-2 bg-yellow-50 rounded-md text-sm font-mono text-gray-800 break-all border border-yellow-200"
+                               class="w-full sm:flex-1 px-3 py-2 bg-yellow-50 rounded-md text-sm font-mono text-gray-800 break-all border border-yellow-200"
                                id="secret-key-value" />
-                        <button type="button"
-                                id="secret-key-copy"
-                                class="px-2 py-1 rounded link border">
-                            Copy
-                        </button>
-                        <button type="button"
-                                id="secret-key-toggle"
-                                class="px-2 py-1 rounded link border">
-                            Show
-                        </button>
+                        <div class="flex gap-2">
+                            <button type="button"
+                                    id="secret-key-copy"
+                                    class="px-2 py-1 text-sm rounded link border">
+                                Copy
+                            </button>
+                            <button type="button"
+                                    id="secret-key-toggle"
+                                    class="px-2 py-1 text-sm rounded link border">
+                                Show
+                            </button>
+                        </div>
                     </div>
                     <p class="text-xs text-red-600 mt-2 font-semibold">
                         <strong>IMPORTANT</strong>: save this key in your password manager and delete it from local storage afterwards.
