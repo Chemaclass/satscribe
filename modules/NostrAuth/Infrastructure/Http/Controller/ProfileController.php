@@ -7,6 +7,7 @@ namespace Modules\NostrAuth\Infrastructure\Http\Controller;
 use App\Models\Chat;
 use App\Models\Message;
 use App\Models\Payment;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
 final readonly class ProfileController
@@ -24,6 +25,19 @@ final readonly class ProfileController
             'totalZaps' => Payment::where('status', 'SETTLED')
                 ->where('tracking_id', $trackingId)
                 ->sum('amount'),
+        ]);
+    }
+
+    public function edit(): View|RedirectResponse
+    {
+        $nostrPubKey = nostr_pubkey();
+
+        if ($nostrPubKey === null || $nostrPubKey === '') {
+            return redirect()->route('profile.index');
+        }
+
+        return view('profile-edit', [
+            'pubkey' => $nostrPubKey,
         ]);
     }
 }

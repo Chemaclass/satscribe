@@ -7,6 +7,8 @@ import {
     publishProfileEvent,
     fetchNostrProfile,
     updateNostrLogoutLabel,
+    publishProfileMetadata,
+    initProfileEdit,
 } from './nostr';
 import { nip19, getPublicKey, getSignature, getEventHash, generatePrivateKey } from 'nostr-tools';
 
@@ -16,6 +18,8 @@ window.nostrTools = { nip19, getPublicKey, getSignature, getEventHash, generateP
 window.publishProfileEvent = publishProfileEvent;
 window.fetchNostrProfile = fetchNostrProfile;
 window.updateNostrLogoutLabel = updateNostrLogoutLabel;
+window.publishProfileMetadata = publishProfileMetadata;
+window.initProfileEdit = initProfileEdit;
 Alpine.start();
 
 initUI();

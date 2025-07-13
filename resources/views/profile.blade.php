@@ -19,9 +19,12 @@
                 {{-- Header --}}
                 <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
                     <h2 id="profile-displayname" class="text-xl font-semibold text-gray-900">Profile</h2>
-                    <button type="button" id="profile-refresh" class="px-2 py-1 rounded border text-sm link">
-                        {{ __('Refresh profile') }}
-                    </button>
+                    <div class="flex gap-2">
+                        <button type="button" id="profile-refresh" class="px-2 py-1 rounded border text-sm link">
+                            {{ __('Refresh profile') }}
+                        </button>
+                        <a href="{{ route('profile.edit') }}" class="px-2 py-1 rounded border text-sm link">{{ __('Edit profile') }}</a>
+                    </div>
                 </div>
 
                 {{-- Name --}}

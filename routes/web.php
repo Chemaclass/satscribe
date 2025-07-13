@@ -31,6 +31,7 @@ Route::get('history/{messageId}/raw', [HistoryController::class, 'getRaw'])->nam
 Route::get('faq', [FaqController::class, 'index'])->name('faq.index');
 Route::get('trace-utxo', [TraceUtxoPageController::class,'index'])->name('trace-utxo.page');
 Route::get('profile', [ProfileController::class, 'index'])->name('profile.index');
+Route::get('profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
 Route::get('nostr', [NostrPageController::class, 'index'])->name('nostr.index');
 
 Route::get('auth/nostr/challenge', [NostrAuthController::class, 'challenge'])->name('nostr.challenge');
