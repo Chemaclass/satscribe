@@ -21,33 +21,43 @@
         </template>
 
         <div class="space-y-6">
+            <!-- Extension Login -->
             <div>
                 <h3 class="font-semibold">{{ __('Browser extension (recommended)') }}</h3>
                 <p class="text-sm text-gray-600 mb-2">
-                    Good security. Requires a plug-in like
+                    {{ __('Good security. Requires a plug-in like') }}
                     <a href="https://getalby.com/products/browser-extension" target="_blank" class="underline text-blue-600">Alby</a>
-                    or
-                    <a href="https://github.com/fiatjaf/nos2x" target="_blank" class="underline text-blue-600">nos2x</a>
+                    {{ __('or') }}
+                    <a href="https://github.com/fiatjaf/nos2x" target="_blank" class="underline text-blue-600">nos2x</a>.
                 </p>
-                <button @click="loginExtension"
-                        class="w-full bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded">{{ __('Use Browser Extension') }}</button>
+                <button @click="loginWithExtension"
+                        class="w-full bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded">
+                    {{ __('Use Browser Extension') }}
+                </button>
             </div>
 
+            <!-- Private Key Login -->
             <div>
                 <h3 class="font-semibold">{{ __('Private key') }}</h3>
                 <p class="text-sm text-gray-600 mb-2">{{ __('Less secure. Enter a private key.') }}</p>
                 <input type="password" x-model="privKey"
-                  class="w-full p-2 text-sm bg-white border border-gray-300 text-gray-900 rounded mb-2"
+                       class="w-full p-2 text-sm bg-white border border-gray-300 text-gray-900 rounded mb-2"
                        placeholder="nsec..." />
-                <button @click="loginPrivKey"
-                        class="w-full bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded">{{ __('Login with Key') }}</button>
+                <button @click="loginWithPrivKey"
+                        class="w-full bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded">
+                    {{ __('Login with Key') }}
+                </button>
             </div>
 
+            <!-- Cancel -->
             <button @click="closeModal"
-                    class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded">{{ __('Cancel') }}</button>
+                    class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded">
+                {{ __('Cancel') }}
+            </button>
         </div>
     </div>
 </div>
+
 <script>
     function nostrLoginModal() {
         return {
@@ -59,84 +69,89 @@
             challengeUrl: document.querySelector('meta[name="nostr-challenge-url"]').content,
             csrf: document.querySelector('meta[name="csrf-token"]').content,
             redirectUrl: document.querySelector('meta[name="redirect-after-login"]')?.content || null,
+
             async open() {
                 this.error = '';
                 this.privKey = '';
                 try {
-                    const r = await fetch(this.challengeUrl, {credentials: 'same-origin'});
-                    const data = await r.json();
-                    this.challenge = data.challenge;
-                } catch {
+                    const res = await fetch(this.challengeUrl, { credentials: 'same-origin' });
+                    const { challenge } = await res.json();
+                    this.challenge = challenge;
+                } catch (err) {
+                    this.error = 'Failed to fetch challenge.';
+                    return;
                 }
                 this.show = true;
                 document.body.classList.add('modal-open');
             },
+
             closeModal() {
                 this.show = false;
                 document.body.classList.remove('modal-open');
             },
-            async loginExtension() {
-                if (!window.nostr || !window.nostr.getPublicKey || !(window.nostr.getSignature || window.nostr.signEvent)) {
+
+            buildEvent(pubkey) {
+                const event = {
+                    kind: 22242,
+                    pubkey,
+                    created_at: Math.floor(Date.now() / 1000),
+                    content: this.challenge,
+                    tags: [],
+                };
+                event.id = window.nostrTools.getEventHash(event);
+                return event;
+            },
+
+            async loginWithExtension() {
+                this.error = '';
+                if (!window.nostr?.getPublicKey || !(window.nostr.getSignature || window.nostr.signEvent)) {
                     this.error = 'No Nostr extension detected. Please install Alby or nos2x.';
                     return;
                 }
+
                 try {
-                    const pk = await window.nostr.getPublicKey();
-                    const event = {
-                        kind: 22242,
-                        pubkey: pk,
-                        created_at: Math.floor(Date.now() / 1000),
-                        content: this.challenge,
-                        tags: []
-                    };
-                    event.id = window.nostrTools.getEventHash(event);
+                    const pubkey = await window.nostr.getPublicKey();
+                    let event = this.buildEvent(pubkey);
+
                     if (window.nostr.getSignature) {
                         event.sig = await window.nostr.getSignature(event);
                     } else {
                         const signed = await window.nostr.signEvent(event);
                         event.sig = signed.sig;
                     }
-                    const resp = await fetch(this.loginUrl, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': this.csrf
-                        },
-                        credentials: 'same-origin',
-                        body: JSON.stringify({event})
-                    });
-                    if (resp.ok) {
-                        const {pubkey} = await resp.json();
-                        StorageClient.setNostrPubkey(pubkey);
-                        if (this.redirectUrl) {
-                            window.location.href = this.redirectUrl;
-                        } else {
-                            window.location.reload();
-                        }
-                    } else {
-                        this.error = 'Login failed';
-                    }
-                } catch (e) {
-                    this.error = 'Login failed';
+
+                    await this.submitEvent(event);
+                } catch (err) {
+                    console.error(err);
+                    this.error = 'Login failed.';
                 }
             },
-            async loginPrivKey() {
-                if (!this.privKey.trim()) return;
+
+            async loginWithPrivKey() {
+                this.error = '';
                 let sk = this.privKey.trim();
+                if (!sk) return;
+
                 try {
                     if (sk.startsWith('nsec')) {
                         sk = window.nostrTools.nip19.decode(sk).data;
                     }
-                    const pk = window.nostrTools.getPublicKey(sk);
-                    const event = {
-                        kind: 22242,
-                        pubkey: pk,
-                        created_at: Math.floor(Date.now() / 1000),
-                        content: this.challenge,
-                        tags: []
-                    };
-                    event.id = window.nostrTools.getEventHash(event);
+
+                    const pubkey = window.nostrTools.getPublicKey(sk);
+                    const event = this.buildEvent(pubkey);
                     event.sig = window.nostrTools.getSignature(event, sk);
+
+                    await this.submitEvent(event);
+                } catch (err) {
+                    console.error(err);
+                    this.error = 'Invalid private key.';
+                } finally {
+                    this.privKey = '';
+                }
+            },
+
+            async submitEvent(event) {
+                try {
                     const resp = await fetch(this.loginUrl, {
                         method: 'POST',
                         headers: {
@@ -144,24 +159,19 @@
                             'X-CSRF-TOKEN': this.csrf
                         },
                         credentials: 'same-origin',
-                        body: JSON.stringify({event})
+                        body: JSON.stringify({ event })
                     });
-                    this.privKey = '';
+
                     if (resp.ok) {
-                        const {pubkey} = await resp.json();
+                        const { pubkey } = await resp.json();
                         StorageClient.setNostrPubkey(pubkey);
-                        if (this.redirectUrl) {
-                            window.location.href = this.redirectUrl;
-                        } else {
-                            window.location.reload();
-                        }
+                        window.location.href = this.redirectUrl || window.location.href;
                     } else {
-                        this.error = 'Login failed';
+                        this.error = 'Login failed.';
                     }
-                } catch (e) {
-                    this.error = 'Invalid private key';
-                } finally {
-                    this.privKey = '';
+                } catch (err) {
+                    console.error(err);
+                    this.error = 'Login failed.';
                 }
             }
         };
