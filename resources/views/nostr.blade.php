@@ -48,18 +48,11 @@
                 work similarly.
             </p>
 
-            <h3>Option 2: Manual Login</h3>
+            <h3>Option 2: Private Key Login</h3>
             <p>
-                You can also log in using any Nostr-compatible app or wallet:
-            </p>
-            <ol>
-                <li>Click <strong>Login → Nostr</strong> on Satscribe to get a challenge string.</li>
-                <li>Sign it as the <code>content</code> of a <code>kind 22242</code> event in your app.</li>
-                <li>Copy the resulting signed JSON.</li>
-                <li>Paste it back into Satscribe when prompted.</li>
-            </ol>
-            <p>
-                This method is secure but more technical. For most users, browser extensions are easier.
+                If you prefer, you can log in using your Nostr private key (<code>nsec</code>).
+                When prompted, enter your private key and Satscribe will sign the challenge
+                for you directly. Keep your private key safe and never share it with anyone.
             </p>
 
             <h2>New to All This?</h2>
