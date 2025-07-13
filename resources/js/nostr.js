@@ -81,13 +81,15 @@ export async function updateNostrLogoutLabel(pubkey) {
     }
 
     const avatar = document.getElementById('nostr-avatar');
-    if (image) {
-        if (avatar) {
+    if (avatar) {
+        if (image) {
             avatar.src = image;
+            avatar.classList.remove('hidden', 'bg-gray-300/50');
+        } else {
+            avatar.src = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
             avatar.classList.remove('hidden');
+            avatar.classList.add('bg-gray-300/50');
         }
-    } else if (avatar) {
-        avatar.classList.add('hidden');
     }
 
     applyNostrAvatarToMessages();
@@ -98,10 +100,10 @@ export function applyNostrAvatarToMessages() {
     const image = StorageClient.getNostrImage();
 
     if (pubkey && image) {
-        document.querySelectorAll('.user-message[data-owned="1"] [data-lucide="user"]').forEach(el => {
+        document.querySelectorAll('.user-message[data-owned="1"] .nostr-avatar-placeholder, .user-message[data-owned="1"] [data-lucide="user"]').forEach(el => {
             const img = document.createElement('img');
             img.src = image;
-            img.className = 'w-6 h-6 rounded-full user-avatar';
+            img.className = 'w-6 h-6 rounded-full user-avatar object-cover';
             el.replaceWith(img);
         });
         document.querySelectorAll('.user-message[data-owned="1"] img.user-avatar').forEach(img => {
@@ -110,11 +112,19 @@ export function applyNostrAvatarToMessages() {
     } else {
         const replaced = [];
         document.querySelectorAll('.user-message[data-owned="1"] img.user-avatar').forEach(img => {
-            const icon = document.createElement('i');
-            icon.setAttribute('data-lucide', 'user');
-            icon.setAttribute('class', 'w-6 h-6');
-            img.replaceWith(icon);
-            replaced.push(icon);
+            const span = document.createElement('span');
+            span.className = 'w-6 h-6 rounded-full bg-gray-300/50 flex items-center justify-center nostr-avatar-placeholder';
+            span.innerHTML = '<i data-lucide="user" class="w-4 h-4 text-gray-500"></i>';
+            img.replaceWith(span);
+            replaced.push(span);
+        });
+        document.querySelectorAll('.user-message[data-owned="1"] [data-lucide="user"]').forEach(icon => {
+            const span = document.createElement('span');
+            span.className = 'w-6 h-6 rounded-full bg-gray-300/50 flex items-center justify-center nostr-avatar-placeholder';
+            icon.className = 'w-4 h-4 text-gray-500';
+            span.appendChild(icon.cloneNode(true));
+            icon.replaceWith(span);
+            replaced.push(span);
         });
         if (replaced.length > 0) refreshIcons();
     }
@@ -226,7 +236,7 @@ export function initNostrAuth() {
             wrapper.setAttribute('data-nostr-menu', '');
             wrapper.innerHTML =
                 `<button type="button" class="nav-link flex items-center gap-1" @click="open = !open">` +
-                `<img id="nostr-avatar" src="" alt="nostr avatar" class="w-5 h-5 rounded-full hidden" />` +
+                `<img id="nostr-avatar" src="" alt="nostr avatar" class="w-5 h-5 rounded-full hidden object-cover bg-gray-300/50" />` +
                 `<span id="nostr-logout-label" class="link-text">${window.i18n.loading}</span>` +
                 `<svg id="nostr-menu-icon" data-lucide="chevron-down" class="w-5 h-5"></svg>` +
                 `</button>` +

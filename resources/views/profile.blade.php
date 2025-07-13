@@ -9,24 +9,22 @@
         <div class="space-y-4 text-gray-700">
             @if($pubkey)
                 <div id="nostr-profile-meta" class="profile-card overflow-hidden">
-                    <div id="profile-banner" class="h-32 bg-cover bg-center skeleton"></div>
-                    <div class="p-4 flex items-start gap-4">
-                        <img id="profile-avatar" class="w-24 h-24 rounded-full -mt-16 border-4 skeleton" alt="avatar" />
-                        <div class="p-4 flex items-start gap-4 w-full relative">
-                            <div class="flex-1">
-                                <div class="flex justify-between items-start">
-                                    <p id="profile-name" class="text-xl font-semibold skeleton h-6 w-32"></p>
-                                    <button type="button" id="profile-refresh" class="px-3 py-1 rounded border text-sm link">
-                                        {{ __('Refresh profile') }}
-                                    </button>
-                                </div>
-                                <p class="text-sm text-gray-500 skeleton h-4 w-24" id="profile-username"></p>
-                                <p class="text-sm"><a id="profile-url" href="#" class=" hover:underline hidden" target="_blank"></a></p>
-                                <p id="profile-nip05" class="text-sm hidden"></p>
-                                <p id="profile-lud16" class="text-sm hidden"></p>
-                                <p id="profile-about" class="text-sm hidden"></p>
-                            </div>
+                    <div class="relative">
+                        <div id="profile-banner" class="h-32 bg-cover bg-center skeleton"></div>
+                        <img id="profile-avatar" class="w-24 h-24 rounded-full border-4 skeleton absolute left-4 bottom-0 transform translate-y-1/2" alt="avatar" />
+                    </div>
+                    <div class="p-4 pt-16">
+                        <div class="flex justify-between items-start">
+                            <p id="profile-name" class="text-xl font-semibold skeleton h-6 w-32"></p>
+                            <button type="button" id="profile-refresh" class="px-3 py-1 rounded border text-sm link">
+                                {{ __('Refresh profile') }}
+                            </button>
                         </div>
+                        <p class="text-sm text-gray-500 skeleton h-4 w-24" id="profile-username"></p>
+                        <p class="text-sm"><a id="profile-url" href="#" class=" hover:underline hidden" target="_blank"></a></p>
+                        <p id="profile-nip05" class="text-sm hidden"></p>
+                        <p id="profile-lud16" class="text-sm hidden"></p>
+                        <p id="profile-about" class="text-sm hidden"></p>
                     </div>
                 </div>
 

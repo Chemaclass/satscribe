@@ -118,8 +118,8 @@
                         // Render user input
                         const nostrImg = StorageClient.getNostrImage();
                         const userIcon = nostrImg ?
-                            `<img src="${nostrImg}" alt="user" class="w-6 h-6 rounded-full nostr-avatar">` :
-                            `<i data-lucide="user" class="w-6 h-6"></i>`;
+                            `<img src="${nostrImg}" alt="user" class="w-6 h-6 rounded-full nostr-avatar object-cover">` :
+                            `<span class="w-6 h-6 rounded-full bg-gray-300/50 flex items-center justify-center nostr-avatar-placeholder"><i data-lucide="user" class="w-4 h-4 text-gray-500"></i></span>`;
 
                         const userHtml = `
             <div class="chat-message-group mb-6">
@@ -306,8 +306,8 @@
                     // 1. Add the user message
                     const nostrImg = StorageClient.getNostrImage();
                     const userIcon = nostrImg ?
-                        `<img src="${nostrImg}" alt="user" class="w-6 h-6 rounded-full nostr-avatar">` :
-                        `<i data-lucide="user" class="w-6 h-6"></i>`;
+                        `<img src="${nostrImg}" alt="user" class="w-6 h-6 rounded-full nostr-avatar object-cover">` :
+                        `<span class="w-6 h-6 rounded-full bg-gray-300/50 flex items-center justify-center nostr-avatar-placeholder"><i data-lucide="user" class="w-4 h-4 text-gray-500"></i></span>`;
 
                     const userHtml = `
             <div class="chat-message-group mb-6">
