@@ -18,20 +18,18 @@
             <div class="bg-white mt-2 rounded-lg p-6 shadow space-y-6">
                 {{-- Header --}}
                 <div class="flex justify-between items-center">
-                    <h2 class="text-xl font-semibold text-gray-900">Profile</h2>
+                    <h2 id="profile-displayname" class="text-xl font-semibold text-gray-900">Profile</h2>
                     <button type="button" id="profile-refresh" class="px-3 py-1 rounded border text-sm link">
                         {{ __('Refresh profile') }}
                     </button>
                 </div>
 
-                {{-- Name and Username --}}
+                {{-- Name --}}
                 <div class="space-y-2">
                     <div id="profile-name" class="h-6 w-36 rounded skeleton"></div>
-                    <div id="profile-username" class="h-4 w-28 rounded skeleton"></div>
                 </div>
 
                 {{-- Bio Section --}}
-                <h3 class="text-sm font-medium text-gray-500 mt-6">About</h3>
                 <p id="profile-about" class="text-gray-600 whitespace-pre-line space-y-2">
                     <span class="block h-4 w-full rounded skeleton"></span>
                     <span class="block h-4 w-5/6 rounded skeleton"></span>
@@ -39,7 +37,6 @@
                 </p>
 
                 {{-- Metadata --}}
-{{--                <h3 class="text-sm font-medium text-gray-500 mt-6">Info</h3>--}}
 {{--                <div class="space-y-1 text-sm">--}}
 {{--                    <a id="profile-url" href="#" class="hidden link break-all"></a>--}}
 {{--                    <div id="profile-nip05" class="hidden break-all"></div>--}}
@@ -47,14 +44,12 @@
 {{--                </div>--}}
 
                 {{-- Social Stats --}}
-{{--                <h3 class="text-sm font-medium text-gray-500 mt-6">Followers</h3>--}}
 {{--                <div class="flex gap-6 text-sm pt-2 border-t border-gray-200">--}}
 {{--                    <div class="h-4 w-24 rounded skeleton"></div>--}}
 {{--                    <div class="h-4 w-24 rounded skeleton"></div>--}}
 {{--                </div>--}}
 
                 {{-- App Stats --}}
-                <h3 class="text-sm font-medium text-gray-500 mt-6">Usage Stats</h3>
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 border-gray-200">
                     <div class="space-y-1">
                         <div class="h-4 w-24">Chats</div>
@@ -71,8 +66,12 @@
                 </div>
 
                 {{-- Pubkey --}}
-                <h3 class="text-sm font-medium text-gray-500 mt-6">Pubkey</h3>
-                <div class="w-full break-words">{{ $pubkey }}</div>
+                <div class="mt-6">
+                    <h3 class="text-sm font-medium text-gray-600 uppercase tracking-wide">Pubkey</h3>
+                    <div class="mt-1 px-3 py-2 bg-gray-100 rounded-md text-sm font-mono text-gray-800 break-all border border-gray-200">
+                        {{ $pubkey }}
+                    </div>
+                </div>
             </div>
         </div>
         @else

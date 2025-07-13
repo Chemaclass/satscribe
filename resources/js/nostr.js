@@ -160,28 +160,26 @@ export async function updateProfilePage(force = false) {
 
     if (profile.picture) {
         const img = document.getElementById('profile-avatar');
-        if (img) {
-            img.src = profile.picture;
-            img.classList.remove('skeleton', 'hidden');
-        }
+        img.src = profile.picture;
+        img.classList.remove('skeleton', 'hidden');
     }
 
-    const displayName = profile.display_name || profile.name;
-    if (displayName) {
-        const el = document.getElementById('profile-name');
-        if (el) {
-            el.textContent = displayName;
-            el.classList.remove('skeleton');
-        }
+    const profileDisplayNameElement = document.getElementById('profile-displayname');
+    if (profileDisplayNameElement) {
+        profileDisplayNameElement.textContent = profile.display_name || "@" + profile.name;
+        profileDisplayNameElement.classList.remove('skeleton');
     }
 
-    if (profile.name) {
-        const el = document.getElementById('profile-username');
-        if (el) {
-            el.textContent = profile.name;
-            el.classList.remove('skeleton');
+    const profileNameElement = document.getElementById('profile-name');
+    if (profile.display_name !== null && profile.name !== profile.display_name) {
+        if (profile.name) {
+            profileNameElement.textContent = "@" + profile.name;
+            profileNameElement.classList.remove('skeleton');
         }
+    } else {
+        profileNameElement.classList.add('hidden');
     }
+
 
     if (profile.website) {
         const el = document.getElementById('profile-url');
