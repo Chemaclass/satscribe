@@ -394,11 +394,42 @@ export async function initProfileEdit() {
     const profile = await getOrFetchProfile(pubkey);
     const fields = ['name','display_name','about','picture','banner','website','nip05','lud16'];
 
+    const pictureInput = document.getElementById('edit-picture');
+    const bannerInput = document.getElementById('edit-banner');
+    const picturePreview = document.getElementById('picture-preview');
+    const bannerPreview = document.getElementById('banner-preview');
+
+    function updatePreview(input, img) {
+        if (!img) return;
+        const url = input.value.trim();
+        if (!url) {
+            img.classList.add('hidden');
+            img.removeAttribute('src');
+            return;
+        }
+        img.onload = () => img.classList.remove('hidden');
+        img.onerror = () => {
+            img.classList.add('hidden');
+            img.removeAttribute('src');
+        };
+        img.src = url;
+    }
+
     if (profile) {
         fields.forEach(f => {
             const input = document.getElementById(`edit-${f}`);
             if (input && profile[f]) input.value = profile[f];
         });
+    }
+
+    if (pictureInput) {
+        pictureInput.addEventListener('input', () => updatePreview(pictureInput, picturePreview));
+        updatePreview(pictureInput, picturePreview);
+    }
+
+    if (bannerInput) {
+        bannerInput.addEventListener('input', () => updatePreview(bannerInput, bannerPreview));
+        updatePreview(bannerInput, bannerPreview);
     }
 
     form.addEventListener('submit', async e => {
