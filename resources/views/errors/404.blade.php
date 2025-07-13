@@ -1,12 +1,12 @@
 @extends('layouts.base')
 
-@section('title', __('Forbidden'))
+@section('title', __('Not Found'))
 
 @section('content')
     <section class="px-4 py-6">
-        <x-page.header title="{{ __('Access Denied') }}" containerClass="max-w-xl">
+        <x-page.header title="{{ __('Page Not Found') }}" containerClass="max-w-xl">
             <p class="subtitle text-base sm:text-lg text-gray-700">
-                {{ __('You are not allowed to access this page.') }}
+                {{ __('The page you are looking for could not be found.') }}
             </p>
         </x-page.header>
         <p class="mt-4">
