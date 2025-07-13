@@ -27,10 +27,6 @@
                     <input id="edit-picture" type="text" class="w-full p-2 border border-gray-300 rounded" />
                 </div>
                 <div>
-                    <label for="edit-image" class="block text-sm font-medium text-gray-700">Image</label>
-                    <input id="edit-image" type="text" class="w-full p-2 border border-gray-300 rounded" />
-                </div>
-                <div>
                     <label for="edit-banner" class="block text-sm font-medium text-gray-700">Banner</label>
                     <input id="edit-banner" type="text" class="w-full p-2 border border-gray-300 rounded" />
                 </div>

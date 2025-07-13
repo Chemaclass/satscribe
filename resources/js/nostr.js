@@ -47,7 +47,6 @@ export async function fetchNostrProfile(pubkey) {
                     display_name: data.display_name ?? null,
                     about: data.about ?? null,
                     picture: data.picture || data.image || null,
-                    image: data.image || data.picture || null,
                     banner: data.banner ?? null,
                     website: data.website || data.url || null,
                     nip05: data.nip05 ?? null,
@@ -393,7 +392,7 @@ export async function initProfileEdit() {
     if (!pubkey) return;
 
     const profile = await getOrFetchProfile(pubkey);
-    const fields = ['name','display_name','about','picture','image','banner','website','nip05','lud16'];
+    const fields = ['name','display_name','about','picture','banner','website','nip05','lud16'];
 
     if (profile) {
         fields.forEach(f => {
