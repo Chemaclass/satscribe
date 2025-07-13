@@ -225,43 +225,6 @@ export function initNostrAuth() {
         const challengeUrl = document.querySelector('meta[name="nostr-challenge-url"]')?.content || '/auth/nostr/challenge';
         const storedPk = StorageClient.getNostrPubkey();
 
-        const replaceLoginWithLogout = (pubkey) => {
-            const menu = document.querySelector('[data-nostr-menu]');
-            if (!menu) return;
-            const wrapper = document.createElement('div');
-            wrapper.className = 'relative';
-            wrapper.setAttribute('x-data', '{ open: false }');
-            wrapper.setAttribute('data-nostr-menu', '');
-            wrapper.innerHTML =
-                `<button type="button" class="nav-link flex items-center gap-1" @click="open = !open">` +
-                `<img id="nostr-avatar" src="" alt="nostr avatar" class="w-5 h-5 rounded-full hidden object-cover bg-gray-300/50" />` +
-                `<span id="nostr-logout-label" class="link-text">${window.i18n.loading}</span>` +
-                `<svg id="nostr-menu-icon" data-lucide="chevron-down" class="w-5 h-5"></svg>` +
-                `</button>` +
-                `<div x-show="open" x-cloak @click.away="open = false" class="absolute right-0 mt-2 w-36 rounded-md shadow-lg border border-gray-200 bg-white z-50">` +
-                `<a href="/history" class="flex items-center gap-1 px-4 py-2 nav-link text-left border-b border-gray-200">` +
-                `<svg data-lucide="scroll" class="w-5 h-5"></svg>` +
-                `<span class="ml-1">History</span>` +
-                `</a>` +
-                `<a href="/profile" class="flex items-center gap-1 px-4 py-2 nav-link text-left">` +
-                `<svg data-lucide="user" class="w-5 h-5"></svg>` +
-                `<span class="ml-1">Profile</span>` +
-                `</a>` +
-                `<form method="POST" action="${logoutUrl}" class="mt-1">` +
-                `<input type="hidden" name="_token" value="${csrfToken}">` +
-                `<button type="submit" class="w-full text-left px-4 py-2 nav-link flex items-center gap-1">` +
-                `<svg data-lucide="log-out" class="w-5 h-5"></svg>` +
-                `<span class="ml-1">Logout</span>` +
-                `</button>` +
-                `</form>` +
-                `</div>`;
-            menu.replaceWith(wrapper);
-            const form = wrapper.querySelector('form');
-            form.addEventListener('submit', handleLogout);
-            refreshIcons();
-            updateNostrLogoutLabel(pubkey);
-        };
-
         const replaceLogoutWithLogin = () => {
             const menu = document.querySelector('[data-nostr-menu]');
             if (!menu) return;
