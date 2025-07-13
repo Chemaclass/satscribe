@@ -77,6 +77,38 @@ export async function fetchNostrProfile(pubkey) {
     return null;
 }
 
+export async function fetchRelayList(pubkey) {
+    let hex = pubkey;
+    if (pubkey.startsWith('npub')) {
+        try {
+            hex = nip19.decode(pubkey).data;
+        } catch (e) {
+            console.error('Failed to decode npub', e);
+            return [];
+        }
+    }
+
+    try {
+        const pool = new SimplePool();
+        const relays = getRelays();
+        const event = await Promise.race([
+            pool.get(relays, { kinds: [10002], authors: [hex], limit: 1 }),
+            new Promise(resolve => setTimeout(() => resolve(null), 3000)),
+        ]);
+        pool.close(relays);
+
+        if (event?.tags) {
+            return event.tags
+                .filter(t => t[0] === 'r' && typeof t[1] === 'string')
+                .map(t => t[1]);
+        }
+    } catch (e) {
+        console.error('Failed to fetch relay list', e);
+    }
+
+    return [];
+}
+
 async function getOrFetchProfile(pubkey) {
     let profile = StorageClient.getNostrProfile();
     if (!profile) {
@@ -319,7 +351,13 @@ export async function updateProfilePage(force = false) {
     const relaysList = $('relays-list');
     if (relaysList) {
         relaysList.innerHTML = '';
-        const relays = StorageClient.getRelays();
+        let relays = StorageClient.getRelays();
+        if (relays.length === 0) {
+            relays = await fetchRelayList(pubkey);
+            if (relays.length > 0) {
+                StorageClient.setRelays(relays);
+            }
+        }
         if (relays.length === 0) {
             const li = document.createElement('li');
             li.textContent = 'No custom relays';
@@ -371,6 +409,7 @@ export function initNostrAuth() {
             StorageClient.clearNostrPubkey();
             StorageClient.clearNostrProfile();
             StorageClient.clearNostrPrivkey();
+            StorageClient.clearNostrRelays();
             window.location.reload();
         });
     });
@@ -411,6 +450,21 @@ export function publishProfileMetadata(privkey, metadata) {
         created_at: Math.floor(Date.now() / 1000),
         content: JSON.stringify(metadata),
         tags: [],
+    };
+    event.id = getEventHash(event);
+    event.sig = getSignature(event, privkey);
+
+    return publishSignedEvent(event);
+}
+
+export function publishRelayList(privkey, relays) {
+    const pubkey = getPublicKey(privkey);
+    const event = {
+        kind: 10002,
+        pubkey,
+        created_at: Math.floor(Date.now() / 1000),
+        content: '',
+        tags: relays.map(r => ['r', r]),
     };
     event.id = getEventHash(event);
     event.sig = getSignature(event, privkey);
@@ -479,21 +533,38 @@ export async function initProfileEdit() {
             li.textContent = 'No custom relays';
             relaysContainer.appendChild(li);
         } else {
-            relays.forEach(r => {
+            relays.forEach((r, idx) => {
                 const li = document.createElement('li');
                 li.className = 'flex items-center gap-2';
-                const span = document.createElement('span');
-                span.textContent = r;
-                span.className = 'flex-1 break-all';
+
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.value = r;
+                input.className = 'flex-1 p-1 border rounded';
+                input.addEventListener('change', () => {
+                    const all = StorageClient.getRelays();
+                    const val = input.value.trim();
+                    if (val) {
+                        all[idx] = val;
+                    } else {
+                        all.splice(idx, 1);
+                    }
+                    StorageClient.setRelays(all);
+                    renderRelays();
+                });
+
                 const remove = document.createElement('button');
                 remove.type = 'button';
                 remove.textContent = 'Remove';
                 remove.className = 'px-2 py-1 text-sm rounded link border';
                 remove.addEventListener('click', () => {
-                    StorageClient.removeRelay(r);
+                    const all = StorageClient.getRelays();
+                    all.splice(idx, 1);
+                    StorageClient.setRelays(all);
                     renderRelays();
                 });
-                li.appendChild(span);
+
+                li.appendChild(input);
                 li.appendChild(remove);
                 relaysContainer.appendChild(li);
             });
@@ -523,6 +594,7 @@ export async function initProfileEdit() {
 
         console.log('Submitting profile update', data);
 
+        const relays = StorageClient.getRelays();
         let sk = StorageClient.getNostrPrivkey();
 
         if (!sk && window.nostr?.signEvent) {
@@ -539,7 +611,23 @@ export async function initProfileEdit() {
                 event.id = signed.id;
                 event.sig = signed.sig;
                 await publishSignedEvent(event);
+
+                if (relays.length > 0) {
+                    const rEvent = {
+                        kind: 10002,
+                        pubkey: pk,
+                        created_at: Math.floor(Date.now() / 1000),
+                        content: '',
+                        tags: relays.map(r => ['r', r]),
+                    };
+                    const signedRelays = await window.nostr.signEvent(rEvent);
+                    rEvent.id = signedRelays.id;
+                    rEvent.sig = signedRelays.sig;
+                    await publishSignedEvent(rEvent);
+                }
+
                 StorageClient.setNostrProfile(data);
+                StorageClient.setRelays(relays);
                 window.location.href = '/profile';
                 return;
             } catch (err) {
@@ -558,7 +646,11 @@ export async function initProfileEdit() {
                 try { sk = nip19.decode(sk).data; } catch {}
             }
             await publishProfileMetadata(sk, data);
+            if (relays.length > 0) {
+                await publishRelayList(sk, relays);
+            }
             StorageClient.setNostrProfile(data);
+            StorageClient.setRelays(relays);
             window.location.href = '/profile';
         } else {
             alert('No private key provided.');
