@@ -184,6 +184,9 @@
                         ? window.nostrTools.nip19.nsecEncode(sk)
                         : window.nostrTools.nip19.encode({ type: 'nsec', data: sk });
                     StorageClient.setNostrPrivkey(nsec);
+                    if (Array.isArray(window.DEFAULT_RELAYS)) {
+                        StorageClient.setRelays(window.DEFAULT_RELAYS);
+                    }
 
                     const pubkey = window.nostrTools.getPublicKey(sk);
                     const event = this.buildEvent(pubkey);

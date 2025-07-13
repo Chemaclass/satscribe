@@ -2,7 +2,7 @@ import { nip19, SimplePool, getEventHash, getSignature, getPublicKey } from 'nos
 import StorageClient from './storage-client';
 import { refreshIcons } from './icons';
 
-const DEFAULT_RELAYS = [
+export const DEFAULT_RELAYS = [
     'wss://atlas.nostr.land',
     'wss://eden.nostr.land',
     'wss://no.str.cr',

@@ -11,12 +11,14 @@ import {
     publishProfileMetadata,
     publishRelayList,
     initProfileEdit,
+    DEFAULT_RELAYS,
 } from './nostr';
 import { nip19, getPublicKey, getSignature, getEventHash, generatePrivateKey } from 'nostr-tools';
 
 window.Alpine = Alpine;
 window.StorageClient = StorageClient;
 window.nostrTools = { nip19, getPublicKey, getSignature, getEventHash, generatePrivateKey };
+window.DEFAULT_RELAYS = DEFAULT_RELAYS;
 window.publishProfileEvent = publishProfileEvent;
 window.fetchNostrProfile = fetchNostrProfile;
 window.fetchRelayList = fetchRelayList;
