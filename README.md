@@ -16,9 +16,9 @@
 
 ## 🖼️ Demo
 
-![Satscribe Demo1](docs/demo-index.png)
+![Satscribe Demo1](docs/demo-index.jpg)
 
-![Satscribe Demo2](docs/demo-history.png)
+![Satscribe Demo2](docs/demo-history-profile.jpg)
 
 ---
 
