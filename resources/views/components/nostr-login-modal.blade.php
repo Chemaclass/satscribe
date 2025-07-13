@@ -58,6 +58,7 @@
             loginUrl: document.querySelector('meta[name="nostr-login-url"]').content,
             challengeUrl: document.querySelector('meta[name="nostr-challenge-url"]').content,
             csrf: document.querySelector('meta[name="csrf-token"]').content,
+            redirectUrl: document.querySelector('meta[name="redirect-after-login"]')?.content || null,
             async open() {
                 this.error = '';
                 this.privKey = '';
@@ -107,7 +108,11 @@
                     if (resp.ok) {
                         const {pubkey} = await resp.json();
                         StorageClient.setNostrPubkey(pubkey);
-                        window.location.reload();
+                        if (this.redirectUrl) {
+                            window.location.href = this.redirectUrl;
+                        } else {
+                            window.location.reload();
+                        }
                     } else {
                         this.error = 'Login failed';
                     }
@@ -145,7 +150,11 @@
                     if (resp.ok) {
                         const {pubkey} = await resp.json();
                         StorageClient.setNostrPubkey(pubkey);
-                        window.location.reload();
+                        if (this.redirectUrl) {
+                            window.location.href = this.redirectUrl;
+                        } else {
+                            window.location.reload();
+                        }
                     } else {
                         this.error = 'Login failed';
                     }

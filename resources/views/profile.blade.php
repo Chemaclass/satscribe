@@ -11,7 +11,7 @@
                 <div id="nostr-profile-meta" class="profile-card overflow-hidden">
                     <div class="relative">
                         <div id="profile-banner" class="h-32 bg-cover bg-center skeleton"></div>
-                        <img id="profile-avatar" class="w-24 h-24 rounded-full border-4 skeleton absolute left-4 bottom-0 transform translate-y-1/2" alt="avatar" />
+                        <img id="profile-avatar" class="w-24 h-24 rounded-full border-4 skeleton absolute left-4 bottom-0 transform translate-y-1/2" alt="avatar" src=""/>
                     </div>
                     <div class="p-4 pt-16">
                         <div class="flex justify-between items-start">
