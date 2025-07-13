@@ -3,54 +3,86 @@
 @section('title', 'Profile')
 
 @section('content')
-    <section class="px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-        <x-page.header title="Profile" />
+    <section id="profile" class="sm:px-6 lg:px-8 px-4 py-6">
+        @if($pubkey)
+            <div id="nostr-profile-meta">
+            {{-- Banner & Avatar --}}
+            <div class="relative">
+                <div id="profile-banner" class="h-48 sm:h-56 md:h-64 bg-cover bg-center rounded-lg skeleton"></div>
+                <div class="absolute -bottom-4 left-4">
+                    <img id="profile-avatar" src="" alt="avatar" class="w-28 h-28 sm:w-32 sm:h-32 rounded-full border-4 border-white shadow-lg object-cover skeleton" />
+                </div>
+            </div>
 
-        <div class="space-y-4 text-gray-700">
-            @if($pubkey)
-                <div id="nostr-profile-meta" class="profile-card overflow-hidden">
-                    <div class="relative">
-                        <div id="profile-banner" class="h-32 bg-cover bg-center skeleton"></div>
-                        <img id="profile-avatar" class="w-24 h-24 rounded-full border-4 skeleton absolute left-4 bottom-0 transform translate-y-1/2" alt="avatar" src=""/>
-                    </div>
-                    <div class="p-4 pt-16">
-                        <div class="flex justify-between items-start">
-                            <p id="profile-name" class="text-xl font-semibold skeleton h-6 w-32"></p>
-                            <button type="button" id="profile-refresh" class="px-3 py-1 rounded border text-sm link">
-                                {{ __('Refresh profile') }}
-                            </button>
-                        </div>
-                        <p class="text-sm text-gray-500 skeleton h-4 w-24" id="profile-username"></p>
-                        <p class="text-sm"><a id="profile-url" href="#" class=" hover:underline hidden" target="_blank"></a></p>
-                        <p id="profile-nip05" class="text-sm hidden"></p>
-                        <p id="profile-lud16" class="text-sm hidden"></p>
-                        <p id="profile-about" class="text-sm hidden"></p>
-                    </div>
+            {{-- Main Card --}}
+            <div class="bg-white mt-2 rounded-lg p-6 shadow space-y-6">
+                {{-- Header --}}
+                <div class="flex justify-between items-center">
+                    <h2 class="text-xl font-semibold text-gray-900">Profile</h2>
+                    <button type="button" id="profile-refresh" class="px-3 py-1 rounded border text-sm link">
+                        {{ __('Refresh profile') }}
+                    </button>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div class="profile-stat">
-                        <p class="text-sm font-medium text-gray-500">Pubkey</p>
-                        <p class="break-all text-sm mt-1">{{ $pubkey }}</p>
+                {{-- Name and Username --}}
+                <div class="space-y-2">
+                    <div id="profile-name" class="h-6 w-36 rounded skeleton"></div>
+                    <div id="profile-username" class="h-4 w-28 rounded skeleton"></div>
+                </div>
+
+                {{-- Bio Section --}}
+                <h3 class="text-sm font-medium text-gray-500 mt-6">About</h3>
+                <p id="profile-about" class="text-gray-600 whitespace-pre-line space-y-2">
+                    <span class="block h-4 w-full rounded skeleton"></span>
+                    <span class="block h-4 w-5/6 rounded skeleton"></span>
+                    <span class="block h-4 w-4/6 rounded skeleton"></span>
+                </p>
+
+                {{-- Metadata --}}
+{{--                <h3 class="text-sm font-medium text-gray-500 mt-6">Info</h3>--}}
+{{--                <div class="space-y-1 text-sm">--}}
+{{--                    <a id="profile-url" href="#" class="hidden link break-all"></a>--}}
+{{--                    <div id="profile-nip05" class="hidden break-all"></div>--}}
+{{--                    <div id="profile-lud16" class="hidden break-all"></div>--}}
+{{--                </div>--}}
+
+                {{-- Social Stats --}}
+{{--                <h3 class="text-sm font-medium text-gray-500 mt-6">Followers</h3>--}}
+{{--                <div class="flex gap-6 text-sm pt-2 border-t border-gray-200">--}}
+{{--                    <div class="h-4 w-24 rounded skeleton"></div>--}}
+{{--                    <div class="h-4 w-24 rounded skeleton"></div>--}}
+{{--                </div>--}}
+
+                {{-- App Stats --}}
+                <h3 class="text-sm font-medium text-gray-500 mt-6">Usage Stats</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 border-gray-200">
+                    <div class="space-y-1">
+                        <div class="h-4 w-24">Chats</div>
+                        <div class="h-6 w-12 mt-2">{{ number_format($totalChats) }}</div>
                     </div>
-                    <div class="profile-stat">
-                        <p class="text-sm font-medium text-gray-500">Total chats</p>
-                        <p class="text-xl font-semibold mt-1">{{ number_format($totalChats) }}</p>
+                    <div class="space-y-1">
+                        <div class="h-4 w-24">Messages</div>
+                        <div class="h-6 w-12 mt-2">{{ number_format($totalMessages) }}</div>
                     </div>
-                    <div class="profile-stat">
-                        <p class="text-sm font-medium text-gray-500">Total messages</p>
-                        <p class="text-xl font-semibold mt-1">{{ number_format($totalMessages) }}</p>
-                    </div>
-                    <div class="profile-stat sm:col-span-3">
-                        <p class="text-sm font-medium text-gray-500">Total zaps</p>
-                        <p class="text-xl font-semibold mt-1">{{ number_format($totalZaps) }}</p>
+                    <div class="space-y-1">
+                        <div class="h-4 w-24">Zaps</div>
+                        <div class="h-6 w-12 mt-2">{{ number_format($totalZaps) }}</div>
                     </div>
                 </div>
-            @else
-                <div class="p-4 rounded-lg profile-stat">
-                    <p>{{ __('Not logged in via Nostr.') }} What is nostr? Check this out: <a href="https://nostr.com/">https://nostr.com/</a></p>
-                </div>
-            @endif
+
+                {{-- Pubkey --}}
+                <h3 class="text-sm font-medium text-gray-500 mt-6">Pubkey</h3>
+                <div class="w-full break-words">{{ $pubkey }}</div>
+            </div>
         </div>
+        @else
+        {{-- Not logged in fallback --}}
+        <div class="p-4 rounded-lg profile-stat bg-white shadow">
+            <p>
+                {{ __('Not logged in via Nostr.') }} What is nostr?
+                <a href="/nostr" class="underline text-orange-300">Check this out</a>
+            </p>
+        </div>
+        @endif
     </section>
 @endsection
