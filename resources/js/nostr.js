@@ -1,4 +1,4 @@
-import { nip19, SimplePool } from 'nostr-tools';
+import { nip19, SimplePool, getEventHash, getSignature, getPublicKey } from 'nostr-tools';
 import StorageClient from './storage-client';
 import { refreshIcons } from './icons';
 
@@ -135,6 +135,43 @@ export function applyNostrAvatarToMessages() {
     }
 }
 
+export function publishProfileEvent(privkey, name) {
+    return new Promise(resolve => {
+        try {
+            const pubkey = getPublicKey(privkey);
+            const event = {
+                kind: 0,
+                pubkey,
+                created_at: Math.floor(Date.now() / 1000),
+                content: JSON.stringify({ name }),
+                tags: [],
+            };
+            event.id = getEventHash(event);
+            event.sig = getSignature(event, privkey);
+
+            const pool = new SimplePool();
+            const pub = pool.publish(RELAYS, event);
+
+            let finished = false;
+            const finish = () => {
+                if (!finished) {
+                    finished = true;
+                    setTimeout(() => pool.close(RELAYS), 100);
+                    resolve();
+                }
+            };
+
+            pub.on('ok', finish);
+            pub.on('seen', finish);
+            pub.on('failed', finish);
+            setTimeout(finish, 3000);
+        } catch (e) {
+            console.error('Failed to publish profile event', e);
+            resolve();
+        }
+    });
+}
+
 export async function updateProfilePage(force = false) {
     const pubkey = document.querySelector('meta[name="nostr-pubkey"]')?.content;
     if (!pubkey) return;
@@ -143,6 +180,25 @@ export async function updateProfilePage(force = false) {
     if (!profile) return;
 
     const $ = id => document.getElementById(id);
+
+    const sk = StorageClient.getNostrPrivkey();
+    const skContainer = $('secret-key-container');
+    const skValue = $('secret-key-value');
+    const skDelete = $('secret-key-delete');
+    if (skContainer && skValue) {
+        if (sk) {
+            skValue.textContent = sk;
+            skContainer.classList.remove('hidden');
+            if (skDelete) {
+                skDelete.addEventListener('click', () => {
+                    StorageClient.clearNostrPrivkey();
+                    skContainer.classList.add('hidden');
+                }, { once: true });
+            }
+        } else {
+            skContainer.classList.add('hidden');
+        }
+    }
 
     if (profile.banner) {
         const banner = $('profile-banner');
@@ -245,6 +301,7 @@ export function initNostrAuth() {
             });
             StorageClient.clearNostrPubkey();
             StorageClient.clearNostrProfile();
+            StorageClient.clearNostrPrivkey();
             window.location.reload();
         });
     });

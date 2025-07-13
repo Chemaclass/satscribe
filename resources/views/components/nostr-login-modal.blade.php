@@ -52,6 +52,16 @@
                 </p>
             </div>
 
+            <!-- Generate Key -->
+            <div>
+                <h3 class="font-semibold">{{ __('Sign up with new key') }}</h3>
+                <p class="text-sm text-gray-600 mb-2">{{ __('Creates a nostr key pair locally.') }}</p>
+                <button @click="signupWithNewKey"
+                        class="w-full bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded">
+                    {{ __('Generate New Key') }}
+                </button>
+            </div>
+
             <!-- Cancel -->
             <button @click="closeModal"
                     class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded">
@@ -150,6 +160,31 @@
                     this.error = 'Invalid private key.';
                 } finally {
                     this.privKey = '';
+                }
+            },
+
+            async signupWithNewKey() {
+                this.error = '';
+                try {
+                    const sk = window.nostrTools.generatePrivateKey();
+                    const nsec = window.nostrTools.nip19.nsecEncode
+                        ? window.nostrTools.nip19.nsecEncode(sk)
+                        : window.nostrTools.nip19.encode({ type: 'nsec', data: sk });
+                    StorageClient.setNostrPrivkey(nsec);
+
+                    const pubkey = window.nostrTools.getPublicKey(sk);
+                    const event = this.buildEvent(pubkey);
+                    event.sig = window.nostrTools.getSignature(event, sk);
+
+                    const random = Math.floor(Math.random() * 100000);
+                    const name = `Satscriber #${random}`;
+                    await window.publishProfileEvent(sk, name);
+
+                    this.redirectUrl = '/profile';
+                    await this.submitEvent(event);
+                } catch (err) {
+                    console.error(err);
+                    this.error = 'Signup failed.';
                 }
             },
 
