@@ -2,7 +2,7 @@ import { nip19, SimplePool, getEventHash, getSignature, getPublicKey } from 'nos
 import StorageClient from './storage-client';
 import { refreshIcons } from './icons';
 
-const RELAYS = [
+const DEFAULT_RELAYS = [
     'wss://atlas.nostr.land',
     'wss://eden.nostr.land',
     'wss://no.str.cr',
@@ -17,6 +17,19 @@ const RELAYS = [
     'wss://nostr.oxtr.dev',
     'wss://nostr.bitcoiner.social',
 ];
+
+export function getRelays() {
+    const relays = [...DEFAULT_RELAYS];
+    const custom = StorageClient.getRelays();
+    if (Array.isArray(custom)) {
+        custom.forEach(r => {
+            if (typeof r === 'string' && r && !relays.includes(r)) {
+                relays.push(r);
+            }
+        });
+    }
+    return relays;
+}
 
 const PLACEHOLDER_IMAGE = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
 
@@ -33,11 +46,12 @@ export async function fetchNostrProfile(pubkey) {
 
     try {
         const pool = new SimplePool();
+        const relays = getRelays();
         const event = await Promise.race([
-            pool.get(RELAYS, { kinds: [0], authors: [hex], limit: 1 }),
+            pool.get(relays, { kinds: [0], authors: [hex], limit: 1 }),
             new Promise(resolve => setTimeout(() => resolve(null), 3000)),
         ]);
-        pool.close(RELAYS);
+        pool.close(relays);
 
         if (event?.content) {
             try {
@@ -149,13 +163,14 @@ export function publishProfileEvent(privkey, name) {
             event.sig = getSignature(event, privkey);
 
             const pool = new SimplePool();
-            const pub = pool.publish(RELAYS, event);
+            const relays = getRelays();
+            const pub = pool.publish(relays, event);
 
             let finished = false;
             const finish = () => {
                 if (!finished) {
                     finished = true;
-                    setTimeout(() => pool.close(RELAYS), 100);
+                    setTimeout(() => pool.close(relays), 100);
                     resolve();
                 }
             };
@@ -300,6 +315,24 @@ export async function updateProfilePage(force = false) {
             aboutEl.classList.remove('hidden');
         }
     }
+
+    const relaysList = $('relays-list');
+    if (relaysList) {
+        relaysList.innerHTML = '';
+        const relays = StorageClient.getRelays();
+        if (relays.length === 0) {
+            const li = document.createElement('li');
+            li.textContent = 'No custom relays';
+            relaysList.appendChild(li);
+        } else {
+            relays.forEach(r => {
+                const li = document.createElement('li');
+                li.textContent = r;
+                li.className = 'break-all';
+                relaysList.appendChild(li);
+            });
+        }
+    }
 }
 
 export function initNostrAuth() {
@@ -347,13 +380,14 @@ function publishSignedEvent(event) {
     return new Promise(resolve => {
         try {
             const pool = new SimplePool();
-            const pub = pool.publish(RELAYS, event);
+            const relays = getRelays();
+            const pub = pool.publish(relays, event);
 
             let finished = false;
             const finish = () => {
                 if (!finished) {
                     finished = true;
-                    setTimeout(() => pool.close(RELAYS), 100);
+                    setTimeout(() => pool.close(relays), 100);
                     resolve();
                 }
             };
@@ -431,6 +465,53 @@ export async function initProfileEdit() {
         bannerInput.addEventListener('input', () => updatePreview(bannerInput, bannerPreview));
         updatePreview(bannerInput, bannerPreview);
     }
+
+    const relaysContainer = document.getElementById('edit-relays-list');
+    const addRelayBtn = document.getElementById('add-relay');
+    const newRelayInput = document.getElementById('new-relay');
+
+    function renderRelays() {
+        if (!relaysContainer) return;
+        relaysContainer.innerHTML = '';
+        const relays = StorageClient.getRelays();
+        if (relays.length === 0) {
+            const li = document.createElement('li');
+            li.textContent = 'No custom relays';
+            relaysContainer.appendChild(li);
+        } else {
+            relays.forEach(r => {
+                const li = document.createElement('li');
+                li.className = 'flex items-center gap-2';
+                const span = document.createElement('span');
+                span.textContent = r;
+                span.className = 'flex-1 break-all';
+                const remove = document.createElement('button');
+                remove.type = 'button';
+                remove.textContent = 'Remove';
+                remove.className = 'px-2 py-1 text-sm rounded link border';
+                remove.addEventListener('click', () => {
+                    StorageClient.removeRelay(r);
+                    renderRelays();
+                });
+                li.appendChild(span);
+                li.appendChild(remove);
+                relaysContainer.appendChild(li);
+            });
+        }
+    }
+
+    if (addRelayBtn && newRelayInput) {
+        addRelayBtn.addEventListener('click', () => {
+            const relay = newRelayInput.value.trim();
+            if (relay) {
+                StorageClient.addRelay(relay);
+                newRelayInput.value = '';
+                renderRelays();
+            }
+        });
+    }
+
+    renderRelays();
 
     form.addEventListener('submit', async e => {
         e.preventDefault();

@@ -56,6 +56,15 @@
                     </div>
                 </div>
 
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Relays</label>
+                    <ul id="edit-relays-list" class="mt-1 space-y-1 text-sm"></ul>
+                    <div class="flex gap-2 mt-2">
+                        <input id="new-relay" type="text" class="flex-1 p-2 border border-gray-300 rounded" placeholder="wss://example.com" />
+                        <button type="button" id="add-relay" class="px-2 py-1 rounded border text-sm link">Add</button>
+                    </div>
+                </div>
+
                 <div class="pt-2">
                     <button type="submit" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded">{{ __('Save') }}</button>
                 </div>
