@@ -14,6 +14,15 @@ const StorageClient = {
     clearNostrPubkey() {
         localStorage.removeItem('nostr_pubkey');
     },
+    getNostrPrivkey() {
+        return localStorage.getItem('nostr_privkey');
+    },
+    setNostrPrivkey(privkey) {
+        localStorage.setItem('nostr_privkey', privkey);
+    },
+    clearNostrPrivkey() {
+        localStorage.removeItem('nostr_privkey');
+    },
     getNostrName() {
         const profile = this.getNostrProfile();
         if (profile) {

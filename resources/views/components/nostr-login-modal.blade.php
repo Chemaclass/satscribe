@@ -52,6 +52,26 @@
                 </p>
             </div>
 
+            <!-- Generate Key -->
+            <div>
+                <h3 class="font-semibold">{{ __('Sign up with new key') }}</h3>
+                <p class="text-sm text-gray-600 mb-2">{{ __('Creates a nostr key pair locally.') }}</p>
+                <button @click="signupWithNewKey" :disabled="generating"
+                        class="relative h-10 w-full bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded">
+                    <span x-show="!generating">{{ __('Generate New Key') }}</span>
+                    <span x-show="generating" class="absolute inset-0 flex items-center justify-center" x-cloak>
+                        <span class="dots-loader">
+                            <span class="dot"></span>
+                            <span class="dot"></span>
+                            <span class="dot"></span>
+                            <span class="dot"></span>
+                            <span class="dot"></span>
+                            <span class="dot"></span>
+                        </span>
+                    </span>
+                </button>
+            </div>
+
             <!-- Cancel -->
             <button @click="closeModal"
                     class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded">
@@ -68,6 +88,7 @@
             privKey: '',
             challenge: '',
             error: '',
+            generating: false,
             loginUrl: document.querySelector('meta[name="nostr-login-url"]').content,
             challengeUrl: document.querySelector('meta[name="nostr-challenge-url"]').content,
             csrf: document.querySelector('meta[name="csrf-token"]').content,
@@ -150,6 +171,42 @@
                     this.error = 'Invalid private key.';
                 } finally {
                     this.privKey = '';
+                }
+            },
+
+            async signupWithNewKey() {
+                if (this.generating) return;
+                this.error = '';
+                this.generating = true;
+                try {
+                    const sk = window.nostrTools.generatePrivateKey();
+                    const nsec = window.nostrTools.nip19.nsecEncode
+                        ? window.nostrTools.nip19.nsecEncode(sk)
+                        : window.nostrTools.nip19.encode({ type: 'nsec', data: sk });
+                    StorageClient.setNostrPrivkey(nsec);
+
+                    const pubkey = window.nostrTools.getPublicKey(sk);
+                    const event = this.buildEvent(pubkey);
+                    event.sig = window.nostrTools.getSignature(event, sk);
+
+                    const random = Math.floor(Math.random() * 100000);
+                    const name = `Satscriber #${random}`;
+                    await window.publishProfileEvent(sk, name);
+
+                    // Fetch the freshly published profile so the navbar name updates
+                    const profile = await window.fetchNostrProfile(pubkey);
+                    if (profile) {
+                        StorageClient.setNostrProfile(profile);
+                        window.updateNostrLogoutLabel(pubkey);
+                    }
+
+                    this.redirectUrl = '/profile';
+                    await this.submitEvent(event);
+                } catch (err) {
+                    console.error(err);
+                    this.error = 'Signup failed.';
+                } finally {
+                    this.generating = false;
                 }
             },
 

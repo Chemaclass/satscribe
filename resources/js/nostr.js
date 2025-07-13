@@ -1,4 +1,4 @@
-import { nip19, SimplePool } from 'nostr-tools';
+import { nip19, SimplePool, getEventHash, getSignature, getPublicKey } from 'nostr-tools';
 import StorageClient from './storage-client';
 import { refreshIcons } from './icons';
 
@@ -135,14 +135,107 @@ export function applyNostrAvatarToMessages() {
     }
 }
 
+export function publishProfileEvent(privkey, name) {
+    return new Promise(resolve => {
+        try {
+            const pubkey = getPublicKey(privkey);
+            const event = {
+                kind: 0,
+                pubkey,
+                created_at: Math.floor(Date.now() / 1000),
+                content: JSON.stringify({ name }),
+                tags: [],
+            };
+            event.id = getEventHash(event);
+            event.sig = getSignature(event, privkey);
+
+            const pool = new SimplePool();
+            const pub = pool.publish(RELAYS, event);
+
+            let finished = false;
+            const finish = () => {
+                if (!finished) {
+                    finished = true;
+                    setTimeout(() => pool.close(RELAYS), 100);
+                    resolve();
+                }
+            };
+
+            pub.on('ok', finish);
+            pub.on('seen', finish);
+            pub.on('failed', finish);
+            setTimeout(finish, 3000);
+        } catch (e) {
+            console.error('Failed to publish profile event', e);
+            resolve();
+        }
+    });
+}
+
 export async function updateProfilePage(force = false) {
     const pubkey = document.querySelector('meta[name="nostr-pubkey"]')?.content;
     if (!pubkey) return;
+
+    const npubEl = document.getElementById('profile-npub');
+    if (npubEl) {
+        try {
+            const npub = window.nostrTools.nip19.npubEncode
+                ? window.nostrTools.nip19.npubEncode(pubkey)
+                : window.nostrTools.nip19.encode({ type: 'npub', data: pubkey });
+            npubEl.textContent = npub;
+        } catch (e) {
+            npubEl.textContent = pubkey;
+        }
+    }
 
     const profile = force ? await fetchNostrProfile(pubkey) : await getOrFetchProfile(pubkey);
     if (!profile) return;
 
     const $ = id => document.getElementById(id);
+
+    const sk = StorageClient.getNostrPrivkey();
+    const skContainer = $('secret-key-container');
+    const skValue = $('secret-key-value');
+    const skDelete = $('secret-key-delete');
+    const skCopy = $('secret-key-copy');
+    const skToggle = $('secret-key-toggle');
+
+    function bindOnce(button, handler) {
+        if (button && !button.dataset.bound) {
+            button.dataset.bound = '1';
+            button.addEventListener('click', handler);
+        }
+    }
+
+    if (skContainer && skValue) {
+        if (sk) {
+            skValue.value = sk;
+            skValue.type = 'password';
+            skContainer.classList.remove('hidden');
+
+            bindOnce(skDelete, () => {
+                StorageClient.clearNostrPrivkey();
+                skContainer.classList.add('hidden');
+            });
+
+            bindOnce(skCopy, () => {
+                navigator.clipboard.writeText(skValue.value).catch(() => {});
+                const original = skCopy.textContent;
+                skCopy.textContent = 'Copied!';
+                setTimeout(() => {
+                    skCopy.textContent = original;
+                }, 2000);
+            });
+
+            bindOnce(skToggle, () => {
+                const isHidden = skValue.type === 'password';
+                skValue.type = isHidden ? 'text' : 'password';
+                skToggle.textContent = isHidden ? 'Hide' : 'Show';
+            });
+        } else {
+            skContainer.classList.add('hidden');
+        }
+    }
 
     if (profile.banner) {
         const banner = $('profile-banner');
@@ -245,6 +338,7 @@ export function initNostrAuth() {
             });
             StorageClient.clearNostrPubkey();
             StorageClient.clearNostrProfile();
+            StorageClient.clearNostrPrivkey();
             window.location.reload();
         });
     });

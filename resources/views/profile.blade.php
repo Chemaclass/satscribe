@@ -30,9 +30,8 @@
                 </div>
 
                 {{-- Bio Section --}}
-                <p id="profile-about" class="text-gray-600 whitespace-pre-line space-y-2">
+                <p id="profile-about" class="hidden text-gray-600 whitespace-pre-line space-y-2">
                     <span class="block h-4 w-full rounded skeleton"></span>
-                    <span class="block h-4 w-5/6 rounded skeleton"></span>
                     <span class="block h-4 w-4/6 rounded skeleton"></span>
                 </p>
 
@@ -71,6 +70,42 @@
                     <div class="mt-1 px-3 py-2 bg-gray-100 rounded-md text-sm font-mono text-gray-800 break-all border border-gray-200">
                         {{ $pubkey }}
                     </div>
+                </div>
+
+                {{-- npub key --}}
+                <div class="mt-6">
+                    <h3 class="text-sm font-medium text-gray-600 uppercase tracking-wide">npub</h3>
+                    <div id="profile-npub" class="mt-1 px-3 py-2 bg-gray-100 rounded-md text-sm font-mono text-gray-800 break-all border border-gray-200">
+                        Loading...
+                    </div>
+                </div>
+
+                {{-- Secret Key (local only) --}}
+                <div class="mt-6 hidden" id="secret-key-container">
+                    <h3 class="text-sm font-medium text-gray-600 uppercase tracking-wide">Secret key</h3>
+                    <div class="mt-1 flex items-center gap-2">
+                        <input type="password"
+                               readonly
+                               class="flex-1 px-3 py-2 bg-yellow-50 rounded-md text-sm font-mono text-gray-800 break-all border border-yellow-200"
+                               id="secret-key-value" />
+                        <button type="button"
+                                id="secret-key-copy"
+                                class="px-2 py-1 rounded link border">
+                            Copy
+                        </button>
+                        <button type="button"
+                                id="secret-key-toggle"
+                                class="px-2 py-1 rounded link border">
+                            Show
+                        </button>
+                    </div>
+                    <p class="text-xs text-red-600 mt-2 font-semibold">
+                        <strong>IMPORTANT</strong>: save this key in your password manager and delete it from local storage afterwards.
+                        <strong>Satscribe will not store it for you.</strong>
+                    </p>
+                    <button type="button" id="secret-key-delete" class="mt-2 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">
+                        Delete from local storage
+                    </button>
                 </div>
             </div>
         </div>
