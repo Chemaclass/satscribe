@@ -2,7 +2,7 @@ import { nip19, SimplePool, getEventHash, getSignature, getPublicKey } from 'nos
 import StorageClient from './storage-client';
 import { refreshIcons } from './icons';
 
-const RELAYS = [
+export const DEFAULT_RELAYS = [
     'wss://atlas.nostr.land',
     'wss://eden.nostr.land',
     'wss://no.str.cr',
@@ -17,6 +17,19 @@ const RELAYS = [
     'wss://nostr.oxtr.dev',
     'wss://nostr.bitcoiner.social',
 ];
+
+export function getRelays() {
+    const relays = [...DEFAULT_RELAYS];
+    const custom = StorageClient.getRelays();
+    if (Array.isArray(custom)) {
+        custom.forEach(r => {
+            if (typeof r === 'string' && r && !relays.includes(r)) {
+                relays.push(r);
+            }
+        });
+    }
+    return relays;
+}
 
 const PLACEHOLDER_IMAGE = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
 
@@ -33,11 +46,12 @@ export async function fetchNostrProfile(pubkey) {
 
     try {
         const pool = new SimplePool();
+        const relays = getRelays();
         const event = await Promise.race([
-            pool.get(RELAYS, { kinds: [0], authors: [hex], limit: 1 }),
+            pool.get(relays, { kinds: [0], authors: [hex], limit: 1 }),
             new Promise(resolve => setTimeout(() => resolve(null), 3000)),
         ]);
-        pool.close(RELAYS);
+        pool.close(relays);
 
         if (event?.content) {
             try {
@@ -61,6 +75,38 @@ export async function fetchNostrProfile(pubkey) {
     }
 
     return null;
+}
+
+export async function fetchRelayList(pubkey) {
+    let hex = pubkey;
+    if (pubkey.startsWith('npub')) {
+        try {
+            hex = nip19.decode(pubkey).data;
+        } catch (e) {
+            console.error('Failed to decode npub', e);
+            return [];
+        }
+    }
+
+    try {
+        const pool = new SimplePool();
+        const relays = getRelays();
+        const event = await Promise.race([
+            pool.get(relays, { kinds: [10002], authors: [hex], limit: 1 }),
+            new Promise(resolve => setTimeout(() => resolve(null), 3000)),
+        ]);
+        pool.close(relays);
+
+        if (event?.tags) {
+            return event.tags
+                .filter(t => t[0] === 'r' && typeof t[1] === 'string')
+                .map(t => t[1]);
+        }
+    } catch (e) {
+        console.error('Failed to fetch relay list', e);
+    }
+
+    return [];
 }
 
 async function getOrFetchProfile(pubkey) {
@@ -149,13 +195,14 @@ export function publishProfileEvent(privkey, name) {
             event.sig = getSignature(event, privkey);
 
             const pool = new SimplePool();
-            const pub = pool.publish(RELAYS, event);
+            const relays = getRelays();
+            const pub = pool.publish(relays, event);
 
             let finished = false;
             const finish = () => {
                 if (!finished) {
                     finished = true;
-                    setTimeout(() => pool.close(RELAYS), 100);
+                    setTimeout(() => pool.close(relays), 100);
                     resolve();
                 }
             };
@@ -300,6 +347,30 @@ export async function updateProfilePage(force = false) {
             aboutEl.classList.remove('hidden');
         }
     }
+
+    const relaysList = $('relays-list');
+    if (relaysList) {
+        relaysList.innerHTML = '';
+        let relays = StorageClient.getRelays();
+        if (relays.length === 0) {
+            relays = await fetchRelayList(pubkey);
+            if (relays.length > 0) {
+                StorageClient.setRelays(relays);
+            }
+        }
+        if (relays.length === 0) {
+            const li = document.createElement('li');
+            li.textContent = 'No custom relays';
+            relaysList.appendChild(li);
+        } else {
+            relays.forEach(r => {
+                const li = document.createElement('li');
+                li.textContent = r;
+                li.className = 'break-all';
+                relaysList.appendChild(li);
+            });
+        }
+    }
 }
 
 export function initNostrAuth() {
@@ -338,6 +409,7 @@ export function initNostrAuth() {
             StorageClient.clearNostrPubkey();
             StorageClient.clearNostrProfile();
             StorageClient.clearNostrPrivkey();
+            StorageClient.clearNostrRelays();
             window.location.reload();
         });
     });
@@ -347,13 +419,14 @@ function publishSignedEvent(event) {
     return new Promise(resolve => {
         try {
             const pool = new SimplePool();
-            const pub = pool.publish(RELAYS, event);
+            const relays = getRelays();
+            const pub = pool.publish(relays, event);
 
             let finished = false;
             const finish = () => {
                 if (!finished) {
                     finished = true;
-                    setTimeout(() => pool.close(RELAYS), 100);
+                    setTimeout(() => pool.close(relays), 100);
                     resolve();
                 }
             };
@@ -377,6 +450,21 @@ export function publishProfileMetadata(privkey, metadata) {
         created_at: Math.floor(Date.now() / 1000),
         content: JSON.stringify(metadata),
         tags: [],
+    };
+    event.id = getEventHash(event);
+    event.sig = getSignature(event, privkey);
+
+    return publishSignedEvent(event);
+}
+
+export function publishRelayList(privkey, relays) {
+    const pubkey = getPublicKey(privkey);
+    const event = {
+        kind: 10002,
+        pubkey,
+        created_at: Math.floor(Date.now() / 1000),
+        content: '',
+        tags: relays.map(r => ['r', r]),
     };
     event.id = getEventHash(event);
     event.sig = getSignature(event, privkey);
@@ -432,6 +520,78 @@ export async function initProfileEdit() {
         updatePreview(bannerInput, bannerPreview);
     }
 
+    const relaysContainer = document.getElementById('edit-relays-list');
+    const addRelayBtn = document.getElementById('add-relay');
+    const newRelayInput = document.getElementById('new-relay');
+
+    let relays = StorageClient.getRelays();
+    if (relays.length === 0) {
+        relays = await fetchRelayList(pubkey);
+        if (relays.length > 0) {
+            StorageClient.setRelays(relays);
+        }
+    }
+
+    function renderRelays() {
+        if (!relaysContainer) return;
+        relaysContainer.innerHTML = '';
+        const relays = StorageClient.getRelays();
+        if (relays.length === 0) {
+            const li = document.createElement('li');
+            li.textContent = 'No custom relays';
+            relaysContainer.appendChild(li);
+        } else {
+            relays.forEach((r, idx) => {
+                const li = document.createElement('li');
+                li.className = 'flex items-center gap-2';
+
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.value = r;
+                input.className = 'flex-1 p-1 border rounded';
+                input.addEventListener('change', () => {
+                    const all = StorageClient.getRelays();
+                    const val = input.value.trim();
+                    if (val) {
+                        all[idx] = val;
+                    } else {
+                        all.splice(idx, 1);
+                    }
+                    StorageClient.setRelays(all);
+                    renderRelays();
+                });
+
+                const remove = document.createElement('button');
+                remove.type = 'button';
+                remove.textContent = 'Remove';
+                remove.className = 'px-2 py-1 text-sm rounded link border';
+                remove.addEventListener('click', () => {
+                    const all = StorageClient.getRelays();
+                    all.splice(idx, 1);
+                    StorageClient.setRelays(all);
+                    renderRelays();
+                });
+
+                li.appendChild(input);
+                li.appendChild(remove);
+                relaysContainer.appendChild(li);
+            });
+        }
+    }
+
+    if (addRelayBtn && newRelayInput) {
+        addRelayBtn.addEventListener('click', () => {
+            const relay = newRelayInput.value.trim();
+            if (relay) {
+                StorageClient.addRelay(relay);
+                newRelayInput.value = '';
+                renderRelays();
+            }
+        });
+    }
+
+    renderRelays();
+
     form.addEventListener('submit', async e => {
         e.preventDefault();
         const data = {};
@@ -442,6 +602,7 @@ export async function initProfileEdit() {
 
         console.log('Submitting profile update', data);
 
+        const relays = StorageClient.getRelays();
         let sk = StorageClient.getNostrPrivkey();
 
         if (!sk && window.nostr?.signEvent) {
@@ -458,7 +619,21 @@ export async function initProfileEdit() {
                 event.id = signed.id;
                 event.sig = signed.sig;
                 await publishSignedEvent(event);
+
+                const rEvent = {
+                    kind: 10002,
+                    pubkey: pk,
+                    created_at: Math.floor(Date.now() / 1000),
+                    content: '',
+                    tags: relays.map(r => ['r', r]),
+                };
+                const signedRelays = await window.nostr.signEvent(rEvent);
+                rEvent.id = signedRelays.id;
+                rEvent.sig = signedRelays.sig;
+                await publishSignedEvent(rEvent);
+
                 StorageClient.setNostrProfile(data);
+                StorageClient.setRelays(relays);
                 window.location.href = '/profile';
                 return;
             } catch (err) {
@@ -477,7 +652,9 @@ export async function initProfileEdit() {
                 try { sk = nip19.decode(sk).data; } catch {}
             }
             await publishProfileMetadata(sk, data);
+            await publishRelayList(sk, relays);
             StorageClient.setNostrProfile(data);
+            StorageClient.setRelays(relays);
             window.location.href = '/profile';
         } else {
             alert('No private key provided.');

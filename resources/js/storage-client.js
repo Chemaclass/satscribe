@@ -52,6 +52,33 @@ const StorageClient = {
     clearNostrProfile() {
         localStorage.removeItem('nostr_profile');
     },
+    getRelays() {
+        const json = localStorage.getItem('nostr_relays');
+        if (!json) return [];
+        try {
+            const relays = JSON.parse(json);
+            return Array.isArray(relays) ? relays : [];
+        } catch {
+            return [];
+        }
+    },
+    setRelays(relays) {
+        localStorage.setItem('nostr_relays', JSON.stringify(relays));
+    },
+    addRelay(relay) {
+        const relays = this.getRelays();
+        if (!relays.includes(relay)) {
+            relays.push(relay);
+            this.setRelays(relays);
+        }
+    },
+    removeRelay(relay) {
+        const relays = this.getRelays().filter(r => r !== relay);
+        this.setRelays(relays);
+    },
+    clearNostrRelays() {
+        localStorage.removeItem('nostr_relays');
+    },
 };
 
 export default StorageClient;

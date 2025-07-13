@@ -112,6 +112,12 @@
                         Delete from local storage
                     </button>
                 </div>
+
+                {{-- Relays --}}
+                <div class="mt-6">
+                    <h3 class="text-sm font-medium text-gray-600 uppercase tracking-wide">Relays</h3>
+                    <ul id="relays-list" class="mt-1 space-y-1 text-sm"></ul>
+                </div>
             </div>
         </div>
         @else
