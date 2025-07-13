@@ -90,12 +90,12 @@
                                id="secret-key-value" />
                         <button type="button"
                                 id="secret-key-copy"
-                                class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-2 py-1 rounded">
+                                class="px-2 py-1 rounded link border">
                             Copy
                         </button>
                         <button type="button"
                                 id="secret-key-toggle"
-                                class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-2 py-1 rounded">
+                                class="px-2 py-1 rounded link border">
                             Show
                         </button>
                     </div>

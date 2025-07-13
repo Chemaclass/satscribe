@@ -199,40 +199,39 @@ export async function updateProfilePage(force = false) {
     const skDelete = $('secret-key-delete');
     const skCopy = $('secret-key-copy');
     const skToggle = $('secret-key-toggle');
+
+    function bindOnce(button, handler) {
+        if (button && !button.dataset.bound) {
+            button.dataset.bound = '1';
+            button.addEventListener('click', handler);
+        }
+    }
+
     if (skContainer && skValue) {
         if (sk) {
             skValue.value = sk;
             skValue.type = 'password';
             skContainer.classList.remove('hidden');
-            if (skDelete && !skDelete.dataset.bound) {
-                skDelete.dataset.bound = '1';
-                skDelete.addEventListener('click', () => {
-                    StorageClient.clearNostrPrivkey();
-                    skContainer.classList.add('hidden');
-                });
-            }
-            if (skCopy && !skCopy.dataset.bound) {
-                skCopy.dataset.bound = '1';
-                skCopy.addEventListener('click', () => {
-                    navigator.clipboard.writeText(skValue.value).catch(() => {});
-                    skCopy.classList.add('bg-orange-400', 'text-white');
-                    setTimeout(() => skCopy.classList.remove('bg-orange-400', 'text-white'), 500);
-                });
-            }
-            if (skToggle && !skToggle.dataset.bound) {
-                skToggle.dataset.bound = '1';
-                skToggle.addEventListener('click', () => {
-                    if (skValue.type === 'password') {
-                        skValue.type = 'text';
-                        skToggle.textContent = 'Hide';
-                    } else {
-                        skValue.type = 'password';
-                        skToggle.textContent = 'Show';
-                    }
-                    skToggle.classList.add('bg-orange-400');
-                    setTimeout(() => skToggle.classList.remove('bg-orange-400'), 500);
-                });
-            }
+
+            bindOnce(skDelete, () => {
+                StorageClient.clearNostrPrivkey();
+                skContainer.classList.add('hidden');
+            });
+
+            bindOnce(skCopy, () => {
+                navigator.clipboard.writeText(skValue.value).catch(() => {});
+                const original = skCopy.textContent;
+                skCopy.textContent = 'Copied!';
+                setTimeout(() => {
+                    skCopy.textContent = original;
+                }, 2000);
+            });
+
+            bindOnce(skToggle, () => {
+                const isHidden = skValue.type === 'password';
+                skValue.type = isHidden ? 'text' : 'password';
+                skToggle.textContent = isHidden ? 'Hide' : 'Show';
+            });
         } else {
             skContainer.classList.add('hidden');
         }
