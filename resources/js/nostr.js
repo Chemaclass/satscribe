@@ -223,12 +223,14 @@ export async function updateProfilePage(force = false) {
     if (!pubkey) return;
 
     const npubEl = document.getElementById('profile-npub');
+    let npubStr = pubkey;
     if (npubEl) {
         try {
             const npub = window.nostrTools.nip19.npubEncode
                 ? window.nostrTools.nip19.npubEncode(pubkey)
                 : window.nostrTools.nip19.encode({ type: 'npub', data: pubkey });
             npubEl.textContent = npub;
+            npubStr = npub;
         } catch (e) {
             npubEl.textContent = pubkey;
         }
@@ -245,6 +247,11 @@ export async function updateProfilePage(force = false) {
     const skDelete = $('secret-key-delete');
     const skCopy = $('secret-key-copy');
     const skToggle = $('secret-key-toggle');
+    const copyPub = $('copy-pubkey');
+    const copyNpub = $('copy-npub');
+    const tipPub = $('copy-pubkey-tooltip');
+    const tipNpub = $('copy-npub-tooltip');
+    const tipSk = $('secret-key-copy-tooltip');
 
     function bindOnce(button, handler) {
         if (button && !button.dataset.bound) {
@@ -266,11 +273,16 @@ export async function updateProfilePage(force = false) {
 
             bindOnce(skCopy, () => {
                 navigator.clipboard.writeText(skValue.value).catch(() => {});
-                const original = skCopy.textContent;
-                skCopy.textContent = 'Copied!';
-                setTimeout(() => {
-                    skCopy.textContent = original;
-                }, 2000);
+                if (tipSk) {
+                    tipSk.style.display = 'block';
+                    requestAnimationFrame(() => tipSk.classList.add('opacity-100'));
+                    setTimeout(() => {
+                        tipSk.classList.remove('opacity-100');
+                        setTimeout(() => {
+                            tipSk.style.display = 'none';
+                        }, 200);
+                    }, 1000);
+                }
             });
 
             bindOnce(skToggle, () => {
@@ -282,6 +294,34 @@ export async function updateProfilePage(force = false) {
             skContainer.classList.add('hidden');
         }
     }
+
+    bindOnce(copyPub, () => {
+        navigator.clipboard.writeText(pubkey).catch(() => {});
+        if (tipPub) {
+            tipPub.style.display = 'block';
+            requestAnimationFrame(() => tipPub.classList.add('opacity-100'));
+            setTimeout(() => {
+                tipPub.classList.remove('opacity-100');
+                setTimeout(() => {
+                    tipPub.style.display = 'none';
+                }, 200);
+            }, 1000);
+        }
+    });
+
+    bindOnce(copyNpub, () => {
+        navigator.clipboard.writeText(npubStr).catch(() => {});
+        if (tipNpub) {
+            tipNpub.style.display = 'block';
+            requestAnimationFrame(() => tipNpub.classList.add('opacity-100'));
+            setTimeout(() => {
+                tipNpub.classList.remove('opacity-100');
+                setTimeout(() => {
+                    tipNpub.style.display = 'none';
+                }, 200);
+            }, 1000);
+        }
+    });
 
     if (profile.banner) {
         const banner = $('profile-banner');

@@ -70,16 +70,44 @@
                 {{-- Pubkey --}}
                 <div class="mt-6">
                     <h3 class="text-sm font-medium text-gray-600 uppercase tracking-wide">Pubkey</h3>
-                    <div class="mt-1 px-3 py-2 bg-gray-100 rounded-md text-sm font-mono text-gray-800 break-all border border-gray-200">
-                        {{ $pubkey }}
+                    <div class="mt-1 flex items-center gap-2">
+                        <div id="profile-pubkey" class="flex-1 px-3 py-2 bg-gray-100 rounded-md text-sm font-mono text-gray-800 break-all border border-gray-200">
+                            {{ $pubkey }}
+                        </div>
+                        <div class="relative group">
+                            <button type="button" id="copy-pubkey" aria-label="Copy pubkey" class="p-2 rounded link border">
+                                <i data-lucide="copy" class="w-4 h-4"></i>
+                            </button>
+                            <span id="copy-pubkey-tooltip"
+                                  class="tooltip-content absolute z-10 bottom-full mb-1 left-1/2 -translate-x-1/2
+                                         bg-gray-800 text-white text-xs font-medium px-2 py-1 rounded shadow-lg
+                                         whitespace-nowrap opacity-0 transition-opacity"
+                                  style="display: none;">
+                                Copied!
+                            </span>
+                        </div>
                     </div>
                 </div>
 
                 {{-- npub key --}}
                 <div class="mt-6">
                     <h3 class="text-sm font-medium text-gray-600 uppercase tracking-wide">npub</h3>
-                    <div id="profile-npub" class="mt-1 px-3 py-2 bg-gray-100 rounded-md text-sm font-mono text-gray-800 break-all border border-gray-200">
-                        Loading...
+                    <div class="mt-1 flex items-center gap-2">
+                        <div id="profile-npub" class="flex-1 px-3 py-2 bg-gray-100 rounded-md text-sm font-mono text-gray-800 break-all border border-gray-200">
+                            Loading...
+                        </div>
+                        <div class="relative group">
+                            <button type="button" id="copy-npub" aria-label="Copy npub" class="p-2 rounded link border">
+                                <i data-lucide="copy" class="w-4 h-4"></i>
+                            </button>
+                            <span id="copy-npub-tooltip"
+                                  class="tooltip-content absolute z-10 bottom-full mb-1 left-1/2 -translate-x-1/2
+                                         bg-gray-800 text-white text-xs font-medium px-2 py-1 rounded shadow-lg
+                                         whitespace-nowrap opacity-0 transition-opacity"
+                                  style="display: none;">
+                                Copied!
+                            </span>
+                        </div>
                     </div>
                 </div>
 
@@ -92,11 +120,21 @@
                                class="w-full sm:flex-1 px-3 py-2 bg-yellow-50 rounded-md text-sm font-mono text-gray-800 break-all border border-yellow-200"
                                id="secret-key-value" />
                         <div class="flex gap-2">
-                            <button type="button"
-                                    id="secret-key-copy"
-                                    class="px-2 py-1 text-sm rounded link border">
-                                Copy
-                            </button>
+                            <div class="relative group">
+                                <button type="button"
+                                        id="secret-key-copy"
+                                        aria-label="Copy secret key"
+                                        class="p-2 rounded link border">
+                                    <i data-lucide="copy" class="w-4 h-4"></i>
+                                </button>
+                                <span id="secret-key-copy-tooltip"
+                                      class="tooltip-content absolute z-10 bottom-full mb-1 left-1/2 -translate-x-1/2
+                                             bg-gray-800 text-white text-xs font-medium px-2 py-1 rounded shadow-lg
+                                             whitespace-nowrap opacity-0 transition-opacity"
+                                      style="display: none;">
+                                    Copied!
+                                </span>
+                            </div>
                             <button type="button"
                                     id="secret-key-toggle"
                                     class="px-2 py-1 text-sm rounded link border">
