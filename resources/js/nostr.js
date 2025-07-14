@@ -16,6 +16,7 @@ export const DEFAULT_RELAYS = [
     'wss://nostr.fmt.wiz.biz',
     'wss://nostr.oxtr.dev',
     'wss://nostr.bitcoiner.social',
+    'wss://relay.primal.net/',
 ];
 
 export function getRelays() {
