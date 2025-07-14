@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Modules\NostrAuth\Domain;
+namespace Modules\Nostr\Domain;
 
 interface EventSignatureVerifierInterface
 {

@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Modules\NostrAuth\Infrastructure\Http\Controller;
+namespace Modules\Nostr\Infrastructure\Http\Controller;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Modules\NostrAuth\Domain\EventSignatureVerifierInterface;
+use Modules\Nostr\Domain\EventSignatureVerifierInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Response;
 

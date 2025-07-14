@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Modules\NostrAuth\Application;
+namespace Modules\Nostr\Application;
 
-use Modules\NostrAuth\Domain\NostrFacadeInterface;
+use Modules\Nostr\Domain\NostrFacadeInterface;
 
 final readonly class NostrFacade implements NostrFacadeInterface
 {

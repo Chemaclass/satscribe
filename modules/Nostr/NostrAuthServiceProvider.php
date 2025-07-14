@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Modules\NostrAuth;
+namespace Modules\Nostr;
 
 use Illuminate\Support\ServiceProvider;
-use Modules\NostrAuth\Application\EventSignatureVerifier;
-use Modules\NostrAuth\Domain\EventSignatureVerifierInterface;
+use Modules\Nostr\Application\EventSignatureVerifier;
+use Modules\Nostr\Domain\EventSignatureVerifierInterface;
 
 final class NostrAuthServiceProvider extends ServiceProvider
 {

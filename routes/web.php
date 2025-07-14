@@ -4,9 +4,9 @@ use Illuminate\Support\Facades\Route;
 use Modules\Chat\Infrastructure\Http\Controller\ChatController;
 use Modules\Chat\Infrastructure\Http\Controller\HistoryController;
 use Modules\Faq\Infrastructure\Http\Controller\FaqController;
-use Modules\NostrAuth\Infrastructure\Http\Controller\NostrAuthController;
-use Modules\NostrAuth\Infrastructure\Http\Controller\NostrPageController;
-use Modules\NostrAuth\Infrastructure\Http\Controller\ProfileController;
+use Modules\Nostr\Infrastructure\Http\Controller\NostrAuthController;
+use Modules\Nostr\Infrastructure\Http\Controller\NostrPageController;
+use Modules\Nostr\Infrastructure\Http\Controller\ProfileController;
 use Modules\Shared\Infrastructure\Http\Middleware\IpRateLimiter;
 use Modules\UtxoTrace\Infrastructure\Http\Controller\TraceUtxoPageController;
 

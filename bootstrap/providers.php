@@ -8,7 +8,7 @@ use Modules\Payment\PaymentServiceProvider;
 use Modules\Shared\RouteServiceProvider;
 use Modules\Shared\SharedServiceProvider;
 use Modules\UtxoTrace\UtxoTraceServiceProvider;
-use Modules\NostrAuth\NostrAuthServiceProvider;
+use Modules\Nostr\NostrAuthServiceProvider;
 
 return [
     SharedServiceProvider::class,
