@@ -383,6 +383,10 @@ export function initNostrAuth() {
             StorageClient.setNostrPubkey(pubkeyMeta);
         }
 
+        if (!pubkeyMeta && storedPubkey) {
+            StorageClient.clearNostr();
+        }
+
         if (pubkeyMeta) {
             updateNostrLogoutLabel(pubkeyMeta);
         }
@@ -406,10 +410,7 @@ export function initNostrAuth() {
                 },
                 credentials: 'same-origin',
             });
-            StorageClient.clearNostrPubkey();
-            StorageClient.clearNostrProfile();
-            StorageClient.clearNostrPrivkey();
-            StorageClient.clearNostrRelays();
+            StorageClient.clearNostr();
             window.location.reload();
         });
     });

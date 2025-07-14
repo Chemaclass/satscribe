@@ -79,6 +79,12 @@ const StorageClient = {
     clearNostrRelays() {
         localStorage.removeItem('nostr_relays');
     },
+    clearNostr() {
+        this.clearNostrPubkey();
+        this.clearNostrPrivkey();
+        this.clearNostrProfile();
+        this.clearNostrRelays();
+    }
 };
 
 export default StorageClient;
