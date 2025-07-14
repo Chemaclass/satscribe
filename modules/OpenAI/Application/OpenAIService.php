@@ -137,7 +137,15 @@ final readonly class OpenAIService
         $historicEur = $this->priceService->getBtcPriceEurAt($timestamp);
 
         if ($historicUsd <= 0 && $historicEur <= 0) {
-            return '';
+            if ($currentUsd <= 0 && $currentEur <= 0) {
+                return '';
+            }
+
+            return sprintf(
+                'Today 1 BTC is about $%s USD or €%s EUR.',
+                number_format($currentUsd, 0),
+                number_format($currentEur, 0),
+            );
         }
 
         return sprintf(

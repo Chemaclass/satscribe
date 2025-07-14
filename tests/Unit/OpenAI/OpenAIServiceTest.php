@@ -268,4 +268,59 @@ final class OpenAIServiceTest extends TestCase
             $captured[2]['content'],
         );
     }
+
+    public function test_uses_current_price_when_historic_not_available(): void
+    {
+        $response = $this->createMock(Response::class);
+        $response->method('failed')->willReturn(false);
+        $response->method('json')->willReturnCallback(static fn (string $key) => match ($key) {
+            'choices.0.message.content' => 'Done',
+            'error.message' => null,
+            default => null,
+        });
+
+        $captured = [];
+        $pending = $this->createMock(PendingRequest::class);
+        $pending->expects($this->once())
+            ->method('post')
+            ->with('https://api.openai.com/v1/chat/completions', $this->callback(static function ($body) use (&$captured) {
+                $captured = $body['messages'];
+                return true;
+            }))
+            ->willReturn($response);
+
+        $http = $this->createMock(HttpClientInterface::class);
+        $http->method('withToken')->willReturn($pending);
+
+        $logger = $this->createStub(LoggerInterface::class);
+
+        $timestamp = time();
+        $block = new BlockData('h', height: 1, timestamp: $timestamp, merkleRoot: 'm');
+        $data = BlockchainData::forBlock($block);
+        $input = new PromptInput(PromptType::Block, '1');
+
+        $priceService = $this->createStub(PriceServiceInterface::class);
+        $priceService->method('getBtcPriceUsdAt')->willReturn(0.0);
+        $priceService->method('getBtcPriceEurAt')->willReturn(0.0);
+        $priceService->method('getCurrentBtcPriceUsd')->willReturn(30000.0);
+        $priceService->method('getCurrentBtcPriceEur')->willReturn(27000.0);
+
+        $service = new OpenAIService(
+            $http,
+            $logger,
+            new PersonaPromptBuilder('en'),
+            $priceService,
+            now(),
+            openAiApiKey: 'api-key',
+            openAiModel: 'model',
+        );
+
+        $service->generateText($data, $input, PromptPersona::Developer, '');
+
+        $this->assertNotEmpty($captured);
+        $this->assertStringContainsString(
+            'Today 1 BTC is about $30,000 USD or €27,000 EUR.',
+            $captured[2]['content'],
+        );
+    }
 }
