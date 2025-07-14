@@ -193,7 +193,7 @@
                     event.sig = window.nostrTools.getSignature(event, sk);
 
                     const random = Math.floor(Math.random() * 100000);
-                    const name = `Satscriber #${random}`;
+                    const name = `Satscriber${random}`;
                     await window.publishProfileEvent(sk, name);
 
                     // Fetch the freshly published profile so the navbar name updates
