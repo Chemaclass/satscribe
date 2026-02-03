@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Modules\Blockchain\Infrastructure\Http\Controller\PrefetchController;
 use Modules\Chat\Infrastructure\Http\Controller\ChatController;
 use Modules\Chat\Infrastructure\Http\Controller\HistoryController;
 use Modules\Faq\Infrastructure\Http\Controller\FaqController;
@@ -29,6 +30,7 @@ Route::post('chats/{chat}/share', [ChatController::class, 'share'])->name('chat.
 Route::post('chats/{chat}/visibility', [ChatController::class, 'toggleVisibility'])->name('chat.toggle-visibility');
 
 Route::get('history', [HistoryController::class, 'index'])->name('history.index');
+Route::get('api/prefetch', [PrefetchController::class, 'prefetch'])->name('api.prefetch');
 Route::get('history/{messageId}/raw', [HistoryController::class, 'getRaw'])->name('history.get-raw');
 
 Route::get('faq', [FaqController::class, 'index'])->name('faq.index');

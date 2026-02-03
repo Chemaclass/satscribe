@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Blockchain\Application\Blockstream;
 
+use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Modules\Blockchain\Domain\Exception\BlockchainException;
 use Modules\Shared\Domain\Data\Blockchain\BlockchainData;
 use Modules\Shared\Domain\Data\Blockchain\BlockData;
@@ -15,18 +16,26 @@ use Psr\Log\LoggerInterface;
 final readonly class BlockchainService
 {
     private const BASE_URL = 'https://blockstream.info/api';
+    private const CACHE_TTL_SECONDS = 300; // 5 minutes
 
     public function __construct(
         private HttpClientInterface $http,
+        private CacheRepository $cache,
         private LoggerInterface $logger,
     ) {
     }
 
     public function getBlockchainData(PromptInput $input): BlockchainData
     {
-        return $input->isBlock()
-            ? $this->buildBlockData($input->text)
-            : $this->buildTransactionData($input->text);
+        $cacheKey = "blockchain:{$input->type->value}:{$input->text}";
+
+        return $this->cache->remember(
+            $cacheKey,
+            self::CACHE_TTL_SECONDS,
+            fn () => $input->isBlock()
+                ? $this->buildBlockData($input->text)
+                : $this->buildTransactionData($input->text),
+        );
     }
 
     private function buildBlockData(string $input): BlockchainData

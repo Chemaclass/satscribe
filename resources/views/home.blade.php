@@ -69,6 +69,7 @@
                 errorFollowUpQuestion: '',
                 hasSubmitted: false,
                 loadingMessage: '',
+                prefetchedInputs: {},
                 loadingMessages: [
                     "Just a sec — I'm working on your request and putting everything together for you!",
                     "Hang on a moment while I sort this out for you — almost there!",
@@ -289,6 +290,22 @@
                     this.isBlockHeight = /^\d+$/.test(trimmed) && height <= this.maxBitcoinBlockHeight;
                     this.isBlockHash = this.isHex64 && trimmed.startsWith('00000000');
                     this.valid = this.isHex64 || this.isBlockHeight || this.isBlockHash;
+
+                    if (this.valid && !this.prefetchedInputs[trimmed]) {
+                        this.prefetch(trimmed);
+                    }
+                },
+
+                prefetch(input) {
+                    this.prefetchedInputs[input] = 'pending';
+                    fetch(`/api/prefetch?q=${encodeURIComponent(input)}`)
+                        .then(r => r.json())
+                        .then(data => {
+                            this.prefetchedInputs[input] = data.status === 'ok' ? 'done' : 'error';
+                        })
+                        .catch(() => {
+                            this.prefetchedInputs[input] = 'error';
+                        });
                 },
 
                 async fetchRandomBlock() {

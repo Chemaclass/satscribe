@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Blockchain;
 
+use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Illuminate\Http\Client\Response;
 use Modules\Blockchain\Application\Blockstream\BlockchainService;
 use Modules\Blockchain\Domain\Exception\BlockchainException;
@@ -66,7 +67,7 @@ final class BlockchainServiceTest extends TestCase
 
         $logger = self::createStub(LoggerInterface::class);
 
-        $service = new BlockchainService($http, $logger);
+        $service = new BlockchainService($http, $this->createPassthroughCache(), $logger);
         $input = new PromptInput(PromptType::Transaction, $txid);
 
         $result = $service->getBlockchainData($input);
@@ -86,7 +87,7 @@ final class BlockchainServiceTest extends TestCase
 
         $logger = self::createStub(LoggerInterface::class);
 
-        $service = new BlockchainService($http, $logger);
+        $service = new BlockchainService($http, $this->createPassthroughCache(), $logger);
         $input = new PromptInput(PromptType::Transaction, $txid);
 
         $this->expectException(BlockchainException::class);
@@ -139,7 +140,7 @@ final class BlockchainServiceTest extends TestCase
 
         $logger = self::createStub(LoggerInterface::class);
 
-        $service = new BlockchainService($http, $logger);
+        $service = new BlockchainService($http, $this->createPassthroughCache(), $logger);
         $input = new PromptInput(PromptType::Block, $blockHeight);
 
         $result = $service->getBlockchainData($input);
@@ -177,11 +178,20 @@ final class BlockchainServiceTest extends TestCase
 
         $logger = self::createStub(LoggerInterface::class);
 
-        $service = new BlockchainService($http, $logger);
+        $service = new BlockchainService($http, $this->createPassthroughCache(), $logger);
         $input = new PromptInput(PromptType::Transaction, $txid);
 
         $result = $service->getBlockchainData($input);
 
         $this->assertFalse($result->current()->toArray()['status']['confirmed']);
+    }
+    private function createPassthroughCache(): CacheRepository
+    {
+        $cache = $this->createMock(CacheRepository::class);
+        $cache->method('remember')->willReturnCallback(
+            static fn (string $key, int $ttl, callable $callback) => $callback(),
+        );
+
+        return $cache;
     }
 }
