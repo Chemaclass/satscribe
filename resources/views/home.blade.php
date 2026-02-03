@@ -413,7 +413,12 @@
                         if (response.status === 429) {
                             const data = await response.json();
                             window.dispatchEvent(new CustomEvent('rate-limit-reached', {detail: data}));
+                            this.moveFormContainerToBottom(chatContainer);
                             return;
+                        }
+
+                        if (!response.ok) {
+                            throw new Error(`HTTP error: ${response.status}`);
                         }
 
                         const reader = response.body.getReader();
