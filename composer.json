@@ -75,7 +75,8 @@
         "test": [
             "@phpstan",
             "phpunit"
-        ]
+        ],
+        "test:coverage": "phpunit --coverage-html local/coverage"
     },
     "extra": {
         "laravel": {
