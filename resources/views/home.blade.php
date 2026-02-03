@@ -239,8 +239,8 @@
                     if (!chatContainer || !suggestions?.length) return;
 
                     const suggestionsHtml = `
-                        <div id="chat-message-form-container" class="mt-4">
-                            <div id="follow-up-suggestions">
+                        <div id="chat-message-form-container" class="mt-4 mb-8">
+                            <div id="follow-up-suggestions" class="mb-8">
                                 <div class="mt-4">
                                     <p class="text-sm font-medium mb-2">Or try one of these</p>
                                     <div class="flex flex-wrap gap-2">

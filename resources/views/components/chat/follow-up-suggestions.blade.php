@@ -16,6 +16,7 @@
 <div
     id="follow-up-suggestions"
     x-data="{ suggestions: @js($filteredSuggestions ?? []) }"
+    class="mb-8"
 >
     <div class="mt-4">
         <p class="text-sm font-medium mb-2">{{ __('Or try one of these') }}</p>
