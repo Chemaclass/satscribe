@@ -349,10 +349,11 @@
                     if (!message || !message.trim()) return;
                     hideChatFormContainer();
 
-                    const chatGroups = document.getElementById('chat-message-groups');
+                    const chatGroups = document.getElementById('chat-message-groups') || document.getElementById('chat-container');
+                    if (!chatGroups) return;
+
                     const assistantMsgCount = document.querySelectorAll('.assistant-message').length;
 
-                    // 1. Add the user message
                     const nostrImg = StorageClient.getNostrImage();
                     const userIcon = nostrImg ?
                         `<img src="${nostrImg}" alt="user" class="w-6 h-6 rounded-full nostr-avatar object-cover">` :
@@ -368,9 +369,18 @@
                         ${userIcon}
                     </div>
                 </div>
-                <!-- Assistant will be appended here -->
-                <div id="assistant-message-${assistantMsgCount}" class="assistant-message loading-spinner-group text-left">
-                    <x-chat.assistant-loading-prompt/>
+                <div id="assistant-message-${assistantMsgCount}" class="assistant-message text-left">
+                    <div class="flex items-center gap-1">
+                        <i data-lucide="bot" class="w-6 h-6"></i>
+                        <span class="font-semibold">Scribe</span>
+                        <span class="ml-2 flex items-center gap-1 loading-dots-container">
+                            <span class="dots-loader">
+                                <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                                <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                            </span>
+                        </span>
+                    </div>
+                    <div class="inline-block rounded px-3 py-2 prose streaming-content"></div>
                 </div>
             </div>
         `;
@@ -378,10 +388,11 @@
                     window.refreshLucideIcons?.();
                     window.setUserAvatar?.(StorageClient.getNostrImage());
 
-                    // 2. Clear the input
-                    document.getElementById('customFollowUp').value = "";
+                    // Clear the input if it exists
+                    const customFollowUp = document.getElementById('customFollowUp');
+                    if (customFollowUp) customFollowUp.value = "";
 
-                    // 3. Send AJAX to backend
+                    // Send AJAX to backend
                     fetch(`/chats/${chatUlid}/messages`, {
                         method: 'POST',
                         headers: {
@@ -392,51 +403,33 @@
                     })
                         .then(r => r.json())
                         .then(data => {
-                            const spinner = document.getElementById(`assistant-message-${assistantMsgCount}`);
-                            if (spinner) {
-                                spinner.innerHTML = `
-                                    <span class="font-semibold flex items-center gap-1">
-                                        <i data-lucide="bot" class="w-6 h-6"></i>
-                                        <span class="font-semibold">Scribe</span>
-                                        <span class="ml-2 flex items-center gap-1 loading-dots-container">
-                                            <span class="dots-loader">
-                                                <span class="dot"></span>
-                                                <span class="dot"></span>
-                                                <span class="dot"></span>
-                                                <span class="dot"></span>
-                                                <span class="dot"></span>
-                                                <span class="dot"></span>
-                                            </span>
-                                        </span>
-                                    </span>
-                                    <div class="inline-block rounded px-3 py-2 prose"></div>
-                                `;
-                                const msgEl = spinner.querySelector('div');
-                                if (msgEl && data.content) {
-                                    this.typeText(msgEl, data.content).then(() => {
-                                        const loader = spinner.querySelector('.loading-dots-container');
-                                        if (loader) loader.remove();
-                                    });
+                            const assistantEl = document.getElementById(`assistant-message-${assistantMsgCount}`);
+                            if (assistantEl) {
+                                const loader = assistantEl.querySelector('.loading-dots-container');
+                                if (loader) loader.remove();
+
+                                const contentEl = assistantEl.querySelector('.streaming-content');
+                                if (contentEl && data.content) {
+                                    contentEl.innerHTML = marked.parse(data.content);
                                 }
-                                spinner.scrollIntoView({behavior: 'smooth', block: 'start'});
+                                assistantEl.scrollIntoView({behavior: 'smooth', block: 'start'});
                             }
                             if (data.suggestions) {
                                 this.updateSuggestionsList(chatUlid, data.suggestions);
                             }
+                            showChatFormContainer();
                             window.refreshLucideIcons?.();
                         }).catch((e) => {
-                            console.error(e)
-                            const spinner = document.getElementById(`assistant-message-${assistantMsgCount}`);
-                            if (spinner) {
-                                spinner.innerHTML = `
-                                    <span class="font-semibold text-yellow-700">Scribe:</span>
-                                    <div class="inline-block rounded px-3 py-2 text-red-700">
-                                        Error fetching response.
-                                    </div>
-                                `;
+                            console.error(e);
+                            const assistantEl = document.getElementById(`assistant-message-${assistantMsgCount}`);
+                            if (assistantEl) {
+                                const contentEl = assistantEl.querySelector('.streaming-content');
+                                if (contentEl) {
+                                    contentEl.innerHTML = `<span class="text-red-700">Error fetching response.</span>`;
+                                }
                             }
-                        }
-                    );
+                            showChatFormContainer();
+                        });
                 },
 
                 updateSuggestionsList(chatUlid, newSuggestions) {
