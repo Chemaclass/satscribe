@@ -8,9 +8,11 @@ use Illuminate\Support\ServiceProvider;
 use Modules\Chat\Application\AddMessageAction;
 use Modules\Chat\Application\ChatFacade;
 use Modules\Chat\Application\CreateChatAction;
+use Modules\Chat\Application\CreateChatStreamAction;
 use Modules\Chat\Domain\AddMessageActionInterface;
 use Modules\Chat\Domain\ChatFacadeInterface;
 use Modules\Chat\Domain\CreateChatActionInterface;
+use Modules\Chat\Domain\CreateChatStreamActionInterface;
 use Modules\Chat\Domain\Repository\ChatRepositoryInterface;
 use Modules\Chat\Domain\Repository\FlaggedWordRepositoryInterface;
 use Modules\Chat\Domain\Repository\MessageRepositoryInterface;
@@ -25,6 +27,7 @@ final class ChatServiceProvider extends ServiceProvider
     public $singletons = [
         AddMessageActionInterface::class => AddMessageAction::class,
         CreateChatActionInterface::class => CreateChatAction::class,
+        CreateChatStreamActionInterface::class => CreateChatStreamAction::class,
         ChatRepositoryInterface::class => ChatRepository::class,
         MessageRepositoryInterface::class => MessageRepository::class,
         FlaggedWordRepositoryInterface::class => FlaggedWordRepository::class,
@@ -51,6 +54,13 @@ final class ChatServiceProvider extends ServiceProvider
             ->needs('$trackingId')
             ->give(static fn () => tracking_id());
         $this->app->when(AddMessageAction::class)
+            ->needs('$maxOpenAIAttempts')
+            ->giveConfig('services.openai.max_attempts');
+
+        $this->app->when(CreateChatStreamAction::class)
+            ->needs('$trackingId')
+            ->give(static fn () => tracking_id());
+        $this->app->when(CreateChatStreamAction::class)
             ->needs('$maxOpenAIAttempts')
             ->giveConfig('services.openai.max_attempts');
 

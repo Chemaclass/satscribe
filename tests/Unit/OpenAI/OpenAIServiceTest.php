@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\OpenAI;
 
+use Illuminate\Http\Client\Factory as HttpFactory;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Response;
 use Illuminate\Translation\Translator;
@@ -64,6 +65,7 @@ final class OpenAIServiceTest extends TestCase
 
         $service = new OpenAIService(
             $http,
+            $this->createStub(HttpFactory::class),
             $logger,
             new PersonaPromptBuilder('en'),
             $priceService,
@@ -105,6 +107,7 @@ final class OpenAIServiceTest extends TestCase
 
         $service = new OpenAIService(
             $http,
+            $this->createStub(HttpFactory::class),
             $logger,
             new PersonaPromptBuilder('en'),
             $priceService,
@@ -147,6 +150,7 @@ final class OpenAIServiceTest extends TestCase
 
         $service = new OpenAIService(
             $http,
+            $this->createStub(HttpFactory::class),
             $logger,
             new PersonaPromptBuilder('en'),
             $priceService,
@@ -197,6 +201,7 @@ final class OpenAIServiceTest extends TestCase
 
         $service = new OpenAIService(
             $http,
+            $this->createStub(HttpFactory::class),
             $logger,
             new PersonaPromptBuilder('en'),
             $priceService,
@@ -252,6 +257,7 @@ final class OpenAIServiceTest extends TestCase
 
         $service = new OpenAIService(
             $http,
+            $this->createStub(HttpFactory::class),
             $logger,
             new PersonaPromptBuilder('en'),
             $priceService,
@@ -307,6 +313,7 @@ final class OpenAIServiceTest extends TestCase
 
         $service = new OpenAIService(
             $http,
+            $this->createStub(HttpFactory::class),
             $logger,
             new PersonaPromptBuilder('en'),
             $priceService,

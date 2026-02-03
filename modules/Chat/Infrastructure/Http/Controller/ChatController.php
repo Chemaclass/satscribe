@@ -9,16 +9,21 @@ use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Modules\Blockchain\Domain\Exception\BlockchainException;
 use Modules\Chat\Application\ChatService;
+use Modules\Chat\Domain\CreateChatStreamActionInterface;
 use Modules\Chat\Infrastructure\Http\Request\CreateChatRequest;
 use Modules\OpenAI\Domain\Exception\OpenAIError;
+use Modules\Shared\Domain\Data\Chat\PromptInput;
+use Modules\Shared\Domain\Enum\Chat\PromptPersona;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 final readonly class ChatController
 {
     public function __construct(
         private ChatService $chatService,
+        private CreateChatStreamActionInterface $createChatStreamAction,
         private LoggerInterface $logger,
     ) {
     }
@@ -75,6 +80,45 @@ final readonly class ChatController
         }
 
         return response()->json($data);
+    }
+
+    public function createChatStream(CreateChatRequest $request): StreamedResponse
+    {
+        $this->logger->debug('Creating streaming chat request', [
+            'search' => $request->hasSearchInput() ? $request->getSearchInput() : null,
+            'persona' => $request->getPersonaInput(),
+            'ip' => $request->ip(),
+        ]);
+
+        $search = $request->hasSearchInput()
+            ? PromptInput::fromRaw($request->getSearchInput())
+            : PromptInput::fromRaw('0');
+
+        $persona = PromptPersona::tryFrom($request->getPersonaInput())
+            ?? PromptPersona::from(PromptPersona::DEFAULT);
+
+        $question = $request->getQuestionInput();
+        $isPublic = !$request->isPrivate();
+
+        return new StreamedResponse(function () use ($search, $persona, $question, $isPublic): void {
+            try {
+                foreach ($this->createChatStreamAction->execute($search, $persona, $question, $isPublic) as $event) {
+                    echo 'data: ' . json_encode($event, JSON_THROW_ON_ERROR) . "\n\n";
+                    ob_flush();
+                    flush();
+                }
+            } catch (BlockchainException|OpenAIError $e) {
+                $this->logger->error('Streaming chat failed', ['error' => $e->getMessage()]);
+                echo 'data: ' . json_encode(['type' => 'error', 'data' => $e->getMessage()], JSON_THROW_ON_ERROR) . "\n\n";
+                ob_flush();
+                flush();
+            }
+        }, Response::HTTP_OK, [
+            'Content-Type' => 'text/event-stream',
+            'Cache-Control' => 'no-cache',
+            'Connection' => 'keep-alive',
+            'X-Accel-Buffering' => 'no',
+        ]);
     }
 
     public function share(Chat $chat, Request $request): JsonResponse

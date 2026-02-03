@@ -7,6 +7,8 @@ namespace Modules\OpenAI\Application;
 use App\Models\Chat;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
+use Generator;
+use Illuminate\Http\Client\Factory as HttpFactory;
 use Modules\Blockchain\Domain\PriceServiceInterface;
 use Modules\OpenAI\Domain\Exception\OpenAIError;
 use Modules\Shared\Domain\Chat\ChatConstants;
@@ -16,6 +18,7 @@ use Modules\Shared\Domain\Data\Blockchain\TransactionData;
 use Modules\Shared\Domain\Data\Chat\PromptInput;
 use Modules\Shared\Domain\Enum\Chat\PromptPersona;
 use Modules\Shared\Domain\Enum\Chat\PromptType;
+
 use Modules\Shared\Domain\HttpClientInterface;
 use Psr\Log\LoggerInterface;
 
@@ -26,6 +29,7 @@ final readonly class OpenAIService
 {
     public function __construct(
         private HttpClientInterface $http,
+        private HttpFactory $httpFactory,
         private LoggerInterface $logger,
         private PersonaPromptBuilder $promptBuilder,
         private PriceServiceInterface $priceService, // @todo use BlockchainFacade instead
@@ -103,6 +107,98 @@ final readonly class OpenAIService
         $this->logger->debug('OpenAI description generation worked', ['length' => strlen($text)]);
 
         return $text;
+    }
+
+    /**
+     * @return Generator<string>
+     */
+    public function generateTextStreaming(
+        BlockchainData $data,
+        PromptInput $input,
+        PromptPersona $persona,
+        string $question,
+        ?Chat $chat = null,
+        string $additionalContext = '',
+    ): Generator {
+        $this->logger->debug('Calling OpenAI API with streaming', [
+            'model' => $this->openAiModel,
+            'persona' => $persona->value,
+        ]);
+
+        $history = collect($chat?->getHistory() ?? [])
+            ->take(-5)
+            ->values()
+            ->all();
+
+        $timestamp = 0;
+        if ($data->block instanceof BlockData) {
+            $timestamp = $data->block->timestamp;
+        } elseif ($data->transaction instanceof TransactionData) {
+            $timestamp = $data->transaction->blockTime ?? 0;
+        }
+
+        $messages = [
+            [
+                'role' => 'system',
+                'content' => $this->promptBuilder->buildSystemPrompt($persona),
+            ],
+            ...$history,
+            [
+                'role' => 'user',
+                'content' => $this->buildBlockchainContext($data, $additionalContext),
+            ],
+            [
+                'role' => 'user',
+                'content' => $this->preparePrompt($input->type, $question, $persona, $timestamp),
+            ],
+        ];
+
+        $response = $this->httpFactory
+            ->withToken($this->openAiApiKey)
+            ->withOptions(['stream' => true])
+            ->timeout(60)
+            ->post('https://api.openai.com/v1/chat/completions', [
+                'model' => $this->openAiModel,
+                'messages' => $messages,
+                'max_tokens' => $persona->maxTokens(),
+                'stream' => true,
+            ]);
+
+        if ($response->failed()) {
+            $this->logger->error('OpenAI API streaming request failed', [
+                'status' => $response->status(),
+            ]);
+
+            return;
+        }
+
+        $body = $response->toPsrResponse()->getBody();
+        $buffer = '';
+
+        while (!$body->eof()) {
+            $chunk = $body->read(1024);
+            $buffer .= $chunk;
+
+            while (($pos = strpos($buffer, "\n")) !== false) {
+                $line = substr($buffer, 0, $pos);
+                $buffer = substr($buffer, $pos + 1);
+
+                if (str_starts_with($line, 'data: ')) {
+                    $jsonData = substr($line, 6);
+
+                    if ($jsonData === '[DONE]') {
+                        return;
+                    }
+
+                    $decoded = json_decode($jsonData, true);
+                    $content = $decoded['choices'][0]['delta']['content'] ?? null;
+
+                    if ($content !== null) {
+                        yield $content;
+                    }
+                }
+            }
+        }
     }
 
     private function buildBlockchainContext(BlockchainData $data, string $additional): string

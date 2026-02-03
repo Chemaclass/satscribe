@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\OpenAI;
 
+use Illuminate\Http\Client\Factory as HttpFactory;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Response;
 use Illuminate\Translation\Translator;
@@ -57,6 +58,7 @@ final class OpenAIFacadeTest extends TestCase
 
         $service = new OpenAIService(
             $http,
+            self::createStub(HttpFactory::class),
             $logger,
             new PersonaPromptBuilder('en'),
             self::createStub(PriceServiceInterface::class),

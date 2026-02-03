@@ -92,7 +92,6 @@
                     this.loadingMessage = this.loadingMessages[Math.floor(Math.random() * this.loadingMessages.length)];
                     this.isSubmitting = true;
 
-                    // if existing chat exists then remove
                     const chatContainer = document.getElementById('chat-container');
                     if (chatContainer) {
                         chatContainer.innerHTML = '';
@@ -115,7 +114,6 @@
                         const rawQuestion = formData.get('question');
                         const userMessage = rawQuestion?.trim() ? rawQuestion.trim() : @js(__('Give me a generic overview.'));
 
-                        // Render user input
                         const nostrImg = StorageClient.getNostrImage();
                         const userIcon = nostrImg ?
                             `<img src="${nostrImg}" alt="user" class="w-6 h-6 rounded-full nostr-avatar object-cover">` :
@@ -131,11 +129,18 @@
                         ${userIcon}
                     </div>
                 </div>
-                <div id="assistant-message-${assistantMsgCount}" class="assistant-message loading-spinner-group text-left">
-                    <x-chat.assistant-loading-prompt/>
-                    <div class="loading-message text-gray-600 mt-1">
-                        ${this.escapeHtml(this.loadingMessage)}
-                    </div>
+                <div id="assistant-message-${assistantMsgCount}" class="assistant-message text-left">
+                    <span class="font-semibold flex items-center gap-1">
+                        <i data-lucide="bot" class="w-6 h-6"></i>
+                        <span class="font-semibold">Scribe</span>
+                        <span class="ml-2 flex items-center gap-1 loading-dots-container">
+                            <span class="dots-loader">
+                                <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                                <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                            </span>
+                        </span>
+                    </span>
+                    <div class="inline-block rounded px-3 py-2 prose streaming-content"></div>
                 </div>
             </div>
         `;
@@ -143,82 +148,75 @@
                         window.refreshLucideIcons?.();
                         window.setUserAvatar?.(StorageClient.getNostrImage());
 
-                        // Send to backend
-                        const {data} = await axios.post(form.action, formData, {
+                        const response = await fetch('/chats/stream', {
+                            method: 'POST',
+                            body: formData,
                             headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                                 'X-Requested-With': 'XMLHttpRequest',
-                                'Accept': 'application/json',
                             },
                         });
 
-                        if (data.maxBitcoinBlockHeight) {
-                            this.maxBitcoinBlockHeight = data.maxBitcoinBlockHeight;
-                        }
-
-                        if (data.status === 'rate_limited') {
-                            window.dispatchEvent(new CustomEvent('rate-limit-reached', {
-                                detail: {
-                                    invoice: data.invoice ?? {},
-                                    maxAttempts: data.maxAttempts
-                                }
-                            }));
-
-                            return;
-                        }
-
-                        const chatContainerEl = document.getElementById('chat-container');
-                        if (chatContainerEl) {
-                            chatContainerEl.innerHTML = data.html || '';
-                            const msgDiv = chatContainerEl.querySelector('.assistant-message div.inline-block');
-                            const header = chatContainerEl.querySelector('.assistant-message .flex.items-center');
-                            if (header) {
-                                header.insertAdjacentHTML('beforeend', `
-                                    <span class="ml-2 flex items-center gap-1 loading-dots-container">
-                                        <span class="dots-loader">
-                                            <span class="dot"></span>
-                                            <span class="dot"></span>
-                                            <span class="dot"></span>
-                                            <span class="dot"></span>
-                                            <span class="dot"></span>
-                                            <span class="dot"></span>
-                                        </span>
-                                    </span>
-                                `);
-                            }
-                            if (msgDiv && data.content) {
-                                msgDiv.textContent = '';
-                                this.typeText(msgDiv, data.content).then(() => {
-                                    const loader = chatContainerEl.querySelector('.loading-dots-container');
-                                    if (loader) loader.remove();
-                                });
-                            }
-                            window.refreshLucideIcons?.();
-                        }
-
-                        // PushState to chat URL
-                        if (data.chatUlid) {
-                            const url = new URL(window.location);
-                            url.pathname = `/chats/${data.chatUlid}`;
-                            window.history.pushState({}, '', url);
-                        }
-
-                        // Update search field
-                        const searchInput = document.getElementById('search-input');
-                        if (searchInput && data.search?.text) {
-                            searchInput.value = data.search.text;
-                            this.input = data.search.text;
-                            this.validate();
-                        }
-
-                        window.refreshLucideIcons?.();
-                    } catch (error) {
-                        if (error.response?.status === 429) {
-                            const data = error.response.data;
-
+                        if (response.status === 429) {
+                            const data = await response.json();
                             window.dispatchEvent(new CustomEvent('rate-limit-reached', {detail: data}));
                             return;
                         }
 
+                        const reader = response.body.getReader();
+                        const decoder = new TextDecoder();
+                        let streamedContent = '';
+                        const contentEl = document.querySelector(`#assistant-message-${assistantMsgCount} .streaming-content`);
+
+                        while (true) {
+                            const {done, value} = await reader.read();
+                            if (done) break;
+
+                            const text = decoder.decode(value, {stream: true});
+                            const lines = text.split('\n');
+
+                            for (const line of lines) {
+                                if (line.startsWith('data: ')) {
+                                    try {
+                                        const event = JSON.parse(line.slice(6));
+
+                                        if (event.type === 'chunk') {
+                                            streamedContent += event.data;
+                                            if (contentEl) {
+                                                contentEl.innerHTML = marked.parse(streamedContent);
+                                            }
+                                        } else if (event.type === 'done') {
+                                            const loader = document.querySelector(`#assistant-message-${assistantMsgCount} .loading-dots-container`);
+                                            if (loader) loader.remove();
+
+                                            if (event.data.maxBitcoinBlockHeight) {
+                                                this.maxBitcoinBlockHeight = event.data.maxBitcoinBlockHeight;
+                                            }
+
+                                            if (event.data.chatUlid) {
+                                                const url = new URL(window.location);
+                                                url.pathname = `/chats/${event.data.chatUlid}`;
+                                                window.history.pushState({}, '', url);
+                                            }
+
+                                            if (event.data.suggestions) {
+                                                this.renderSuggestions(event.data.chatUlid, event.data.suggestions);
+                                            }
+                                        } else if (event.type === 'error') {
+                                            if (contentEl) {
+                                                contentEl.innerHTML = `<span class="text-red-700">${this.escapeHtml(event.data)}</span>`;
+                                            }
+                                        }
+                                    } catch (e) {
+                                        // Ignore parse errors for incomplete chunks
+                                    }
+                                }
+                            }
+                        }
+
+                        window.refreshLucideIcons?.();
+                        showChatFormContainer();
+                    } catch (error) {
                         const assistantDiv = document.getElementById(`assistant-message-${assistantMsgCount}`);
                         if (assistantDiv) {
                             assistantDiv.innerHTML = `
@@ -233,6 +231,40 @@
                         this.isSubmitting = false;
                         this.hasSubmitted = true;
                     }
+                },
+
+                renderSuggestions(chatUlid, suggestions) {
+                    const chatContainer = document.getElementById('chat-container');
+                    if (!chatContainer || !suggestions?.length) return;
+
+                    const suggestionsHtml = `
+                        <div id="chat-message-form-container" class="mt-4">
+                            <div id="follow-up-suggestions">
+                                <div class="mt-4">
+                                    <p class="text-sm font-medium mb-2">Or try one of these</p>
+                                    <div class="flex flex-wrap gap-2">
+                                        ${suggestions.map(s => `
+                                            <button type="button" class="suggested-question-prompt"
+                                                data-suggestion="${s.replace(/"/g, '&quot;')}"
+                                                data-chat-ulid="${chatUlid}">
+                                                ${s}
+                                            </button>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    chatContainer.insertAdjacentHTML('beforeend', suggestionsHtml);
+
+                    const buttons = chatContainer.querySelectorAll('button[data-suggestion]');
+                    buttons.forEach(button => {
+                        button.addEventListener('click', () => {
+                            const suggestion = button.getAttribute('data-suggestion');
+                            const ulid = button.getAttribute('data-chat-ulid');
+                            this.sendMessageToChat(ulid, suggestion);
+                        });
+                    });
                 },
 
                 get helperText() {

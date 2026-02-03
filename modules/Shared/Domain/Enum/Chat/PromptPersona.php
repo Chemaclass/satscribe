@@ -109,9 +109,9 @@ TEXT,
     public function maxTokens(): int
     {
         return match ($this) {
-            self::Educator => 900,
-            self::Developer => 950,
-            self::Storyteller => 1000,
+            self::Educator => 500,
+            self::Developer => 500,
+            self::Storyteller => 600,
         };
     }
 

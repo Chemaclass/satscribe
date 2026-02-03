@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\OpenAI\Application;
 
 use App\Models\Chat;
+use Generator;
 use Modules\OpenAI\Domain\OpenAIFacadeInterface;
 use Modules\Shared\Domain\Data\Blockchain\BlockchainData;
 use Modules\Shared\Domain\Data\Chat\PromptInput;
@@ -26,5 +27,19 @@ final readonly class OpenAIFacade implements OpenAIFacadeInterface
         string $additionalContext = '',
     ): string {
         return $this->openAIService->generateText($data, $input, $persona, $question, $chat, $additionalContext);
+    }
+
+    /**
+     * @return Generator<string>
+     */
+    public function generateTextStreaming(
+        BlockchainData $data,
+        PromptInput $input,
+        PromptPersona $persona,
+        string $question,
+        ?Chat $chat = null,
+        string $additionalContext = '',
+    ): Generator {
+        return $this->openAIService->generateTextStreaming($data, $input, $persona, $question, $chat, $additionalContext);
     }
 }
