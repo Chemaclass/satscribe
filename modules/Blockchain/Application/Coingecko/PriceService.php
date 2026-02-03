@@ -19,6 +19,8 @@ final readonly class PriceService implements PriceServiceInterface
     private const BASE_URL = 'https://api.coingecko.com/api';
     private const CACHE_KEY = 'btc_prices';
     private const CACHE_TTL_MINUTES = 15;
+    private const HISTORICAL_CACHE_KEY_PREFIX = 'btc_historical_price';
+    private const HISTORICAL_CACHE_TTL_DAYS = 30;
     private const SUPPORTED_CURRENCIES = ['usd', 'eur', 'cny', 'gbp'];
 
     public function __construct(
@@ -109,23 +111,30 @@ final readonly class PriceService implements PriceServiceInterface
         }
 
         $date = date('d-m-Y', $timestamp);
+        $cacheKey = self::HISTORICAL_CACHE_KEY_PREFIX . ":{$currency}:{$date}";
 
-        $response = $this->http->get(self::BASE_URL . '/v3/coins/bitcoin/history', [
-            'date' => $date,
-            'localization' => 'false',
-        ]);
+        return $this->cache->remember(
+            $cacheKey,
+            $this->now->copy()->addDays(self::HISTORICAL_CACHE_TTL_DAYS),
+            function () use ($currency, $date): float {
+                $response = $this->http->get(self::BASE_URL . '/v3/coins/bitcoin/history', [
+                    'date' => $date,
+                    'localization' => 'false',
+                ]);
 
-        if (!$response->successful()) {
-            $this->logger->warning('Failed to fetch historical BTC price from Coingecko', [
-                'currency' => $currency,
-                'date' => $date,
-                'response' => $response->body(),
-            ]);
+                if (!$response->successful()) {
+                    $this->logger->warning('Failed to fetch historical BTC price from Coingecko', [
+                        'currency' => $currency,
+                        'date' => $date,
+                        'response' => $response->body(),
+                    ]);
 
-            throw new RuntimeException('Failed to fetch historical BTC price');
-        }
+                    throw new RuntimeException('Failed to fetch historical BTC price');
+                }
 
-        return (float) $response->json("market_data.current_price.{$currency}");
+                return (float) $response->json("market_data.current_price.{$currency}");
+            },
+        );
     }
 
     private function defaultPrices(): array
