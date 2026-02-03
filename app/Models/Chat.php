@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
@@ -32,6 +33,15 @@ class Chat extends Model
 
     public function getFirstUserMessage(): Message
     {
+        if ($this->relationLoaded('messages')) {
+            $message = $this->messages->first(static fn (Message $m): bool => $m->role === 'user');
+            if ($message === null) {
+                throw new ModelNotFoundException();
+            }
+
+            return $message;
+        }
+
         return $this->messages()
             ->where('role', 'user')
             ->orderBy('id')
@@ -45,6 +55,10 @@ class Chat extends Model
 
     public function getLastUserMessage(): Message
     {
+        if ($this->relationLoaded('messages')) {
+            return $this->messages->last(static fn (Message $m): bool => $m->role === 'user');
+        }
+
         return $this->messages()
             ->where('role', 'user')
             ->orderBy('id', 'desc')
@@ -53,6 +67,15 @@ class Chat extends Model
 
     public function getFirstAssistantMessage(): Message
     {
+        if ($this->relationLoaded('messages')) {
+            $message = $this->messages->first(static fn (Message $m): bool => $m->role === 'assistant');
+            if ($message === null) {
+                throw new ModelNotFoundException();
+            }
+
+            return $message;
+        }
+
         return $this->messages()
             ->where('role', 'assistant')
             ->orderBy('id')
@@ -61,6 +84,10 @@ class Chat extends Model
 
     public function getLastAssistantMessage(): Message
     {
+        if ($this->relationLoaded('messages')) {
+            return $this->messages->last(static fn (Message $m): bool => $m->role === 'assistant');
+        }
+
         return $this->messages()
             ->where('role', 'assistant')
             ->orderBy('id', 'desc')
@@ -114,7 +141,11 @@ class Chat extends Model
 
     public function isBlock(): bool
     {
-        return $this->messages()->first()->isBlock();
+        $firstMessage = $this->relationLoaded('messages')
+            ? $this->messages->first()
+            : $this->messages()->first();
+
+        return $firstMessage->isBlock();
     }
 
     public function messageGroups(): array
@@ -149,7 +180,9 @@ class Chat extends Model
      */
     public function getHistory(): array
     {
-        $chatMessages = $this->messages()->orderBy('created_at')->get();
+        $chatMessages = $this->relationLoaded('messages')
+            ? $this->messages->sortBy('created_at')
+            : $this->messages()->orderBy('created_at')->get();
 
         return $chatMessages
             ->map(static fn ($msg) => [
