@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Modules\Blockchain\Domain\Exception\BlockchainException;
 use Modules\Chat\Application\ChatService;
+use Modules\Chat\Domain\AddMessageStreamActionInterface;
 use Modules\Chat\Domain\CreateChatStreamActionInterface;
 use Modules\Chat\Infrastructure\Http\Request\CreateChatRequest;
 use Modules\OpenAI\Domain\Exception\OpenAIError;
@@ -24,6 +25,7 @@ final readonly class ChatController
     public function __construct(
         private ChatService $chatService,
         private CreateChatStreamActionInterface $createChatStreamAction,
+        private AddMessageStreamActionInterface $addMessageStreamAction,
         private LoggerInterface $logger,
     ) {
     }
@@ -46,6 +48,35 @@ final readonly class ChatController
         return response()->json(
             $this->chatService->addMessage($chat, (string) $request->input('message')),
         );
+    }
+
+    public function addMessageStream(Request $request, Chat $chat): StreamedResponse
+    {
+        if (tracking_id() !== $chat->tracking_id) {
+            abort(Response::HTTP_FORBIDDEN, 'You are not allowed to send messages to this chat.');
+        }
+
+        $message = (string) $request->input('message');
+
+        return new StreamedResponse(function () use ($chat, $message): void {
+            try {
+                foreach ($this->addMessageStreamAction->execute($chat, $message) as $event) {
+                    echo 'data: ' . json_encode($event, JSON_THROW_ON_ERROR) . "\n\n";
+                    ob_flush();
+                    flush();
+                }
+            } catch (BlockchainException|OpenAIError $e) {
+                $this->logger->error('Streaming message failed', ['error' => $e->getMessage()]);
+                echo 'data: ' . json_encode(['type' => 'error', 'data' => $e->getMessage()], JSON_THROW_ON_ERROR) . "\n\n";
+                ob_flush();
+                flush();
+            }
+        }, Response::HTTP_OK, [
+            'Content-Type' => 'text/event-stream',
+            'Cache-Control' => 'no-cache',
+            'Connection' => 'keep-alive',
+            'X-Accel-Buffering' => 'no',
+        ]);
     }
 
     public function index(): View

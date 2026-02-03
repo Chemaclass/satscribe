@@ -26,6 +26,9 @@ Route::get('chats/{chat?}', [ChatController::class, 'show'])->name('chat.show');
 Route::post('chats/{chat}/messages', [ChatController::class, 'addMessage'])
     ->name('chat.add-message')
     ->middleware(IpRateLimiter::class);
+Route::post('chats/{chat}/messages/stream', [ChatController::class, 'addMessageStream'])
+    ->name('chat.add-message-stream')
+    ->middleware(IpRateLimiter::class);
 Route::post('chats/{chat}/share', [ChatController::class, 'share'])->name('chat.share');
 Route::post('chats/{chat}/visibility', [ChatController::class, 'toggleVisibility'])->name('chat.toggle-visibility');
 

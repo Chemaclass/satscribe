@@ -392,44 +392,82 @@
                     const customFollowUp = document.getElementById('customFollowUp');
                     if (customFollowUp) customFollowUp.value = "";
 
-                    // Send AJAX to backend
-                    fetch(`/chats/${chatUlid}/messages`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                        },
-                        body: JSON.stringify({message: message})
-                    })
-                        .then(r => r.json())
-                        .then(data => {
-                            const assistantEl = document.getElementById(`assistant-message-${assistantMsgCount}`);
-                            if (assistantEl) {
-                                const loader = assistantEl.querySelector('.loading-dots-container');
-                                if (loader) loader.remove();
-
-                                const contentEl = assistantEl.querySelector('.streaming-content');
-                                if (contentEl && data.content) {
-                                    contentEl.innerHTML = marked.parse(data.content);
-                                }
-                                assistantEl.scrollIntoView({behavior: 'smooth', block: 'start'});
-                            }
-                            if (data.suggestions) {
-                                this.updateSuggestionsList(chatUlid, data.suggestions);
-                            }
-                            showChatFormContainer();
-                            window.refreshLucideIcons?.();
-                        }).catch((e) => {
-                            console.error(e);
-                            const assistantEl = document.getElementById(`assistant-message-${assistantMsgCount}`);
-                            if (assistantEl) {
-                                const contentEl = assistantEl.querySelector('.streaming-content');
-                                if (contentEl) {
-                                    contentEl.innerHTML = `<span class="text-red-700">Error fetching response.</span>`;
-                                }
-                            }
-                            showChatFormContainer();
+                    try {
+                        // Use streaming endpoint for follow-up messages
+                        const response = await fetch(`/chats/${chatUlid}/messages/stream`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                'X-Requested-With': 'XMLHttpRequest',
+                            },
+                            body: JSON.stringify({message: message.trim()})
                         });
+
+                        if (response.status === 429) {
+                            const data = await response.json();
+                            window.dispatchEvent(new CustomEvent('rate-limit-reached', {detail: data}));
+                            return;
+                        }
+
+                        const reader = response.body.getReader();
+                        const decoder = new TextDecoder();
+                        let streamedContent = '';
+                        const contentEl = document.querySelector(`#assistant-message-${assistantMsgCount} .streaming-content`);
+
+                        while (true) {
+                            const {done, value} = await reader.read();
+                            if (done) break;
+
+                            const text = decoder.decode(value, {stream: true});
+                            const lines = text.split('\n');
+
+                            for (const line of lines) {
+                                if (line.startsWith('data: ')) {
+                                    try {
+                                        const event = JSON.parse(line.slice(6));
+
+                                        if (event.type === 'chunk') {
+                                            streamedContent += event.data;
+                                            if (contentEl) {
+                                                contentEl.innerHTML = marked.parse(streamedContent);
+                                            }
+                                        } else if (event.type === 'done') {
+                                            const loader = document.querySelector(`#assistant-message-${assistantMsgCount} .loading-dots-container`);
+                                            if (loader) loader.remove();
+
+                                            if (event.data.suggestions) {
+                                                this.updateSuggestionsList(chatUlid, event.data.suggestions);
+                                            }
+                                        } else if (event.type === 'error') {
+                                            if (contentEl) {
+                                                contentEl.innerHTML = `<span class="text-red-700">${this.escapeHtml(event.data)}</span>`;
+                                            }
+                                        }
+                                    } catch (e) {
+                                        // Ignore parse errors for incomplete chunks
+                                    }
+                                }
+                            }
+                        }
+
+                        const assistantEl = document.getElementById(`assistant-message-${assistantMsgCount}`);
+                        if (assistantEl) {
+                            assistantEl.scrollIntoView({behavior: 'smooth', block: 'start'});
+                        }
+                        showChatFormContainer();
+                        window.refreshLucideIcons?.();
+                    } catch (e) {
+                        console.error(e);
+                        const assistantEl = document.getElementById(`assistant-message-${assistantMsgCount}`);
+                        if (assistantEl) {
+                            const contentEl = assistantEl.querySelector('.streaming-content');
+                            if (contentEl) {
+                                contentEl.innerHTML = `<span class="text-red-700">Error fetching response.</span>`;
+                            }
+                        }
+                        showChatFormContainer();
+                    }
                 },
 
                 updateSuggestionsList(chatUlid, newSuggestions) {
