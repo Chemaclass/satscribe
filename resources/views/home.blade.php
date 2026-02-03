@@ -141,15 +141,7 @@
                             </span>
                         </span>
                     </div>
-                    <div class="inline-block rounded px-3 py-2 w-full max-w-2xl">
-                        <div class="skeleton-bars animate-pulse space-y-3">
-                            <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
-                            <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-full"></div>
-                            <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-5/6"></div>
-                            <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-2/3"></div>
-                        </div>
-                        <div class="prose streaming-content hidden"></div>
-                    </div>
+                    <div class="inline-block rounded px-3 py-2 prose streaming-content"></div>
                 </div>
             </div>
         `;
@@ -176,7 +168,6 @@
                         const decoder = new TextDecoder();
                         let streamedContent = '';
                         const contentEl = document.querySelector(`#assistant-message-${assistantMsgCount} .streaming-content`);
-                        const skeletonEl = document.querySelector(`#assistant-message-${assistantMsgCount} .skeleton-bars`);
 
                         while (true) {
                             const {done, value} = await reader.read();
@@ -191,10 +182,6 @@
                                         const event = JSON.parse(line.slice(6));
 
                                         if (event.type === 'chunk') {
-                                            if (skeletonEl && !skeletonEl.classList.contains('hidden')) {
-                                                skeletonEl.classList.add('hidden');
-                                                contentEl?.classList.remove('hidden');
-                                            }
                                             streamedContent += event.data;
                                             if (contentEl) {
                                                 contentEl.innerHTML = marked.parse(streamedContent);
