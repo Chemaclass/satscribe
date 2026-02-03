@@ -347,9 +347,15 @@
 
                 async sendMessageToChat(chatUlid, message) {
                     if (!message || !message.trim()) return;
-                    hideChatFormContainer();
 
-                    const chatGroups = document.getElementById('chat-message-groups') || document.getElementById('chat-container');
+                    // Immediately hide suggestions for visual feedback
+                    const formContainer = document.getElementById('chat-message-form-container');
+                    if (formContainer) {
+                        formContainer.classList.add('hidden');
+                    }
+
+                    const chatContainer = document.getElementById('chat-container');
+                    const chatGroups = document.getElementById('chat-message-groups') || chatContainer;
                     if (!chatGroups) return;
 
                     const assistantMsgCount = document.querySelectorAll('.assistant-message').length;
@@ -451,11 +457,13 @@
                             }
                         }
 
+                        // Move form container to the bottom and show it
+                        this.moveFormContainerToBottom(chatContainer);
+
                         const assistantEl = document.getElementById(`assistant-message-${assistantMsgCount}`);
                         if (assistantEl) {
                             assistantEl.scrollIntoView({behavior: 'smooth', block: 'start'});
                         }
-                        showChatFormContainer();
                         window.refreshLucideIcons?.();
                     } catch (e) {
                         console.error(e);
@@ -466,19 +474,37 @@
                                 contentEl.innerHTML = `<span class="text-red-700">Error fetching response.</span>`;
                             }
                         }
-                        showChatFormContainer();
+                        // Still show the form container on error
+                        this.moveFormContainerToBottom(chatContainer);
+                    }
+                },
+
+                moveFormContainerToBottom(chatContainer) {
+                    const formContainer = document.getElementById('chat-message-form-container');
+                    if (formContainer && chatContainer) {
+                        // Move to end of chat container (before raw-data-toggle if it exists)
+                        const rawDataToggle = chatContainer.querySelector('[id^="raw-data"]');
+                        if (rawDataToggle) {
+                            chatContainer.insertBefore(formContainer, rawDataToggle);
+                        } else {
+                            chatContainer.appendChild(formContainer);
+                        }
+                        // Show with a slight delay for smooth appearance
+                        requestAnimationFrame(() => {
+                            formContainer.classList.remove('hidden');
+                        });
                     }
                 },
 
                 updateSuggestionsList(chatUlid, newSuggestions) {
                     const suggestionsContainer = document.getElementById('follow-up-suggestions');
-                    if (!suggestionsContainer) return;
+                    if (!suggestionsContainer || !newSuggestions?.length) return;
 
                     suggestionsContainer.innerHTML = `
         <div class="mt-4">
-            <p class="text-sm font-medium mb-2">Or try one of these</p>
+            <p class="text-sm font-medium mb-2">{{ __('Or try one of these') }}</p>
             <div class="flex flex-wrap gap-2">
-                ${newSuggestions.map((s, i) => `
+                ${newSuggestions.map(s => `
                     <button
                         type="button"
                         class="suggested-question-prompt"
@@ -493,13 +519,18 @@
     `;
                     // Re-attach event listeners
                     const buttons = suggestionsContainer.querySelectorAll('button[data-suggestion]');
+                    const self = this;
                     buttons.forEach(button => {
-                        button.addEventListener('click', () => {
-                            const suggestion = button.getAttribute('data-suggestion');
-                            const ulid = button.getAttribute('data-chat-ulid');
-                            this.sendMessageToChat(ulid, suggestion);
+                        button.addEventListener('click', function() {
+                            const suggestion = this.getAttribute('data-suggestion');
+                            const ulid = this.getAttribute('data-chat-ulid');
+                            self.sendMessageToChat(ulid, suggestion);
                         });
                     });
+
+                    // Clear the input field
+                    const customFollowUp = document.getElementById('customFollowUp');
+                    if (customFollowUp) customFollowUp.value = '';
                 },
 
                 focusSearchInput() {
