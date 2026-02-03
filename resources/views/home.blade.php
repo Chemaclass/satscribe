@@ -236,34 +236,64 @@
 
                 renderSuggestions(chatUlid, suggestions) {
                     const chatContainer = document.getElementById('chat-container');
-                    if (!chatContainer || !suggestions?.length) return;
+                    if (!chatContainer) return;
 
-                    const suggestionsHtml = `
-                        <div id="chat-message-form-container" class="mt-4 mb-8">
-                            <div id="follow-up-suggestions" class="mb-8">
-                                <div class="mt-4">
-                                    <p class="text-sm font-medium mb-2">Or try one of these</p>
-                                    <div class="flex flex-wrap gap-2">
-                                        ${suggestions.map(s => `
-                                            <button type="button" class="suggested-question-prompt"
-                                                data-suggestion="${s.replace(/"/g, '&quot;')}"
-                                                data-chat-ulid="${chatUlid}">
-                                                ${s}
-                                            </button>
-                                        `).join('')}
-                                    </div>
+                    const suggestionsHtml = suggestions?.length ? `
+                        <div id="follow-up-suggestions" class="mb-8">
+                            <div class="mt-4">
+                                <p class="text-sm font-medium mb-2">{{ __('Or try one of these') }}</p>
+                                <div class="flex flex-wrap gap-2">
+                                    ${suggestions.map(s => `
+                                        <button type="button" class="suggested-question-prompt"
+                                            data-suggestion="${s.replace(/"/g, '&quot;')}"
+                                            data-chat-ulid="${chatUlid}">
+                                            ${s}
+                                        </button>
+                                    `).join('')}
                                 </div>
                             </div>
                         </div>
+                    ` : '';
+
+                    const formHtml = `
+                        <div id="chat-message-form-container" class="mt-4 mb-8">
+                            <div x-data="{ message: '' }" class="w-full pt-1">
+                                <form @submit.prevent="sendMessageToChat('${chatUlid}', message)" class="flex w-full gap-2">
+                                    <input
+                                        id="customFollowUp"
+                                        type="text"
+                                        x-model="message"
+                                        class="w-3/4 p-2 border rounded"
+                                        placeholder="{{ __('Ask a follow-up question...') }}"
+                                        autocomplete="off"
+                                    />
+                                    <button type="submit" class="w-1/4 form-button flex items-center justify-center">
+                                        <span class="submit-icon mr-2">
+                                            <i data-lucide="send" class="w-4 h-4"></i>
+                                        </span>
+                                        <span class="submit-text">{{ __('Send') }}</span>
+                                    </button>
+                                </form>
+                            </div>
+                            ${suggestionsHtml}
+                        </div>
                     `;
-                    chatContainer.insertAdjacentHTML('beforeend', suggestionsHtml);
+                    chatContainer.insertAdjacentHTML('beforeend', formHtml);
+
+                    // Initialize Alpine.js on the new form
+                    if (window.Alpine) {
+                        Alpine.initTree(document.getElementById('chat-message-form-container'));
+                    }
+
+                    window.refreshLucideIcons?.();
 
                     const buttons = chatContainer.querySelectorAll('button[data-suggestion]');
+                    const self = this;
                     buttons.forEach(button => {
-                        button.addEventListener('click', () => {
-                            const suggestion = button.getAttribute('data-suggestion');
-                            const ulid = button.getAttribute('data-chat-ulid');
-                            this.sendMessageToChat(ulid, suggestion);
+                        button.addEventListener('click', function() {
+                            const suggestion = this.getAttribute('data-suggestion');
+                            const ulid = this.getAttribute('data-chat-ulid');
+                            self.sendMessageToChat(ulid, suggestion);
                         });
                     });
                 },
