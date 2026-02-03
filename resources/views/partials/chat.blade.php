@@ -25,14 +25,16 @@
     </div>
 
     @if (tracking_id() === $chat->tracking_id)
-        <x-chat.message-form :chat="$chat"/>
+        <div id="chat-message-form-container">
+            <x-chat.message-form :chat="$chat"/>
 
-        <x-chat.follow-up-suggestions
-            :input="data_get($message['meta'], 'input')"
-            :question="data_get($message['meta'], 'question', '')"
-            :suggestions="$suggestions"
-            :message="$message"
-        />
+            <x-chat.follow-up-suggestions
+                :input="data_get($message['meta'], 'input')"
+                :question="data_get($message['meta'], 'question', '')"
+                :suggestions="$suggestions"
+                :message="$message"
+            />
+        </div>
 
         <x-chat.raw-data-toggle-button :chat="$chat" />
     @endif
