@@ -149,7 +149,7 @@
                         window.refreshLucideIcons?.();
                         window.setUserAvatar?.(StorageClient.getNostrImage());
 
-                        const response = await fetch('/chats/stream', {
+                        const response = await fetch('/stream', {
                             method: 'POST',
                             body: formData,
                             headers: {

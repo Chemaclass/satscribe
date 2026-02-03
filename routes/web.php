@@ -18,7 +18,7 @@ Route::get('/', [ChatController::class, 'index'])->name('home.index');
 Route::post('/', [ChatController::class, 'createChat'])
     ->name('home.create-chat')
     ->middleware(IpRateLimiter::class);
-Route::post('/chats/stream', [ChatController::class, 'createChatStream'])
+Route::post('stream', [ChatController::class, 'createChatStream'])
     ->name('home.create-chat-stream')
     ->middleware(IpRateLimiter::class);
 
