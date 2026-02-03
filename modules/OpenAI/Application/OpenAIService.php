@@ -8,6 +8,7 @@ use App\Models\Chat;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
 use Generator;
+use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Illuminate\Http\Client\Factory as HttpFactory;
 use Modules\Blockchain\Domain\PriceServiceInterface;
 use Modules\OpenAI\Domain\Exception\OpenAIError;
@@ -27,9 +28,12 @@ use function strlen;
 
 final readonly class OpenAIService
 {
+    private const CACHE_TTL_SECONDS = 3600; // 1 hour
+
     public function __construct(
         private HttpClientInterface $http,
         private HttpFactory $httpFactory,
+        private CacheRepository $cache,
         private LoggerInterface $logger,
         private PersonaPromptBuilder $promptBuilder,
         private PriceServiceInterface $priceService, // @todo use BlockchainFacade instead
@@ -47,64 +51,24 @@ final readonly class OpenAIService
         ?Chat $chat = null,
         string $additionalContext = '',
     ): string {
-        $this->logger->debug('Calling OpenAI API', [
-            'model' => $this->openAiModel,
-            'persona' => $persona->value,
-        ]);
-        $history = collect($chat?->getHistory() ?? [])
-            ->take(-5) // gets the last 5 messages
-            ->values()
-            ->all();
+        // Only cache initial requests (no chat history)
+        $cacheKey = $chat instanceof Chat ? null : $this->buildCacheKey($input, $persona, $question);
 
-        $timestamp = 0;
-        if ($data->block instanceof BlockData) {
-            $timestamp = $data->block->timestamp;
-        } elseif ($data->transaction instanceof TransactionData) {
-            $timestamp = $data->transaction->blockTime ?? 0;
+        if ($cacheKey !== null) {
+            $cached = $this->cache->get($cacheKey);
+
+            if ($cached !== null) {
+                $this->logger->debug('Returning cached OpenAI response', ['key' => $cacheKey]);
+
+                return $cached;
+            }
         }
 
-        $messages = [
-            [
-                'role' => 'system',
-                'content' => $this->promptBuilder->buildSystemPrompt($persona),
-            ],
-            ...$history,
-            [
-                'role' => 'user',
-                'content' => $this->buildBlockchainContext($data, $additionalContext),
-            ],
-            [
-                'role' => 'user',
-                'content' => $this->preparePrompt($input->type, $question, $persona, $timestamp),
-            ],
-        ];
+        $text = $this->callOpenAI($data, $input, $persona, $question, $chat, $additionalContext);
 
-        $response = $this->http->withToken($this->openAiApiKey)
-            ->post('https://api.openai.com/v1/chat/completions', [
-                'model' => $this->openAiModel,
-                'messages' => $messages,
-                'max_tokens' => $persona->maxTokens(),
-            ]);
-
-        if ($response->failed()) {
-            $this->logger->error('OpenAI API request failed', [
-                'status' => $response->status(),
-                'body' => $response->body(),
-            ]);
-            throw new OpenAIError('OpenAI API request failed');
+        if ($cacheKey !== null) {
+            $this->cache->put($cacheKey, $text, self::CACHE_TTL_SECONDS);
         }
-
-        if ($error = $response->json('error.message')) {
-            $this->logger->error('OpenAI API responded with an error', [
-                'error' => $error,
-                'status' => $response->status(),
-            ]);
-            throw new OpenAIError($error);
-        }
-
-        $text = $response->json('choices.0.message.content');
-        $text = $this->trimToLastFullSentence($text);
-        $this->logger->debug('OpenAI description generation worked', ['length' => strlen($text)]);
 
         return $text;
     }
@@ -199,6 +163,83 @@ final readonly class OpenAIService
                 }
             }
         }
+    }
+
+    private function callOpenAI(
+        BlockchainData $data,
+        PromptInput $input,
+        PromptPersona $persona,
+        string $question,
+        ?Chat $chat,
+        string $additionalContext,
+    ): string {
+        $this->logger->debug('Calling OpenAI API', [
+            'model' => $this->openAiModel,
+            'persona' => $persona->value,
+        ]);
+        $history = collect($chat?->getHistory() ?? [])
+            ->take(-5)
+            ->values()
+            ->all();
+
+        $timestamp = 0;
+        if ($data->block instanceof BlockData) {
+            $timestamp = $data->block->timestamp;
+        } elseif ($data->transaction instanceof TransactionData) {
+            $timestamp = $data->transaction->blockTime ?? 0;
+        }
+
+        $messages = [
+            [
+                'role' => 'system',
+                'content' => $this->promptBuilder->buildSystemPrompt($persona),
+            ],
+            ...$history,
+            [
+                'role' => 'user',
+                'content' => $this->buildBlockchainContext($data, $additionalContext),
+            ],
+            [
+                'role' => 'user',
+                'content' => $this->preparePrompt($input->type, $question, $persona, $timestamp),
+            ],
+        ];
+
+        $response = $this->http->withToken($this->openAiApiKey)
+            ->post('https://api.openai.com/v1/chat/completions', [
+                'model' => $this->openAiModel,
+                'messages' => $messages,
+                'max_tokens' => $persona->maxTokens(),
+            ]);
+
+        if ($response->failed()) {
+            $this->logger->error('OpenAI API request failed', [
+                'status' => $response->status(),
+                'body' => $response->body(),
+            ]);
+            throw new OpenAIError('OpenAI API request failed');
+        }
+
+        if ($error = $response->json('error.message')) {
+            $this->logger->error('OpenAI API responded with an error', [
+                'error' => $error,
+                'status' => $response->status(),
+            ]);
+            throw new OpenAIError($error);
+        }
+
+        $text = $response->json('choices.0.message.content');
+        $text = $this->trimToLastFullSentence($text);
+        $this->logger->debug('OpenAI description generation worked', ['length' => strlen($text)]);
+
+        return $text;
+    }
+
+    private function buildCacheKey(PromptInput $input, PromptPersona $persona, string $question): string
+    {
+        $questionHash = md5($question);
+
+        return "openai:{$input->type->value}:{$input->text}:{$persona->value}:{$questionHash}";
     }
 
     private function buildBlockchainContext(BlockchainData $data, string $additional): string

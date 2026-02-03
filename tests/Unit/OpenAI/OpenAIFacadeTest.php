@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\OpenAI;
 
+use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Illuminate\Http\Client\Factory as HttpFactory;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Response;
@@ -59,6 +60,7 @@ final class OpenAIFacadeTest extends TestCase
         $service = new OpenAIService(
             $http,
             self::createStub(HttpFactory::class),
+            $this->createPassthroughCache(),
             $logger,
             new PersonaPromptBuilder('en'),
             self::createStub(PriceServiceInterface::class),
@@ -71,5 +73,14 @@ final class OpenAIFacadeTest extends TestCase
         $result = $facade->generateText($data, $input, PromptPersona::Educator, 'Question');
 
         $this->assertSame('Sentence 1.', $result);
+    }
+
+    private function createPassthroughCache(): CacheRepository
+    {
+        $cache = $this->createMock(CacheRepository::class);
+        $cache->method('get')->willReturn(null);
+        $cache->method('put')->willReturn(true);
+
+        return $cache;
     }
 }

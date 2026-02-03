@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\OpenAI;
 
+use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Illuminate\Http\Client\Factory as HttpFactory;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Response;
@@ -66,6 +67,7 @@ final class OpenAIServiceTest extends TestCase
         $service = new OpenAIService(
             $http,
             $this->createStub(HttpFactory::class),
+            $this->createPassthroughCache(),
             $logger,
             new PersonaPromptBuilder('en'),
             $priceService,
@@ -108,6 +110,7 @@ final class OpenAIServiceTest extends TestCase
         $service = new OpenAIService(
             $http,
             $this->createStub(HttpFactory::class),
+            $this->createPassthroughCache(),
             $logger,
             new PersonaPromptBuilder('en'),
             $priceService,
@@ -151,6 +154,7 @@ final class OpenAIServiceTest extends TestCase
         $service = new OpenAIService(
             $http,
             $this->createStub(HttpFactory::class),
+            $this->createPassthroughCache(),
             $logger,
             new PersonaPromptBuilder('en'),
             $priceService,
@@ -202,6 +206,7 @@ final class OpenAIServiceTest extends TestCase
         $service = new OpenAIService(
             $http,
             $this->createStub(HttpFactory::class),
+            $this->createPassthroughCache(),
             $logger,
             new PersonaPromptBuilder('en'),
             $priceService,
@@ -258,6 +263,7 @@ final class OpenAIServiceTest extends TestCase
         $service = new OpenAIService(
             $http,
             $this->createStub(HttpFactory::class),
+            $this->createPassthroughCache(),
             $logger,
             new PersonaPromptBuilder('en'),
             $priceService,
@@ -314,6 +320,7 @@ final class OpenAIServiceTest extends TestCase
         $service = new OpenAIService(
             $http,
             $this->createStub(HttpFactory::class),
+            $this->createPassthroughCache(),
             $logger,
             new PersonaPromptBuilder('en'),
             $priceService,
@@ -329,5 +336,14 @@ final class OpenAIServiceTest extends TestCase
             'Today 1 BTC is about $30,000 USD or €27,000 EUR.',
             $captured[2]['content'],
         );
+    }
+
+    private function createPassthroughCache(): CacheRepository
+    {
+        $cache = $this->createMock(CacheRepository::class);
+        $cache->method('get')->willReturn(null);
+        $cache->method('put')->willReturn(true);
+
+        return $cache;
     }
 }
