@@ -110,7 +110,7 @@ final class UserInputSanitizerTest extends TestCase
     private function createRepository(array $words): FlaggedWordRepositoryInterface
     {
         return new class($words) implements FlaggedWordRepositoryInterface {
-            public function __construct(private array $words)
+            public function __construct(private readonly array $words)
             {
             }
 

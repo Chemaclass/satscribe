@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Chat;
 
+use Illuminate\Support\Collection;
 use Modules\Chat\Application\SuggestedPromptService;
 use Modules\Chat\Domain\Data\QuestionPlaceholder;
 use Tests\TestCase;
@@ -44,7 +45,7 @@ final class SuggestedPromptServiceTest extends TestCase
         $result = $service->getGroupedPrompts(null);
 
         foreach ($result as $prompts) {
-            $this->assertInstanceOf(\Illuminate\Support\Collection::class, $prompts);
+            $this->assertInstanceOf(Collection::class, $prompts);
         }
     }
 

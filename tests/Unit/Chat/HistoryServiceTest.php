@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Chat;
 
+use App\Models\Chat;
 use App\Models\Message;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Pagination\Paginator;
@@ -52,7 +53,7 @@ final class HistoryServiceTest extends TestCase
     {
         $rawData = ['txid' => 'abc123', 'fee' => 1000];
 
-        $chat = \App\Models\Chat::create(['ulid' => 'test-ulid', 'is_public' => true]);
+        $chat = Chat::create(['ulid' => 'test-ulid', 'is_public' => true]);
         $message = Message::create([
             'chat_id' => $chat->id,
             'role' => 'assistant',
@@ -72,7 +73,7 @@ final class HistoryServiceTest extends TestCase
 
     public function test_get_raw_message_data_returns_null_when_no_raw_data(): void
     {
-        $chat = \App\Models\Chat::create(['ulid' => 'test-ulid', 'is_public' => true]);
+        $chat = Chat::create(['ulid' => 'test-ulid', 'is_public' => true]);
         $message = Message::create([
             'chat_id' => $chat->id,
             'role' => 'assistant',
