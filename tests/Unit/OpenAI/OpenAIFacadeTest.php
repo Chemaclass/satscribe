@@ -67,6 +67,7 @@ final class OpenAIFacadeTest extends TestCase
             now(),
             openAiApiKey: 'key',
             openAiModel: 'model',
+            openAiModelFollowup: 'model-mini',
         );
         $facade = new OpenAIFacade($service);
 

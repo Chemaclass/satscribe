@@ -35,6 +35,10 @@ final class OpenAIServiceProvider extends ServiceProvider
             ->needs('$openAiModel')
             ->giveConfig('services.openai.model');
 
+        $this->app->when(OpenAIService::class)
+            ->needs('$openAiModelFollowup')
+            ->giveConfig('services.openai.model_followup');
+
         $this->app->when(PersonaPromptBuilder::class)
             ->needs('$locale')
             ->give(app()->getLocale());

@@ -40,6 +40,7 @@ final readonly class OpenAIService
         private CarbonInterface $now,
         private string $openAiApiKey,
         private string $openAiModel,
+        private string $openAiModelFollowup,
     ) {
     }
 
@@ -173,9 +174,12 @@ final readonly class OpenAIService
         ?Chat $chat,
         string $additionalContext,
     ): string {
+        $model = $chat instanceof Chat ? $this->openAiModelFollowup : $this->openAiModel;
+
         $this->logger->debug('Calling OpenAI API', [
-            'model' => $this->openAiModel,
+            'model' => $model,
             'persona' => $persona->value,
+            'is_followup' => $chat instanceof Chat,
         ]);
         $history = collect($chat?->getHistory() ?? [])
             ->take(-5)
@@ -207,7 +211,7 @@ final readonly class OpenAIService
 
         $response = $this->http->withToken($this->openAiApiKey)
             ->post('https://api.openai.com/v1/chat/completions', [
-                'model' => $this->openAiModel,
+                'model' => $model,
                 'messages' => $messages,
                 'max_tokens' => $persona->maxTokens(),
             ]);

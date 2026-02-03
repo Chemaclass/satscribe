@@ -38,6 +38,7 @@ return [
     'openai' => [
         'key' => env('OPENAI_API_KEY'),
         'model' => env('OPENAI_MODEL', 'gpt-4'),
+        'model_followup' => env('OPENAI_MODEL_FOLLOWUP', 'gpt-4o-mini'),
         'max_attempts' => env('OPENAI_MAX_ATTEMPTS', 200),
     ],
 

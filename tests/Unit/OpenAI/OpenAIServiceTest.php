@@ -74,6 +74,7 @@ final class OpenAIServiceTest extends TestCase
             now(),
             openAiApiKey: 'api-key',
             openAiModel: 'model',
+            openAiModelFollowup: 'model-mini',
         );
 
         $result = $service->generateText($data, $input, PromptPersona::Developer, 'Question');
@@ -117,6 +118,7 @@ final class OpenAIServiceTest extends TestCase
             now(),
             openAiApiKey: 'api-key',
             openAiModel: 'model',
+            openAiModelFollowup: 'model-mini',
         );
 
         $this->expectException(OpenAIError::class);
@@ -161,6 +163,7 @@ final class OpenAIServiceTest extends TestCase
             now(),
             openAiApiKey: 'api-key',
             openAiModel: 'model',
+            openAiModelFollowup: 'model-mini',
         );
 
         $this->expectException(OpenAIError::class);
@@ -213,6 +216,7 @@ final class OpenAIServiceTest extends TestCase
             now(),
             openAiApiKey: 'api-key',
             openAiModel: 'model',
+            openAiModelFollowup: 'model-mini',
         );
 
         $service->generateText($data, $input, PromptPersona::Developer, '');
@@ -270,6 +274,7 @@ final class OpenAIServiceTest extends TestCase
             now(),
             openAiApiKey: 'api-key',
             openAiModel: 'model',
+            openAiModelFollowup: 'model-mini',
         );
 
         $service->generateText($data, $input, PromptPersona::Developer, '');
@@ -327,6 +332,7 @@ final class OpenAIServiceTest extends TestCase
             now(),
             openAiApiKey: 'api-key',
             openAiModel: 'model',
+            openAiModelFollowup: 'model-mini',
         );
 
         $service->generateText($data, $input, PromptPersona::Developer, '');
