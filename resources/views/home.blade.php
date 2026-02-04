@@ -5,9 +5,8 @@
 @extends('layouts.base')
 
 @section('content')
-    <x-home.disclaimer />
     <section
-            class="satscribe-home px-2"
+            class="satscribe-home px-2 flex flex-col flex-grow min-h-0"
             x-data="searchInputValidator('{{ old('search', $search ?? '') }}', {{ $maxBitcoinBlockHeight }})"
             x-init="
             validate();
@@ -17,40 +16,50 @@
                 }
             });
         ">
-        <x-home.header/>
-        <x-home.form
-                :search="old('search', $search ?? '')"
-                :question="old('question', $question ?? '')"
-                :maxBitcoinBlockHeight="$maxBitcoinBlockHeight"
-                :latestBlockHeight="$latestBlockHeight"
-                :suggestedPromptsGrouped="$suggestedPromptsGrouped"
-                :persona="old('persona', $persona ?? PromptPersona::DEFAULT)"
-                :personaDescriptions="$personaDescriptions"
-                :isChat="isset($chat)"
-        />
+        <div
+            id="homepage-header"
+            class="flex-shrink-0 transition-all duration-300"
+            :class="{ 'hidden': hasSubmitted }"
+            @if(isset($chat)) style="display: none;" @endif
+        >
+            <x-home.header/>
+            <x-home.form
+                    :search="old('search', $search ?? '')"
+                    :question="old('question', $question ?? '')"
+                    :maxBitcoinBlockHeight="$maxBitcoinBlockHeight"
+                    :latestBlockHeight="$latestBlockHeight"
+                    :suggestedPromptsGrouped="$suggestedPromptsGrouped"
+                    :persona="old('persona', $persona ?? PromptPersona::DEFAULT)"
+                    :personaDescriptions="$personaDescriptions"
+                    :isChat="isset($chat)"
+            />
 
-        @if(!isset($chat))
-            <div
-                class="mt-6 mb-6 text-center text-gray-500 text-sm space-y-2 home-narrative"
-                x-show="!hasSubmitted"
-                x-cloak>
-                <p>{{ __('home.narrative.line1') }}</p>
-                <p>{{ __('home.narrative.line2') }}</p>
-                <p>{{ __('home.total_messages', ['count' => number_format($totalMessages)]) }}</p>
-            </div>
-        @endif
+            @if(!isset($chat))
+                <div
+                    class="mt-6 mb-6 text-center text-gray-500 text-sm space-y-2 home-narrative"
+                    x-show="!hasSubmitted"
+                    x-cloak>
+                    <p>{{ __('home.narrative.line1') }}</p>
+                    <p>{{ __('home.narrative.line2') }}</p>
+                    <p>{{ __('home.total_messages', ['count' => number_format($totalMessages)]) }}</p>
+                </div>
+            @endif
+        </div>
 
-        @if(isset($chat))
-            @include('partials.chat', [
-                'chat' => $chat,
-                'suggestions' => $suggestions,
-            ])
-        @else
-            <section id="chat-container"></section>
-        @endif
+        <div id="chat-wrapper" class="flex flex-col flex-grow min-h-0">
+            @if(isset($chat))
+                @include('partials.chat', [
+                    'chat' => $chat,
+                    'suggestions' => $suggestions,
+                ])
+            @else
+                <section id="chat-container" class="flex flex-col flex-grow min-h-0"></section>
+            @endif
+        </div>
 
     </section>
     <x-paywall-modal/>
+    <x-home.disclaimer />
 @endsection
 
 @push('scripts')
@@ -95,9 +104,23 @@
 
                     const chatContainer = document.getElementById('chat-container');
                     if (chatContainer) {
-                        chatContainer.innerHTML = '';
+                        // Create scrollable structure for new chat with header
+                        chatContainer.innerHTML = `
+                            <div id="chat-header" class="flex-shrink-0 flex items-center justify-between p-2 border-b border-gray-200">
+                                <span class="text-sm text-gray-600">{{ __('Chat') }}</span>
+                                <a href="{{ route('home.index') }}" class="flex items-center gap-1 text-sm text-orange-600 hover:text-orange-700">
+                                    <i data-lucide="plus" class="w-4 h-4"></i>
+                                    {{ __('New Chat') }}
+                                </a>
+                            </div>
+                            <div id="chat-messages-scroll" class="flex-grow overflow-y-auto p-2">
+                                <div id="chat-message-groups"></div>
+                            </div>
+                        `;
+                        window.refreshLucideIcons?.();
                     }
 
+                    const chatMessageGroups = document.getElementById('chat-message-groups');
                     const assistantMsgCount = document.querySelectorAll('.assistant-message').length;
 
                     try {
@@ -145,9 +168,12 @@
                 </div>
             </div>
         `;
-                        chatContainer.insertAdjacentHTML('beforeend', userHtml);
+                        chatMessageGroups.insertAdjacentHTML('beforeend', userHtml);
                         window.refreshLucideIcons?.();
                         window.setUserAvatar?.(StorageClient.getNostrImage());
+
+                        // Scroll to bottom of chat
+                        scrollChatToBottom(false);
 
                         const response = await fetch('/stream', {
                             method: 'POST',
@@ -185,6 +211,10 @@
                                             streamedContent += event.data;
                                             if (contentEl) {
                                                 contentEl.innerHTML = marked.parse(streamedContent);
+                                                // Auto-scroll during streaming if user is near bottom
+                                                if (isNearBottom()) {
+                                                    scrollChatToBottom();
+                                                }
                                             }
                                         } else if (event.type === 'done') {
                                             const loader = document.querySelector(`#assistant-message-${assistantMsgCount} .loading-dots-container`);
@@ -225,7 +255,6 @@
                         }
 
                         window.refreshLucideIcons?.();
-                        showChatFormContainer();
                     } catch (error) {
                         const assistantDiv = document.getElementById(`assistant-message-${assistantMsgCount}`);
                         if (assistantDiv) {
@@ -248,8 +277,8 @@
                     if (!chatContainer) return;
 
                     const suggestionsHtml = suggestions?.length ? `
-                        <div id="follow-up-suggestions" class="mb-8">
-                            <div class="mt-4">
+                        <div id="follow-up-suggestions">
+                            <div class="mt-2">
                                 <p class="text-sm font-medium mb-2">{{ __('Or try one of these') }}</p>
                                 <div class="flex flex-wrap gap-2">
                                     ${suggestions.map(s => `
@@ -265,7 +294,7 @@
                     ` : '';
 
                     const formHtml = `
-                        <div id="chat-message-form-container" class="mt-4 mb-8">
+                        <div id="chat-message-form-container" class="flex-shrink-0 border-t border-gray-200 bg-inherit p-2">
                             <div x-data="{ message: '' }" class="w-full pt-1">
                                 <form @submit.prevent="sendMessageToChat('${chatUlid}', message)" class="flex w-full gap-2">
                                     <input
@@ -287,6 +316,7 @@
                             ${suggestionsHtml}
                         </div>
                     `;
+                    // Insert form after scrollable area (at end of chat container)
                     chatContainer.insertAdjacentHTML('beforeend', formHtml);
 
                     // Initialize Alpine.js on the new form
@@ -305,6 +335,11 @@
                             self.sendMessageToChat(ulid, suggestion);
                         });
                     });
+
+                    // Scroll to bottom after rendering form and focus input
+                    scrollChatToBottom();
+                    const customFollowUp = document.getElementById('customFollowUp');
+                    if (customFollowUp) customFollowUp.focus();
                 },
 
                 get helperText() {
@@ -387,12 +422,6 @@
                 async sendMessageToChat(chatUlid, message) {
                     if (!message || !message.trim()) return;
 
-                    // Immediately hide suggestions for visual feedback
-                    const formContainer = document.getElementById('chat-message-form-container');
-                    if (formContainer) {
-                        formContainer.classList.add('hidden');
-                    }
-
                     const chatContainer = document.getElementById('chat-container');
                     const chatGroups = document.getElementById('chat-message-groups') || chatContainer;
                     if (!chatGroups) return;
@@ -433,9 +462,15 @@
                     window.refreshLucideIcons?.();
                     window.setUserAvatar?.(StorageClient.getNostrImage());
 
+                    // Scroll to bottom after adding user message
+                    scrollChatToBottom(false);
+
                     // Clear the input if it exists
                     const customFollowUp = document.getElementById('customFollowUp');
-                    if (customFollowUp) customFollowUp.value = "";
+                    if (customFollowUp) {
+                        customFollowUp.value = "";
+                        customFollowUp.focus();
+                    }
 
                     try {
                         // Use streaming endpoint for follow-up messages
@@ -481,6 +516,10 @@
                                             streamedContent += event.data;
                                             if (contentEl) {
                                                 contentEl.innerHTML = marked.parse(streamedContent);
+                                                // Auto-scroll during streaming if user is near bottom
+                                                if (isNearBottom()) {
+                                                    scrollChatToBottom();
+                                                }
                                             }
                                         } else if (event.type === 'done') {
                                             const loader = document.querySelector(`#assistant-message-${assistantMsgCount} .loading-dots-container`);
@@ -503,11 +542,6 @@
 
                         // Move form container to the bottom and show it
                         this.moveFormContainerToBottom(chatContainer);
-
-                        const assistantEl = document.getElementById(`assistant-message-${assistantMsgCount}`);
-                        if (assistantEl) {
-                            assistantEl.scrollIntoView({behavior: 'smooth', block: 'start'});
-                        }
                         window.refreshLucideIcons?.();
                     } catch (e) {
                         console.error(e);
@@ -533,10 +567,9 @@
                         } else {
                             chatContainer.appendChild(formContainer);
                         }
-                        // Show with a slight delay for smooth appearance
-                        requestAnimationFrame(() => {
-                            formContainer.classList.remove('hidden');
-                        });
+                        // Focus on input after moving
+                        const customFollowUp = document.getElementById('customFollowUp');
+                        if (customFollowUp) customFollowUp.focus();
                     }
                 },
 
@@ -572,9 +605,12 @@
                         });
                     });
 
-                    // Clear the input field
+                    // Clear the input field and keep focus
                     const customFollowUp = document.getElementById('customFollowUp');
-                    if (customFollowUp) customFollowUp.value = '';
+                    if (customFollowUp) {
+                        customFollowUp.value = '';
+                        customFollowUp.focus();
+                    }
                 },
 
                 focusSearchInput() {
@@ -583,12 +619,9 @@
                 },
 
                 typeText(element, markdownText, delay = 1) {
-                    hideChatFormContainer();
-
                     return new Promise(resolve => {
                         // Immediately render the full markdown text without typing effect
                         element.innerHTML = marked.parse(markdownText);
-                        showChatFormContainer();
                         resolve();
                     });
                 },
@@ -652,14 +685,26 @@
         }
 
 
-        function hideChatFormContainer() {
-            const formContainer = document.getElementById('chat-message-form-container');
-            if (formContainer) formContainer.classList.add('hidden');
+        function scrollChatToBottom(smooth = true) {
+            const scrollContainer = document.getElementById('chat-messages-scroll');
+            if (scrollContainer) {
+                scrollContainer.scrollTo({
+                    top: scrollContainer.scrollHeight,
+                    behavior: smooth ? 'smooth' : 'instant'
+                });
+            }
         }
 
-        function showChatFormContainer() {
-            const formContainer = document.getElementById('chat-message-form-container');
-            if (formContainer) formContainer.classList.remove('hidden');
+        function isNearBottom() {
+            const scrollContainer = document.getElementById('chat-messages-scroll');
+            if (!scrollContainer) return true;
+            const threshold = 100;
+            return scrollContainer.scrollHeight - scrollContainer.scrollTop - scrollContainer.clientHeight < threshold;
         }
+
+        // Scroll to bottom on page load for existing chats
+        document.addEventListener('DOMContentLoaded', function() {
+            scrollChatToBottom(false);
+        });
     </script>
 @endpush

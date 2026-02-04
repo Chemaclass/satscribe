@@ -690,3 +690,27 @@ a:hover,
 .skeleton {
     @apply bg-gray-200 animate-pulse text-transparent;
 }
+
+/* =============================================================================
+   Slack-like Chat Layout
+============================================================================= */
+#chat-wrapper {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    min-height: 0;
+}
+
+#chat-messages-scroll {
+    flex: 1 1 0;
+    overflow-y: auto;
+    min-height: 0;
+    scroll-behavior: smooth;
+}
+
+#chat-message-form-container {
+    flex-shrink: 0;
+    border-top: 1px solid var(--btc-border-default);
+}
+
+/* Chat view: homepage header is hidden via inline style or Alpine's hidden class */
