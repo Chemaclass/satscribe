@@ -1,5 +1,28 @@
 @extends('layouts.base')
 
+@section('title', __('FAQ - Frequently Asked Questions') . ' – Satscribe')
+@section('description', __('Find answers to common questions about Satscribe, Bitcoin blockchain exploration, transactions, blocks, and AI-powered explanations.'))
+
+@push('structured_data')
+@if(isset($faqs) && $faqs->count() > 0)
+@php
+$faqSchema = [
+    '@context' => 'https://schema.org',
+    '@type' => 'FAQPage',
+    'mainEntity' => $faqs->take(10)->map(fn($faq) => [
+        '@type' => 'Question',
+        'name' => $faq->question,
+        'acceptedAnswer' => [
+            '@type' => 'Answer',
+            'text' => strip_tags($faq->answer ?? $faq->answer_advance ?? ''),
+        ],
+    ])->values()->all(),
+];
+@endphp
+<script type="application/ld+json">{!! json_encode($faqSchema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}</script>
+@endif
+@endpush
+
 @section('content')
     <section class="faq-section px-4 sm:px-6 lg:px-8 py-6" x-data="faqSection()">
         {{-- Header --}}

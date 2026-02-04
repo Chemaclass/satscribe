@@ -1,2 +1,23 @@
+# Satscribe - Bitcoin Blockchain Explorer with AI
+# https://satscribe.net
+
 User-agent: *
-Disallow:
+Allow: /
+Disallow: /api/
+Disallow: /auth/
+Disallow: /stream
+Disallow: /chats/*/messages
+
+# Crawl-delay for respectful crawling
+Crawl-delay: 1
+
+# Sitemap location
+Sitemap: https://satscribe.net/sitemap.xml
+
+# Google specific
+User-agent: Googlebot
+Allow: /
+
+# Bing specific
+User-agent: Bingbot
+Allow: /

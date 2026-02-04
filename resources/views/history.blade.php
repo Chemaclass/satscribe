@@ -1,6 +1,7 @@
 @extends('layouts.base')
 
-@section('title', 'Satscribe History')
+@section('title', __('Chat History - Browse Bitcoin Blockchain Conversations') . ' – Satscribe')
+@section('description', __('Explore past conversations about Bitcoin blocks and transactions. Learn from AI-generated explanations of blockchain data.'))
 
 @section('content')
     <section id="history" class="sm:px-6 lg:px-8 px-4 py-6">

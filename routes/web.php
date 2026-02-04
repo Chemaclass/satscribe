@@ -11,6 +11,20 @@ use Modules\Nostr\Infrastructure\Http\Controller\ProfileController;
 use Modules\Shared\Infrastructure\Http\Middleware\IpRateLimiter;
 use Modules\UtxoTrace\Infrastructure\Http\Controller\TraceUtxoPageController;
 
+Route::get('sitemap.xml', function () {
+    $urls = [
+        ['loc' => url('/'), 'priority' => '1.0', 'changefreq' => 'daily'],
+        ['loc' => url('/faq'), 'priority' => '0.8', 'changefreq' => 'weekly'],
+        ['loc' => url('/history'), 'priority' => '0.7', 'changefreq' => 'daily'],
+        ['loc' => url('/trace-utxo'), 'priority' => '0.7', 'changefreq' => 'weekly'],
+        ['loc' => url('/nostr'), 'priority' => '0.6', 'changefreq' => 'monthly'],
+    ];
+
+    return response()
+        ->view('sitemap', ['urls' => $urls])
+        ->header('Content-Type', 'application/xml');
+})->name('sitemap');
+
 Route::redirect('generate', '/');
 Route::redirect('describe', '/');
 

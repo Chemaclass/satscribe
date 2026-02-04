@@ -1,6 +1,7 @@
 @extends('layouts.base')
 
-@section('title', __('Trace UTXO'))
+@section('title', __('Trace UTXO - Bitcoin Transaction Input Tracer') . ' – Satscribe')
+@section('description', __('Trace Bitcoin UTXOs (Unspent Transaction Outputs) through the blockchain. Follow the flow of satoshis from transaction to transaction.'))
 
 @section('content')
     <section class="px-4 py-6" x-data="traceUtxoComponent()">

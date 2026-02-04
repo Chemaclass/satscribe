@@ -1,6 +1,7 @@
 @extends('layouts.base')
 
-@section('title', 'Nostr Login Guide')
+@section('title', __('Nostr Login Guide - Decentralized Authentication') . ' – Satscribe')
+@section('description', __('Learn how to login to Satscribe using Nostr protocol. Privacy-focused, decentralized authentication without passwords or email.'))
 
 @section('content')
     <section class="px-4 sm:px-6 lg:px-8 py-6 space-y-6">
