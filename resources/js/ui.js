@@ -29,11 +29,20 @@ const toggleRawBlockVisibility = (button, rawBlock, visible) => {
     rawBlock.style.display = visible ? 'block' : 'none';
     rawBlock.classList.toggle('hidden', !visible);
 
+    // Toggle button text
     const fullSpan = button.querySelector('.full-label');
     const shortSpan = button.querySelector('.short-label');
-
     if (fullSpan) fullSpan.textContent = visible ? window.i18n.hideRawData : window.i18n.showRawData;
     if (shortSpan) shortSpan.textContent = visible ? window.i18n.hide : window.i18n.raw;
+
+    // Toggle icons
+    const iconShow = button.querySelector('.icon-show');
+    const iconHide = button.querySelector('.icon-hide');
+    if (iconShow) iconShow.classList.toggle('hidden', visible);
+    if (iconHide) iconHide.classList.toggle('hidden', !visible);
+
+    // Toggle active state on button
+    button.classList.toggle('active', visible);
 };
 
 const loadRawData = async (messageId) => {
@@ -138,16 +147,19 @@ function setupEventDelegation() {
             const rawBlock = document.getElementById(targetId);
             if (!rawBlock) return;
 
+            // Find the content element (nested pre) or fall back to the container itself
+            const contentEl = rawBlock.querySelector('.raw-data-content') || rawBlock;
+
             const isLoaded = rawBlock.dataset.loaded === 'true';
             const isVisible = getComputedStyle(rawBlock).display !== 'none';
 
             if (!isLoaded) {
                 try {
                     const data = await loadRawData(entryId);
-                    rawBlock.innerText = JSON.stringify(data, null, 2);
+                    contentEl.innerText = JSON.stringify(data, null, 2);
                     rawBlock.dataset.loaded = 'true';
                 } catch {
-                    rawBlock.innerText = 'Failed to load data.';
+                    contentEl.innerText = 'Failed to load data.';
                     rawBlock.dataset.loaded = 'true';
                 }
 

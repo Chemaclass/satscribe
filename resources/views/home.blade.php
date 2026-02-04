@@ -104,20 +104,36 @@
 
                     const chatContainer = document.getElementById('chat-container');
                     if (chatContainer) {
+                        const searchInput = this.input.trim();
+                        const isBlock = searchInput.length < 10 || searchInput.startsWith('00000000');
+                        const contextIcon = isBlock ? 'box' : 'arrow-right-left';
+                        const contextLabel = isBlock
+                            ? `{{ __('Block') }} #${searchInput || '...'}`
+                            : `{{ __('Transaction') }} ${searchInput.substring(0, 12)}...`;
+
                         // Create scrollable structure for new chat with header
                         chatContainer.innerHTML = `
                             <div id="chat-header" class="flex-shrink-0 flex items-center justify-between p-2 border-b border-gray-200">
-                                <span class="text-sm text-gray-600">{{ __('Chat') }}</span>
+                                <div class="flex items-center gap-2">
+                                    <i data-lucide="${contextIcon}" class="w-4 h-4 text-gray-500"></i>
+                                    <span id="chat-context-label" class="text-sm font-medium text-gray-700">${contextLabel}</span>
+                                </div>
                                 <a href="{{ route('home.index') }}" class="flex items-center gap-1 text-sm text-orange-600 hover:text-orange-700">
                                     <i data-lucide="plus" class="w-4 h-4"></i>
                                     {{ __('New Chat') }}
                                 </a>
                             </div>
-                            <div id="chat-messages-scroll" class="flex-grow overflow-y-auto p-2">
+                            <div id="chat-messages-scroll" class="flex-grow overflow-y-auto p-2 relative">
                                 <div id="chat-message-groups"></div>
+                            </div>
+                            <div id="scroll-to-bottom-btn" class="hidden absolute bottom-24 right-4 z-10">
+                                <button type="button" onclick="scrollChatToBottom()" class="p-2 bg-white border border-gray-300 rounded-full shadow-lg hover:bg-gray-50 transition-colors" title="{{ __('Scroll to bottom') }}">
+                                    <i data-lucide="chevron-down" class="w-5 h-5 text-gray-600"></i>
+                                </button>
                             </div>
                         `;
                         window.refreshLucideIcons?.();
+                        this.setupScrollListener();
                     }
 
                     const chatMessageGroups = document.getElementById('chat-message-groups');
@@ -164,7 +180,18 @@
                             </span>
                         </span>
                     </div>
-                    <div class="inline-block rounded px-3 py-2 prose streaming-content"></div>
+                    <div class="loading-skeleton mb-2 space-y-2 skeleton-container">
+                        <div class="h-4 bg-gray-200 rounded animate-pulse w-3/4"></div>
+                        <div class="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
+                        <div class="h-4 bg-gray-200 rounded animate-pulse w-5/6"></div>
+                    </div>
+                    <div class="inline-block rounded px-3 py-2 prose streaming-content hidden"></div>
+                    <div class="message-actions flex items-center gap-2 mt-1 ml-3 hidden">
+                        <button type="button" onclick="copyMessageContent(this)" class="text-xs text-gray-500 hover:text-gray-700 flex items-center gap-1 copy-btn">
+                            <i data-lucide="copy" class="w-3 h-3"></i>
+                            <span>{{ __('Copy') }}</span>
+                        </button>
+                    </div>
                 </div>
             </div>
         `;
@@ -193,7 +220,11 @@
                         const reader = response.body.getReader();
                         const decoder = new TextDecoder();
                         let streamedContent = '';
-                        const contentEl = document.querySelector(`#assistant-message-${assistantMsgCount} .streaming-content`);
+                        const assistantEl = document.getElementById(`assistant-message-${assistantMsgCount}`);
+                        const contentEl = assistantEl?.querySelector('.streaming-content');
+                        const skeletonEl = assistantEl?.querySelector('.skeleton-container');
+                        const actionsEl = assistantEl?.querySelector('.message-actions');
+                        let firstChunk = true;
 
                         while (true) {
                             const {done, value} = await reader.read();
@@ -208,6 +239,12 @@
                                         const event = JSON.parse(line.slice(6));
 
                                         if (event.type === 'chunk') {
+                                            // Hide skeleton on first chunk
+                                            if (firstChunk) {
+                                                if (skeletonEl) skeletonEl.classList.add('hidden');
+                                                if (contentEl) contentEl.classList.remove('hidden');
+                                                firstChunk = false;
+                                            }
                                             streamedContent += event.data;
                                             if (contentEl) {
                                                 contentEl.innerHTML = marked.parse(streamedContent);
@@ -217,20 +254,33 @@
                                                 }
                                             }
                                         } else if (event.type === 'done') {
-                                            const loader = document.querySelector(`#assistant-message-${assistantMsgCount} .loading-dots-container`);
+                                            const loader = assistantEl?.querySelector('.loading-dots-container');
                                             if (loader) loader.remove();
+                                            // Show action buttons
+                                            if (actionsEl) actionsEl.classList.remove('hidden');
 
                                             // Update max block height first (needed for validation)
                                             if (event.data.maxBitcoinBlockHeight) {
                                                 this.maxBitcoinBlockHeight = event.data.maxBitcoinBlockHeight;
                                             }
 
-                                            // Update search input with the block/tx that was used
-                                            if (event.data.search && !this.input.trim()) {
-                                                this.input = event.data.search;
-                                                const searchInput = document.getElementById('search-input');
-                                                if (searchInput) searchInput.value = event.data.search;
-                                                this.validate(); // Re-validate with the new input
+                                            // Update search input and chat header with the block/tx that was used
+                                            if (event.data.search) {
+                                                const search = event.data.search;
+                                                if (!this.input.trim()) {
+                                                    this.input = search;
+                                                    const searchInput = document.getElementById('search-input');
+                                                    if (searchInput) searchInput.value = search;
+                                                    this.validate(); // Re-validate with the new input
+                                                }
+                                                // Update chat header label
+                                                const contextLabel = document.getElementById('chat-context-label');
+                                                if (contextLabel) {
+                                                    const isBlock = search.length < 10 || search.startsWith('00000000');
+                                                    contextLabel.textContent = isBlock
+                                                        ? `{{ __('Block') }} #${search}`
+                                                        : `{{ __('Transaction') }} ${search.substring(0, 12)}...`;
+                                                }
                                             }
 
                                             if (event.data.chatUlid) {
@@ -269,6 +319,11 @@
                     } finally {
                         this.isSubmitting = false;
                         this.hasSubmitted = true;
+                        // Ensure focus returns to input after completion
+                        requestAnimationFrame(() => {
+                            const input = document.getElementById('customFollowUp');
+                            if (input) input.focus();
+                        });
                     }
                 },
 
@@ -338,8 +393,11 @@
 
                     // Scroll to bottom after rendering form and focus input
                     scrollChatToBottom();
-                    const customFollowUp = document.getElementById('customFollowUp');
-                    if (customFollowUp) customFollowUp.focus();
+                    // Use setTimeout to ensure focus after Alpine initialization completes
+                    setTimeout(() => {
+                        const customFollowUp = document.getElementById('customFollowUp');
+                        if (customFollowUp) customFollowUp.focus();
+                    }, 50);
                 },
 
                 get helperText() {
@@ -454,7 +512,18 @@
                             </span>
                         </span>
                     </div>
-                    <div class="inline-block rounded px-3 py-2 prose streaming-content"></div>
+                    <div class="loading-skeleton mb-2 space-y-2 skeleton-container">
+                        <div class="h-4 bg-gray-200 rounded animate-pulse w-3/4"></div>
+                        <div class="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
+                        <div class="h-4 bg-gray-200 rounded animate-pulse w-5/6"></div>
+                    </div>
+                    <div class="inline-block rounded px-3 py-2 prose streaming-content hidden"></div>
+                    <div class="message-actions flex items-center gap-2 mt-1 ml-3 hidden">
+                        <button type="button" onclick="copyMessageContent(this)" class="text-xs text-gray-500 hover:text-gray-700 flex items-center gap-1 copy-btn">
+                            <i data-lucide="copy" class="w-3 h-3"></i>
+                            <span>{{ __('Copy') }}</span>
+                        </button>
+                    </div>
                 </div>
             </div>
         `;
@@ -498,7 +567,11 @@
                         const reader = response.body.getReader();
                         const decoder = new TextDecoder();
                         let streamedContent = '';
-                        const contentEl = document.querySelector(`#assistant-message-${assistantMsgCount} .streaming-content`);
+                        const assistantEl = document.getElementById(`assistant-message-${assistantMsgCount}`);
+                        const contentEl = assistantEl?.querySelector('.streaming-content');
+                        const skeletonEl = assistantEl?.querySelector('.skeleton-container');
+                        const actionsEl = assistantEl?.querySelector('.message-actions');
+                        let firstChunk = true;
 
                         while (true) {
                             const {done, value} = await reader.read();
@@ -513,6 +586,12 @@
                                         const event = JSON.parse(line.slice(6));
 
                                         if (event.type === 'chunk') {
+                                            // Hide skeleton on first chunk
+                                            if (firstChunk) {
+                                                if (skeletonEl) skeletonEl.classList.add('hidden');
+                                                if (contentEl) contentEl.classList.remove('hidden');
+                                                firstChunk = false;
+                                            }
                                             streamedContent += event.data;
                                             if (contentEl) {
                                                 contentEl.innerHTML = marked.parse(streamedContent);
@@ -522,14 +601,18 @@
                                                 }
                                             }
                                         } else if (event.type === 'done') {
-                                            const loader = document.querySelector(`#assistant-message-${assistantMsgCount} .loading-dots-container`);
+                                            const loader = assistantEl?.querySelector('.loading-dots-container');
                                             if (loader) loader.remove();
+                                            // Show action buttons
+                                            if (actionsEl) actionsEl.classList.remove('hidden');
 
                                             if (event.data.suggestions) {
                                                 this.updateSuggestionsList(chatUlid, event.data.suggestions);
                                             }
                                         } else if (event.type === 'error') {
+                                            if (skeletonEl) skeletonEl.classList.add('hidden');
                                             if (contentEl) {
+                                                contentEl.classList.remove('hidden');
                                                 contentEl.innerHTML = `<span class="text-red-700">${this.escapeHtml(event.data)}</span>`;
                                             }
                                         }
@@ -567,9 +650,11 @@
                         } else {
                             chatContainer.appendChild(formContainer);
                         }
-                        // Focus on input after moving
-                        const customFollowUp = document.getElementById('customFollowUp');
-                        if (customFollowUp) customFollowUp.focus();
+                        // Focus on input after moving (with delay for fast cached responses)
+                        setTimeout(() => {
+                            const customFollowUp = document.getElementById('customFollowUp');
+                            if (customFollowUp) customFollowUp.focus();
+                        }, 50);
                     }
                 },
 
@@ -605,12 +690,14 @@
                         });
                     });
 
-                    // Clear the input field and keep focus
-                    const customFollowUp = document.getElementById('customFollowUp');
-                    if (customFollowUp) {
-                        customFollowUp.value = '';
-                        customFollowUp.focus();
-                    }
+                    // Clear the input field and keep focus (with delay for fast cached responses)
+                    setTimeout(() => {
+                        const customFollowUp = document.getElementById('customFollowUp');
+                        if (customFollowUp) {
+                            customFollowUp.value = '';
+                            customFollowUp.focus();
+                        }
+                    }, 50);
                 },
 
                 focusSearchInput() {
@@ -633,6 +720,18 @@
                             '/': '&#47;', '<': '&lt;', '>': '&gt;'
                         }[a];
                     });
+                },
+
+                setupScrollListener() {
+                    const scrollEl = document.getElementById('chat-messages-scroll');
+                    const scrollBtn = document.getElementById('scroll-to-bottom-btn');
+                    if (scrollEl && scrollBtn) {
+                        scrollEl.addEventListener('scroll', () => {
+                            const threshold = 100;
+                            const isNearBottom = scrollEl.scrollHeight - scrollEl.scrollTop - scrollEl.clientHeight < threshold;
+                            scrollBtn.classList.toggle('hidden', isNearBottom);
+                        });
+                    }
                 }
             };
         }
@@ -700,6 +799,33 @@
             if (!scrollContainer) return true;
             const threshold = 100;
             return scrollContainer.scrollHeight - scrollContainer.scrollTop - scrollContainer.clientHeight < threshold;
+        }
+
+        function copyMessageContent(button) {
+            const messageEl = button.closest('.assistant-message');
+            const contentEl = messageEl?.querySelector('.streaming-content, .message-content');
+            if (!contentEl) return;
+
+            const text = contentEl.innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                const icon = button.querySelector('[data-lucide]');
+                const span = button.querySelector('span');
+                if (icon) {
+                    icon.setAttribute('data-lucide', 'check');
+                    icon.classList.add('text-green-600');
+                }
+                if (span) span.textContent = '{{ __('Copied!') }}';
+                window.refreshLucideIcons?.();
+
+                setTimeout(() => {
+                    if (icon) {
+                        icon.setAttribute('data-lucide', 'copy');
+                        icon.classList.remove('text-green-600');
+                    }
+                    if (span) span.textContent = '{{ __('Copy') }}';
+                    window.refreshLucideIcons?.();
+                }, 2000);
+            });
         }
 
         // Scroll to bottom on page load for existing chats
