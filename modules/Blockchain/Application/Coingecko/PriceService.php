@@ -93,10 +93,12 @@ final readonly class PriceService implements PriceServiceInterface
 
             $data = $response->json('bitcoin') ?? [];
 
-            return array_map(
-                static fn (string $currency) => (float) ($data[$currency] ?? 0.0),
-                self::SUPPORTED_CURRENCIES,
-            );
+            $prices = [];
+            foreach (self::SUPPORTED_CURRENCIES as $currency) {
+                $prices[$currency] = (float) ($data[$currency] ?? 0.0);
+            }
+
+            return $prices;
         });
     }
 
