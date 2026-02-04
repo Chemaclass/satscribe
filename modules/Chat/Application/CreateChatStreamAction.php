@@ -88,6 +88,7 @@ final readonly class CreateChatStreamAction implements CreateChatStreamActionInt
                 'content' => $fullResponse,
                 'suggestions' => $suggestions,
                 'maxBitcoinBlockHeight' => $this->blockchainFacade->getMaxPossibleBlockHeight(),
+                'search' => $input->text,
             ],
         ];
     }

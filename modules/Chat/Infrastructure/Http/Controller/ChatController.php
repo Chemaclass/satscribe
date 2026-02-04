@@ -7,6 +7,7 @@ namespace Modules\Chat\Infrastructure\Http\Controller;
 use App\Models\Chat;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Modules\Blockchain\Domain\BlockchainFacadeInterface;
 use Modules\Blockchain\Domain\Exception\BlockchainException;
 use Modules\Chat\Application\ChatService;
 use Modules\Chat\Domain\AddMessageStreamActionInterface;
@@ -24,6 +25,7 @@ final readonly class ChatController
 {
     public function __construct(
         private ChatService $chatService,
+        private BlockchainFacadeInterface $blockchainFacade,
         private CreateChatStreamActionInterface $createChatStreamAction,
         private AddMessageStreamActionInterface $addMessageStreamAction,
         private LoggerInterface $logger,
@@ -123,7 +125,7 @@ final readonly class ChatController
 
         $search = $request->hasSearchInput()
             ? PromptInput::fromRaw($request->getSearchInput())
-            : PromptInput::fromRaw('0');
+            : PromptInput::fromRaw($this->blockchainFacade->getCurrentBlockHeight());
 
         $persona = PromptPersona::tryFrom($request->getPersonaInput())
             ?? PromptPersona::from(PromptPersona::DEFAULT);

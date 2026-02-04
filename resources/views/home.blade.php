@@ -194,6 +194,13 @@
                                                 this.maxBitcoinBlockHeight = event.data.maxBitcoinBlockHeight;
                                             }
 
+                                            // Update search input with the block/tx that was used
+                                            if (event.data.search && !this.input.trim()) {
+                                                this.input = event.data.search;
+                                                const searchInput = document.getElementById('search-input');
+                                                if (searchInput) searchInput.value = event.data.search;
+                                            }
+
                                             if (event.data.chatUlid) {
                                                 const url = new URL(window.location);
                                                 url.pathname = `/chats/${event.data.chatUlid}`;
