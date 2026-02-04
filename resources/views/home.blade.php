@@ -190,6 +190,7 @@
                                             const loader = document.querySelector(`#assistant-message-${assistantMsgCount} .loading-dots-container`);
                                             if (loader) loader.remove();
 
+                                            // Update max block height first (needed for validation)
                                             if (event.data.maxBitcoinBlockHeight) {
                                                 this.maxBitcoinBlockHeight = event.data.maxBitcoinBlockHeight;
                                             }
@@ -199,6 +200,7 @@
                                                 this.input = event.data.search;
                                                 const searchInput = document.getElementById('search-input');
                                                 if (searchInput) searchInput.value = event.data.search;
+                                                this.validate(); // Re-validate with the new input
                                             }
 
                                             if (event.data.chatUlid) {
