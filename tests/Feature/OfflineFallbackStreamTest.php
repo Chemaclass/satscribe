@@ -77,6 +77,49 @@ final class OfflineFallbackStreamTest extends TestCase
         self::assertSame(1, Chat::count());
     }
 
+    /**
+     * A follow-up goes through a different action, and the fallback has to
+     * behave the same there or the two drift apart.
+     */
+    public function test_a_follow_up_message_falls_back_too(): void
+    {
+        config(['services.ai_offline_fallback' => true]);
+
+        $chat = Chat::create([
+            'title' => 'Test Chat',
+            'tracking_id' => tracking_id(),
+            'is_public' => false,
+            'is_shared' => false,
+        ]);
+        $chat->addUserMessage('question', ['type' => 'block', 'input' => '210000', 'persona' => 'storyteller']);
+        $chat->addAssistantMessage('an earlier answer');
+
+        $body = $this->post(route('chat.add-message-stream', $chat), ['message' => 'And the fees?'])
+            ->streamedContent();
+
+        self::assertStringContainsString('"type":"done"', $body);
+        self::assertStringContainsString('No AI model was reachable', $body);
+    }
+
+    public function test_a_follow_up_still_errors_when_the_fallback_is_off(): void
+    {
+        config(['services.ai_offline_fallback' => false]);
+
+        $chat = Chat::create([
+            'title' => 'Test Chat',
+            'tracking_id' => tracking_id(),
+            'is_public' => false,
+            'is_shared' => false,
+        ]);
+        $chat->addUserMessage('question', ['type' => 'block', 'input' => '210000', 'persona' => 'storyteller']);
+        $chat->addAssistantMessage('an earlier answer');
+
+        $body = $this->post(route('chat.add-message-stream', $chat), ['message' => 'And the fees?'])
+            ->streamedContent();
+
+        self::assertStringContainsString('"type":"error"', $body);
+    }
+
     private function stream(): string
     {
         return $this->post('/stream', [
