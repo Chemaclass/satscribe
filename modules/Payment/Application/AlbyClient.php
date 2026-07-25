@@ -36,21 +36,7 @@ final class AlbyClient implements AlbyClientInterface
 
     public function createInvoice(InvoiceData $invoice): array
     {
-        $params = [
-            'amount' => $invoice->amount,
-            'memo' => $invoice->memo,
-            'expiry' => $invoice->expiry,
-        ];
-
-        if ($invoice->descriptionHash !== null) {
-            $params['description_hash'] = $invoice->descriptionHash;
-        }
-
-        if ($invoice->description !== null) {
-            $params['description'] = $invoice->description;
-        }
-
-        $data = $this->request('POST', '/invoices', $params);
+        $data = $this->request('POST', '/invoices', $invoice->toArray());
 
         if (!isset($data['payment_hash']) || !is_string($data['payment_hash'])) {
             throw new RuntimeException('Alby invoice response is missing a payment_hash.');

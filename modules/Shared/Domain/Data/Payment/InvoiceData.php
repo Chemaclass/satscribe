@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Modules\Shared\Domain\Data\Payment;
 
-use InvalidArgumentException;
-
 final readonly class InvoiceData
 {
     public function __construct(
@@ -15,34 +13,6 @@ final readonly class InvoiceData
         public ?string $descriptionHash = null,
         public int $expiry = 3600,
     ) {
-    }
-
-    /**
-     * @param  array{
-     *     amount?: int,
-     *     memo?: string,
-     *     description?: ?string,
-     *     description_hash?: ?string,
-     *     expiry?: int,
-     * }  $data
-     */
-    public static function create(array $data): self
-    {
-        if (!isset($data['amount'])) {
-            throw new InvalidArgumentException('Amount is required');
-        }
-
-        if ($data['amount'] <= 0) {
-            throw new InvalidArgumentException('Amount must be positive');
-        }
-
-        return new self(
-            amount: $data['amount'],
-            memo: $data['memo'] ?? 'Tip to unlock more requests',
-            description: $data['description'] ?? null,
-            descriptionHash: $data['description_hash'] ?? null,
-            expiry: $data['expiry'] ?? 3600,
-        );
     }
 
     /**
