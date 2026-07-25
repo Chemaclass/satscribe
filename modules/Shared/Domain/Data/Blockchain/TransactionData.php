@@ -4,8 +4,17 @@ declare(strict_types=1);
 
 namespace Modules\Shared\Domain\Data\Blockchain;
 
+/**
+ * `vin`/`vout` hold raw Blockstream input/output objects. Their inner keys vary
+ * by script type (and `vin` entries may carry a nested `prevout`), so they stay
+ * unsealed rather than being given a shape the API does not guarantee.
+ */
 final readonly class TransactionData implements BlockchainDataInterface
 {
+    /**
+     * @param  list<array<string, mixed>>  $vin
+     * @param  list<array<string, mixed>>  $vout
+     */
     public function __construct(
         public string $txid,
         public int $version = 0,
@@ -22,16 +31,24 @@ final readonly class TransactionData implements BlockchainDataInterface
     ) {
     }
 
-    public function getType(): string
-    {
-        return 'transaction';
-    }
-
-    public function getInput(): string
-    {
-        return $this->txid;
-    }
-
+    /**
+     * @return array{
+     *     txid: string,
+     *     version: int,
+     *     locktime: int,
+     *     vin: list<array<string, mixed>>,
+     *     vout: list<array<string, mixed>>,
+     *     size: int,
+     *     weight: int,
+     *     fee: int,
+     *     status: array{
+     *         confirmed: bool,
+     *         block_height: int|null,
+     *         block_hash: string|null,
+     *         block_time: int|null,
+     *     },
+     * }
+     */
     public function toArray(): array
     {
         return [

@@ -13,6 +13,7 @@ use Illuminate\Http\Client\Factory as HttpFactory;
 use Modules\Blockchain\Domain\PriceServiceInterface;
 use Modules\OpenAI\Domain\Exception\OpenAIError;
 use Modules\Shared\Domain\Chat\ChatConstants;
+use Modules\Shared\Domain\Chat\SentenceTrimmer;
 use Modules\Shared\Domain\Data\Blockchain\BlockchainData;
 use Modules\Shared\Domain\Data\Blockchain\BlockData;
 use Modules\Shared\Domain\Data\Blockchain\TransactionData;
@@ -42,6 +43,9 @@ final readonly class OpenAIService
         private string $openAiModel,
         private string $openAiModelFollowup,
     ) {
+        if ($this->openAiApiKey === '') {
+            throw new OpenAIError('OPENAI_API_KEY is not configured.');
+        }
     }
 
     public function generateText(
@@ -90,41 +94,13 @@ final readonly class OpenAIService
             'persona' => $persona->value,
         ]);
 
-        $history = collect($chat?->getHistory() ?? [])
-            ->take(-5)
-            ->values()
-            ->all();
-
-        $timestamp = 0;
-        if ($data->block instanceof BlockData) {
-            $timestamp = $data->block->timestamp;
-        } elseif ($data->transaction instanceof TransactionData) {
-            $timestamp = $data->transaction->blockTime ?? 0;
-        }
-
-        $messages = [
-            [
-                'role' => 'system',
-                'content' => $this->promptBuilder->buildSystemPrompt($persona),
-            ],
-            ...$history,
-            [
-                'role' => 'user',
-                'content' => $this->buildBlockchainContext($data, $additionalContext),
-            ],
-            [
-                'role' => 'user',
-                'content' => $this->preparePrompt($input->type, $question, $persona, $timestamp),
-            ],
-        ];
-
         $response = $this->httpFactory
             ->withToken($this->openAiApiKey)
             ->withOptions(['stream' => true])
             ->timeout(60)
             ->post('https://api.openai.com/v1/chat/completions', [
                 'model' => $this->openAiModel,
-                'messages' => $messages,
+                'messages' => $this->buildMessages($data, $input, $persona, $question, $chat, $additionalContext),
                 'max_tokens' => $persona->maxTokens(),
                 'stream' => true,
             ]);
@@ -134,7 +110,7 @@ final readonly class OpenAIService
                 'status' => $response->status(),
             ]);
 
-            return;
+            throw new OpenAIError('OpenAI API streaming request failed');
         }
 
         $body = $response->toPsrResponse()->getBody();
@@ -181,38 +157,11 @@ final readonly class OpenAIService
             'persona' => $persona->value,
             'is_followup' => $chat instanceof Chat,
         ]);
-        $history = collect($chat?->getHistory() ?? [])
-            ->take(-5)
-            ->values()
-            ->all();
-
-        $timestamp = 0;
-        if ($data->block instanceof BlockData) {
-            $timestamp = $data->block->timestamp;
-        } elseif ($data->transaction instanceof TransactionData) {
-            $timestamp = $data->transaction->blockTime ?? 0;
-        }
-
-        $messages = [
-            [
-                'role' => 'system',
-                'content' => $this->promptBuilder->buildSystemPrompt($persona),
-            ],
-            ...$history,
-            [
-                'role' => 'user',
-                'content' => $this->buildBlockchainContext($data, $additionalContext),
-            ],
-            [
-                'role' => 'user',
-                'content' => $this->preparePrompt($input->type, $question, $persona, $timestamp),
-            ],
-        ];
 
         $response = $this->http->withToken($this->openAiApiKey)
             ->post('https://api.openai.com/v1/chat/completions', [
                 'model' => $model,
-                'messages' => $messages,
+                'messages' => $this->buildMessages($data, $input, $persona, $question, $chat, $additionalContext),
                 'max_tokens' => $persona->maxTokens(),
             ]);
 
@@ -233,10 +182,54 @@ final readonly class OpenAIService
         }
 
         $text = $response->json('choices.0.message.content');
-        $text = $this->trimToLastFullSentence($text);
+        $text = SentenceTrimmer::toLastFullSentence($text);
         $this->logger->debug('OpenAI description generation worked', ['length' => strlen($text)]);
 
         return $text;
+    }
+
+    /**
+     * Assembles the chat completion payload shared by the streaming and
+     * non-streaming paths. Keeping it in one place is what prevents the two
+     * from drifting apart again.
+     *
+     * @return array<int, array<string, string>>
+     */
+    private function buildMessages(
+        BlockchainData $data,
+        PromptInput $input,
+        PromptPersona $persona,
+        string $question,
+        ?Chat $chat,
+        string $additionalContext,
+    ): array {
+        $history = collect($chat?->getHistory() ?? [])
+            ->take(-5)
+            ->values()
+            ->all();
+
+        $timestamp = 0;
+        if ($data->block instanceof BlockData) {
+            $timestamp = $data->block->timestamp;
+        } elseif ($data->transaction instanceof TransactionData) {
+            $timestamp = $data->transaction->blockTime ?? 0;
+        }
+
+        return [
+            [
+                'role' => 'system',
+                'content' => $this->promptBuilder->buildSystemPrompt($persona),
+            ],
+            ...$history,
+            [
+                'role' => 'user',
+                'content' => $this->buildBlockchainContext($data, $additionalContext),
+            ],
+            [
+                'role' => 'user',
+                'content' => $this->preparePrompt($input->type, $question, $persona, $timestamp),
+            ],
+        ];
     }
 
     private function buildCacheKey(PromptInput $input, PromptPersona $persona, string $question): string
@@ -369,20 +362,4 @@ Style:
 TEXT;
     }
 
-    private function trimToLastFullSentence(string $text): string
-    {
-        $text = trim($text);
-
-        preg_match_all('/[.?!…](?=\s|$)/u', $text, $matches, PREG_OFFSET_CAPTURE);
-
-        if (isset($matches[0]) && $matches[0] !== []) {
-            $last = end($matches[0]);
-            $cutPos = $last[1] + mb_strlen($last[0]);
-            $clean = mb_substr($text, 0, $cutPos);
-
-            return trim((string) preg_replace('/(\*\*|\*|_|\-)+$/u', '', $clean));
-        }
-
-        return $text;
-    }
 }

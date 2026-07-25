@@ -35,16 +35,20 @@ return [
         ],
     ],
 
+    // The '' defaults below are load-bearing: these values are injected into
+    // non-nullable string constructor params, so a missing env var would
+    // otherwise fail container resolution with a TypeError naming an argument
+    // position rather than the setting. Consumers treat '' as "not configured".
     'openai' => [
-        'key' => env('OPENAI_API_KEY'),
+        'key' => env('OPENAI_API_KEY', ''),
         'model' => env('OPENAI_MODEL', 'gpt-4'),
         'model_followup' => env('OPENAI_MODEL_FOLLOWUP', 'gpt-4o-mini'),
         'max_attempts' => env('OPENAI_MAX_ATTEMPTS', 200),
     ],
 
     'alby' => [
-        'api_key' => env('ALBY_API_KEY'),
-        'webhook_secret' => env('ALBY_WEBHOOK_SECRET'),
+        'api_key' => env('ALBY_API_KEY', ''),
+        'webhook_secret' => env('ALBY_WEBHOOK_SECRET', ''),
     ],
 
     'rate_limit' => [

@@ -6,10 +6,10 @@ namespace Modules\Shared\Domain\Data\Blockchain;
 
 interface BlockchainDataInterface
 {
-    public function getType(): string;
-
-    public function getInput(): string;
-
+    /**
+     * @return array<string, mixed> blockstream-shaped payload; see the
+     *         implementations for their concrete shapes
+     */
     public function toArray(): array;
 
     public function toPrompt(): string;

@@ -4,8 +4,29 @@ declare(strict_types=1);
 
 namespace Modules\Shared\Domain\Data\Blockchain;
 
+/**
+ * @phpstan-type TRawBlock array{
+ *     id: string,
+ *     height: int,
+ *     version: int,
+ *     timestamp: int,
+ *     tx_count: int,
+ *     size: int,
+ *     weight: int,
+ *     merkle_root: string,
+ *     previousblockhash?: string|null,
+ *     mediantime: int,
+ *     nonce: int,
+ *     bits: int,
+ *     difficulty: float,
+ *     ...
+ * }
+ */
 final readonly class BlockData implements BlockchainDataInterface
 {
+    /**
+     * @param  list<array<string, mixed>>  $transactions  raw Blockstream transactions
+     */
     public function __construct(
         public string $hash,
         public int $height = 0,
@@ -25,6 +46,10 @@ final readonly class BlockData implements BlockchainDataInterface
     ) {
     }
 
+    /**
+     * @param  TRawBlock  $data
+     * @param  list<array<string, mixed>>  $transactions
+     */
     public static function fromArray(array $data, array $transactions = []): self
     {
         $coinbaseMessage = null;
@@ -65,16 +90,25 @@ final readonly class BlockData implements BlockchainDataInterface
         return trim((string) $ascii);
     }
 
-    public function getType(): string
-    {
-        return 'block';
-    }
-
-    public function getInput(): string
-    {
-        return (string) $this->height;
-    }
-
+    /**
+     * @return array{
+     *     hash: string,
+     *     height: int,
+     *     version: int,
+     *     timestamp: int,
+     *     tx_count: int,
+     *     size: int,
+     *     weight: int,
+     *     merkle_root: string,
+     *     previousblockhash: string|null,
+     *     mediantime: int,
+     *     nonce: int,
+     *     bits: int,
+     *     difficulty: float,
+     *     transactions: list<array<string, mixed>>,
+     *     coinbase_message: string|null,
+     * }
+     */
     public function toArray(): array
     {
         return [

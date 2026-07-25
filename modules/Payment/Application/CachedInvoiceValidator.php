@@ -22,6 +22,9 @@ final readonly class CachedInvoiceValidator implements CachedInvoiceValidatorInt
     ) {
     }
 
+    /**
+     * @param  array<string, mixed>|null  $cached
+     */
     public function isValidCachedInvoice(?array $cached): bool
     {
         if (

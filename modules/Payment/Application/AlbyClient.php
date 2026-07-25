@@ -7,9 +7,13 @@ namespace Modules\Payment\Application;
 use GuzzleHttp\Client as GuzzleClient;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Psr7\Request as GuzzleRequest;
+use JsonException;
 use Modules\Payment\Domain\AlbyClientInterface;
 use Modules\Shared\Domain\Data\Payment\InvoiceData;
 use RuntimeException;
+
+use function is_array;
+use function is_string;
 
 /**
  * @see https://guides.getalby.com/developer-guide/alby-wallet-api
@@ -25,32 +29,6 @@ final class AlbyClient implements AlbyClientInterface
     ) {
     }
 
-    /**
-     * Retrieve the authenticated user information from Alby.
-     *
-     * @return array User details with additional alias and identity_pubkey fields
-     */
-    public function getInfo(): array
-    {
-        $data = $this->request('GET', '/user/me') ?? [];
-        $data['alias'] = 'getalby.com';
-        $data['identity_pubkey'] = '';
-        return $data;
-    }
-
-    /**
-     * Retrieve the current wallet balance.
-     *
-     * @return array Balance information
-     */
-    public function getBalance(): array
-    {
-        return $this->request('GET', '/balance') ?? [];
-    }
-
-    /**
-     * Check if the connection to Alby is valid.
-     */
     public function isConnectionValid(): bool
     {
         return $this->accessToken !== '' && $this->accessToken !== '0';
@@ -61,6 +39,7 @@ final class AlbyClient implements AlbyClientInterface
         $params = [
             'amount' => $invoice->amount,
             'memo' => $invoice->memo,
+            'expiry' => $invoice->expiry,
         ];
 
         if ($invoice->descriptionHash !== null) {
@@ -71,11 +50,11 @@ final class AlbyClient implements AlbyClientInterface
             $params['description'] = $invoice->description;
         }
 
-        if ($invoice->expiry !== null) {
-            $params['expiry'] = $invoice->expiry;
-        }
+        $data = $this->request('POST', '/invoices', $params);
 
-        $data = $this->request('POST', '/invoices', $params) ?? [];
+        if (!isset($data['payment_hash']) || !is_string($data['payment_hash'])) {
+            throw new RuntimeException('Alby invoice response is missing a payment_hash.');
+        }
 
         $data['id'] = $data['payment_hash'];
         $data['r_hash'] = $data['payment_hash'];
@@ -88,28 +67,23 @@ final class AlbyClient implements AlbyClientInterface
      */
     public function isInvoicePaid(string $hash): bool
     {
-        $invoice = $this->getInvoice($hash);
-        return $invoice['settled'] ?? false;
+        return (bool) ($this->getInvoice($hash)['settled'] ?? false);
     }
 
     /**
      * @param  string  $hash  Payment hash of the invoice
-     *
-     * @return array Invoice details
      */
     public function getInvoice(string $hash): array
     {
-        return $this->request('GET', "/invoices/{$hash}") ?? [];
+        return $this->request('GET', "/invoices/{$hash}");
     }
 
     /**
-     * @param  string  $method  HTTP method (GET, POST, etc.)
-     * @param  string  $path  API endpoint path
-     * @param  mixed|null  $body  Request payload (optional)
+     * @param  array<string, scalar>|null  $body
      *
-     * @return array|null Decoded JSON response as an associative array
+     * @return array<string, mixed>
      */
-    private function request(string $method, string $path, mixed $body = null): ?array
+    private function request(string $method, string $path, ?array $body = null): array
     {
         $headers = [
             'Accept' => 'application/json',
@@ -119,22 +93,35 @@ final class AlbyClient implements AlbyClientInterface
             'User-Agent' => 'alby-php',
         ];
 
-        $requestBody = $body ? json_encode($body) : null;
+        $requestBody = $body === null ? null : json_encode($body, JSON_THROW_ON_ERROR);
         $request = new GuzzleRequest($method, $path, $headers, $requestBody);
 
         try {
             $response = $this->client()->send($request);
             $responseBody = $response->getBody()->getContents();
-            return json_decode($responseBody, true);
         } catch (ClientException $e) {
             $error = json_decode($e->getResponse()->getBody()->getContents(), true);
-            throw new RuntimeException($error['error'] ?? 'Unknown Alby API error', $e->getCode(), $e);
+            $message = is_array($error) ? ($error['error'] ?? null) : null;
+            throw new RuntimeException(
+                is_string($message) ? $message : 'Unknown Alby API error',
+                $e->getCode(),
+                $e,
+            );
         }
+
+        try {
+            $decoded = json_decode($responseBody, true, flags: JSON_THROW_ON_ERROR);
+        } catch (JsonException $e) {
+            throw new RuntimeException("Alby returned an unparseable response for {$method} {$path}.", 0, $e);
+        }
+
+        if (!is_array($decoded)) {
+            throw new RuntimeException("Alby returned a non-object response for {$method} {$path}.");
+        }
+
+        return $decoded;
     }
 
-    /**
-     * Get or initialize the Guzzle HTTP client.
-     */
     private function client(): GuzzleClient
     {
         if ($this->client instanceof GuzzleClient) {

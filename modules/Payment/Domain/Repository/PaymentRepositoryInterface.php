@@ -11,7 +11,7 @@ interface PaymentRepositoryInterface
     /**
      * @param  array{
      *     tracking_id: ?string,
-     *     chat_id: ?int,
+     *     chat_id?: ?int,
      *     payment_hash: string,
      *     memo: string,
      *     amount: int,

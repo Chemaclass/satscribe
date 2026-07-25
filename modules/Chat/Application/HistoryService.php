@@ -19,9 +19,6 @@ final readonly class HistoryService
     ) {
     }
 
-    /**
-     * Retrieve paginated chats for history view.
-     */
     public function getHistory(bool $showAll): Paginator
     {
         $this->logger->debug('Fetching chat history', ['all' => $showAll]);
@@ -39,7 +36,7 @@ final readonly class HistoryService
     }
 
     /**
-     * Get raw metadata for a message.
+     * @return array<string, mixed>|null
      */
     public function getRawMessageData(int $messageId): ?array
     {
@@ -47,7 +44,7 @@ final readonly class HistoryService
 
         $message = Message::find($messageId);
 
-        $raw = $message->meta['raw_data'] ?? null;
+        $raw = $message instanceof Message ? ($message->meta['raw_data'] ?? null) : null;
 
         $this->logger->debug('Raw message data fetched', ['exists' => $raw !== null]);
 

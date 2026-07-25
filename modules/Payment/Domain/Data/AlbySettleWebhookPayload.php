@@ -18,7 +18,11 @@ final readonly class AlbySettleWebhookPayload
     }
 
     /**
-     * @param  array{payment_hash:string,type:string,state:string,memo:string,amount:int}  $data
+     * Decoded webhook body. It is attacker-controlled up to Svix signature
+     * verification, so no key is guaranteed to be present — the `??` throws
+     * below are the actual validation.
+     *
+     * @param  array<string, mixed>  $data
      */
     public static function fromArray(array $data): self
     {
@@ -31,6 +35,15 @@ final readonly class AlbySettleWebhookPayload
         );
     }
 
+    /**
+     * @return array{
+     *     payment_hash: string,
+     *     type: string,
+     *     state: string,
+     *     memo: string,
+     *     amount: int,
+     * }
+     */
     public function toArray(): array
     {
         return [

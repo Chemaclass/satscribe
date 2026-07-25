@@ -29,8 +29,6 @@ final readonly class ChatService
     }
 
     /**
-     * Prepare data for showing a chat.
-     *
      * @return array<string, mixed>
      */
     public function getChatData(Chat $chat): array
@@ -47,7 +45,7 @@ final readonly class ChatService
             'maxBitcoinBlockHeight' => $this->blockchainFacade->getMaxPossibleBlockHeight(),
             'latestBlockHeight' => $this->blockchainFacade->getCurrentBlockHeight(),
             'personaDescriptions' => PromptPersona::descriptions()->toJson(),
-            'question' => $chat->messages()->first()->content,
+            'question' => $firstMsg->content,
             'chat' => $chat,
             'search' => $firstMsg->meta['input'] ?? '',
             'persona' => $firstMsg->meta['persona'] ?? '',
@@ -56,8 +54,6 @@ final readonly class ChatService
     }
 
     /**
-     * Add a new message to the chat and return response data.
-     *
      * @return array<string, mixed>
      */
     public function addMessage(Chat $chat, string $message): array
@@ -71,8 +67,6 @@ final readonly class ChatService
     }
 
     /**
-     * Data required for the home page view.
-     *
      * @return array<string, mixed>
      */
     public function getIndexData(): array
@@ -88,8 +82,6 @@ final readonly class ChatService
     }
 
     /**
-     * Handle chat creation request and return data for JSON response.
-     *
      * @throws BlockchainException|OpenAIError
      *
      * @return array<string, mixed>
@@ -138,6 +130,9 @@ final readonly class ChatService
             ?? PromptPersona::from(PromptPersona::DEFAULT);
     }
 
+    /**
+     * @return list<string>
+     */
     private function generateSuggestions(PromptInput $search): array
     {
         return $search->isBlock()

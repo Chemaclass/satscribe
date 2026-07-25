@@ -43,6 +43,9 @@ final class ImportFaqs extends Command
         return Command::SUCCESS;
     }
 
+    /**
+     * @return Generator<int, array<string, string|null>>
+     */
     private function readCsvLines(string $filePath): Generator
     {
         $handle = fopen($filePath, 'r');
@@ -51,7 +54,8 @@ final class ImportFaqs extends Command
         while (($line = fgetcsv($handle)) !== false) {
             if (count($line) !== count($header)) {
                 $lineNumber = ftell($handle);
-                $this->warn("Skipping malformed line at byte {$lineNumber}", ['line' => $line]);
+                $columns = implode(',', array_map(static fn ($value) => (string) $value, $line));
+                $this->warn("Skipping malformed line at byte {$lineNumber}: {$columns}");
                 continue;
             }
 
@@ -61,7 +65,10 @@ final class ImportFaqs extends Command
         fclose($handle);
     }
 
-    private function processChunk($chunk, Carbon $now): void
+    /**
+     * @param  array<int, array<string, string|null>>  $chunk
+     */
+    private function processChunk(array $chunk, Carbon $now): void
     {
         $rows = [];
         foreach ($chunk as $row) {
