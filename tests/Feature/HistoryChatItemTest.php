@@ -153,4 +153,36 @@ final class HistoryChatItemTest extends TestCase
 
         $this->assertSame('https://mempool.space/block/800000', $item->mempoolUrl);
     }
+
+    /**
+     * raw_data is a JSON column, so a hash that is not a string reaches the URL
+     * concatenation and renders a link to /block/Array.
+     */
+    public function test_from_chat_falls_back_to_input_when_raw_data_hash_is_not_a_string(): void
+    {
+        $chat = Chat::create([
+            'ulid' => 'test-ulid',
+            'tracking_id' => 'owner-tracking',
+            'is_public' => true,
+            'is_shared' => false,
+        ]);
+
+        Message::create([
+            'chat_id' => $chat->id,
+            'role' => 'user',
+            'content' => 'Question',
+            'meta' => ['type' => 'block', 'input' => '800000', 'persona' => 'educator'],
+        ]);
+
+        Message::create([
+            'chat_id' => $chat->id,
+            'role' => 'assistant',
+            'content' => 'Response',
+            'meta' => ['type' => 'block', 'input' => '800000', 'raw_data' => ['hash' => ['nested']]],
+        ]);
+
+        $item = HistoryChatItem::fromChat($chat->refresh(), 'owner-tracking');
+
+        $this->assertSame('https://mempool.space/block/800000', $item->mempoolUrl);
+    }
 }

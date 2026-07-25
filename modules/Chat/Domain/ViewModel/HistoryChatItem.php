@@ -8,6 +8,9 @@ use App\Models\Chat;
 use Carbon\Carbon;
 use RuntimeException;
 
+use function is_array;
+use function is_string;
+
 final readonly class HistoryChatItem
 {
     public function __construct(
@@ -40,9 +43,16 @@ final readonly class HistoryChatItem
             throw new RuntimeException("Chat {$chat->ulid} has no created_at timestamp.");
         }
 
-        $mempoolUrl = $assistantMsg->isBlock()
-            ? 'https://mempool.space/block/' . ($raw['hash'] ?? $assistantMsg->input)
-            : 'https://mempool.space/tx/' . ($raw['txid'] ?? $assistantMsg->input);
+        // raw_data is a JSON column, so its contents are whatever was stored.
+        // A non-string identifier used to be concatenated anyway and rendered
+        // a link to /block/Array.
+        $isBlock = $assistantMsg->isBlock();
+        $identifier = is_array($raw) ? ($raw[$isBlock ? 'hash' : 'txid'] ?? null) : null;
+        $reference = is_string($identifier) ? $identifier : $assistantMsg->input;
+
+        $mempoolUrl = $isBlock
+            ? 'https://mempool.space/block/' . $reference
+            : 'https://mempool.space/tx/' . $reference;
 
         return new self(
             ulid: $chat->ulid,
