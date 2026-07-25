@@ -12,6 +12,8 @@ use Modules\Blockchain\Application\Coingecko\PriceService;
 use Modules\Blockchain\Domain\BlockchainFacadeInterface;
 use Modules\Blockchain\Domain\PriceServiceInterface;
 use Override;
+use Psr\Log\LoggerInterface;
+use RuntimeException;
 
 final class BlockchainServiceProvider extends ServiceProvider
 {
@@ -38,10 +40,38 @@ final class BlockchainServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        $priceService = app(PriceService::class);
-        View::share('btcPriceUsd', $priceService->getCurrentBtcPriceUsd());
-        View::share('btcPriceEur', $priceService->getCurrentBtcPriceEur());
-        View::share('btcPriceCny', $priceService->getCurrentBtcPriceCny());
-        View::share('btcPriceGbp', $priceService->getCurrentBtcPriceGbp());
+        View::share($this->currentPrices());
+    }
+
+    /**
+     * boot() runs on every request and Coingecko rate-limits its free tier, so
+     * an unguarded lookup here turns a missing price badge into a site-wide
+     * 500. The ticker is decoration: degrade it to zeros and keep serving.
+     *
+     * @return array<string, float>
+     */
+    private function currentPrices(): array
+    {
+        $priceService = app(PriceServiceInterface::class);
+
+        try {
+            return [
+                'btcPriceUsd' => $priceService->getCurrentBtcPriceUsd(),
+                'btcPriceEur' => $priceService->getCurrentBtcPriceEur(),
+                'btcPriceCny' => $priceService->getCurrentBtcPriceCny(),
+                'btcPriceGbp' => $priceService->getCurrentBtcPriceGbp(),
+            ];
+        } catch (RuntimeException $e) {
+            app(LoggerInterface::class)->warning('BTC price unavailable', [
+                'error' => $e->getMessage(),
+            ]);
+
+            return [
+                'btcPriceUsd' => 0.0,
+                'btcPriceEur' => 0.0,
+                'btcPriceCny' => 0.0,
+                'btcPriceGbp' => 0.0,
+            ];
+        }
     }
 }

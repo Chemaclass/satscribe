@@ -39,7 +39,11 @@ final readonly class OpenAIService
         private CacheRepository $cache,
         private LoggerInterface $logger,
         private PersonaPromptBuilder $promptBuilder,
-        private PriceServiceInterface $priceService, // @todo use BlockchainFacade instead
+        // Deliberately the narrow price contract rather than BlockchainFacade:
+        // routing prices through the facade forces every unrelated consumer of
+        // it — the UTXO tracer's doubles among them — to satisfy four price
+        // methods they never call.
+        private PriceServiceInterface $priceService,
         private CarbonInterface $now,
         private ProviderRegistryInterface $registry,
     ) {
