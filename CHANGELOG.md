@@ -44,6 +44,11 @@ Anything older than the first section below lives in `git log`.
 - The answer cache returned whichever matching row the database happened to
   yield rather than the newest, so the first answer ever generated for a
   question was served indefinitely.
+- **The block wallet-type breakdown showed raw codes to the model.** The
+  descriptions were keyed on unversioned names (`p2wpkh`, `p2tr`), but
+  Blockstream emits `v0_p2wpkh` and `v1_p2tr` — the majority of outputs in a
+  modern block — so those reached the prompt as `V0_P2WPKH` instead of an
+  explanation.
 - **Empty answers were replayed from the cache.** Both cache lookups — the one
   serving a stored reply and the one reusing a whole chat — return before the
   empty-response guard runs, so a blank answer stored before that guard existed

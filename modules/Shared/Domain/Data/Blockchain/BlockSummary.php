@@ -94,13 +94,22 @@ final class BlockSummary
             static fn ($tx, $i) => sprintf('%d. %s (Fee: %s sats)', $i + 1, $tx['txid'] ?? 'N/A', number_format($tx['fee'])),
         )->implode("\n");
 
+        // Keyed on the values Blockstream actually emits. Esplora versions the
+        // witness types (`v0_p2wpkh`, `v0_p2wsh`, `v1_p2tr`) and calls bare
+        // multisig `multisig`, so the unversioned spellings never matched and
+        // the commonest output types in a modern block fell through to their
+        // raw uppercase code. The unversioned keys stay as aliases.
         $walletTypeDescriptions = [
             'p2pk' => 'P2PK: Full public keys directly',
             'p2pkh' => 'P2PKH: Legacy (starts with 1)',
             'p2sh' => 'P2SH: Script (starts with 3)',
+            'v0_p2wpkh' => 'P2WPKH: Native SegWit (starts with bc1)',
             'p2wpkh' => 'P2WPKH: Native SegWit (starts with bc1)',
+            'v0_p2wsh' => 'P2WSH: SegWit complex scripts',
             'p2wsh' => 'P2WSH: SegWit complex scripts',
+            'v1_p2tr' => 'P2TR: Taproot (starts with bc1p)',
             'p2tr' => 'P2TR: Taproot (starts with bc1p)',
+            'multisig' => 'P2MS: Multisig scripts',
             'p2ms' => 'P2MS: Multisig scripts',
             'op_return' => 'OP_RETURN: Data-carrying txs',
         ];
