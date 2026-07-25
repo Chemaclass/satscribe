@@ -36,6 +36,9 @@ use Illuminate\Contracts\Cache\Repository;
 use Modules\Payment\Application\AlbySettleWebhookAction;
 use Modules\Payment\Domain\Exception\InvalidAlbyWebhookPayloadException;
 use Modules\Payment\Domain\Exception\InvalidAlbyWebhookSignatureException;
+use Modules\Payment\Domain\Data\InvoiceMemo;
+use Modules\Payment\Domain\PremiumCreditsInterface;
+use Modules\Payment\Domain\PremiumPackInvoiceInterface;
 use Modules\Payment\Domain\Repository\PaymentRepositoryInterface;
 use Modules\Shared\Domain\RateLimit\RateLimitKeys;
 use PHPUnit\Framework\TestCase;
@@ -50,7 +53,7 @@ final class AlbySettleWebhookActionTest extends TestCase
         $repo = $this->createStub(PaymentRepositoryInterface::class);
         $logger = $this->createStub(LoggerInterface::class);
 
-        $action = new AlbySettleWebhookAction('', $cache, $rate, $repo, $logger);
+        $action = $this->action('', $cache, $rate, $repo);
 
         $this->expectException(InvalidAlbyWebhookSignatureException::class);
 
@@ -76,7 +79,7 @@ final class AlbySettleWebhookActionTest extends TestCase
 
         $logger = $this->createStub(LoggerInterface::class);
 
-        $action = new AlbySettleWebhookAction('secret', $cache, $rate, $repo, $logger);
+        $action = $this->action('secret', $cache, $rate, $repo);
 
         $payload = json_encode([
             'payment_hash' => 'hash',
@@ -108,7 +111,7 @@ final class AlbySettleWebhookActionTest extends TestCase
         $repo = new RecordingPaymentRepository();
         $logger = $this->createStub(LoggerInterface::class);
 
-        $action = new AlbySettleWebhookAction('secret', $cache, $rate, $repo, $logger);
+        $action = $this->action('secret', $cache, $rate, $repo);
 
         $action->execute($this->payload('CREATED'), 'id', 't', 's');
         $this->assertNotContains(RateLimitKeys::forTrackingId('track'), $rate->cleared);
@@ -124,17 +127,98 @@ final class AlbySettleWebhookActionTest extends TestCase
      */
     public function test_a_signed_but_unusable_body_is_a_payload_error(): void
     {
+        $action = $this->action('secret', new CacheRepository(new ArrayStore()), new RecordingRateLimiter($this->createStub(Repository::class)), new RecordingPaymentRepository());
+
+        $this->expectException(InvalidAlbyWebhookPayloadException::class);
+
+        $action->execute('"just a string"', 'id', 't', 's');
+    }
+
+    /**
+     * The pack and the quota unlock arrive through the same webhook, and only
+     * the memo distinguishes them.
+     */
+    public function test_a_settled_pack_grants_credit_to_its_buyer(): void
+    {
+        $packInvoice = new StubPackInvoice();
+        $packInvoice->identities['deadbeef'] = 'npub-of-buyer';
+        $credits = new StubPremiumCredits();
+        $rate = new RecordingRateLimiter($this->createStub(Repository::class));
+
+        $action = new AlbySettleWebhookAction(
+            'secret',
+            new CacheRepository(new ArrayStore()),
+            $rate,
+            new RecordingPaymentRepository(),
+            $packInvoice,
+            $credits,
+            20,
+            $this->createStub(LoggerInterface::class),
+        );
+
+        $action->execute($this->packPayload('SETTLED'), 'id', 't', 's');
+
+        self::assertSame(
+            [['npub' => 'npub-of-buyer', 'hash' => 'hash', 'messages' => 20]],
+            $credits->grants,
+        );
+        // A pack buys credit, not a reset of the free quota.
+        self::assertSame([], $rate->cleared);
+    }
+
+    public function test_an_unsettled_pack_grants_nothing(): void
+    {
+        $packInvoice = new StubPackInvoice();
+        $packInvoice->identities['deadbeef'] = 'npub-of-buyer';
+        $credits = new StubPremiumCredits();
+
         $action = new AlbySettleWebhookAction(
             'secret',
             new CacheRepository(new ArrayStore()),
             new RecordingRateLimiter($this->createStub(Repository::class)),
             new RecordingPaymentRepository(),
+            $packInvoice,
+            $credits,
+            20,
             $this->createStub(LoggerInterface::class),
         );
 
-        $this->expectException(InvalidAlbyWebhookPayloadException::class);
+        $action->execute($this->packPayload('CREATED'), 'id', 't', 's');
 
-        $action->execute('"just a string"', 'id', 't', 's');
+        self::assertSame([], $credits->grants);
+    }
+
+    private function packPayload(string $state): string
+    {
+        return json_encode([
+            'payment_hash' => 'hash',
+            'type' => 'incoming',
+            'state' => $state,
+            'memo' => InvoiceMemo::forPremiumPack('deadbeef'),
+            'amount' => 500,
+        ], JSON_THROW_ON_ERROR);
+    }
+
+    /**
+     * One place to build the action, so a change to its collaborators does not
+     * have to be repeated across every case.
+     */
+    private function action(
+        string $secret,
+        Repository $cache,
+        RateLimiter $rate,
+        PaymentRepositoryInterface $repo,
+    ): AlbySettleWebhookAction {
+        return new AlbySettleWebhookAction(
+            $secret,
+            $cache,
+            $rate,
+            $repo,
+            new StubPackInvoice(),
+            new StubPremiumCredits(),
+            20,
+            $this->createStub(LoggerInterface::class),
+        );
     }
 
     private function payload(string $state): string
@@ -178,3 +262,41 @@ final class RecordingRateLimiter extends RateLimiter
         $this->cleared[] = (string) $key;
     }
 }
+
+final class StubPackInvoice implements PremiumPackInvoiceInterface
+{
+    /** @var array<string, string> */
+    public array $identities = [];
+
+    public function issueFor(string $npub): array
+    {
+        return [];
+    }
+
+    public function identityFor(string $reference): ?string
+    {
+        return $this->identities[$reference] ?? null;
+    }
+}
+
+final class StubPremiumCredits implements PremiumCreditsInterface
+{
+    /** @var list<array{npub: string, hash: string, messages: int}> */
+    public array $grants = [];
+
+    public function balanceFor(string $npub): int
+    {
+        return 0;
+    }
+
+    public function grantPack(string $npub, string $paymentHash, int $messages): void
+    {
+        $this->grants[] = ['npub' => $npub, 'hash' => $paymentHash, 'messages' => $messages];
+    }
+
+    public function spendOne(string $npub): bool
+    {
+        return false;
+    }
+}
+

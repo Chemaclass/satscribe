@@ -8,6 +8,7 @@ use App\Models\Chat;
 use Generator;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Modules\Blockchain\Domain\BlockchainFacadeInterface;
+use Modules\OpenAI\Application\OpenAIFacade;
 use Modules\OpenAI\Domain\Data\AiProviderDefinition;
 use Modules\OpenAI\Domain\Data\ModelSelection;
 use Modules\OpenAI\Domain\OpenAIFacadeInterface;
@@ -147,7 +148,7 @@ final class StubOpenAIFacade implements OpenAIFacadeInterface
         ?string $modelId,
         ?string $userApiKey = null,
     ): ?ModelSelection {
-        return app(\Modules\OpenAI\Application\OpenAIFacade::class)
+        return app(OpenAIFacade::class)
             ->resolveSelection($providerId, $modelId, $userApiKey);
     }
 }

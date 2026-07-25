@@ -7,9 +7,9 @@ namespace Modules\Payment\Application;
 use Modules\Payment\Domain\AlbyClientInterface;
 use Modules\Payment\Domain\CachedInvoiceValidatorInterface;
 use Modules\Payment\Domain\Data\InvoiceData;
+use Modules\Payment\Domain\Data\InvoiceMemo;
 use Modules\Shared\Domain\RateLimit\PaywallInvoiceIssuerInterface;
 
-use function sprintf;
 
 /**
  * Payment's side of the rate-limit paywall: everything Alby-shaped that the
@@ -27,7 +27,7 @@ final readonly class PaywallInvoiceIssuer implements PaywallInvoiceIssuerInterfa
     {
         return $this->albyClient->createInvoice(new InvoiceData(
             amount: $amountSats,
-            memo: sprintf('Zap to keep Satscribe alive ⚡️ #%s', $reference),
+            memo: InvoiceMemo::forPaywall($reference),
             expiry: $expirySeconds,
         ));
     }

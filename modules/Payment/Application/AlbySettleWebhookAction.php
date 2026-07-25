@@ -8,8 +8,11 @@ use Illuminate\Cache\RateLimiter;
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use JsonException;
 use Modules\Payment\Domain\Data\AlbySettleWebhookPayload;
+use Modules\Payment\Domain\Data\InvoiceMemo;
 use Modules\Payment\Domain\Exception\InvalidAlbyWebhookPayloadException;
 use Modules\Payment\Domain\Exception\InvalidAlbyWebhookSignatureException;
+use Modules\Payment\Domain\PremiumCreditsInterface;
+use Modules\Payment\Domain\PremiumPackInvoiceInterface;
 use Modules\Payment\Domain\Repository\PaymentRepositoryInterface;
 use Modules\Shared\Domain\RateLimit\RateLimitKeys;
 use Psr\Log\LoggerInterface;
@@ -28,6 +31,9 @@ final readonly class AlbySettleWebhookAction
         private CacheRepository $cache,
         private RateLimiter $rateLimiter,
         private PaymentRepositoryInterface $paymentRepository,
+        private PremiumPackInvoiceInterface $packInvoice,
+        private PremiumCreditsInterface $credits,
+        private int $packMessages,
         private LoggerInterface $logger,
     ) {
         $this->webhook = new Webhook($this->webhookSecret);
@@ -48,7 +54,19 @@ final readonly class AlbySettleWebhookAction
             return;
         }
 
-        $this->handleInvoice($verified, $verified->state !== 'SETTLED');
+        $isFailure = $verified->state !== 'SETTLED';
+
+        // A pack is a different product from a quota unlock, and only the memo
+        // says which arrived.
+        $packReference = InvoiceMemo::premiumPackReference($verified->memo);
+
+        if ($packReference !== null) {
+            $this->handlePremiumPack($verified, $packReference, $isFailure);
+
+            return;
+        }
+
+        $this->handleInvoice($verified, $isFailure);
     }
 
     private function verifySignature(
@@ -99,6 +117,35 @@ final readonly class AlbySettleWebhookAction
 
         /** @var array<string, mixed> $data */
         return AlbySettleWebhookPayload::fromArray($data);
+    }
+
+    private function handlePremiumPack(
+        AlbySettleWebhookPayload $payload,
+        string $reference,
+        bool $isFailure,
+    ): void {
+        $npub = $this->packInvoice->identityFor($reference);
+
+        if ($npub === null) {
+            $this->logger->warning('No identity for premium pack reference', ['reference' => $reference]);
+        } elseif (!$isFailure) {
+            // Keyed on the payment hash, so a redelivered settlement grants once.
+            $this->credits->grantPack($npub, $payload->paymentHash, $this->packMessages);
+
+            $this->logger->info('Premium pack granted', [
+                'payment_hash' => $payload->paymentHash,
+                'messages' => $this->packMessages,
+            ]);
+        }
+
+        $this->paymentRepository->create([
+            'tracking_id' => $npub,
+            'payment_hash' => $payload->paymentHash,
+            'memo' => $payload->memo,
+            'amount' => $payload->amount,
+            'status' => $payload->state,
+            'failure_reason' => $isFailure ? $payload->state : null,
+        ]);
     }
 
     private function handleInvoice(AlbySettleWebhookPayload $payload, bool $isFailure): void
@@ -166,6 +213,6 @@ final readonly class AlbySettleWebhookAction
 
     private function extractShortHash(string $memo): ?string
     {
-        return preg_match('/#([a-f0-9]{8})/', $memo, $matches) ? $matches[1] : null;
+        return InvoiceMemo::paywallReference($memo);
     }
 }
