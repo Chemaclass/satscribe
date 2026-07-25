@@ -29,6 +29,8 @@ class Webhook
 namespace Tests\Unit\Payment;
 
 use App\Models\Payment;
+use Illuminate\Cache\ArrayStore;
+use Illuminate\Cache\Repository as CacheRepository;
 use Illuminate\Cache\RateLimiter;
 use Illuminate\Contracts\Cache\Repository;
 use Modules\Payment\Application\AlbySettleWebhookAction;
@@ -56,8 +58,8 @@ final class AlbySettleWebhookActionTest extends TestCase
 
     public function test_stores_invoice_and_clears_rate_limits(): void
     {
-        $cache = $this->createStub(Repository::class);
-        $cache->method('pull')->willReturn(['tracking_id' => 'track']);
+        $cache = new CacheRepository(new ArrayStore());
+        $cache->forever(RateLimitKeys::forInvoiceTrackingMapping('deadbeef'), ['tracking_id' => 'track']);
 
         $rate = new RecordingRateLimiter($this->createStub(Repository::class));
 
@@ -87,7 +89,55 @@ final class AlbySettleWebhookActionTest extends TestCase
 
         $this->assertSame('hash', $repo->data['payment_hash']);
         $this->assertContains(RateLimitKeys::forTrackingId('track'), $rate->cleared);
-        $this->assertContains('ln_invoice:deadbeef', $rate->cleared);
+        $this->assertNull($cache->get(RateLimitKeys::forInvoice('deadbeef')));
+    }
+
+    /**
+     * Alby sends more than one `incoming` event per invoice. The short-hash to
+     * tracking-id mapping used to be read with pull(), so the first event
+     * consumed it and the SETTLED one that followed had nothing to look up —
+     * the visitor paid and stayed rate limited.
+     */
+    public function test_an_earlier_event_does_not_consume_the_tracking_mapping(): void
+    {
+        $cache = new CacheRepository(new ArrayStore());
+        $cache->forever(RateLimitKeys::forInvoiceTrackingMapping('deadbeef'), ['tracking_id' => 'track']);
+
+        $rate = new RecordingRateLimiter($this->createStub(Repository::class));
+        $repo = new RecordingPaymentRepository();
+        $logger = $this->createStub(LoggerInterface::class);
+
+        $action = new AlbySettleWebhookAction('secret', $cache, $rate, $repo, $logger);
+
+        $action->execute($this->payload('CREATED'), 'id', 't', 's');
+        $this->assertNotContains(RateLimitKeys::forTrackingId('track'), $rate->cleared);
+
+        $action->execute($this->payload('SETTLED'), 'id', 't', 's');
+        $this->assertContains(RateLimitKeys::forTrackingId('track'), $rate->cleared);
+    }
+
+    private function payload(string $state): string
+    {
+        return json_encode([
+            'payment_hash' => 'hash',
+            'type' => 'incoming',
+            'state' => $state,
+            'memo' => 'memo #deadbeef',
+            'amount' => 1,
+        ], JSON_THROW_ON_ERROR);
+    }
+}
+
+final class RecordingPaymentRepository implements PaymentRepositoryInterface
+{
+    /** @var array<string, mixed> */
+    public array $data = [];
+
+    public function create(array $data): Payment
+    {
+        $this->data = $data;
+
+        return new Payment();
     }
 }
 

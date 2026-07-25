@@ -92,7 +92,12 @@ final readonly class AlbySettleWebhookAction
         if ($shortHash === null) {
             $this->logger->warning('No hash found in memo', ['memo' => $payload->memo]);
         } else {
-            $cached = $this->cache->pull(RateLimitKeys::forInvoiceTrackingMapping($shortHash));
+            $mappingKey = RateLimitKeys::forInvoiceTrackingMapping($shortHash);
+
+            // Read without consuming: Alby sends more than one `incoming` event
+            // per invoice, and pulling here meant the first one destroyed the
+            // mapping the SETTLED event still needed.
+            $cached = $this->cache->get($mappingKey);
 
             // The cache writer stores ['tracking_id' => string]; the bare-string
             // branch tolerates entries written by an earlier format.
@@ -109,16 +114,18 @@ final readonly class AlbySettleWebhookAction
                 $cacheKey = RateLimitKeys::forTrackingId($trackingId);
                 $this->rateLimiter->clear($cacheKey);
 
+                // Settled is terminal, so the mapping has done its job.
+                $this->cache->forget($mappingKey);
+
                 $this->logger->info('Rate limit cleared for tracking ID', [
                     'trackingId' => $trackingId,
                     'invoiceCacheKey' => $cacheKey,
                 ]);
             }
+
+            // The invoice is a plain cache entry, not a rate-limiter counter.
+            $this->cache->forget(RateLimitKeys::forInvoice($shortHash));
         }
-
-        $invoiceCacheKey = RateLimitKeys::forInvoice((string) $shortHash);
-
-        $this->rateLimiter->clear($invoiceCacheKey);
 
         $this->paymentRepository->create([
             'tracking_id' => $trackingId,
@@ -135,7 +142,7 @@ final readonly class AlbySettleWebhookAction
                 'payment_hash' => $payload->paymentHash,
                 'amount' => $payload->amount,
                 'state' => $payload->state,
-                'invoiceCacheKey' => $invoiceCacheKey,
+                'shortHash' => $shortHash,
             ],
         );
     }
