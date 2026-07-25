@@ -73,6 +73,21 @@ final readonly class AiProviderDefinition
     }
 
     /**
+     * The model to reach for when nothing was asked for: the cheapest one the
+     * provider offers, falling back to its first if none is free.
+     */
+    public function defaultFreeModel(): AiModel
+    {
+        foreach ($this->models as $model) {
+            if ($model->free) {
+                return $model;
+            }
+        }
+
+        return $this->defaultModel();
+    }
+
+    /**
      * True when the caller must bring their own key because the server has none.
      */
     public function requiresUserKey(): bool

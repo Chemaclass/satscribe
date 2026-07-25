@@ -33,6 +33,50 @@ final class ProviderRegistryTest extends TestCase
         self::assertSame('gpt-4o-mini', $this->registry()->defaultFollowupSelection()->model);
     }
 
+    /**
+     * Deployments that hold a free-tier key should spend it rather than the
+     * paid OpenAI one, which is the difference between a working install and
+     * every chat failing on a missing or exhausted OpenAI account.
+     */
+    public function test_default_selection_prefers_a_configured_free_tier_provider(): void
+    {
+        $selection = $this->registry(groqKey: 'groq-key')->defaultSelection();
+
+        self::assertSame('groq', $selection->provider->id());
+        self::assertSame('llama-3.3-70b-versatile', $selection->model);
+        self::assertSame('groq-key', $selection->apiKey());
+    }
+
+    public function test_default_selection_uses_a_free_model_of_that_provider(): void
+    {
+        $registry = $this->registry(openAiKey: '', openRouterKey: 'or-key');
+
+        $selection = $registry->defaultSelection();
+
+        self::assertSame('openrouter', $selection->provider->id());
+        self::assertTrue($selection->provider->findModel($selection->model)?->free);
+    }
+
+    public function test_default_selection_stays_on_openai_when_it_is_the_only_key(): void
+    {
+        $selection = $this->registry(openAiKey: 'server-key')->defaultSelection();
+
+        self::assertSame('openai', $selection->provider->id());
+        self::assertSame('gpt-4', $selection->model);
+    }
+
+    /**
+     * A follow-up on a free provider has no separate cheap model to fall back
+     * to, so it uses that provider's free model rather than the OpenAI setting.
+     */
+    public function test_default_followup_selection_follows_the_free_provider(): void
+    {
+        $selection = $this->registry(groqKey: 'groq-key')->defaultFollowupSelection();
+
+        self::assertSame('groq', $selection->provider->id());
+        self::assertTrue($selection->provider->findModel($selection->model)?->free);
+    }
+
     public function test_default_selection_honours_configured_base_url(): void
     {
         $registry = $this->registry(baseUrl: 'https://proxy.example.test/v1/');
@@ -178,13 +222,14 @@ final class ProviderRegistryTest extends TestCase
         string $baseUrl = 'https://api.openai.com/v1',
         string $openAiKey = 'server-key',
         string $groqKey = '',
+        string $openRouterKey = '',
     ): ProviderRegistry {
         return new ProviderRegistry(
             openAiBaseUrl: $baseUrl,
             openAiApiKey: $openAiKey,
             openAiModel: 'gpt-4',
             openAiModelFollowup: 'gpt-4o-mini',
-            openRouterApiKey: '',
+            openRouterApiKey: $openRouterKey,
             groqApiKey: $groqKey,
         );
     }

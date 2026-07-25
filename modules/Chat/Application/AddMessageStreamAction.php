@@ -15,6 +15,7 @@ use Modules\Chat\Domain\Data\UserInputSanitizer;
 use Modules\Chat\Domain\Repository\ChatRepositoryInterface;
 use Modules\Chat\Domain\Repository\MessageRepositoryInterface;
 use Modules\OpenAI\Domain\Data\ModelSelection;
+use Modules\OpenAI\Domain\Exception\OpenAIError;
 use Modules\OpenAI\Domain\OpenAIFacadeInterface;
 use Modules\Shared\Domain\Chat\SentenceTrimmer;
 use Modules\Shared\Domain\Data\Chat\PromptInput;
@@ -98,6 +99,14 @@ final readonly class AddMessageStreamAction implements AddMessageStreamActionInt
                 'type' => 'chunk',
                 'data' => $chunk,
             ];
+        }
+
+        // Same guard as chat creation: a provider that yields nothing usable
+        // would otherwise persist a blank reply and report it as a success.
+        if (trim($fullResponse) === '') {
+            $this->logger->error('Model produced an empty response', ['chat_id' => $chat->id]);
+
+            throw OpenAIError::emptyResponse();
         }
 
         $fullResponse = SentenceTrimmer::toLastFullSentence($fullResponse);

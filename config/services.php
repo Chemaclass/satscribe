@@ -42,7 +42,11 @@ return [
     'openai' => [
         'key' => env('OPENAI_API_KEY', ''),
         'base_url' => env('OPENAI_BASE_URL', 'https://api.openai.com/v1'),
-        'model' => env('OPENAI_MODEL', 'gpt-4'),
+        // Must be one of the models AiProvider::OpenAI allowlists. The previous
+        // default, 'gpt-4', was not among them and is not enabled on every
+        // account, so an install that never set OPENAI_MODEL called a model it
+        // could not use.
+        'model' => env('OPENAI_MODEL', 'gpt-4o-mini'),
         'model_followup' => env('OPENAI_MODEL_FOLLOWUP', 'gpt-4o-mini'),
         'max_attempts' => env('OPENAI_MAX_ATTEMPTS', 200),
     ],

@@ -23,6 +23,18 @@ final readonly class ProviderRegistry implements ProviderRegistryInterface
      */
     private const USER_KEY_PATTERN = '/^[A-Za-z0-9._\-]{16,256}$/';
 
+    /**
+     * Preference order for the automatic default: a provider whose free tier
+     * costs nothing to call comes before the paid one. Without this the app
+     * defaults to OpenAI even on a deployment that only holds a free-tier key,
+     * and every chat fails on a missing or exhausted OpenAI account.
+     */
+    private const DEFAULT_PROVIDER_PREFERENCE = [
+        AiProvider::Groq,
+        AiProvider::OpenRouter,
+        AiProvider::OpenAI,
+    ];
+
     public function __construct(
         private string $openAiBaseUrl,
         private string $openAiApiKey,
@@ -53,12 +65,16 @@ final readonly class ProviderRegistry implements ProviderRegistryInterface
 
     public function defaultSelection(): ModelSelection
     {
-        return $this->build($this->definition(AiProvider::OpenAI), $this->openAiModel, null);
+        $definition = $this->defaultDefinition();
+
+        return $this->build($definition, $this->defaultModelFor($definition, $this->openAiModel), null);
     }
 
     public function defaultFollowupSelection(): ModelSelection
     {
-        return $this->build($this->definition(AiProvider::OpenAI), $this->openAiModelFollowup, null);
+        $definition = $this->defaultDefinition();
+
+        return $this->build($definition, $this->defaultModelFor($definition, $this->openAiModelFollowup), null);
     }
 
     public function selectionFrom(
@@ -97,6 +113,36 @@ final readonly class ProviderRegistry implements ProviderRegistryInterface
         }
 
         return $this->build($definition, $modelId, $userApiKey);
+    }
+
+    /**
+     * The first preferred provider this deployment actually holds a key for.
+     * Falls back to OpenAI so a wholly unconfigured install still fails with
+     * "OPENAI_API_KEY is not configured" rather than something obscure.
+     */
+    private function defaultDefinition(): AiProviderDefinition
+    {
+        foreach (self::DEFAULT_PROVIDER_PREFERENCE as $provider) {
+            if ($this->serverKey($provider) !== '') {
+                return $this->definition($provider);
+            }
+        }
+
+        return $this->definition(AiProvider::OpenAI);
+    }
+
+    /**
+     * The OpenAI model settings only describe OpenAI, so they are meaningless
+     * once the default lands on another provider — that one picks its own free
+     * model instead.
+     */
+    private function defaultModelFor(AiProviderDefinition $definition, string $configuredModel): string
+    {
+        if ($definition->provider === AiProvider::OpenAI) {
+            return $configuredModel;
+        }
+
+        return $definition->defaultFreeModel()->id;
     }
 
     private function definition(AiProvider $provider): AiProviderDefinition

@@ -11,6 +11,7 @@ use Modules\Chat\Domain\Data\QuestionPlaceholder;
 use Modules\Chat\Domain\Data\UserInputSanitizer;
 use Modules\Chat\Domain\Repository\ChatRepositoryInterface;
 use Modules\OpenAI\Domain\Data\ModelSelection;
+use Modules\OpenAI\Domain\Exception\OpenAIError;
 use Modules\OpenAI\Domain\OpenAIFacadeInterface;
 use Modules\Shared\Domain\Chat\SentenceTrimmer;
 use Modules\Shared\Domain\Data\Chat\PromptInput;
@@ -73,6 +74,19 @@ final readonly class CreateChatStreamAction implements CreateChatStreamActionInt
                 'type' => 'chunk',
                 'data' => $chunk,
             ];
+        }
+
+        // A provider can answer 200 and still yield nothing usable — a quota
+        // notice in the body, or a delta shape this app does not parse. The
+        // chat is only written after the stream, so without this the row was
+        // saved with an empty answer and reported as a success.
+        if (trim($fullResponse) === '') {
+            $this->logger->error('Model produced an empty response', [
+                'input' => $input->text,
+                'persona' => $persona->value,
+            ]);
+
+            throw OpenAIError::emptyResponse();
         }
 
         $fullResponse = SentenceTrimmer::toLastFullSentence($fullResponse);

@@ -26,6 +26,8 @@ use Modules\Shared\Domain\Enum\Chat\PromptType;
 use Modules\Shared\Domain\HttpClientInterface;
 use Psr\Log\LoggerInterface;
 
+use function is_array;
+use function is_string;
 use function sprintf;
 use function strlen;
 
@@ -70,7 +72,9 @@ final readonly class OpenAIService
         if ($cacheKey !== null) {
             $cached = $this->cache->get($cacheKey);
 
-            if ($cached !== null) {
+            // Cache contents are untyped; an entry written by an older version
+            // that is not a string would be returned as one.
+            if (is_string($cached) && $cached !== '') {
                 $this->logger->debug('Returning cached OpenAI response', ['key' => $cacheKey]);
 
                 return $cached;
@@ -143,10 +147,18 @@ final readonly class OpenAIService
                         return;
                     }
 
+                    // OpenRouter and Groq are OpenAI-compatible, not identical,
+                    // and a chunk may also be a keep-alive or an error object.
+                    // Callers concatenate what comes out, so anything that is
+                    // not a string is dropped rather than yielded.
                     $decoded = json_decode($jsonData, true);
-                    $content = $decoded['choices'][0]['delta']['content'] ?? null;
+                    $choices = is_array($decoded) ? ($decoded['choices'] ?? null) : null;
+                    $delta = is_array($choices) && is_array($choices[0] ?? null)
+                        ? ($choices[0]['delta'] ?? null)
+                        : null;
+                    $content = is_array($delta) ? ($delta['content'] ?? null) : null;
 
-                    if ($content !== null) {
+                    if (is_string($content) && $content !== '') {
                         yield $content;
                     }
                 }
@@ -185,16 +197,31 @@ final readonly class OpenAIService
             throw new OpenAIError('OpenAI API request failed');
         }
 
-        if ($error = $response->json('error.message')) {
+        $error = $response->json('error.message');
+
+        if ($error !== null && $error !== '') {
             $this->logger->error('OpenAI API responded with an error', [
                 ...$selection->toLogContext(),
                 'error' => $error,
                 'status' => $response->status(),
             ]);
-            throw new OpenAIError($error);
+
+            throw new OpenAIError(is_string($error) ? $error : 'The model reported an error.');
         }
 
+        // A 200 whose body carries no content is not a usable answer; without
+        // this it reached the trimmer as null and died with a TypeError.
         $text = $response->json('choices.0.message.content');
+
+        if (!is_string($text) || trim($text) === '') {
+            $this->logger->error('OpenAI API returned no content', [
+                ...$selection->toLogContext(),
+                'status' => $response->status(),
+            ]);
+
+            throw OpenAIError::emptyResponse();
+        }
+
         $text = SentenceTrimmer::toLastFullSentence($text);
         $this->logger->debug('OpenAI description generation worked', ['length' => strlen($text)]);
 

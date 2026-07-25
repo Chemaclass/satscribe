@@ -63,6 +63,32 @@ final class OpenAIServiceStreamingTest extends TestCase
         self::assertSame(['Hel', 'lo.'], array_values($chunks));
     }
 
+    /**
+     * The generator is declared as yielding strings and callers concatenate
+     * what comes out. OpenRouter and Groq are only OpenAI-compatible, so a
+     * chunk whose content is not a string has to be dropped rather than
+     * reaching the caller and failing as an "Array to string conversion".
+     */
+    public function test_streaming_drops_chunks_whose_content_is_not_a_string(): void
+    {
+        $body = implode("\n\n", [
+            'data: ' . json_encode(['choices' => [['delta' => ['content' => 'Good.']]]], JSON_THROW_ON_ERROR),
+            'data: ' . json_encode(['choices' => [['delta' => ['content' => ['nested']]]]], JSON_THROW_ON_ERROR),
+            'data: ' . json_encode(['choices' => 'not-a-list'], JSON_THROW_ON_ERROR),
+            'data: not json at all',
+            'data: [DONE]',
+        ]) . "\n\n";
+
+        $chunks = iterator_to_array($this->service($this->fakeFactory($body))->generateTextStreaming(
+            $this->data(),
+            $this->input(),
+            PromptPersona::Developer,
+            'Question',
+        ));
+
+        self::assertSame(['Good.'], array_values($chunks));
+    }
+
     public function test_streaming_without_a_selection_calls_the_configured_openai_default(): void
     {
         $factory = $this->fakeFactory($this->sseBody(['Hi.']));
