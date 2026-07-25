@@ -37,7 +37,11 @@ final readonly class ChatRepository implements ChatRepositoryInterface
                     ->whereJsonContains('meta->type', $input->type->value)
                     ->whereJsonContains('meta->input', $input->text)
                     ->whereJsonContains('meta->persona', $persona->value);
-            })->first();
+            })
+            // Newest first, for the same reason as the message lookup: more
+            // than one chat can match and the choice must not be arbitrary.
+            ->orderByDesc('id')
+            ->first();
     }
 
     public function createChat(

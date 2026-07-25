@@ -19,6 +19,10 @@ final readonly class MessageRepository implements MessageRepositoryInterface
             ->whereJsonContains('meta->input', $input->text)
             ->whereJsonContains('meta->persona', $persona->value)
             ->whereJsonContains('meta->question', $question)
+            // Newest first: several rows can share a key, and an unordered
+            // first() served whichever the database happened to return, so the
+            // cached reply could change between requests.
+            ->orderByDesc('id')
             ->first();
     }
 

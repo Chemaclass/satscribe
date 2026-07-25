@@ -164,4 +164,40 @@ final class MessageRepositoryTest extends TestCase
 
         $this->assertNull($result);
     }
+
+    /**
+     * The lookup serves a previous answer as a cached reply. With several rows
+     * matching the same key the query took whichever the database happened to
+     * return first, so the reply could differ between requests. The newest is
+     * the one generated against the most recent chain state.
+     */
+    public function test_find_assistant_message_returns_the_newest_match(): void
+    {
+        $chat = Chat::create(['ulid' => 'test-ulid', 'is_public' => true]);
+
+        $meta = [
+            'type' => 'transaction',
+            'input' => 'abc123txid',
+            'persona' => 'educator',
+            'question' => 'What is this?',
+        ];
+
+        foreach (['oldest answer', 'middle answer', 'newest answer'] as $content) {
+            Message::create([
+                'chat_id' => $chat->id,
+                'role' => 'assistant',
+                'content' => $content,
+                'meta' => $meta,
+            ]);
+        }
+
+        $result = (new MessageRepository())->findAssistantMessage(
+            new PromptInput(PromptType::Transaction, 'abc123txid'),
+            PromptPersona::Educator,
+            'What is this?',
+        );
+
+        $this->assertNotNull($result);
+        $this->assertSame('newest answer', $result->content);
+    }
 }
