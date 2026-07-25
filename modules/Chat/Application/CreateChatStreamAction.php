@@ -12,6 +12,7 @@ use Modules\Chat\Domain\Data\UserInputSanitizer;
 use Modules\Chat\Domain\Repository\ChatRepositoryInterface;
 use Modules\OpenAI\Domain\Data\ModelSelection;
 use Modules\OpenAI\Domain\Exception\OpenAIError;
+use Modules\OpenAI\Application\OfflineFallback;
 use Modules\OpenAI\Domain\OpenAIFacadeInterface;
 use Modules\Payment\Domain\PremiumAccessInterface;
 use Modules\Shared\Domain\Chat\SentenceTrimmer;
@@ -32,6 +33,7 @@ final readonly class CreateChatStreamAction implements CreateChatStreamActionInt
         private AdditionalContextBuilder $contextBuilder,
         private OpenAiRateLimiter $rateLimiter,
         private PremiumAccessInterface $premiumAccess,
+        private OfflineFallback $offlineFallback,
         private LoggerInterface $logger,
     ) {
     }
@@ -64,22 +66,41 @@ final readonly class CreateChatStreamAction implements CreateChatStreamActionInt
 
         $fullResponse = '';
 
-        $stream = $this->openaiFacade->generateTextStreaming(
-            $blockchainData,
-            $input,
-            $persona,
-            $cleanQuestion,
-            null,
-            $additional,
-            $selection,
-        );
+        try {
+            $stream = $this->openaiFacade->generateTextStreaming(
+                $blockchainData,
+                $input,
+                $persona,
+                $cleanQuestion,
+                null,
+                $additional,
+                $selection,
+            );
 
-        foreach ($stream as $chunk) {
-            $fullResponse .= $chunk;
+            foreach ($stream as $chunk) {
+                $fullResponse .= $chunk;
+
+                yield [
+                    'type' => 'chunk',
+                    'data' => $chunk,
+                ];
+            }
+        } catch (OpenAIError $e) {
+            // Only when the provider failed before saying anything. Half an
+            // answer followed by a templated summary would read as one voice.
+            if ($fullResponse !== '' || !$this->offlineFallback->isEnabled()) {
+                throw $e;
+            }
+
+            // Still an error in the log: the visitor gets something readable,
+            // the operator still learns the provider is down.
+            $this->logger->error('Falling back to the offline narrator', ['error' => $e->getMessage()]);
+
+            $fullResponse = $this->offlineFallback->narrate($blockchainData, $persona);
 
             yield [
                 'type' => 'chunk',
-                'data' => $chunk,
+                'data' => $fullResponse,
             ];
         }
 

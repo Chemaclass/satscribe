@@ -10,7 +10,6 @@ use Modules\Payment\Domain\Data\InvoiceData;
 use Modules\Payment\Domain\Data\InvoiceMemo;
 use Modules\Shared\Domain\RateLimit\PaywallInvoiceIssuerInterface;
 
-
 /**
  * Payment's side of the rate-limit paywall: everything Alby-shaped that the
  * middleware used to reach across module boundaries to do itself.

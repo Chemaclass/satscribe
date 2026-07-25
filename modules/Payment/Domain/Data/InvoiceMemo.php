@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Modules\Payment\Domain\Data;
 
+use function sprintf;
+
 /**
  * Two products settle through the same Alby webhook — an unlock of the free
  * quota, and a pack of premium messages — and the memo is the only field that

@@ -28,6 +28,14 @@ Anything older than the first section below lives in `git log`.
   throttle and it was never opted back in. Limited to 120 requests a minute,
   which leaves roughly threefold headroom over the paywall modal's polling.
 
+### Added
+
+- **Demo mode** (`AI_OFFLINE_FALLBACK`). When no model is reachable the app can
+  answer from the on-chain data instead of showing an error. Every figure is one
+  that was actually fetched, the phrasing varies by persona, and the answer says
+  outright that no model wrote it. Off by default, because answering anyway
+  hides an outage.
+
 ### Fixed
 
 - **Two of the three OpenRouter models on offer no longer existed.** Both free

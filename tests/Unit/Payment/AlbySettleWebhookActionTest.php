@@ -34,9 +34,9 @@ use Illuminate\Cache\RateLimiter;
 use Illuminate\Cache\Repository as CacheRepository;
 use Illuminate\Contracts\Cache\Repository;
 use Modules\Payment\Application\AlbySettleWebhookAction;
+use Modules\Payment\Domain\Data\InvoiceMemo;
 use Modules\Payment\Domain\Exception\InvalidAlbyWebhookPayloadException;
 use Modules\Payment\Domain\Exception\InvalidAlbyWebhookSignatureException;
-use Modules\Payment\Domain\Data\InvoiceMemo;
 use Modules\Payment\Domain\PremiumCreditsInterface;
 use Modules\Payment\Domain\PremiumPackInvoiceInterface;
 use Modules\Payment\Domain\Repository\PaymentRepositoryInterface;
@@ -51,7 +51,7 @@ final class AlbySettleWebhookActionTest extends TestCase
         $cache = $this->createStub(Repository::class);
         $rate = new RecordingRateLimiter($this->createStub(Repository::class));
         $repo = $this->createStub(PaymentRepositoryInterface::class);
-        $logger = $this->createStub(LoggerInterface::class);
+        $this->createStub(LoggerInterface::class);
 
         $action = $this->action('', $cache, $rate, $repo);
 
@@ -77,7 +77,7 @@ final class AlbySettleWebhookActionTest extends TestCase
             }
         };
 
-        $logger = $this->createStub(LoggerInterface::class);
+        $this->createStub(LoggerInterface::class);
 
         $action = $this->action('secret', $cache, $rate, $repo);
 
@@ -109,7 +109,7 @@ final class AlbySettleWebhookActionTest extends TestCase
 
         $rate = new RecordingRateLimiter($this->createStub(Repository::class));
         $repo = new RecordingPaymentRepository();
-        $logger = $this->createStub(LoggerInterface::class);
+        $this->createStub(LoggerInterface::class);
 
         $action = $this->action('secret', $cache, $rate, $repo);
 
@@ -299,4 +299,3 @@ final class StubPremiumCredits implements PremiumCreditsInterface
         return false;
     }
 }
-

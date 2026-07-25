@@ -5,9 +5,12 @@ declare(strict_types=1);
 namespace Modules\OpenAI;
 
 use Illuminate\Support\ServiceProvider;
+use Modules\OpenAI\Application\OfflineFallback;
+use Modules\OpenAI\Application\OfflineNarrator;
 use Modules\OpenAI\Application\OpenAIFacade;
 use Modules\OpenAI\Application\PersonaPromptBuilder;
 use Modules\OpenAI\Application\ProviderRegistry;
+use Modules\OpenAI\Domain\OfflineNarratorInterface;
 use Modules\OpenAI\Domain\OpenAIFacadeInterface;
 use Modules\OpenAI\Domain\ProviderRegistryInterface;
 use Override;
@@ -16,6 +19,7 @@ final class OpenAIServiceProvider extends ServiceProvider
 {
     /** @var array<class-string, class-string> */
     public $singletons = [
+        OfflineNarratorInterface::class => OfflineNarrator::class,
         OpenAIFacadeInterface::class => OpenAIFacade::class,
         ProviderRegistryInterface::class => ProviderRegistry::class,
     ];
@@ -26,6 +30,10 @@ final class OpenAIServiceProvider extends ServiceProvider
     #[Override]
     public function register(): void
     {
+        $this->app->when(OfflineFallback::class)
+            ->needs('$enabled')
+            ->giveConfig('services.ai_offline_fallback');
+
         $this->app->when(ProviderRegistry::class)
             ->needs('$openAiBaseUrl')
             ->giveConfig('services.openai.base_url');
