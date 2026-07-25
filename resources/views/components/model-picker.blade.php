@@ -18,6 +18,7 @@
 >
     <button
         type="button"
+        x-ref="trigger"
         class="model-picker__trigger"
         :class="missingKey ? 'model-picker__trigger--alert' : ''"
         :aria-expanded="open ? 'true' : 'false'"
@@ -33,7 +34,9 @@
 
     <div
         id="model-picker-panel"
+        x-ref="panel"
         class="model-picker__panel"
+        :class="dropUp ? 'model-picker__panel--up' : ''"
         x-show="open"
         x-cloak
         x-transition

@@ -7,6 +7,10 @@ import StorageClient from './storage-client';
  */
 const CHOICE_SEPARATOR = '::';
 
+/** Used before the panel is visible and can be measured. */
+const ESTIMATED_PANEL_HEIGHT = 320;
+const PANEL_GAP = 12;
+
 /**
  * Splits a picker choice back into the two fields the server expects. An empty
  * choice means "automatic": both fields stay blank and the request is byte for
@@ -34,6 +38,7 @@ const splitChoice = (choice) => {
  */
 export const modelPicker = (config = {}) => ({
     open: false,
+    dropUp: false,
     choice: '',
     apiKey: '',
     label: '',
@@ -71,11 +76,38 @@ export const modelPicker = (config = {}) => ({
     },
 
     toggle() {
+        if (!this.open) {
+            this.updatePlacement();
+        }
+
         this.open = !this.open;
 
         if (this.open) {
             window.refreshLucideIcons?.();
+            // The panel has no height until it is shown, so the first estimate
+            // uses a fallback and this second pass corrects it before paint.
+            this.$nextTick(() => this.updatePlacement());
         }
+    },
+
+    /**
+     * Opens the panel upward when it would otherwise run off the bottom of the
+     * viewport. On the home page the trigger sits just above the composer, so
+     * dropping downward cut off the API key field entirely.
+     */
+    updatePlacement() {
+        const trigger = this.$refs.trigger;
+
+        if (!trigger) {
+            return;
+        }
+
+        const rect = trigger.getBoundingClientRect();
+        const measured = this.$refs.panel?.offsetHeight ?? 0;
+        const needed = (measured > 0 ? measured : ESTIMATED_PANEL_HEIGHT) + PANEL_GAP;
+        const spaceBelow = window.innerHeight - rect.bottom;
+
+        this.dropUp = spaceBelow < needed && rect.top > spaceBelow;
     },
 
     onChoiceChange() {
@@ -135,9 +167,11 @@ export const modelPicker = (config = {}) => ({
                     return false;
                 }
 
+                this.updatePlacement();
                 this.open = true;
                 this.keyErrorShown = true;
                 this.$nextTick(() => {
+                    this.updatePlacement();
                     window.refreshLucideIcons?.();
                     this.$refs.keyInput?.focus();
                 });
