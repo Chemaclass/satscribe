@@ -1,180 +1,91 @@
-# CLAUDE.md
+# Satscribe
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Laravel 12 · Modular Hexagonal · TDD · Bitcoin blocks/txs → AI chats via GPT-4o · Nostr auth (no passwords)
+Modules: Blockchain, Chat, Faq, Nostr, OpenAI, Payment, Shared, UtxoTrace
 
-## Project Overview
+## Hard Rules
 
-Satscribe transforms Bitcoin blocks and transactions into human-readable AI conversations. Users input a transaction ID, block hash, or block height; the app fetches blockchain data via Blockstream API and generates explanations using OpenAI GPT-4o. Authentication uses Nostr protocol (no traditional accounts).
+- **Layers**: Infrastructure → Application → Domain. Domain never imports `Modules\*\Infrastructure\*`, Laravel runtime, or facades
+- **DB**: repositories in `Infrastructure/Repository/` are the only Eloquent gateway. Controllers, actions and services never query
+- **Interfaces first**: declare in `Domain/`, implement in `Application/` (actions) or `Infrastructure/` (repositories), bind in `<Module>ServiceProvider::$singletons`
+- **Cross-module**: only via the other module's `<Module>FacadeInterface`. Never import a concrete class from another module
+- **Every file**: `declare(strict_types=1);` · `final` unless inherited · `readonly` where immutable · constructor promotion
+- **Naming**: type declarations `T`-prefixed · input DTOs `Transfer` suffix · handler outputs `Result` suffix — no `T` on DTOs
+- **Tests**: failing test first. `mock()` directly, never `Mockery::mock()`. Mock `Domain/` interfaces, never concrete classes
+- **Commits**: `<type>(<scope>): <description>` — imperative, ≤80 chars, no trailing period. `ref:` not `refactor:`. Never mention AI/Claude
+- **Providers**: registered by hand in `bootstrap/providers.php` — no auto-discovery
 
-## Development Commands
+## Never Do
 
-```bash
-composer dev          # Run full dev environment (server + queue + logs + vite)
-composer test         # Run phpstan + phpunit
-composer fix          # Run rector + php-cs-fixer
-composer phpunit      # Run unit tests only
-composer phpstan      # Run static analysis only
-```
+- Business logic in `app/` — it holds Laravel glue only (Models, framework providers)
+- An interface without its `$singletons` binding — fails at runtime, not in phpstan
+- `env()` outside `config/` — returns null once config is cached
+- Production code before its failing test · commit on red · `--no-verify`
+- Leave `dd()`, `dump()`, `var_dump()`, `ray()` behind
+- Unit tests that touch the DB or network
 
-**Run a single test file:**
-```bash
-vendor/bin/phpunit tests/Unit/Chat/ChatRepositoryTest.php
-```
+## Commands
 
-**Run a single test method:**
-```bash
-vendor/bin/phpunit --filter testMethodName
-```
+| Command | What |
+|---|---|
+| `composer test` | phpstan + phpunit — the gate |
+| `composer fix` | rector + php-cs-fixer |
+| `composer dev` | server + queue + logs + vite |
+| `composer phpunit` / `composer phpstan` | tests only / analysis only |
+| `vendor/bin/phpunit --testsuite=unit` | fast loop |
+| `vendor/bin/phpunit --filter <name>` | one class or method |
+| `git config core.hooksPath githooks` | enable pre-commit gate (once per clone) |
 
-**Enable git hooks:**
-```bash
-git config core.hooksPath githooks
-```
+## Reference — read the rule file when working in that area
 
-## Architecture
+| File | Covers |
+|---|---|
+| `.claude/rules/architecture.md` | Layers, module layout, Domain purity trade, facades, bindings |
+| `.claude/rules/php.md` | Style, class conventions, type/DTO naming, phpstan |
+| `.claude/rules/testing.md` | Test layout, suites, mocking, naming |
+| `.claude/rules/laravel.md` | Models, providers, routes, controllers, config, queues |
+| `.claude/rules/error-handling.md` | External APIs, domain exceptions, streaming failures |
+| `.claude/rules/frontend.md` | Blade, Alpine, Tailwind v4, Vite, Nostr browser auth |
+| `.claude/rules/commits.md` | Commit format, branch hygiene, PR creation |
 
-The codebase uses a **modular hexagonal architecture** with all business logic in `/modules/`. Each module follows a 4-layer structure:
+## Agents & Skills
 
-```
-Module/
-├── Application/        # Use cases, services, actions, facades
-├── Domain/            # Interfaces and domain data objects (NEVER depends on Infrastructure)
-├── Infrastructure/    # Controllers, repositories, middleware, HTTP requests
-└── ModuleServiceProvider.php
-```
+| Need | Use |
+|---|---|
+| Fast file/code search | `explorer` (haiku) |
+| Code review | `clean-code-reviewer` · `/review` |
+| TDD coaching | `tdd-coach` · `/tdd` |
+| Layer boundaries, placement | `hexagonal-architect` · `/architecture-check` |
+| Root-cause a failure | `debugger` |
+| Scaffold | `/create-action` `/create-repository` `/create-controller` `/create-module` |
+| Everyday | `/test` `/fix` `/commit` `/pr` `/refactor` `/module-map` |
 
-### Architecture Rules (MUST follow)
+## Enforcement
 
-1. **Domain layer is pure** - No Laravel, no infrastructure dependencies. Only PHP interfaces and value objects.
-2. **Dependency direction** - Infrastructure → Application → Domain. Never the reverse.
-3. **Interface in Domain, implementation in Infrastructure** - All repository interfaces live in `Domain/Repository/`, implementations in `Infrastructure/Repository/`.
-4. **Actions for use cases** - Each use case is an Action class in Application with a single `execute()` method.
-5. **Facades expose module APIs** - Other modules communicate via `*FacadeInterface` from Domain layer.
-6. **Service Provider binds contracts** - All interface→implementation bindings in `ModuleServiceProvider`.
+| Hook | What |
+|---|---|
+| `pre-bash` | Blocks DB drops, mass `rm`, `--no-verify`, plain force-push |
+| `pre-write` | Blocks logic in `app/` and Infra imports in `Domain/`. Blocks **new** / warns existing for Laravel leakage and Eloquent outside repositories |
+| `post-edit` | Auto-formats PHP (php-cs-fixer) |
+| `post-commit-msg` | Blocks AI attribution, warns on non-conventional format |
+| `pre-stop` | Warns on uncommitted changes |
+| `githooks/pre-commit` | `composer fix && composer test` |
 
-### Layer Responsibilities
+## Known Debt
 
-| Layer | Contains | Depends On | Never Contains |
-|-------|----------|------------|----------------|
-| **Domain** | Interfaces, Enums, Value Objects, Exceptions | Nothing | Laravel classes, external libs |
-| **Application** | Actions, Services, Facades | Domain | Controllers, HTTP |
-| **Infrastructure** | Controllers, Repositories, Middleware, Commands | Application, Domain | Business logic |
+Pre-existing violations — do not replicate; fix opportunistically when already in the file:
 
-### Creating New Code
+| Location | Issue |
+|---|---|
+| `modules/Chat/Application/HistoryService.php:48` | `Message::find()` in Application — belongs in `MessageRepository` |
+| `modules/Nostr/.../ProfileController.php:21,25` | `Chat::where()` / `Payment::where()` in a controller |
+| 9 `Domain/` files (Chat, OpenAI, Payment, UtxoTrace) | Import `App\Models\*` — accepted legacy trade, see `rules/architecture.md` |
+| `Faq`/`Nostr`/`Payment` `FacadeInterface` | Declared and implemented, but never bound in `$singletons` and never injected. Dormant — injecting one today throws "not instantiable". Bind it when you first use it |
 
-**New Action (use case):**
-```
-modules/{Module}/Domain/{Name}ActionInterface.php    # Interface first
-modules/{Module}/Application/{Name}Action.php        # Implementation
-tests/Unit/{Module}/{Name}ActionTest.php             # Test
-```
+## Gotchas
 
-**New Repository:**
-```
-modules/{Module}/Domain/Repository/{Name}RepositoryInterface.php
-modules/{Module}/Infrastructure/Repository/{Name}Repository.php
-tests/Unit/{Module}/{Name}RepositoryTest.php
-```
-
-**New Module:**
-```
-modules/{Module}/
-├── Application/
-├── Domain/
-├── Infrastructure/
-│   ├── Http/Controller/
-│   └── Repository/
-└── {Module}ServiceProvider.php
-```
-
-### Core Modules
-
-- **Blockchain** – Fetches data from Blockstream API
-- **Chat** – Chat creation, messaging, history (ChatService, ChatFacade)
-- **OpenAI** – GPT-4o API interactions
-- **Nostr** – Decentralized authentication
-- **Payment** – Lightning invoices via Alby
-- **UtxoTrace** – UTXO tracing for transactions
-- **Faq** – FAQ management
-- **Shared** – Cross-cutting helpers, rate limiting middleware
-
-## TDD Workflow
-
-Follow Red-Green-Refactor:
-
-1. **Red** - Write a failing test first that describes the behavior
-2. **Green** - Write minimal code to make it pass
-3. **Refactor** - Clean up while keeping tests green
-
-### Test Organization
-
-```
-tests/
-├── Unit/           # Fast, isolated tests (mock dependencies)
-│   └── {Module}/   # Mirror module structure
-├── Feature/        # Integration tests (real database)
-└── TestCase.php    # Base test class
-```
-
-### Test Naming Convention
-
-```php
-public function test_{action}_{condition}_{expected_result}(): void
-// Example:
-public function test_execute_with_cached_chat_returns_existing(): void
-public function test_sanitize_removes_flagged_words(): void
-```
-
-## Code Style
-
-- PHP CS Fixer + Rector for formatting
-- PHPStan for static analysis (level max)
-- Strict types enabled in ALL files
-- PSR-12 compliant
-- `final` classes by default (extend only when necessary)
-- `readonly` for immutable properties
-- Constructor property promotion
-
-### Class Conventions
-
-```php
-<?php
-
-declare(strict_types=1);
-
-namespace Modules\{Module}\{Layer};
-
-final readonly class ExampleAction implements ExampleActionInterface
-{
-    public function __construct(
-        private SomeDependencyInterface $dependency,
-    ) {
-    }
-
-    public function execute(InputDto $input): OutputDto
-    {
-        // ...
-    }
-}
-```
-
-## Commit Guidelines
-
-Always use conventional commits: `feat`, `fix`, `refactor`, `chore`, `docs`, `test`.
-
-Examples:
-- `feat: add UTXO tracing for transaction inputs`
-- `fix: handle null response from OpenAI API`
-- `refactor: extract rate limiting to dedicated middleware`
-- `test: add unit tests for ChatRepository pagination`
-
-## Code Review Checklist
-
-Before completing any change, verify:
-
-- [ ] Tests pass: `composer test`
-- [ ] Code style: `composer fix`
-- [ ] No architecture violations (Domain must not import Infrastructure)
-- [ ] Interfaces defined before implementations
-- [ ] Service provider updated with new bindings
-- [ ] No business logic in controllers (delegate to Actions)
+- `phpstan.neon` is **level 1** — passing analysis is a low bar. Hold new code higher than the config enforces
+- Streaming replies (`Chat/Application/*StreamAction.php`) fail as truncated output, not exceptions — headers are already sent
+- External APIs (Blockstream, OpenAI, Alby) must be wrapped in try/catch — network failure is expected, not exceptional
+- Queue driver is `sync` in tests, so jobs run inline
+- After a rename, grep string literals too — route paths, i18n keys, seeders. A stale `"/old-path"` is a production outage

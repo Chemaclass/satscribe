@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "includeCoAuthoredBy": false,
+  "respectGitignore": true,
+  "permissions": {
+    "allow": [
+      "Edit",
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "Bash(composer *)",
+      "Bash(vendor/bin/*)",
+      "Bash(./vendor/bin/*)",
+      "Bash(php artisan *)",
+      "Bash(npm run *)",
+      "Bash(npx *)",
+      "Bash(git *)",
+      "Bash(gh *)",
+      "Bash(ls *)",
+      "Bash(find modules *)",
+      "Bash(find tests *)"
+    ],
+    "deny": [
+      "Bash(git push --force *)",
+      "Bash(git push -f *)",
+      "Bash(git push origin +*)",
+      "Bash(git reset --hard *)",
+      "Bash(git clean -f *)",
+      "Bash(git checkout .)",
+      "Bash(git checkout -- .)",
+      "Bash(git restore .)",
+      "Bash(rm -rf *)",
+      "Bash(rm -fr *)",
+      "Bash(sudo *)",
+      "Bash(php artisan migrate:fresh *)",
+      "Bash(php artisan db:wipe *)",
+      "Read(.env)",
+      "Read(.env.*)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/bin/bash .claude/hooks/pre-bash.sh",
+            "timeout": 5,
+            "statusMessage": "Checking command safety"
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/bin/bash .claude/hooks/pre-write.sh",
+            "timeout": 5,
+            "statusMessage": "Checking file placement and layer purity"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/bin/bash .claude/hooks/post-edit.sh",
+            "timeout": 30,
+            "statusMessage": "Formatting touched files"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/bin/bash .claude/hooks/post-commit-msg.sh",
+            "timeout": 10,
+            "statusMessage": "Validating commit message"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/bin/bash .claude/hooks/pre-stop.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/bin/bash .claude/hooks/compact-context.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
