@@ -35,19 +35,7 @@ class Chat extends Model
 
     public function getFirstUserMessage(): Message
     {
-        if ($this->relationLoaded('messages')) {
-            $message = $this->messages->first(static fn (Message $m): bool => $m->role === 'user');
-            if ($message === null) {
-                throw new ModelNotFoundException();
-            }
-
-            return $message;
-        }
-
-        return $this->messages()
-            ->where('role', 'user')
-            ->orderBy('id')
-            ->firstOrFail();
+        return $this->messageWithRole('user');
     }
 
     /**
@@ -60,78 +48,36 @@ class Chat extends Model
 
     public function getLastUserMessage(): Message
     {
-        if ($this->relationLoaded('messages')) {
-            $message = $this->messages->last(static fn (Message $m): bool => $m->role === 'user');
-            if ($message === null) {
-                throw new ModelNotFoundException();
-            }
-
-            return $message;
-        }
-
-        return $this->messages()
-            ->where('role', 'user')
-            ->orderBy('id', 'desc')
-            ->firstOrFail();
+        return $this->messageWithRole('user', last: true);
     }
 
     public function getFirstAssistantMessage(): Message
     {
-        if ($this->relationLoaded('messages')) {
-            $message = $this->messages->first(static fn (Message $m): bool => $m->role === 'assistant');
-            if ($message === null) {
-                throw new ModelNotFoundException();
-            }
-
-            return $message;
-        }
-
-        return $this->messages()
-            ->where('role', 'assistant')
-            ->orderBy('id')
-            ->firstOrFail();
+        return $this->messageWithRole('assistant');
     }
 
     public function getLastAssistantMessage(): Message
     {
-        if ($this->relationLoaded('messages')) {
-            $message = $this->messages->last(static fn (Message $m): bool => $m->role === 'assistant');
-            if ($message === null) {
-                throw new ModelNotFoundException();
-            }
-
-            return $message;
-        }
-
-        return $this->messages()
-            ->where('role', 'assistant')
-            ->orderBy('id', 'desc')
-            ->firstOrFail();
+        return $this->messageWithRole('assistant', last: true);
     }
 
     public function getForceRefreshAttribute(): bool
     {
-        $firstMsg = $this->relationLoaded('messages')
-            ? $this->messages->first()
-            : $this->messages()->first();
+        $firstMsg = $this->firstMessage();
 
         return (bool) ($firstMsg?->meta['force_refresh'] ?? false);
     }
 
     public function getTypeAttribute(): string
     {
-        $firstMsg = $this->relationLoaded('messages')
-            ? $this->messages->first()
-            : $this->messages()->first();
+        $firstMsg = $this->firstMessage();
 
         return $firstMsg?->meta['type'] ?? '';
     }
 
     public function getInputAttribute(): string
     {
-        $firstMsg = $this->relationLoaded('messages')
-            ? $this->messages->first()
-            : $this->messages()->first();
+        $firstMsg = $this->firstMessage();
 
         return $firstMsg?->meta['input'] ?? '';
     }
@@ -162,9 +108,7 @@ class Chat extends Model
 
     public function isBlock(): bool
     {
-        $firstMessage = $this->relationLoaded('messages')
-            ? $this->messages->first()
-            : $this->messages()->first();
+        $firstMessage = $this->firstMessage();
 
         if (!$firstMessage instanceof Message) {
             throw new ModelNotFoundException();
@@ -241,5 +185,40 @@ class Chat extends Model
                 $model->ulid = strtolower((string) Str::ulid());
             }
         });
+    }
+
+    /**
+     * The oldest message whatever its role. Ordered explicitly so the query
+     * branch cannot disagree with the eager-loaded one about which is first.
+     */
+    private function firstMessage(): ?Message
+    {
+        return $this->relationLoaded('messages')
+            ? $this->messages->first()
+            : $this->messages()->orderBy('id')->first();
+    }
+
+    /**
+     * Reads the eager-loaded relation when there is one so a loaded chat never
+     * issues another query, and raises a not-found either way when the role is
+     * absent.
+     */
+    private function messageWithRole(string $role, bool $last = false): Message
+    {
+        if ($this->relationLoaded('messages')) {
+            $matches = $this->messages->filter(static fn (Message $m): bool => $m->role === $role);
+            $message = $last ? $matches->last() : $matches->first();
+
+            if (!$message instanceof Message) {
+                throw new ModelNotFoundException();
+            }
+
+            return $message;
+        }
+
+        return $this->messages()
+            ->where('role', $role)
+            ->orderBy('id', $last ? 'desc' : 'asc')
+            ->firstOrFail();
     }
 }
