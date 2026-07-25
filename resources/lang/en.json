@@ -165,5 +165,18 @@
     "home.examples.pizza.question": "What happened in this transaction?",
     "home.examples.halving.title": "The first halving",
     "home.examples.halving.subtitle": "Block 210,000, the reward drops to 25 BTC",
-    "home.examples.halving.question": "Why does this block matter?"
+    "home.examples.halving.question": "Why does this block matter?",
+    "model_picker.title": "AI model",
+    "model_picker.select.label": "Model",
+    "model_picker.select.help": "Free models need no key. The others use your own API key, which stays in this browser.",
+    "model_picker.auto": "Automatic — Satscribe picks for you",
+    "model_picker.auto.short": "Automatic",
+    "model_picker.badge.free": "free tier",
+    "model_picker.badge.paid": "paid",
+    "model_picker.badge.your_key": "needs your key",
+    "model_picker.key.label": "Your API key (optional)",
+    "model_picker.key.placeholder": "Paste your provider API key",
+    "model_picker.key.clear": "Forget",
+    "model_picker.key.privacy": "Your key is stored in this browser only. Satscribe never saves it on the server — it is sent with your request just to call the provider.",
+    "model_picker.key.missing": "This model needs your own API key. Paste one above, or choose a free model that needs no key."
 }

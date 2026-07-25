@@ -992,3 +992,163 @@ a:hover,
         padding: 0.1rem 0.4rem;
     }
 }
+
+/* =============================================================================
+   Model Picker (provider / model choice + bring-your-own key)
+============================================================================= */
+.model-picker-bar {
+    display: flex;
+    justify-content: flex-end;
+    padding: 0 0.25rem 0.375rem;
+}
+
+.model-picker {
+    position: relative;
+    display: inline-block;
+}
+
+.model-picker__trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    max-width: 16rem;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8125rem;
+    color: var(--btc-gray);
+    background: var(--btc-bg-light);
+    border: 1px solid var(--btc-border-default);
+    border-radius: 9999px;
+    cursor: pointer;
+    transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.model-picker__trigger:hover {
+    color: var(--btc-text-dark);
+    border-color: var(--btc-border-light);
+}
+
+/* A key-required model with no key: flag it on the closed trigger too, so the
+   reason a submit was refused is visible without opening the panel. */
+.model-picker__trigger--alert {
+    color: var(--btc-alert-dark);
+    border-color: #fcd34d;
+    background-color: #fffbeb;
+}
+
+.model-picker__current {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.model-picker__panel {
+    position: absolute;
+    right: 0;
+    z-index: 30;
+    width: min(22rem, calc(100vw - 2rem));
+    margin-top: 0.375rem;
+    padding: 0.75rem;
+    text-align: left;
+    background: var(--body-bg);
+    border: 1px solid var(--btc-border-default);
+    border-radius: 0.5rem;
+    box-shadow: 0 10px 24px rgba(17, 24, 39, 0.12);
+}
+
+.model-picker__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+}
+
+.model-picker__heading {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--btc-text-dark);
+}
+
+.model-picker__close {
+    color: var(--btc-gray);
+    cursor: pointer;
+}
+
+.model-picker__close:hover {
+    color: var(--btc-text-dark);
+}
+
+.model-picker__label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--btc-text-dark);
+    margin-bottom: 0.25rem;
+}
+
+.model-picker__select,
+.model-picker__input {
+    width: 100%;
+    /* 1rem keeps iOS Safari from zooming the page when the field is focused */
+    font-size: 1rem;
+    background: var(--btc-surface-light);
+    border: 1px solid var(--btc-border-light);
+    color: var(--btc-text-dark);
+    padding: 0.4rem;
+    border-radius: 0.375rem;
+}
+
+.model-picker__input--error {
+    border-color: #fecaca;
+    background-color: #fef2f2;
+}
+
+.model-picker__key-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.model-picker__forget {
+    flex-shrink: 0;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--btc-gray);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    cursor: pointer;
+}
+
+.model-picker__forget:hover {
+    color: var(--btc-text-dark);
+}
+
+.model-picker__hint {
+    margin-top: 0.25rem;
+    font-size: 0.75rem;
+    color: var(--btc-gray);
+}
+
+.model-picker__notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.375rem;
+    margin-top: 0.5rem;
+    font-size: 0.75rem;
+    line-height: 1.35;
+    color: var(--btc-gray);
+}
+
+.model-picker__notice--error {
+    color: #991b1b;
+}
+
+@media (max-width: 640px) {
+    .model-picker-bar {
+        justify-content: flex-start;
+    }
+
+    .model-picker__panel {
+        right: auto;
+        left: 0;
+    }
+}

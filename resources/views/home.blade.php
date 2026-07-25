@@ -49,6 +49,14 @@
             @endif
         </div>
 
+        {{--
+            Outside #homepage-header on purpose: that block is hidden once a chat
+            starts, and the model choice has to stay reachable for follow-ups too.
+        --}}
+        <div class="model-picker-bar">
+            <x-model-picker/>
+        </div>
+
         <div id="chat-wrapper" class="flex flex-col flex-grow min-h-0">
             @if(isset($chat))
                 @include('partials.chat', [
@@ -104,6 +112,9 @@
                 async submitForm(form) {
                     if (window.__PAYWALL_ACTIVE) return;
                     if (this.isSubmitting) return;
+                    // A key-required model with no key would fail upstream; say so
+                    // here instead, before anything is streamed.
+                    if (window.AiModelPicker?.blockSubmit?.()) return;
 
                     this.loadingMessage = this.loadingMessages[Math.floor(Math.random() * this.loadingMessages.length)];
                     this.isSubmitting = true;
@@ -188,14 +199,24 @@
                         this.streamController = new AbortController();
                         this.setStreamingUi(true);
 
+                        // Provider/model ride along in the body; the key only ever
+                        // travels in the X-Ai-Api-Key header, which keeps it out of
+                        // request-body logging.
+                        const selection = window.AiModelPicker?.selectionFields?.() ?? {};
+                        if (selection.provider) formData.set('provider', selection.provider);
+                        if (selection.model) formData.set('model', selection.model);
+
+                        const streamHeaders = {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'X-Requested-With': 'XMLHttpRequest',
+                        };
+                        window.AiModelPicker?.applyToHeaders?.(streamHeaders);
+
                         const response = await fetch('/stream', {
                             method: 'POST',
                             body: formData,
                             signal: this.streamController.signal,
-                            headers: {
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                                'X-Requested-With': 'XMLHttpRequest',
-                            },
+                            headers: streamHeaders,
                         });
 
                         if (response.status === 429) {
@@ -460,6 +481,7 @@
 
                 async sendMessageToChat(chatUlid, message) {
                     if (!message || !message.trim()) return;
+                    if (window.AiModelPicker?.blockSubmit?.()) return;
 
                     const chatContainer = document.getElementById('chat-container');
                     const chatGroups = document.getElementById('chat-message-groups') || chatContainer;
@@ -489,16 +511,26 @@
                         this.streamController = new AbortController();
                         this.setStreamingUi(true);
 
+                        // Same contract as /stream: provider + model in the body,
+                        // the bring-your-own key only in the header.
+                        const selection = window.AiModelPicker?.selectionFields?.() ?? {};
+                        const followUpHeaders = {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'X-Requested-With': 'XMLHttpRequest',
+                        };
+                        window.AiModelPicker?.applyToHeaders?.(followUpHeaders);
+
+                        const followUpBody = {message: message.trim()};
+                        if (selection.provider) followUpBody.provider = selection.provider;
+                        if (selection.model) followUpBody.model = selection.model;
+
                         // Use streaming endpoint for follow-up messages
                         const response = await fetch(`/chats/${chatUlid}/messages/stream`, {
                             method: 'POST',
                             signal: this.streamController.signal,
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                                'X-Requested-With': 'XMLHttpRequest',
-                            },
-                            body: JSON.stringify({message: message.trim()})
+                            headers: followUpHeaders,
+                            body: JSON.stringify(followUpBody)
                         });
 
                         if (response.status === 429) {

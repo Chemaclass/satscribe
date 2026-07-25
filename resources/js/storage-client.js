@@ -75,6 +75,35 @@ const StorageClient = {
     clearNostrRelays() {
         localStorage.removeItem('nostr_relays');
     },
+    /**
+     * The picked provider/model, as the combined `provider::model` option value.
+     * Returns null when the visitor has never chosen, which is different from
+     * '' (they explicitly picked "automatic").
+     */
+    getAiModelChoice() {
+        return localStorage.getItem('ai_model_choice');
+    },
+    setAiModelChoice(choice) {
+        localStorage.setItem('ai_model_choice', choice ?? '');
+    },
+    /**
+     * A bring-your-own API key. localStorage is the only place it is ever kept:
+     * it is never sent to Satscribe's own storage, never logged, and only
+     * leaves the browser in the X-Ai-Api-Key header of an AI request.
+     */
+    getAiApiKey() {
+        return localStorage.getItem('ai_api_key') ?? '';
+    },
+    setAiApiKey(key) {
+        if (!key) {
+            this.clearAiApiKey();
+            return;
+        }
+        localStorage.setItem('ai_api_key', key);
+    },
+    clearAiApiKey() {
+        localStorage.removeItem('ai_api_key');
+    },
     clearNostr() {
         this.clearNostrPubkey();
         this.clearNostrPrivkey();

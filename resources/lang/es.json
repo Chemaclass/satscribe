@@ -163,5 +163,18 @@
     "home.examples.pizza.question": "¿Qué ocurrió en esta transacción?",
     "home.examples.halving.title": "El primer halving",
     "home.examples.halving.subtitle": "Bloque 210.000, la recompensa baja a 25 BTC",
-    "home.examples.halving.question": "¿Por qué importa este bloque?"
+    "home.examples.halving.question": "¿Por qué importa este bloque?",
+    "model_picker.title": "Modelo de IA",
+    "model_picker.select.label": "Modelo",
+    "model_picker.select.help": "Los modelos gratuitos no necesitan clave. Los demás usan tu propia clave de API, que se queda en este navegador.",
+    "model_picker.auto": "Automático — Satscribe elige por ti",
+    "model_picker.auto.short": "Automático",
+    "model_picker.badge.free": "gratis",
+    "model_picker.badge.paid": "de pago",
+    "model_picker.badge.your_key": "necesita tu clave",
+    "model_picker.key.label": "Tu clave de API (opcional)",
+    "model_picker.key.placeholder": "Pega la clave de API de tu proveedor",
+    "model_picker.key.clear": "Olvidar",
+    "model_picker.key.privacy": "Tu clave se guarda solo en este navegador. Satscribe nunca la almacena en el servidor: se envía con tu petición únicamente para llamar al proveedor.",
+    "model_picker.key.missing": "Este modelo necesita tu propia clave de API. Pega una arriba o elige un modelo gratuito que no requiera clave."
 }
