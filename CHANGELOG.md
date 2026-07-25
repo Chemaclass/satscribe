@@ -9,6 +9,20 @@ Anything older than the first section below lives in `git log`.
 
 ## [Unreleased]
 
+### Security
+
+- **A message's stored payload was readable by anyone.** `history/{id}/raw` took a
+  bare integer and returned that message's data with no ownership check, so a
+  private chat's contents were reachable by counting upwards. It now applies the
+  same visibility rule as opening the chat.
+- **The UTXO trace endpoint had no depth limit.** Each level walks every input of
+  every transaction above it, so `?depth=500` on one unauthenticated request
+  could pin a worker for its full 300s limit while fanning out to Blockstream.
+  Clamped to 5; the page only ever asks for 2.
+- **No `/api/*` route was rate limited.** Laravel 11 dropped the default API
+  throttle and it was never opted back in. Limited to 120 requests a minute,
+  which leaves roughly threefold headroom over the paywall modal's polling.
+
 ### Fixed
 
 - **Two of the three OpenRouter models on offer no longer existed.** Both free
@@ -23,6 +37,9 @@ Anything older than the first section below lives in `git log`.
   error answered with 422.
 - The model picker opened downward even when there was no room, cutting off the
   API key field. It now flips upward when the space below is too small.
+- Unsharing a chat reported it as shared: the endpoint answered a constant
+  `true` whatever it stored, and read the flag with a cast that turns the string
+  `"false"` into `true`.
 
 ### Changed
 
