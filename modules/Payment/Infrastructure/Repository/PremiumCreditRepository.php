@@ -35,7 +35,7 @@ final readonly class PremiumCreditRepository implements PremiumCreditsInterface
     {
         // Serialised so two requests cannot both read the last credit and both
         // decide they may spend it.
-        return DB::transaction(function () use ($npub): bool {
+        return DB::transaction(static function () use ($npub): bool {
             $balance = (int) PremiumCreditEntry::where('npub', $npub)
                 ->lockForUpdate()
                 ->sum('delta');

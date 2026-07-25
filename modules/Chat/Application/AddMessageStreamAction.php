@@ -17,6 +17,7 @@ use Modules\Chat\Domain\Repository\MessageRepositoryInterface;
 use Modules\OpenAI\Domain\Data\ModelSelection;
 use Modules\OpenAI\Domain\Exception\OpenAIError;
 use Modules\OpenAI\Domain\OpenAIFacadeInterface;
+use Modules\Payment\Domain\PremiumAccessInterface;
 use Modules\Shared\Domain\Chat\SentenceTrimmer;
 use Modules\Shared\Domain\Data\Chat\PromptInput;
 use Modules\Shared\Domain\Enum\Chat\PromptPersona;
@@ -37,6 +38,7 @@ final readonly class AddMessageStreamAction implements AddMessageStreamActionInt
         private UserInputSanitizer $userInputSanitizer,
         private AdditionalContextBuilder $contextBuilder,
         private OpenAiRateLimiter $rateLimiter,
+        private PremiumAccessInterface $premiumAccess,
         private LoggerInterface $logger,
     ) {
     }
@@ -47,6 +49,11 @@ final readonly class AddMessageStreamAction implements AddMessageStreamActionInt
     public function execute(Chat $chat, string $message, ?ModelSelection $selection = null): Generator
     {
         $this->logger->debug('Adding streaming message to chat', ['chat_id' => $chat->id]);
+        // Before anything is spent: a model this deployment funds costs the
+        // visitor a premium credit, and refusing here means no provider call
+        // is made at all.
+        $this->premiumAccess->authorise($selection);
+
         $this->rateLimiter->enforce();
 
         $firstUserMessage = $chat->getFirstUserMessage();

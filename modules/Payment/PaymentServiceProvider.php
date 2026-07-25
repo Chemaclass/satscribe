@@ -46,6 +46,10 @@ final class PaymentServiceProvider extends ServiceProvider
             ->giveConfig('services.alby.api_key');
 
         $this->app->when(PremiumAccess::class)
+            ->needs('$npub')
+            ->give(static fn (): string => nostr_pubkey() ?? '');
+
+        $this->app->when(PremiumAccess::class)
             ->needs('$packSats')
             ->giveConfig('services.premium.pack_sats');
 

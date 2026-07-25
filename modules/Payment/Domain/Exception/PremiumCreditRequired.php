@@ -6,6 +6,8 @@ namespace Modules\Payment\Domain\Exception;
 
 use RuntimeException;
 
+use function sprintf;
+
 /**
  * Raised instead of calling a paid provider, so the caller can offer an invoice.
  * Separate from a login failure because the two need different answers: one is

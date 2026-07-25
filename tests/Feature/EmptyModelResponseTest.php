@@ -93,12 +93,14 @@ final class StubBlockchainFacade implements BlockchainFacadeInterface
     }
 }
 
-final readonly class StubOpenAIFacade implements OpenAIFacadeInterface
+final class StubOpenAIFacade implements OpenAIFacadeInterface
 {
+    public int $calls = 0;
+
     /**
      * @param list<string> $chunks
      */
-    public function __construct(private array $chunks)
+    public function __construct(private readonly array $chunks)
     {
     }
 
@@ -123,6 +125,8 @@ final readonly class StubOpenAIFacade implements OpenAIFacadeInterface
         string $additionalContext = '',
         ?ModelSelection $selection = null,
     ): Generator {
+        ++$this->calls;
+
         yield from $this->chunks;
     }
 
@@ -134,11 +138,16 @@ final readonly class StubOpenAIFacade implements OpenAIFacadeInterface
         return [];
     }
 
+    /**
+     * Delegates so a test can ask for a real provider and model; the gate needs
+     * a genuine selection to decide anything.
+     */
     public function resolveSelection(
         ?string $providerId,
         ?string $modelId,
         ?string $userApiKey = null,
     ): ?ModelSelection {
-        return null;
+        return app(\Modules\OpenAI\Application\OpenAIFacade::class)
+            ->resolveSelection($providerId, $modelId, $userApiKey);
     }
 }

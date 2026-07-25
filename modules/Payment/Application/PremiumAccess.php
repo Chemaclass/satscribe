@@ -13,12 +13,13 @@ final readonly class PremiumAccess implements PremiumAccessInterface
 {
     public function __construct(
         private PremiumCreditsInterface $credits,
+        private string $npub,
         private int $packSats,
         private int $packMessages,
     ) {
     }
 
-    public function authorise(?ModelSelection $selection, ?string $npub): void
+    public function authorise(?ModelSelection $selection): void
     {
         // No selection means the automatic default, which is always a model
         // this deployment already funds for free.
@@ -37,11 +38,11 @@ final readonly class PremiumAccess implements PremiumAccessInterface
 
         // Credit follows the Nostr identity, so there is nothing to charge
         // against without one.
-        if ($npub === null || $npub === '') {
+        if ($this->npub === '') {
             throw PremiumCreditRequired::notLoggedIn();
         }
 
-        if (!$this->credits->spendOne($npub)) {
+        if (!$this->credits->spendOne($this->npub)) {
             throw PremiumCreditRequired::noBalance($this->packSats, $this->packMessages);
         }
     }

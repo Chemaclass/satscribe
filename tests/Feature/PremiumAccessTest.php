@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Modules\OpenAI\Domain\Data\ModelSelection;
 use Modules\OpenAI\Domain\OpenAIFacadeInterface;
 use Modules\Payment\Domain\Exception\PremiumCreditRequired;
+use Modules\Payment\Application\PremiumAccess;
 use Modules\Payment\Domain\PremiumAccessInterface;
 use Modules\Payment\Domain\PremiumCreditsInterface;
 use Tests\TestCase;
@@ -35,14 +37,14 @@ final class PremiumAccessTest extends TestCase
 
     public function test_a_free_model_needs_no_credit_and_no_login(): void
     {
-        $this->access()->authorise($this->selection('groq', 'llama-3.3-70b-versatile'), null);
+        $this->access()->authorise($this->selection('groq', 'llama-3.3-70b-versatile'));
 
         self::assertSame(0, $this->credits()->balanceFor(self::NPUB));
     }
 
     public function test_the_automatic_default_needs_no_credit(): void
     {
-        $this->access()->authorise(null, null);
+        $this->access()->authorise(null);
 
         self::assertSame(0, $this->credits()->balanceFor(self::NPUB));
     }
@@ -52,7 +54,7 @@ final class PremiumAccessTest extends TestCase
         $this->expectException(PremiumCreditRequired::class);
         $this->expectExceptionMessage('Nostr login');
 
-        $this->access()->authorise($this->selection('openrouter', 'anthropic/claude-sonnet-5'), null);
+        $this->access()->authorise($this->selection('openrouter', 'anthropic/claude-sonnet-5'));
     }
 
     public function test_a_premium_model_without_credit_is_refused(): void
@@ -60,14 +62,14 @@ final class PremiumAccessTest extends TestCase
         $this->expectException(PremiumCreditRequired::class);
         $this->expectExceptionMessage('no premium messages left');
 
-        $this->access()->authorise($this->selection('openrouter', 'anthropic/claude-sonnet-5'), self::NPUB);
+        $this->access(self::NPUB)->authorise($this->selection('openrouter', 'anthropic/claude-sonnet-5'));
     }
 
     public function test_a_premium_model_with_credit_spends_exactly_one(): void
     {
         $this->credits()->grantPack(self::NPUB, 'hash-1', 3);
 
-        $this->access()->authorise($this->selection('openrouter', 'anthropic/claude-sonnet-5'), self::NPUB);
+        $this->access(self::NPUB)->authorise($this->selection('openrouter', 'anthropic/claude-sonnet-5'));
 
         self::assertSame(2, $this->credits()->balanceFor(self::NPUB));
     }
@@ -86,14 +88,14 @@ final class PremiumAccessTest extends TestCase
             'sk-user-supplied-key-0123456789',
         );
 
-        $this->access()->authorise($selection, self::NPUB);
+        $this->access(self::NPUB)->authorise($selection);
 
         self::assertSame(3, $this->credits()->balanceFor(self::NPUB));
     }
 
-    private function access(): PremiumAccessInterface
+    private function access(?string $npub = null): PremiumAccessInterface
     {
-        return app(PremiumAccessInterface::class);
+        return new PremiumAccess($this->credits(), $npub ?? '', 500, 20);
     }
 
     private function credits(): PremiumCreditsInterface
@@ -101,7 +103,7 @@ final class PremiumAccessTest extends TestCase
         return app(PremiumCreditsInterface::class);
     }
 
-    private function selection(string $provider, string $model, ?string $userKey = null): \Modules\OpenAI\Domain\Data\ModelSelection
+    private function selection(string $provider, string $model, ?string $userKey = null): ModelSelection
     {
         $selection = app(OpenAIFacadeInterface::class)->resolveSelection($provider, $model, $userKey);
 

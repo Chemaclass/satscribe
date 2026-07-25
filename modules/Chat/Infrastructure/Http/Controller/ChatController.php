@@ -20,6 +20,7 @@ use Modules\Chat\Infrastructure\Http\Request\CreateChatRequest;
 use Modules\OpenAI\Domain\Data\ModelSelection;
 use Modules\OpenAI\Domain\Exception\OpenAIError;
 use Modules\OpenAI\Domain\OpenAIFacadeInterface;
+use Modules\Payment\Domain\Exception\PremiumCreditRequired;
 use Modules\Shared\Domain\Data\Chat\PromptInput;
 use Modules\Shared\Domain\Enum\Chat\PromptPersona;
 use Psr\Log\LoggerInterface;
@@ -220,11 +221,11 @@ final readonly class ChatController
                 foreach ($events() as $event) {
                     $this->emit($event);
                 }
-            } catch (BlockchainException|OpenAIError|ThrottleRequestsException $e) {
-                // The daily quota is enforced from inside the generator, so a
-                // throttle escapes after the SSE headers are already sent. Left
-                // uncaught it just kills the stream, and the client sees a
-                // skeleton that never resolves rather than a reason.
+            } catch (BlockchainException|OpenAIError|ThrottleRequestsException|PremiumCreditRequired $e) {
+                // These are all raised from inside the generator, after the SSE
+                // headers have gone out. Left uncaught they just kill the
+                // stream, and the client sees a skeleton that never resolves
+                // rather than a reason it can act on.
                 $this->logger->error($errorLogMessage, ['error' => $e->getMessage()]);
                 $this->emit(['type' => 'error', 'data' => $e->getMessage()]);
             }
