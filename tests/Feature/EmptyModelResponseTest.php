@@ -93,12 +93,12 @@ final class StubBlockchainFacade implements BlockchainFacadeInterface
     }
 }
 
-final class StubOpenAIFacade implements OpenAIFacadeInterface
+final readonly class StubOpenAIFacade implements OpenAIFacadeInterface
 {
     /**
      * @param list<string> $chunks
      */
-    public function __construct(private readonly array $chunks)
+    public function __construct(private array $chunks)
     {
     }
 
