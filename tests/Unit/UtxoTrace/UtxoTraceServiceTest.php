@@ -209,37 +209,6 @@ final class UtxoTraceServiceTest extends TestCase
     }
 
     /**
-     * @param array<string, mixed> $tx
-     */
-    private function httpReturning(array $tx): HttpClientInterface
-    {
-        $response = $this->createConfiguredMock(Response::class, [
-            'failed' => false,
-            'json' => $tx,
-        ]);
-
-        $http = $this->createMock(HttpClientInterface::class);
-        $http->method('get')->willReturn($response);
-
-        return $http;
-    }
-
-    private function nullRepository(): UtxoTraceRepositoryInterface
-    {
-        return new class() implements UtxoTraceRepositoryInterface {
-            public function find(string $txid, int $depth): ?UtxoTrace
-            {
-                return null;
-            }
-
-            public function store(string $txid, int $depth, array $result): UtxoTrace
-            {
-                return new UtxoTrace();
-            }
-        };
-    }
-
-    /**
      * The transaction memo used to be a method-level `static`, so it was shared
      * by every instance for the life of the process. That leaked across requests
      * in a long-lived worker and silently poisoned unrelated tests: one test's
@@ -286,5 +255,36 @@ final class UtxoTraceServiceTest extends TestCase
         $second = $makeTracer()->buildBacktrace('shared-txid', 1);
 
         self::assertSame($first, $second);
+    }
+
+    /**
+     * @param array<string, mixed> $tx
+     */
+    private function httpReturning(array $tx): HttpClientInterface
+    {
+        $response = $this->createConfiguredMock(Response::class, [
+            'failed' => false,
+            'json' => $tx,
+        ]);
+
+        $http = $this->createMock(HttpClientInterface::class);
+        $http->method('get')->willReturn($response);
+
+        return $http;
+    }
+
+    private function nullRepository(): UtxoTraceRepositoryInterface
+    {
+        return new class() implements UtxoTraceRepositoryInterface {
+            public function find(string $txid, int $depth): ?UtxoTrace
+            {
+                return null;
+            }
+
+            public function store(string $txid, int $depth, array $result): UtxoTrace
+            {
+                return new UtxoTrace();
+            }
+        };
     }
 }
