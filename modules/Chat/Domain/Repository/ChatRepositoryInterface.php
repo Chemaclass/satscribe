@@ -31,4 +31,8 @@ interface ChatRepositoryInterface
     public function getPagination(bool $showAll): Paginator;
 
     public function getTotalChats(): int;
+
+    public function setShared(Chat $chat, bool $shared): void;
+
+    public function setPublic(Chat $chat, bool $isPublic): void;
 }

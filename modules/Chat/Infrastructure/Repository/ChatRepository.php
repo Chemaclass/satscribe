@@ -126,4 +126,16 @@ final readonly class ChatRepository implements ChatRepositoryInterface
     {
         return Chat::count();
     }
+
+    public function setShared(Chat $chat, bool $shared): void
+    {
+        $chat->is_shared = $shared;
+        $chat->save();
+    }
+
+    public function setPublic(Chat $chat, bool $isPublic): void
+    {
+        $chat->is_public = $isPublic;
+        $chat->save();
+    }
 }

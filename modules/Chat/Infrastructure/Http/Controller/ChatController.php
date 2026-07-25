@@ -14,6 +14,7 @@ use Modules\Blockchain\Domain\Exception\BlockchainException;
 use Modules\Chat\Application\ChatService;
 use Modules\Chat\Domain\AddMessageStreamActionInterface;
 use Modules\Chat\Domain\CreateChatStreamActionInterface;
+use Modules\Chat\Domain\Repository\ChatRepositoryInterface;
 use Modules\Chat\Infrastructure\Http\Request\CreateChatRequest;
 use Modules\OpenAI\Domain\Data\ModelSelection;
 use Modules\OpenAI\Domain\Exception\OpenAIError;
@@ -37,6 +38,7 @@ final readonly class ChatController
 
     public function __construct(
         private ChatService $chatService,
+        private ChatRepositoryInterface $chatRepository,
         private BlockchainFacadeInterface $blockchainFacade,
         private CreateChatStreamActionInterface $createChatStreamAction,
         private AddMessageStreamActionInterface $addMessageStreamAction,
@@ -151,20 +153,26 @@ final readonly class ChatController
     {
         $this->abortUnlessOwner($chat, 'You are not allowed to share this chat.');
 
-        $chat->is_shared = (bool)$request->input('shared');
-        $chat->save();
+        // boolean() rather than a cast: a form-encoded body carries "false" as
+        // a string, which casts to true and shared a chat that was being
+        // unshared. The response reports the flag that was actually stored — it
+        // used to answer `true` whatever happened.
+        $shared = $request->boolean('shared');
 
-        return response()->json(['shared' => true]);
+        $this->chatRepository->setShared($chat, $shared);
+
+        return response()->json(['shared' => $shared]);
     }
 
     public function toggleVisibility(Chat $chat): JsonResponse
     {
         $this->abortUnlessOwner($chat, 'You are not allowed to change this chat visibility.');
 
-        $chat->is_public = !$chat->is_public;
-        $chat->save();
+        $isPublic = !$chat->is_public;
 
-        return response()->json(['is_public' => $chat->is_public]);
+        $this->chatRepository->setPublic($chat, $isPublic);
+
+        return response()->json(['is_public' => $isPublic]);
     }
 
     /**
