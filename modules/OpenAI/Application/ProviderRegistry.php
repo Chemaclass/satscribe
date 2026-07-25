@@ -87,9 +87,6 @@ final readonly class ProviderRegistry implements ProviderRegistryInterface
 
         if ($providerId === '') {
             // "Automatic" — the same default defaultSelection() resolves to.
-            // This branch used to name OpenAI outright, so a visitor who left
-            // the picker on Automatic and pasted, say, a Groq key had that key
-            // sent to api.openai.com: a provider they never chose.
             $definition = $this->defaultDefinition();
             $model = $modelId === '' ? $this->defaultModelFor($definition, $this->openAiModel) : $modelId;
 
@@ -97,7 +94,11 @@ final readonly class ProviderRegistry implements ProviderRegistryInterface
                 throw $this->unsupportedModel($definition, $modelId);
             }
 
-            return $this->build($definition, $model, $userApiKey);
+            // A key belongs to exactly one provider, so it cannot be honoured
+            // when none was named: "let the app choose" and "use my key" are
+            // contradictory instructions. The key is dropped rather than sent
+            // to whichever provider Automatic happens to resolve to.
+            return $this->build($definition, $model, null);
         }
 
         $definition = $this->find($providerId);

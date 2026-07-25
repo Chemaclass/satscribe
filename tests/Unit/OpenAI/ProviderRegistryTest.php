@@ -218,6 +218,32 @@ final class ProviderRegistryTest extends TestCase
         self::assertNull($this->registry()->find('anthropic'));
     }
 
+    /**
+     * A key belongs to one provider, so it cannot be applied when the visitor
+     * named none. The blank-provider branch used to hardcode OpenAI, which sent
+     * a Groq or Anthropic key to api.openai.com.
+     */
+    public function test_automatic_ignores_a_user_key_and_uses_the_server_default(): void
+    {
+        $registry = $this->registry(groqKey: 'groq-key');
+
+        $selection = $registry->selectionFrom('', '', self::USER_KEY);
+
+        self::assertSame('groq', $selection->provider->id());
+        self::assertSame($registry->defaultSelection()->model, $selection->model);
+        self::assertFalse($selection->usesUserKey);
+        self::assertSame('groq-key', $selection->apiKey());
+    }
+
+    public function test_automatic_with_a_user_key_still_falls_back_to_openai(): void
+    {
+        $selection = $this->registry(openAiKey: 'server-key')->selectionFrom('', '', self::USER_KEY);
+
+        self::assertSame('openai', $selection->provider->id());
+        self::assertSame('gpt-4', $selection->model);
+        self::assertFalse($selection->usesUserKey);
+    }
+
     private function registry(
         string $baseUrl = 'https://api.openai.com/v1',
         string $openAiKey = 'server-key',
@@ -232,30 +258,5 @@ final class ProviderRegistryTest extends TestCase
             openRouterApiKey: $openRouterKey,
             groqApiKey: $groqKey,
         );
-    }
-
-    /**
-     * "Automatic" means the same thing whether or not a key was pasted. The
-     * blank-provider branch used to hardcode OpenAI, so a visitor who chose
-     * Automatic and supplied, say, a Groq key had that key sent to
-     * api.openai.com — a provider they never named.
-     */
-    public function test_automatic_with_a_user_key_uses_the_default_provider(): void
-    {
-        $registry = $this->registry(groqKey: 'groq-key');
-
-        $selection = $registry->selectionFrom('', '', self::USER_KEY);
-
-        self::assertSame('groq', $selection->provider->id());
-        self::assertSame($registry->defaultSelection()->model, $selection->model);
-        self::assertTrue($selection->usesUserKey);
-    }
-
-    public function test_automatic_with_a_user_key_still_falls_back_to_openai(): void
-    {
-        $selection = $this->registry(openAiKey: 'server-key')->selectionFrom('', '', self::USER_KEY);
-
-        self::assertSame('openai', $selection->provider->id());
-        self::assertSame('gpt-4', $selection->model);
     }
 }
