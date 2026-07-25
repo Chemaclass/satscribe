@@ -87,6 +87,11 @@ final readonly class AiProviderDefinition
         return $this->defaultModel();
     }
 
+    public function isPremium(string $modelId): bool
+    {
+        return $this->findModel($modelId)?->premium === true;
+    }
+
     /**
      * True when the caller must bring their own key because the server has none.
      */
@@ -100,7 +105,7 @@ final readonly class AiProviderDefinition
      *     id: string,
      *     label: string,
      *     requires_user_key: bool,
-     *     models: list<array{id: string, label: string, free: bool}>,
+     *     models: list<array{id: string, label: string, free: bool, premium: bool}>,
      * }
      */
     public function toArray(): array

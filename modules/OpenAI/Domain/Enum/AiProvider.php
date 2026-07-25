@@ -72,11 +72,12 @@ enum AiProvider: string
             ],
             // The only route to Anthropic here: Claude speaks its own protocol
             // directly, but OpenRouter fronts it with the OpenAI one this app
-            // already uses. Free first, then cheapest paid.
+            // already uses. The Claudes are the premium tier — served with this
+            // deployment's key and paid for in sats.
             self::OpenRouter => [
                 new AiModel('openai/gpt-oss-20b:free', 'GPT-OSS 20B', free: true),
-                new AiModel('anthropic/claude-haiku-4.5', 'Claude Haiku 4.5'),
-                new AiModel('anthropic/claude-sonnet-5', 'Claude Sonnet 5'),
+                new AiModel('anthropic/claude-haiku-4.5', 'Claude Haiku 4.5', premium: true),
+                new AiModel('anthropic/claude-sonnet-5', 'Claude Sonnet 5', premium: true),
             ],
             // No free tier here, so the cheapest-first ordering is the only
             // thing keeping an accidental click off an expensive model.

@@ -63,6 +63,14 @@ return [
         'key' => env('GROQ_API_KEY', ''),
     ],
 
+    // A pack of premium messages: what the visitor pays, and what they get.
+    // Both are integers so the balance is a simple count rather than a running
+    // sats figure that has to be priced per model.
+    'premium' => [
+        'pack_sats' => (int) env('PREMIUM_PACK_SATS', 500),
+        'pack_messages' => (int) env('PREMIUM_PACK_MESSAGES', 20),
+    ],
+
     'alby' => [
         'api_key' => env('ALBY_API_KEY', ''),
         'webhook_secret' => env('ALBY_WEBHOOK_SECRET', ''),
