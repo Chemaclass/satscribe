@@ -11,6 +11,9 @@ use Modules\UtxoTrace\Domain\UtxoTraceFacadeInterface;
 use Psr\Log\LoggerInterface;
 
 use function count;
+use function is_array;
+use function is_int;
+use function is_string;
 
 /**
  * Shapes below are derived from how this class reads the Blockstream
@@ -70,7 +73,7 @@ final class UtxoTracer
      */
     private const MAX_CACHED_TRANSACTIONS = 500;
 
-    /** @var array<string, array<string, mixed>> */
+    /** @var array<string, TTransaction> */
     private array $transactionCache = [];
 
     public function __construct(
@@ -230,11 +233,27 @@ final class UtxoTracer
             return $this->remember($txid, []);
         }
 
-        return $this->remember($txid, $response->json());
+        $body = $response->json();
+
+        // A 200 carrying anything but a JSON object is not a transaction; cache
+        // the empty result so a broken response is not re-fetched per hop.
+        if (!is_array($body)) {
+            $this->logger->warning('Blockstream returned a non-object transaction', [
+                'url' => $url,
+            ]);
+
+            return $this->remember($txid, []);
+        }
+
+        return $this->remember($txid, $body);
     }
 
     /**
-     * @param  array<string, mixed>  $transaction
+     * The single point where a decoded Blockstream payload is taken to be a
+     * transaction. Keys the API does not send are simply absent, which is why
+     * every field in TTransaction is optional.
+     *
+     * @param  array<array-key, mixed>  $transaction
      *
      * @return TTransaction
      */
@@ -244,9 +263,9 @@ final class UtxoTracer
             array_shift($this->transactionCache);
         }
 
+        /** @var TTransaction $transaction */
         $this->transactionCache[$txid] = $transaction;
 
-        /** @var TTransaction $transaction */
         return $transaction;
     }
 
@@ -295,8 +314,11 @@ final class UtxoTracer
         $prevTxid = $input['txid'] ?? null;
         $vout = $input['vout'] ?? null;
 
-        if ($prevTxid === null || $vout === null) {
-            $this->logger->warning('Missing txid or vout', [
+        // Only null used to be guarded, so a present-but-wrongly-typed field
+        // reached getVout(string, int) and took down the whole trace with a
+        // TypeError instead of skipping the one bad input.
+        if (!is_string($prevTxid) || !is_int($vout)) {
+            $this->logger->warning('Missing or malformed txid or vout', [
                 'txid' => $parentTxid,
                 'input_index' => $index,
                 'level' => $level,

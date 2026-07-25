@@ -75,6 +75,36 @@ final class UtxoTraceServiceTest extends TestCase
     }
 
     /**
+     * A `vin` entry whose txid/vout are present but not a string/int used to
+     * reach getVout(string, int) and kill the trace with a TypeError under
+     * strict_types. Only null was ever guarded against.
+     */
+    public function test_skips_a_vin_entry_with_a_malformed_txid(): void
+    {
+        $tx = [
+            'txid' => 'txmalformed',
+            'vin' => [
+                ['txid' => ['not-a-string'], 'vout' => 0],
+                ['txid' => 'parenttx', 'vout' => 'not-an-int'],
+            ],
+            'vout' => [
+                ['scriptpubkey' => 'aa', 'value' => 1000],
+            ],
+        ];
+
+        $service = new UtxoTracer(
+            $this->httpReturning($tx),
+            $this->createStub(LoggerInterface::class),
+            $this->nullRepository(),
+        );
+
+        $result = $service->buildBacktrace('txmalformed', 2);
+
+        self::assertCount(1, $result);
+        self::assertSame([], $result[0]['trace']);
+    }
+
+    /**
      * Esplora's `vout` objects carry no index field: the fixture below is the
      * real `/tx/{txid}` shape (verified against blockstream.info), and an
      * output is identified by its position. Reading a non-existent `n` made
