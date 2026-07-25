@@ -6,6 +6,7 @@ namespace Modules\Shared\Domain\Data\Blockchain;
 
 use Illuminate\Support\Collection;
 
+use function is_string;
 use function sprintf;
 
 /**
@@ -35,8 +36,12 @@ final class BlockSummary
     public static function from(BlockData $data): self
     {
         $coinbaseTx = $data->transactions[0] ?? [];
-        $scriptsig = $coinbaseTx['vin'][0]['scriptsig'] ?? '';
-        $miner = MinerIdentifier::extractFromCoinbaseHex($scriptsig);
+
+        // scriptsig is a raw Blockstream field: absent on a malformed coinbase
+        // and not guaranteed to be a string, which extractFromCoinbaseHex
+        // would reject outright rather than treat as an unknown miner.
+        $scriptsig = $coinbaseTx['vin'][0]['scriptsig'] ?? null;
+        $miner = MinerIdentifier::extractFromCoinbaseHex(is_string($scriptsig) ? $scriptsig : '');
         /** @var list<TRawVout> $coinbaseOutputs */
         $coinbaseOutputs = $coinbaseTx['vout'] ?? [];
 
@@ -57,6 +62,7 @@ final class BlockSummary
             ->all();
         $topFees = array_values($topFees);
 
+        /** @var array<string, int> $walletTypes */
         $walletTypes = collect($data->transactions)
             ->flatMap(static fn ($tx) => $tx['vout'] ?? [])
             ->groupBy('scriptpubkey_type')

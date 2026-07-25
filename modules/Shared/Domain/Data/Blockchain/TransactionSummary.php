@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace Modules\Shared\Domain\Data\Blockchain;
 
 use function count;
+use function is_array;
+use function is_int;
+use function is_string;
 
 final class TransactionSummary
 {
@@ -37,25 +40,35 @@ final class TransactionSummary
         $inputs = collect($tx->vin);
         $outputs = collect($tx->vout);
 
-        $totalInput = $inputs->sum(static fn ($vin) => $vin['prevout']['value'] ?? 0);
-        $totalOutput = $outputs->sum(static fn ($out) => $out['value'] ?? 0);
+        $totalInput = $inputs->sum(static fn (array $vin): int => self::intField(self::prevout($vin), 'value'));
+        $totalOutput = $outputs->sum(static fn (array $out): int => self::intField($out, 'value'));
 
-        $hasOpReturn = $outputs->contains(static fn ($out) => $out['scriptpubkey_type'] === 'op_return');
-        $hasMultiSig = $outputs->contains(static fn ($out) => $out['scriptpubkey_type'] === 'multisig');
+        $hasOpReturn = $outputs->contains(
+            static fn (array $out): bool => ($out['scriptpubkey_type'] ?? null) === 'op_return',
+        );
+        $hasMultiSig = $outputs->contains(
+            static fn (array $out): bool => ($out['scriptpubkey_type'] ?? null) === 'multisig',
+        );
 
         $isTopFeePayer = $block instanceof BlockSummary && collect($block->topTransactionsByFee)
                 ->pluck('txid')->contains($tx->txid);
 
+        /** @var array<string, int> $walletTypes */
         $walletTypes = collect([...$inputs, ...$outputs])
-            ->map(static fn ($io) => $io['prevout']['scriptpubkey_type'] ?? $io['scriptpubkey_type'] ?? null)
+            ->map(static fn (array $io): ?string => self::stringField(self::prevout($io), 'scriptpubkey_type')
+                ?? self::stringField($io, 'scriptpubkey_type'))
             ->filter()
             ->countBy()
             ->toArray();
 
-        $uniqueInputAddresses = $inputs->map(static fn (
-            $vin,
-        ) => $vin['prevout']['scriptpubkey_address'] ?? null)->filter()->unique();
-        $outputValues = $outputs->pluck('value')->filter();
+        $uniqueInputAddresses = $inputs
+            ->map(static fn (array $vin): ?string => self::stringField(self::prevout($vin), 'scriptpubkey_address'))
+            ->filter()
+            ->unique();
+
+        $outputValues = $outputs
+            ->map(static fn (array $out): int => self::intField($out, 'value'))
+            ->filter();
 
         $isCoinJoinLike = $uniqueInputAddresses->count() > 5
             && $outputValues->countBy()->max() > 2;
@@ -126,5 +139,43 @@ Behavior Flags:
 - CoinJoin-like: {$coinjoin}
 - Consolidation-like: {$consolidation}
 TEXT;
+    }
+
+    /**
+     * Blockstream input/output objects are unsealed and their inner keys vary
+     * by script type, so a field can be absent or the wrong type. Reading them
+     * blind summed a non-numeric value straight into the totals — a TypeError
+     * at best, a plausible-looking wrong number at worst, and these figures go
+     * verbatim into the prompt the user reads as fact.
+     *
+     * @param  array<string, mixed>  $io
+     *
+     * @return array<string, mixed>
+     */
+    private static function prevout(array $io): array
+    {
+        $prevout = $io['prevout'] ?? null;
+
+        return is_array($prevout) ? $prevout : [];
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    private static function intField(array $data, string $field): int
+    {
+        $value = $data[$field] ?? null;
+
+        return is_int($value) ? $value : 0;
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    private static function stringField(array $data, string $field): ?string
+    {
+        $value = $data[$field] ?? null;
+
+        return is_string($value) ? $value : null;
     }
 }
