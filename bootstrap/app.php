@@ -18,6 +18,12 @@ return Application::configure(basePath: \dirname(__DIR__))
     )
     ->withMiddleware(static function (Middleware $middleware): void {
         $middleware->appendToGroup('web', SetLocale::class);
+
+        // Laravel 11 dropped the default API throttle, so /api/* was entirely
+        // unmetered — including the UTXO trace, which fans out to Blockstream.
+        // The busiest honest caller is the paywall modal polling invoice status
+        // once every 1.5s (~40/min), so this leaves roughly threefold headroom.
+        $middleware->appendToGroup('api', 'throttle:120,1');
     })
     ->withExceptions(static function (Exceptions $exceptions): void {
         // The OpenAI daily cap is enforced by throwing ThrottleRequestsException
