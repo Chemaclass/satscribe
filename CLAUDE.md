@@ -84,7 +84,7 @@ Pre-existing violations — do not replicate; fix opportunistically when already
 
 ## Gotchas
 
-- `phpstan.neon` is **level 1** — passing analysis is a low bar. Hold new code higher than the config enforces
+- `phpstan.neon` is **level 5** across `app`, `modules` and `tests`. Mockery's expectation API is invisible to PHPStan, so `mock()->expects()` is suppressed by an `ignoreErrors` rule scoped to `tests/*` — don't widen it to production code
 - Streaming replies (`Chat/Application/*StreamAction.php`) fail as truncated output, not exceptions — headers are already sent
 - External APIs (Blockstream, OpenAI, Alby) must be wrapped in try/catch — network failure is expected, not exceptional
 - Queue driver is `sync` in tests, so jobs run inline

@@ -19,6 +19,7 @@ use Modules\Chat\Domain\CreateChatStreamActionInterface;
 use Modules\Chat\Domain\Repository\ChatRepositoryInterface;
 use Modules\Chat\Domain\Repository\FlaggedWordRepositoryInterface;
 use Modules\Chat\Domain\Repository\MessageRepositoryInterface;
+use Modules\Chat\Infrastructure\Command\ImportFlaggedWords;
 use Modules\Chat\Infrastructure\Repository\ChatRepository;
 use Modules\Chat\Infrastructure\Repository\FlaggedWordRepository;
 use Modules\Chat\Infrastructure\Repository\MessageRepository;
@@ -57,5 +58,14 @@ final class ChatServiceProvider extends ServiceProvider
         $this->app->when(ChatRepository::class)
             ->needs('$trackingId')
             ->give(static fn () => tracking_id());
+    }
+
+    public function boot(): void
+    {
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                ImportFlaggedWords::class,
+            ]);
+        }
     }
 }
