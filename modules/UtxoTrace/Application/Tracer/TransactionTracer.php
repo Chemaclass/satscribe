@@ -11,6 +11,7 @@ use Psr\Log\LoggerInterface;
 use Throwable;
 
 use function count;
+use function is_string;
 use function sprintf;
 
 final readonly class TransactionTracer
@@ -65,7 +66,10 @@ final readonly class TransactionTracer
 
             foreach ($tx->vin as $vin) {
                 $parent = $vin['txid'] ?? null;
-                if ($parent !== null && !isset($visited[$parent])) {
+
+                // A txid that is not a string is malformed upstream data, and
+                // feeding it back into the queue would fail the next lookup.
+                if (is_string($parent) && !isset($visited[$parent])) {
                     $queue[] = $parent;
                 }
             }

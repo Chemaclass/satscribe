@@ -13,6 +13,7 @@ use Psr\Log\LoggerInterface;
 use RuntimeException;
 
 use function in_array;
+use function is_array;
 
 final readonly class PriceService implements PriceServiceInterface
 {
@@ -90,11 +91,15 @@ final readonly class PriceService implements PriceServiceInterface
                 throw new RuntimeException('Failed to fetch current BTC price');
             }
 
-            $data = $response->json('bitcoin') ?? [];
+            $data = $response->json('bitcoin');
 
+            // Coingecko occasionally answers 200 with a partial or reshaped
+            // body; an absent or non-numeric rate becomes 0.0 rather than
+            // being cast out of whatever arrived.
             $prices = [];
             foreach (self::SUPPORTED_CURRENCIES as $currency) {
-                $prices[$currency] = (float) ($data[$currency] ?? 0.0);
+                $rate = is_array($data) ? ($data[$currency] ?? null) : null;
+                $prices[$currency] = is_numeric($rate) ? (float) $rate : 0.0;
             }
 
             return $prices;
@@ -133,7 +138,9 @@ final readonly class PriceService implements PriceServiceInterface
                     throw new RuntimeException('Failed to fetch historical BTC price');
                 }
 
-                return (float) $response->json("market_data.current_price.{$currency}");
+                $rate = $response->json("market_data.current_price.{$currency}");
+
+                return is_numeric($rate) ? (float) $rate : 0.0;
             },
         );
     }

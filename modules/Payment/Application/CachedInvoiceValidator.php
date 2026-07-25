@@ -11,7 +11,7 @@ use Modules\Payment\Domain\CachedInvoiceValidatorInterface;
 use Psr\Log\LoggerInterface;
 use Throwable;
 
-use function is_array;
+use function is_string;
 
 final readonly class CachedInvoiceValidator implements CachedInvoiceValidatorInterface
 {
@@ -27,16 +27,26 @@ final readonly class CachedInvoiceValidator implements CachedInvoiceValidatorInt
      */
     public function isValidCachedInvoice(?array $cached): bool
     {
+        $hash = $cached['payment_hash'] ?? null;
+        $request = $cached['payment_request'] ?? null;
+        $createdAt = $cached['created_at'] ?? null;
+        $expiry = $cached['expiry'] ?? null;
+
+        // The cache is untyped storage, so a key being present says nothing
+        // about its type: an unchecked created_at reached Carbon::parse() and
+        // killed the request with a TypeError rather than being discarded.
         if (
-            !is_array($cached) ||
-            !isset($cached['payment_hash'], $cached['payment_request'], $cached['created_at'], $cached['expiry'])
+            !is_string($hash) ||
+            !is_string($request) ||
+            !is_string($createdAt) ||
+            !is_numeric($expiry)
         ) {
             $this->logger->warning('Invalid cached invoice structure', ['cached' => $cached]);
 
             return false;
         }
 
-        $expiresAt = Carbon::parse($cached['created_at'])->addSeconds((int) $cached['expiry']);
+        $expiresAt = Carbon::parse($createdAt)->addSeconds((int) $expiry);
         $this->logger->debug('Cached invoice expiry', ['expires_at' => $expiresAt->toDateTimeString()]);
 
         if ($this->now->greaterThanOrEqualTo($expiresAt)) {
@@ -46,8 +56,8 @@ final readonly class CachedInvoiceValidator implements CachedInvoiceValidatorInt
         }
 
         try {
-            if ($this->albyClient->isInvoicePaid($cached['payment_hash'])) {
-                $this->logger->info('Invoice already paid', ['payment_hash' => $cached['payment_hash']]);
+            if ($this->albyClient->isInvoicePaid($hash)) {
+                $this->logger->info('Invoice already paid', ['payment_hash' => $hash]);
 
                 return false;
             }

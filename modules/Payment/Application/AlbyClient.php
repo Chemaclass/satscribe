@@ -105,6 +105,9 @@ final class AlbyClient implements AlbyClientInterface
             throw new RuntimeException("Alby returned a non-object response for {$method} {$path}.");
         }
 
+        // Every Alby endpoint used here answers with a JSON object, and
+        // json_decode in assoc mode gives those string keys.
+        /** @var array<string, mixed> $decoded */
         return $decoded;
     }
 
