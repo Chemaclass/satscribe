@@ -61,6 +61,21 @@ the app never spends OpenAI credit unless that is the only key configured.
 `free` means "costs nothing at the provider's free tier" — every provider still
 requires a key.
 
+### Premium models
+
+Claude is served with **your** OpenRouter key and paid for by the visitor in
+sats: they buy a pack of messages over Lightning, and each premium answer spends
+one. Credit is tied to their Nostr login so it follows them between devices.
+
+```dotenv
+OPENROUTER_API_KEY=sk-or-...     # the key the packs are spent against
+PREMIUM_PACK_SATS=500            # what a pack costs
+PREMIUM_PACK_MESSAGES=20         # what it buys
+```
+
+Without `OPENROUTER_API_KEY` those models are simply bring-your-own-key, and no
+price is advertised.
+
 ### Demo mode
 
 `AI_OFFLINE_FALLBACK=true` lets a deployment answer from the Blockstream data

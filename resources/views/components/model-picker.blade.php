@@ -12,7 +12,13 @@
 <div
     id="model-picker"
     class="model-picker"
-    x-data="modelPicker(@js(['defaultChoice' => $defaultChoice, 'requiresKey' => $requiresKeyByChoice]))"
+    x-data="modelPicker(@js([
+        'defaultChoice' => $defaultChoice,
+        'requiresKey' => $requiresKeyByChoice,
+        'premium' => $premiumByChoice,
+        'loggedIn' => nostr_pubkey() !== null,
+        'labels' => ['balance' => __('model_picker.premium.balance', ['count' => ':count'])],
+    ]))"
     @keydown.escape.window="open = false"
     @click.outside="open = false"
 >
@@ -61,10 +67,21 @@
                 <optgroup label="{{ $provider['label'] }}">
                     @foreach($provider['models'] as $model)
                         @php
+                            // Premium only counts when this deployment holds the
+                            // key: otherwise the visitor brings their own and
+                            // pays their own provider, which is not a sats sale.
+                            $isPremium = $model['premium'] && !$provider['requires_user_key'];
+
                             $badges = [];
-                            $badges[] = $model['free']
-                                ? __('model_picker.badge.free')
-                                : __('model_picker.badge.paid');
+
+                            if ($isPremium) {
+                                $badges[] = __('model_picker.badge.premium', ['sats' => number_format($packSats)]);
+                            } else {
+                                $badges[] = $model['free']
+                                    ? __('model_picker.badge.free')
+                                    : __('model_picker.badge.paid');
+                            }
+
                             if ($provider['requires_user_key']) {
                                 $badges[] = __('model_picker.badge.your_key');
                             }
@@ -78,6 +95,40 @@
             @endforeach
         </select>
         <p class="model-picker__hint">{{ __('model_picker.select.help') }}</p>
+
+        {{-- Only for models this deployment funds; a bring-your-own-key model
+             is the visitor's own bill and needs none of this. --}}
+        <div class="model-picker__premium" x-show="isPremiumChoice" x-cloak>
+            <p class="model-picker__notice" x-show="loggedIn">
+                <i data-lucide="zap" class="w-3.5 h-3.5 shrink-0"></i>
+                <span x-text="balanceLabel"></span>
+            </p>
+
+            <p class="model-picker__notice model-picker__notice--error" x-show="!loggedIn">
+                <i data-lucide="circle-alert" class="w-3.5 h-3.5 shrink-0"></i>
+                <span>{{ __('model_picker.premium.login') }}</span>
+            </p>
+
+            <button
+                type="button"
+                class="model-picker__buy"
+                x-show="loggedIn && !packInvoice"
+                @click="buyPack()"
+                :disabled="buying"
+            >{{ __('model_picker.premium.buy', ['count' => $packMessages, 'sats' => number_format($packSats)]) }}</button>
+
+            <div class="model-picker__invoice" x-show="packInvoice" x-cloak>
+                <img
+                    :src="packInvoice?.qr_code_svg"
+                    alt="{{ __('Lightning Invoice QR') }}"
+                    class="model-picker__qr"
+                    x-show="packInvoice?.qr_code_svg"
+                />
+                <button type="button" class="model-picker__forget" @click="copyInvoice()">
+                    <span x-text="copiedInvoice ? '{{ __('Copied!') }}' : '{{ __('Copy') }}'"></span>
+                </button>
+            </div>
+        </div>
 
         <label for="model-picker-key" class="model-picker__label mt-3">{{ __('model_picker.key.label') }}</label>
         <div class="model-picker__key-row">

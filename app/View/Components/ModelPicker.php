@@ -40,6 +40,9 @@ final class ModelPicker extends Component
             ),
             'defaultChoice' => $this->defaultChoice(),
             'requiresKeyByChoice' => $this->requiresKeyByChoice(),
+            'premiumByChoice' => $this->premiumByChoice(),
+            'packSats' => config_int('services.premium.pack_sats'),
+            'packMessages' => config_int('services.premium.pack_messages'),
         ]);
     }
 
@@ -80,6 +83,27 @@ final class ModelPicker extends Component
         foreach ($this->providers as $definition) {
             foreach ($definition->models as $model) {
                 $map[$this->choiceValue($definition, $model)] = $definition->requiresUserKey();
+            }
+        }
+
+        return $map;
+    }
+
+    /**
+     * Which choices this deployment pays for, and therefore charges sats to
+     * use. A premium model on a provider we hold no key for is not premium at
+     * all — the visitor supplies their own key and pays their own provider.
+     *
+     * @return array<string, bool>
+     */
+    private function premiumByChoice(): array
+    {
+        $map = [];
+
+        foreach ($this->providers as $definition) {
+            foreach ($definition->models as $model) {
+                $map[$this->choiceValue($definition, $model)] =
+                    $model->premium && !$definition->requiresUserKey();
             }
         }
 

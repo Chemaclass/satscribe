@@ -135,4 +135,30 @@ final class ModelPickerRenderTest extends TestCase
 
         self::fail(sprintf('Provider "%s" is not in the registry.', $id));
     }
+
+    /**
+     * A Claude model is only a sats purchase when this deployment holds the
+     * OpenRouter key. Without one the visitor brings their own and pays their
+     * own provider, so advertising a price would be wrong.
+     */
+    public function test_a_premium_model_is_priced_only_when_the_server_funds_it(): void
+    {
+        config(['services.openrouter.key' => 'openrouter-server-key']);
+
+        $html = (string) $this->get('/')->getContent();
+
+        self::assertStringContainsString('Claude Sonnet 5 · 500 sats', $html);
+    }
+
+    public function test_without_the_server_key_a_premium_model_asks_for_the_visitors_own(): void
+    {
+        config(['services.openrouter.key' => '']);
+
+        $html = (string) $this->get('/')->getContent();
+
+        self::assertStringContainsString('Claude Sonnet 5', $html);
+        self::assertStringNotContainsString('Claude Sonnet 5 · 500 sats', $html);
+        self::assertStringContainsString('needs your key', $html);
+    }
 }
+

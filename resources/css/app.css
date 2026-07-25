@@ -1055,6 +1055,46 @@ a:hover,
     box-shadow: 0 10px 24px rgba(17, 24, 39, 0.12);
 }
 
+.model-picker__premium {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--btc-border-default);
+}
+
+.model-picker__buy {
+    width: 100%;
+    margin-top: 0.5rem;
+    padding: 0.375rem 0.75rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #fff;
+    background: var(--btc-orange, #f7931a);
+    border: none;
+    border-radius: 0.375rem;
+    cursor: pointer;
+}
+
+.model-picker__buy:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.model-picker__invoice {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.model-picker__qr {
+    width: 10rem;
+    height: 10rem;
+    padding: 0.25rem;
+    background: #fff;
+    border-radius: 0.375rem;
+}
+
 /* The picker sits just above the composer near the bottom of the page, so a
    panel that always drops downward is clipped by the viewport — the API key
    field was the part that disappeared. modelPicker() measures the available

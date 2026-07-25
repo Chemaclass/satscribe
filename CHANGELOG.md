@@ -30,6 +30,12 @@ Anything older than the first section below lives in `git log`.
 
 ### Added
 
+- **Premium models paid in sats.** Claude Haiku 4.5 and Sonnet 5 are served with
+  the deployment's own OpenRouter key and funded by the visitor buying a pack of
+  messages over Lightning. Credit is a ledger tied to a Nostr identity, so it
+  survives a change of network, and both the grant and the spend are idempotent.
+  Configure with `PREMIUM_PACK_SATS` and `PREMIUM_PACK_MESSAGES`.
+
 - **Demo mode** (`AI_OFFLINE_FALLBACK`). When no model is reachable the app can
   answer from the on-chain data instead of showing an error. Every figure is one
   that was actually fetched, the phrasing varies by persona, and the answer says

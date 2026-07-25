@@ -176,5 +176,9 @@
     "model_picker.key.clear": "Vergessen",
     "model_picker.key.privacy": "Dein Schlüssel wird nur in diesem Browser gespeichert. Satscribe speichert ihn nie auf dem Server — er wird mit deiner Anfrage nur gesendet, um den Anbieter aufzurufen.",
     "model_picker.key.missing": "Dieses Modell braucht deinen eigenen API-Schlüssel. Füge oben einen ein oder wähle ein kostenloses Modell ohne Schlüssel.",
-    "home.stream.empty": "Für diese Nachricht wurde keine Antwort erzeugt. Versuche es erneut."
+    "home.stream.empty": "Für diese Nachricht wurde keine Antwort erzeugt. Versuche es erneut.",
+    "model_picker.badge.premium": ":sats Sats",
+    "model_picker.premium.balance": "Premium · :count übrig",
+    "model_picker.premium.buy": ":count Nachrichten für :sats Sats kaufen",
+    "model_picker.premium.login": "Melde dich mit Nostr an, um Premium-Nachrichten zu kaufen."
 }
