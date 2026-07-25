@@ -7,13 +7,11 @@ namespace Modules\Chat;
 use Illuminate\Support\ServiceProvider;
 use Modules\Chat\Application\AddMessageAction;
 use Modules\Chat\Application\AddMessageStreamAction;
-use Modules\Chat\Application\ChatFacade;
 use Modules\Chat\Application\CreateChatAction;
 use Modules\Chat\Application\CreateChatStreamAction;
 use Modules\Chat\Application\OpenAiRateLimiter;
 use Modules\Chat\Domain\AddMessageActionInterface;
 use Modules\Chat\Domain\AddMessageStreamActionInterface;
-use Modules\Chat\Domain\ChatFacadeInterface;
 use Modules\Chat\Domain\CreateChatActionInterface;
 use Modules\Chat\Domain\CreateChatStreamActionInterface;
 use Modules\Chat\Domain\Repository\ChatRepositoryInterface;
@@ -36,7 +34,6 @@ final class ChatServiceProvider extends ServiceProvider
         ChatRepositoryInterface::class => ChatRepository::class,
         MessageRepositoryInterface::class => MessageRepository::class,
         FlaggedWordRepositoryInterface::class => FlaggedWordRepository::class,
-        ChatFacadeInterface::class => ChatFacade::class,
     ];
 
     /** @var array<class-string, class-string> */
