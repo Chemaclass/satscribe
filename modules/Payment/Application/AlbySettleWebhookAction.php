@@ -6,6 +6,7 @@ namespace Modules\Payment\Application;
 
 use Illuminate\Cache\RateLimiter;
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
+use JsonException;
 use Modules\Payment\Domain\Data\AlbySettleWebhookPayload;
 use Modules\Payment\Domain\Exception\InvalidAlbyWebhookPayloadException;
 use Modules\Payment\Domain\Exception\InvalidAlbyWebhookSignatureException;
@@ -61,27 +62,43 @@ final readonly class AlbySettleWebhookAction
             throw new InvalidAlbyWebhookSignatureException();
         }
 
+        // Scoped to verify() alone. Wrapping the parsing too meant a correctly
+        // signed webhook with an unexpected body was reported as a signature
+        // failure, which points the operator at a secret mismatch that is not
+        // there.
         try {
             $this->webhook->verify($payload, [
                 'svix-id' => $svixId,
                 'svix-timestamp' => $svixTimestamp,
                 'svix-signature' => $svixSignature,
             ]);
-
-            $this->logger->info('Webhook signature successfully verified');
-
-            $data = json_decode($payload, true, flags: JSON_THROW_ON_ERROR);
-
-            if (!is_array($data)) {
-                throw InvalidAlbyWebhookPayloadException::malformed('body', 'a JSON object');
-            }
-
-            /** @var array<string, mixed> $data */
-            return AlbySettleWebhookPayload::fromArray($data);
         } catch (Throwable $e) {
             $this->logger->warning('Webhook signature verification failed', ['error' => $e->getMessage()]);
+
             throw new InvalidAlbyWebhookSignatureException();
         }
+
+        $this->logger->info('Webhook signature successfully verified');
+
+        return $this->parsePayload($payload);
+    }
+
+    private function parsePayload(string $payload): AlbySettleWebhookPayload
+    {
+        try {
+            $data = json_decode($payload, true, flags: JSON_THROW_ON_ERROR);
+        } catch (JsonException $e) {
+            $this->logger->warning('Webhook body is not valid JSON', ['error' => $e->getMessage()]);
+
+            throw InvalidAlbyWebhookPayloadException::malformed('body', 'valid JSON');
+        }
+
+        if (!is_array($data)) {
+            throw InvalidAlbyWebhookPayloadException::malformed('body', 'a JSON object');
+        }
+
+        /** @var array<string, mixed> $data */
+        return AlbySettleWebhookPayload::fromArray($data);
     }
 
     private function handleInvoice(AlbySettleWebhookPayload $payload, bool $isFailure): void

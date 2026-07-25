@@ -6,6 +6,7 @@ namespace Modules\Payment\Infrastructure\Http\Controller;
 
 use Illuminate\Http\Request;
 use Modules\Payment\Application\AlbySettleWebhookAction;
+use Modules\Payment\Domain\Exception\InvalidAlbyWebhookPayloadException;
 use Modules\Payment\Domain\Exception\InvalidAlbyWebhookSignatureException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
@@ -26,6 +27,10 @@ final class AlbyWebhookController
             return response()->json(['success' => true]);
         } catch (InvalidAlbyWebhookSignatureException) {
             return response()->json(['error' => 'Invalid signature'], 401);
+        } catch (InvalidAlbyWebhookPayloadException $e) {
+            // A signed request whose body we cannot use will never succeed, so
+            // answer 422 rather than letting it 500 and be retried forever.
+            return response()->json(['error' => $e->getMessage()], 422);
         }
     }
 }

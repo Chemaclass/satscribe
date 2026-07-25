@@ -34,6 +34,7 @@ use Illuminate\Cache\RateLimiter;
 use Illuminate\Cache\Repository as CacheRepository;
 use Illuminate\Contracts\Cache\Repository;
 use Modules\Payment\Application\AlbySettleWebhookAction;
+use Modules\Payment\Domain\Exception\InvalidAlbyWebhookPayloadException;
 use Modules\Payment\Domain\Exception\InvalidAlbyWebhookSignatureException;
 use Modules\Payment\Domain\Repository\PaymentRepositoryInterface;
 use Modules\Shared\Domain\RateLimit\RateLimitKeys;
@@ -114,6 +115,26 @@ final class AlbySettleWebhookActionTest extends TestCase
 
         $action->execute($this->payload('SETTLED'), 'id', 't', 's');
         $this->assertContains(RateLimitKeys::forTrackingId('track'), $rate->cleared);
+    }
+
+    /**
+     * The parsing used to sit inside the same try as verify(), so a correctly
+     * signed webhook with an unusable body was reported as a signature failure
+     * — pointing an operator at a secret mismatch that does not exist.
+     */
+    public function test_a_signed_but_unusable_body_is_a_payload_error(): void
+    {
+        $action = new AlbySettleWebhookAction(
+            'secret',
+            new CacheRepository(new ArrayStore()),
+            new RecordingRateLimiter($this->createStub(Repository::class)),
+            new RecordingPaymentRepository(),
+            $this->createStub(LoggerInterface::class),
+        );
+
+        $this->expectException(InvalidAlbyWebhookPayloadException::class);
+
+        $action->execute('"just a string"', 'id', 't', 's');
     }
 
     private function payload(string $state): string
