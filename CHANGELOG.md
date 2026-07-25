@@ -37,6 +37,14 @@ Anything older than the first section below lives in `git log`.
   error answered with 422.
 - The model picker opened downward even when there was no room, cutting off the
   API key field. It now flips upward when the space below is too small.
+- **A mempool transaction was cached forever.** The force-refresh flag is stored
+  on the assistant message but was read from the first message — always the
+  user's — so it evaluated false for every chat. A transaction answered while
+  unconfirmed kept replaying that answer after it had been mined.
+- The answer cache returned whichever matching row the database happened to
+  yield rather than the newest, so the first answer ever generated for a
+  question was served indefinitely.
+- A chat with no messages returned 500 instead of a not found.
 - Unsharing a chat reported it as shared: the endpoint answered a constant
   `true` whatever it stored, and read the flag with a cast that turns the string
   `"false"` into `true`.

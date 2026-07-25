@@ -61,11 +61,20 @@ class Chat extends Model
         return $this->messageWithRole('assistant', last: true);
     }
 
+    /**
+     * The flag is written alongside the answer it describes, so it lives on the
+     * assistant message. Reading it off the first message — always the user's —
+     * found no such key and reported false for every chat, which left an
+     * unconfirmed transaction cached for good instead of being re-fetched once
+     * it was mined.
+     */
     public function getForceRefreshAttribute(): bool
     {
-        $firstMsg = $this->firstMessage();
+        $answer = $this->relationLoaded('messages')
+            ? $this->messages->first(static fn (Message $m): bool => $m->role === 'assistant')
+            : $this->messages()->where('role', 'assistant')->orderBy('id')->first();
 
-        return (bool) ($firstMsg?->meta['force_refresh'] ?? false);
+        return (bool) ($answer?->meta['force_refresh'] ?? false);
     }
 
     public function getTypeAttribute(): string
