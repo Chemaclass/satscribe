@@ -6,6 +6,9 @@ namespace Modules\Payment\Domain\Data;
 
 use Modules\Payment\Domain\Exception\InvalidAlbyWebhookPayloadException;
 
+use function is_int;
+use function is_string;
+
 final readonly class AlbySettleWebhookPayload
 {
     public function __construct(
@@ -19,19 +22,20 @@ final readonly class AlbySettleWebhookPayload
 
     /**
      * Decoded webhook body. It is attacker-controlled up to Svix signature
-     * verification, so no key is guaranteed to be present — the `??` throws
-     * below are the actual validation.
+     * verification, and presence alone says nothing about type: a field of the
+     * wrong type used to reach the constructor and fail as a TypeError, which
+     * the webhook controller turns into a 500 rather than a rejected payload.
      *
      * @param  array<string, mixed>  $data
      */
     public static function fromArray(array $data): self
     {
         return new self(
-            paymentHash: $data['payment_hash'] ?? throw InvalidAlbyWebhookPayloadException::missing('payment_hash'),
-            type: $data['type'] ?? throw InvalidAlbyWebhookPayloadException::missing('type'),
-            state: $data['state'] ?? throw InvalidAlbyWebhookPayloadException::missing('state'),
-            memo: $data['memo'] ?? throw InvalidAlbyWebhookPayloadException::missing('memo'),
-            amount: $data['amount'] ?? throw InvalidAlbyWebhookPayloadException::missing('amount'),
+            paymentHash: self::string($data, 'payment_hash'),
+            type: self::string($data, 'type'),
+            state: self::string($data, 'state'),
+            memo: self::string($data, 'memo'),
+            amount: self::int($data, 'amount'),
         );
     }
 
@@ -53,5 +57,33 @@ final readonly class AlbySettleWebhookPayload
             'memo' => $this->memo,
             'amount' => $this->amount,
         ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    private static function string(array $data, string $field): string
+    {
+        $value = $data[$field] ?? throw InvalidAlbyWebhookPayloadException::missing($field);
+
+        if (!is_string($value)) {
+            throw InvalidAlbyWebhookPayloadException::malformed($field, 'a string');
+        }
+
+        return $value;
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    private static function int(array $data, string $field): int
+    {
+        $value = $data[$field] ?? throw InvalidAlbyWebhookPayloadException::missing($field);
+
+        if (!is_int($value)) {
+            throw InvalidAlbyWebhookPayloadException::malformed($field, 'an integer');
+        }
+
+        return $value;
     }
 }
