@@ -20,6 +20,8 @@ use function sprintf;
 
 final readonly class IpRateLimiter
 {
+    private const INVOICE_CACHE_MARGIN_SECONDS = 10;
+
     public function __construct(
         private CachedInvoiceValidatorInterface $invoiceValidator,
         private AlbyClientInterface $albyClient,
@@ -129,17 +131,32 @@ final readonly class IpRateLimiter
     }
 
     /**
+     * Cached for slightly less than the invoice's own lifetime so a reused
+     * invoice always has some life left when the client renders its QR.
+     *
+     * An expiry at or below the margin leaves no safe window, so nothing is
+     * cached and every paywalled request mints a fresh invoice. That used to
+     * happen silently: the subtraction went negative and the cache write was
+     * discarded as already-expired.
+     *
      * @param  array<string, mixed>  $invoice
      */
     private function cacheInvoice(string $key, array $invoice): void
     {
+        $ttl = $this->lnInvoiceExpirySeconds - self::INVOICE_CACHE_MARGIN_SECONDS;
+
+        if ($ttl <= 0) {
+            $this->logger->debug('Invoice expiry too short to cache', [
+                'invoiceCacheKey' => $key,
+                'expiry' => $this->lnInvoiceExpirySeconds,
+            ]);
+
+            return;
+        }
+
         $this->logger->debug('Caching new invoice', ['invoiceCacheKey' => $key]);
 
-        $this->cache->put(
-            $key,
-            $invoice,
-            $this->now->copy()->addSeconds($this->lnInvoiceExpirySeconds - 10),
-        );
+        $this->cache->put($key, $invoice, $this->now->copy()->addSeconds($ttl));
     }
 
     private function logRateLimitHit(string $key): void
