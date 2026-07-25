@@ -175,5 +175,6 @@
     "model_picker.key.placeholder": "Pega la clave de API de tu proveedor",
     "model_picker.key.clear": "Olvidar",
     "model_picker.key.privacy": "Tu clave se guarda solo en este navegador. Satscribe nunca la almacena en el servidor: se envía con tu petición únicamente para llamar al proveedor.",
-    "model_picker.key.missing": "Este modelo necesita tu propia clave de API. Pega una arriba o elige un modelo gratuito que no requiera clave."
+    "model_picker.key.missing": "Este modelo necesita tu propia clave de API. Pega una arriba o elige un modelo gratuito que no requiera clave.",
+    "home.stream.empty": "No se generó ninguna respuesta para este mensaje. Inténtalo de nuevo."
 }

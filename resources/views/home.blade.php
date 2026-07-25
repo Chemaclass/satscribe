@@ -730,6 +730,10 @@
                     if (outcome.status === 'done') {
                         const loader = assistantEl?.querySelector('.loading-dots-container');
                         if (loader) loader.remove();
+                        // The skeleton is otherwise only hidden by the first chunk, so a
+                        // `done` carrying no content left it pulsing forever next to a
+                        // Copy button — the stream looked stuck when it had finished.
+                        if (skeletonEl) skeletonEl.classList.add('hidden');
                         if (actionsEl) actionsEl.classList.remove('hidden');
                     }
 

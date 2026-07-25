@@ -4,6 +4,9 @@
 
 @php
     $contentLength = strlen($assistantMsg->content);
+    // Chats saved before the empty-response guard hold blank answers; rendering
+    // one as an empty bubble made a finished page look like it was still loading.
+    $isEmptyMessage = trim($assistantMsg->content) === '';
     $isLongMessage = $contentLength > 1500;
     $assistantCreatedAt = $assistantMsg->created_at;
     $assistantOlderThan5Min = $assistantCreatedAt && $assistantCreatedAt->lt(now()->subMinutes(5));
@@ -41,11 +44,18 @@
         class="inline-block rounded px-3 py-2 message-content transition-all duration-300"
         :class="{ 'max-h-64 overflow-hidden': !expanded && {{ $isLongMessage ? 'true' : 'false' }} }"
     >
-        {!! Str::markdown($assistantMsg->content) !!}
+        @if($isEmptyMessage)
+            <span class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                <i data-lucide="circle-alert" class="w-4 h-4"></i>
+                {{ __('home.stream.empty') }}
+            </span>
+        @else
+            {!! Str::markdown($assistantMsg->content) !!}
+        @endif
     </div>
 
     <!-- Action buttons -->
-    <div class="flex items-center gap-2 mt-1 ml-3">
+    <div class="flex items-center gap-2 mt-1 ml-3" @if($isEmptyMessage) hidden @endif>
         @if($isLongMessage)
             <button
                 type="button"
