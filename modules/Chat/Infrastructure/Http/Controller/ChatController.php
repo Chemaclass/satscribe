@@ -59,7 +59,7 @@ final readonly class ChatController
         $this->abortUnlessOwner($chat, 'You are not allowed to send messages to this chat.');
 
         return response()->json(
-            $this->chatService->addMessage($chat, (string) $request->input('message')),
+            $this->chatService->addMessage($chat, as_string($request->input('message'))),
         );
     }
 
@@ -67,7 +67,7 @@ final readonly class ChatController
     {
         $this->abortUnlessOwner($chat, 'You are not allowed to send messages to this chat.');
 
-        $message = (string) $request->input('message');
+        $message = as_string($request->input('message'));
 
         // Resolved inside the stream closure so a rejected model is reported as
         // an SSE error event rather than a 500 the chat UI cannot render.

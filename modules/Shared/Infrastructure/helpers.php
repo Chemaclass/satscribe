@@ -35,6 +35,27 @@ if (!\function_exists('nostr_pubkey')) {
     }
 }
 
+if (!\function_exists('as_string')) {
+    /**
+     * Request and session fields are whatever the client sent. Casting an array
+     * to string raises "Array to string conversion", which Laravel escalates to
+     * an ErrorException — so `?q[]=x` was enough to 500 an endpoint. Anything
+     * that is not stringable falls back to the default instead.
+     */
+    function as_string(mixed $value, string $default = ''): string
+    {
+        if (\is_string($value)) {
+            return $value;
+        }
+
+        if (\is_int($value) || \is_float($value) || $value instanceof \Stringable) {
+            return (string) $value;
+        }
+
+        return $default;
+    }
+}
+
 if (!\function_exists('config_int')) {
     /**
      * config() is typed as mixed, so every caller cast it and a missing or

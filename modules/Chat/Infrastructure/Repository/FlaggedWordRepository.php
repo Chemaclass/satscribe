@@ -17,7 +17,7 @@ final class FlaggedWordRepository implements FlaggedWordRepositoryInterface
         return array_values(
             FlaggedWord::where('is_active', true)
                 ->pluck('word')
-                ->map(static fn ($word) => (string) $word)
+                ->map(static fn ($word): string => as_string($word))
                 ->all(),
         );
     }

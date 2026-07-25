@@ -45,7 +45,7 @@ final readonly class NostrAuthController
             return response()->json(['error' => 'Invalid event'], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
-        $pubkey = strtolower((string) ($event['pubkey'] ?? ''));
+        $pubkey = strtolower(as_string($event['pubkey'] ?? null));
 
         if (!preg_match('/^[0-9a-f]{64}$/', $pubkey)) {
             $this->logger->debug('NostrAuth login failed: invalid pubkey', ['pubkey' => $pubkey]);

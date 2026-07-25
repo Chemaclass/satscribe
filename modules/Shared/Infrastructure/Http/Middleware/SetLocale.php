@@ -39,7 +39,7 @@ final readonly class SetLocale
      */
     private function resolveLocale(Request $request): string
     {
-        $default = (string) config('app.locale');
+        $default = as_string(config('app.locale'), 'en');
 
         if ($request->has('lang')) {
             session(['app_locale' => $request->get('lang')]);

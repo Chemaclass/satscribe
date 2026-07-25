@@ -20,7 +20,7 @@ final readonly class PrefetchController
 
     public function prefetch(Request $request): JsonResponse
     {
-        $query = (string) $request->input('q', '');
+        $query = as_string($request->input('q'));
 
         if ($query === '') {
             return new JsonResponse(['status' => 'error', 'message' => 'Missing query'], Response::HTTP_BAD_REQUEST);

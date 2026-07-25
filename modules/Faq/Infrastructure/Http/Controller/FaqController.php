@@ -17,7 +17,7 @@ final readonly class FaqController
 
     public function index(Request $request): View
     {
-        $search = $request->input('search', '');
+        $search = as_string($request->input('search'));
         $data = $this->service->getFaqData($search);
 
         return view('faq', $data);
