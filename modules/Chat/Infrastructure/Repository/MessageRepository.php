@@ -40,7 +40,7 @@ final readonly class MessageRepository implements MessageRepositoryInterface
         // SQLite's TRIM() leaves newlines alone — and this has to agree with the
         // guard, which uses trim().
         foreach ($candidates as $message) {
-            if (trim($message->content) !== '') {
+            if (trim((string) $message->content) !== '') {
                 return $message;
             }
         }

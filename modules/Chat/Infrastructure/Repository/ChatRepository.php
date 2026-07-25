@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\Chat\Infrastructure\Repository;
 
 use App\Models\Chat;
+use App\Models\Message;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\Paginator;
 use Modules\Chat\Domain\Repository\ChatRepositoryInterface;
@@ -17,6 +18,12 @@ use function is_array;
 
 final readonly class ChatRepository implements ChatRepositoryInterface
 {
+    /**
+     * How many matching chats to consider before giving up on a usable answer.
+     * A key rarely has more than one, so this only bounds the work if it does.
+     */
+    private const CANDIDATE_LIMIT = 10;
+
     public function __construct(
         private int $perPage,
         private string $trackingId,
@@ -29,7 +36,7 @@ final readonly class ChatRepository implements ChatRepositoryInterface
         string $question = '',
     ): ?Chat {
         // Search criteria live in the first user message's meta JSON, not on the chat row.
-        return Chat::query()
+        $candidates = Chat::query()
             ->where('tracking_id', '=', $this->trackingId)
             ->whereHas('messages', static function ($q) use ($input, $persona, $question): void {
                 $q->where('role', 'user')
@@ -38,10 +45,23 @@ final readonly class ChatRepository implements ChatRepositoryInterface
                     ->whereJsonContains('meta->input', $input->text)
                     ->whereJsonContains('meta->persona', $persona->value);
             })
+            ->with('messages')
             // Newest first, for the same reason as the message lookup: more
             // than one chat can match and the choice must not be arbitrary.
             ->orderByDesc('id')
-            ->first();
+            ->limit(self::CANDIDATE_LIMIT)
+            ->get();
+
+        // The caller replays a match as a finished result, so a chat whose
+        // answer is blank is not a usable hit — the rows saved before the
+        // empty-response guard existed are exactly that.
+        foreach ($candidates as $chat) {
+            if (trim($this->answerOf($chat)) !== '') {
+                return $chat;
+            }
+        }
+
+        return null;
     }
 
     public function createChat(
@@ -147,5 +167,12 @@ final readonly class ChatRepository implements ChatRepositoryInterface
     {
         $chat->is_public = $isPublic;
         $chat->save();
+    }
+
+    private function answerOf(Chat $chat): string
+    {
+        $answer = $chat->messages->last(static fn (Message $m): bool => $m->role === 'assistant');
+
+        return $answer instanceof Message ? (string) $answer->content : '';
     }
 }
