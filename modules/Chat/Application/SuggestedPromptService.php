@@ -27,7 +27,7 @@ final readonly class SuggestedPromptService
             $used = $chat->messages()
                 ->where('role', 'user')
                 ->pluck('content')
-                ->map(static fn (string $p) => trim($p))
+                ->map(static fn (mixed $p): string => trim(as_string($p)))
                 ->all();
         }
 

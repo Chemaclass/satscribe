@@ -13,6 +13,8 @@ use Modules\Shared\Domain\Data\Chat\PromptInput;
 use Modules\Shared\Domain\Enum\Chat\PromptPersona;
 use Modules\Shared\Domain\Enum\Chat\PromptType;
 
+use function is_array;
+
 final readonly class ChatRepository implements ChatRepositoryInterface
 {
     public function __construct(
@@ -48,9 +50,13 @@ final readonly class ChatRepository implements ChatRepositoryInterface
     ): Chat {
         $raw = $blockchainData->toArray();
 
-        $forceRefresh = $input->type->value === PromptType::Transaction->value
-            && isset($raw['status']['confirmed'])
-            && $raw['status']['confirmed'] === false;
+        // An unconfirmed transaction is still in the mempool, so its stored copy
+        // goes stale as soon as it is mined.
+        $status = $raw['status'] ?? null;
+
+        $forceRefresh = $input->type === PromptType::Transaction
+            && is_array($status)
+            && ($status['confirmed'] ?? null) === false;
 
         /** @var Chat $chat */
         $chat = Chat::create([

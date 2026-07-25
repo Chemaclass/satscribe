@@ -43,6 +43,10 @@ Anything older than the first section below lives in `git log`.
 
 ### Changed
 
+- **PHPStan raised to level 9**, its maximum, across `app`, `modules` and
+  `tests`. Getting there was mostly boundary validation rather than annotation:
+  the analyser kept pointing at real places where untyped external data was read
+  as though its shape were known.
 - Refreshed the model catalogue: Groq gains GPT-OSS 120B/20B and Kimi K2,
   OpenRouter moves to current free models, and OpenAI gains the cheaper
   GPT-5 nano / GPT-4.1 nano tiers.

@@ -19,6 +19,7 @@ use Throwable;
  * more, so they stay unsealed.
  *
  * @phpstan-import-type TRawBlock from BlockData
+ * @phpstan-import-type TRawTx from BlockData
  *
  * @phpstan-type TRawTransaction array{
  *     txid: string,
@@ -144,7 +145,7 @@ final readonly class BlockchainService
     }
 
     /**
-     * @return list<array<string, mixed>>
+     * @return list<TRawTx>
      */
     private function fetchBlockTransactions(string $hash): array
     {
@@ -160,7 +161,12 @@ final readonly class BlockchainService
             throw BlockchainException::blockOrTxFetchFailed($hash);
         }
 
-        return BlockstreamPayload::objectList($response->json(), "transactions of block {$hash}");
+        // objectList proves each entry is a JSON object; every field of TRawTx
+        // is optional, and the consumers validate the ones they read.
+        /** @var list<TRawTx> $transactions */
+        $transactions = BlockstreamPayload::objectList($response->json(), "transactions of block {$hash}");
+
+        return $transactions;
     }
 
     /**

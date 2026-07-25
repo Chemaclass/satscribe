@@ -35,7 +35,10 @@ final class ImportFaqs extends Command
             return Command::FAILURE;
         }
 
-        LazyCollection::make(fn () => $this->readCsvLines($filePath))
+        // The generator is passed directly rather than wrapped in a closure:
+        // LazyCollection::make() declares the closure form as returning void,
+        // which no generator satisfies.
+        LazyCollection::make($this->readCsvLines($filePath))
             ->chunk(50)
             ->each(function (LazyCollection $chunk): void {
                 $this->processChunk($chunk->all(), Carbon::now());

@@ -183,7 +183,10 @@ final class BlockchainServiceTest extends TestCase
 
         $result = $service->getBlockchainData($input);
 
-        $this->assertFalse($result->current()->toArray()['status']['confirmed']);
+        $status = $result->current()->toArray()['status'] ?? null;
+
+        self::assertIsArray($status);
+        $this->assertFalse($status['confirmed']);
     }
     private function createPassthroughCache(): CacheRepository
     {

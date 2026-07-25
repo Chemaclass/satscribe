@@ -104,7 +104,7 @@ final class ConfirmInvoicePaymentTest extends TestCase
     private function exhaustTheLimit(string $trackingId): void
     {
         $key = RateLimitKeys::forTrackingId($trackingId);
-        $max = (int) config('services.rate_limit.guest.max_attempts');
+        $max = config_int('services.rate_limit.guest.max_attempts');
 
         for ($i = 0; $i <= $max; ++$i) {
             RateLimiter::hit($key, 3600);

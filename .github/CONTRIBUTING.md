@@ -104,7 +104,7 @@ Use `mock()` directly rather than `Mockery::mock()`.
 composer fix && composer test
 ```
 
-`composer test` runs PHPStan at level 8 over `app`, `modules` and `tests`,
+`composer test` runs PHPStan at level 9 over `app`, `modules` and `tests`,
 followed by PHPUnit. Both must pass before a PR is reviewed. You can have this
 run automatically on every commit:
 

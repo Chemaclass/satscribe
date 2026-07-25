@@ -56,7 +56,17 @@ final class QuestionPlaceholder
 
     public static function rand(): string
     {
-        return __(collect(self::SAMPLE_QUESTIONS)->flatten()->random());
+        $questions = self::all();
+
+        return __($questions[array_rand($questions)]);
+    }
+
+    /**
+     * @return list<string>
+     */
+    private static function all(): array
+    {
+        return array_merge(...array_values(self::SAMPLE_QUESTIONS));
     }
 
     /**

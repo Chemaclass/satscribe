@@ -77,11 +77,11 @@ final class PaywallRateLimitTest extends TestCase
 
         self::assertInstanceOf(InvoiceData::class, $alby->lastInvoice);
         self::assertSame(
-            (int) config('services.rate_limit.guest.invoice_amount'),
+            config_int('services.rate_limit.guest.invoice_amount'),
             $alby->lastInvoice->amount,
         );
         self::assertSame(
-            (int) config('services.rate_limit.invoice_expiry'),
+            config_int('services.rate_limit.invoice_expiry'),
             $alby->lastInvoice->expiry,
         );
     }
@@ -89,7 +89,7 @@ final class PaywallRateLimitTest extends TestCase
     private function exhaustTheLimit(): void
     {
         $key = RateLimitKeys::forTrackingId(tracking_id());
-        $max = (int) config('services.rate_limit.guest.max_attempts');
+        $max = config_int('services.rate_limit.guest.max_attempts');
 
         for ($i = 0; $i <= $max; ++$i) {
             RateLimiter::hit($key, 3600);

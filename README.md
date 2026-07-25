@@ -106,8 +106,8 @@ If your browser doesn't have a Nostr extension, you can still sign in with your 
 
 ## 🧪 Testing
 
-`composer test` is the gate: it runs PHPStan (level 8 over `app`, `modules` and
-`tests`) followed by PHPUnit.
+`composer test` is the gate: it runs PHPStan (level 9 — the maximum — over
+`app`, `modules` and `tests`) followed by PHPUnit.
 
 ```bash
 composer fix && composer test          # format, then the full gate

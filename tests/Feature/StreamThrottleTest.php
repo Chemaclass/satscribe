@@ -22,7 +22,7 @@ final class StreamThrottleTest extends TestCase
     {
         $limiter = app(RateLimiter::class);
         $key = 'openai:' . tracking_id();
-        $max = (int) config('services.openai.max_attempts');
+        $max = config_int('services.openai.max_attempts');
 
         for ($i = 0; $i <= $max; ++$i) {
             $limiter->hit($key, 86400);

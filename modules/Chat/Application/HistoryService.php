@@ -73,6 +73,13 @@ final readonly class HistoryService
 
         $this->logger->debug('Raw message data fetched', ['exists' => $raw !== null]);
 
-        return is_array($raw) ? $raw : null;
+        if (!is_array($raw)) {
+            return null;
+        }
+
+        // meta is a JSON column, so what comes back is whatever was written;
+        // a stored object always decodes with string keys.
+        /** @var array<string, mixed> $raw */
+        return $raw;
     }
 }
