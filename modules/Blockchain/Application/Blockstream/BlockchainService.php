@@ -128,7 +128,19 @@ final readonly class BlockchainService
             throw BlockchainException::blockOrTxFetchFailed($hash);
         }
 
-        return $response->json();
+        /** @var TRawBlock $block */
+        $block = BlockstreamPayload::object($response->json(), "block {$hash}", [
+            'id' => BlockstreamPayload::STRING,
+            'height' => BlockstreamPayload::INT,
+            'version' => BlockstreamPayload::INT,
+            'timestamp' => BlockstreamPayload::INT,
+            'tx_count' => BlockstreamPayload::INT,
+            'size' => BlockstreamPayload::INT,
+            'weight' => BlockstreamPayload::INT,
+            'merkle_root' => BlockstreamPayload::STRING,
+        ]);
+
+        return $block;
     }
 
     /**
@@ -148,7 +160,7 @@ final readonly class BlockchainService
             throw BlockchainException::blockOrTxFetchFailed($hash);
         }
 
-        return $response->json();
+        return BlockstreamPayload::objectList($response->json(), "transactions of block {$hash}");
     }
 
     /**
@@ -210,7 +222,19 @@ final readonly class BlockchainService
             throw BlockchainException::txLookupFailed($txid);
         }
 
-        return $response->json();
+        /** @var TRawTransaction $tx */
+        $tx = BlockstreamPayload::object($response->json(), "transaction {$txid}", [
+            'txid' => BlockstreamPayload::STRING,
+            'version' => BlockstreamPayload::INT,
+            'locktime' => BlockstreamPayload::INT,
+            'vin' => BlockstreamPayload::ARRAY,
+            'vout' => BlockstreamPayload::ARRAY,
+            'size' => BlockstreamPayload::INT,
+            'weight' => BlockstreamPayload::INT,
+            'fee' => BlockstreamPayload::INT,
+        ]);
+
+        return $tx;
     }
 
     /**
@@ -230,6 +254,13 @@ final readonly class BlockchainService
             throw BlockchainException::txLookupFailed($txid);
         }
 
-        return $response->json();
+        // Only `confirmed` is guaranteed; the block_* fields are absent for a
+        // transaction still in the mempool.
+        /** @var TRawTransactionStatus $status */
+        $status = BlockstreamPayload::object($response->json(), "status of {$txid}", [
+            'confirmed' => BlockstreamPayload::BOOL,
+        ]);
+
+        return $status;
     }
 }

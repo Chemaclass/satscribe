@@ -17,4 +17,13 @@ final class BlockchainException extends RuntimeException
     {
         return new self('Transaction lookup failed: ' . $txid);
     }
+
+    /**
+     * A 200 whose body is not the documented shape. Treated as a fetch failure
+     * so callers keep the one error path they already handle.
+     */
+    public static function malformedPayload(string $reference, string $field): self
+    {
+        return new self("Malformed Blockstream payload for {$reference}: {$field}");
+    }
 }
