@@ -47,12 +47,14 @@ allowlisted; a provider not in that list can never become an outbound request.
 
 | Provider | Env var | Free tier |
 |---|---|---|
-| Groq | `GROQ_API_KEY` | ✅ every listed model — Llama 3.3 70B, GPT-OSS 120B/20B, Kimi K2, Llama 3.1 8B |
-| OpenRouter | `OPENROUTER_API_KEY` | ✅ GPT-OSS 20B, Gemma 4 31B, Nemotron 3 Super 120B |
+| Groq | `GROQ_API_KEY` | ✅ every listed model — Llama 3.3 70B, GPT-OSS 120B, Llama 3.1 8B |
+| OpenRouter | `OPENROUTER_API_KEY` | ✅ GPT-OSS 20B (also the only route to Claude) |
 | OpenAI | `OPENAI_API_KEY` | ❌ paid only |
 
-Within each provider the free models are listed first and the paid ones
-cheapest-first, so the least expensive option is always the one nearest the top.
+Three models per provider, chosen so each earns its place — cheapest, best or
+fastest — rather than listing everything on offer. Free models come first and
+paid ones cheapest-first, so the least expensive option is always nearest the
+top.
 
 Set **at least one**. When a free-tier key is present it becomes the default, so
 the app never spends OpenAI credit unless that is the only key configured.

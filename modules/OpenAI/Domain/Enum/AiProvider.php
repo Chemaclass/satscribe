@@ -58,40 +58,32 @@ enum AiProvider: string
      */
     public function models(): array
     {
+        // Three per provider on purpose. A long list is harder to choose from
+        // than a short one, and most entries were near-duplicates: another
+        // model of the same family, at the same price, on the same tier. Each
+        // one kept earns its place — cheapest, best, or fastest — so the list
+        // reads as a decision rather than a catalogue.
         return match ($this) {
-            // Everything Groq serves is on its free tier, so the whole list is
-            // usable without spending anything.
+            // Everything Groq serves is on its free tier.
             self::Groq => [
                 new AiModel('llama-3.3-70b-versatile', 'Llama 3.3 70B Versatile', free: true),
                 new AiModel('openai/gpt-oss-120b', 'GPT-OSS 120B', free: true),
-                new AiModel('openai/gpt-oss-20b', 'GPT-OSS 20B', free: true),
-                new AiModel('moonshotai/kimi-k2-instruct', 'Kimi K2', free: true),
                 new AiModel('llama-3.1-8b-instant', 'Llama 3.1 8B Instant', free: true),
             ],
-            // The widest catalogue, and the only route to Anthropic and Google
-            // models here: both speak their own protocol directly, but
-            // OpenRouter fronts them with the OpenAI one this app already uses.
-            // Free models first, then paid cheapest-first.
+            // The only route to Anthropic here: Claude speaks its own protocol
+            // directly, but OpenRouter fronts it with the OpenAI one this app
+            // already uses. Free first, then cheapest paid.
             self::OpenRouter => [
                 new AiModel('openai/gpt-oss-20b:free', 'GPT-OSS 20B', free: true),
-                new AiModel('google/gemma-4-31b-it:free', 'Gemma 4 31B', free: true),
-                new AiModel('nvidia/nemotron-3-super-120b-a12b:free', 'Nemotron 3 Super 120B', free: true),
-                new AiModel('deepseek/deepseek-v4-flash', 'DeepSeek V4 Flash'),
-                new AiModel('openai/gpt-5-nano', 'GPT-5 nano'),
-                new AiModel('google/gemini-2.5-flash-lite', 'Gemini 2.5 Flash Lite'),
-                new AiModel('openai/gpt-4o-mini', 'GPT-4o mini'),
                 new AiModel('anthropic/claude-haiku-4.5', 'Claude Haiku 4.5'),
                 new AiModel('anthropic/claude-sonnet-5', 'Claude Sonnet 5'),
             ],
-            // Cheapest first: this list has no free tier, so the ordering is
-            // the only thing keeping an accidental click off an expensive model.
+            // No free tier here, so the cheapest-first ordering is the only
+            // thing keeping an accidental click off an expensive model.
             self::OpenAI => [
                 new AiModel('gpt-5-nano', 'GPT-5 nano'),
-                new AiModel('gpt-4.1-nano', 'GPT-4.1 nano'),
                 new AiModel('gpt-4o-mini', 'GPT-4o mini'),
                 new AiModel('gpt-5-mini', 'GPT-5 mini'),
-                new AiModel('gpt-4.1-mini', 'GPT-4.1 mini'),
-                new AiModel('gpt-4o', 'GPT-4o'),
             ],
         };
     }

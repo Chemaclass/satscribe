@@ -73,9 +73,11 @@ Anything older than the first section below lives in `git log`.
   `tests`. Getting there was mostly boundary validation rather than annotation:
   the analyser kept pointing at real places where untyped external data was read
   as though its shape were known.
-- Refreshed the model catalogue: Groq gains GPT-OSS 120B/20B and Kimi K2,
-  OpenRouter moves to current free models, and OpenAI gains the cheaper
-  GPT-5 nano / GPT-4.1 nano tiers.
+- Refreshed the model catalogue and cut it to three per provider. The earlier
+  list ran to twenty and most entries were near-duplicates — same family, same
+  price, same tier — which made the picker harder to choose from than a short
+  list. Each remaining model is the cheapest, the best or the fastest of its
+  provider, and Claude is reachable through OpenRouter.
 - Providers with a free tier are listed first, free models before paid ones, and
   paid models cheapest-first — so the least expensive option is always nearest
   the top.
