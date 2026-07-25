@@ -68,6 +68,10 @@ final readonly class NostrAuthController
             return response()->json(['error' => 'Invalid signature'], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
+        // Rotate the id as the privilege level changes: a session id fixed on
+        // the visitor before they authenticate must not keep working after.
+        // Laravel's own guard does this on login; this app has no guard.
+        $request->session()->regenerate();
         $request->session()->put('nostr_pubkey', $pubkey);
 
         return response()->json(['pubkey' => $pubkey]);
@@ -76,6 +80,10 @@ final readonly class NostrAuthController
     public function logout(Request $request): JsonResponse
     {
         $request->session()->forget('nostr_pubkey');
+
+        // Signing out drops the privilege too, so the id it was tied to goes
+        // with it rather than being handed back for reuse.
+        $request->session()->regenerate();
 
         return response()->json(['ok' => true]);
     }
