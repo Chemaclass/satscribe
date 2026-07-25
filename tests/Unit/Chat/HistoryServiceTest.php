@@ -10,6 +10,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Pagination\Paginator;
 use Modules\Chat\Application\HistoryService;
 use Modules\Chat\Domain\Repository\ChatRepositoryInterface;
+use Modules\Chat\Domain\Repository\MessageRepositoryInterface;
 use Psr\Log\LoggerInterface;
 use Tests\TestCase;
 
@@ -30,7 +31,7 @@ final class HistoryServiceTest extends TestCase
 
         $logger = $this->createStub(LoggerInterface::class);
 
-        $service = new HistoryService($repo, $logger);
+        $service = new HistoryService($repo, $this->messageRepository(), $logger);
 
         $this->assertSame($paginator, $service->getHistory(false));
     }
@@ -48,7 +49,7 @@ final class HistoryServiceTest extends TestCase
 
         $logger = $this->createStub(LoggerInterface::class);
 
-        $service = new HistoryService($repo, $logger);
+        $service = new HistoryService($repo, $this->messageRepository(), $logger);
 
         $service->getHistory(true);
     }
@@ -68,9 +69,9 @@ final class HistoryServiceTest extends TestCase
         $repo = $this->createStub(ChatRepositoryInterface::class);
         $logger = $this->createStub(LoggerInterface::class);
 
-        $service = new HistoryService($repo, $logger);
+        $service = new HistoryService($repo, $this->messageRepository(), $logger);
 
-        $result = $service->getRawMessageData($message->id);
+        $result = $service->getRawMessageData($message->id, 'anyone');
 
         $this->assertSame($rawData, $result);
     }
@@ -88,10 +89,19 @@ final class HistoryServiceTest extends TestCase
         $repo = $this->createStub(ChatRepositoryInterface::class);
         $logger = $this->createStub(LoggerInterface::class);
 
-        $service = new HistoryService($repo, $logger);
+        $service = new HistoryService($repo, $this->messageRepository(), $logger);
 
-        $result = $service->getRawMessageData($message->id);
+        $result = $service->getRawMessageData($message->id, 'anyone');
 
         $this->assertNull($result);
+    }
+
+    /**
+     * The real repository: these cases exercise lookup and visibility, not a
+     * stubbed-out query.
+     */
+    private function messageRepository(): MessageRepositoryInterface
+    {
+        return app(MessageRepositoryInterface::class);
     }
 }

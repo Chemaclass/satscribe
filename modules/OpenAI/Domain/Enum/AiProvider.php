@@ -68,13 +68,20 @@ enum AiProvider: string
                 new AiModel('moonshotai/kimi-k2-instruct', 'Kimi K2', free: true),
                 new AiModel('llama-3.1-8b-instant', 'Llama 3.1 8B Instant', free: true),
             ],
-            // Free models first, then the cheapest paid ones.
+            // The widest catalogue, and the only route to Anthropic and Google
+            // models here: both speak their own protocol directly, but
+            // OpenRouter fronts them with the OpenAI one this app already uses.
+            // Free models first, then paid cheapest-first.
             self::OpenRouter => [
                 new AiModel('openai/gpt-oss-20b:free', 'GPT-OSS 20B', free: true),
                 new AiModel('google/gemma-4-31b-it:free', 'Gemma 4 31B', free: true),
                 new AiModel('nvidia/nemotron-3-super-120b-a12b:free', 'Nemotron 3 Super 120B', free: true),
+                new AiModel('deepseek/deepseek-v4-flash', 'DeepSeek V4 Flash'),
                 new AiModel('openai/gpt-5-nano', 'GPT-5 nano'),
+                new AiModel('google/gemini-2.5-flash-lite', 'Gemini 2.5 Flash Lite'),
                 new AiModel('openai/gpt-4o-mini', 'GPT-4o mini'),
+                new AiModel('anthropic/claude-haiku-4.5', 'Claude Haiku 4.5'),
+                new AiModel('anthropic/claude-sonnet-5', 'Claude Sonnet 5'),
             ],
             // Cheapest first: this list has no free tier, so the ordering is
             // the only thing keeping an accidental click off an expensive model.

@@ -7,7 +7,10 @@ namespace Modules\Chat\Infrastructure\Http\Controller;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Modules\Chat\Application\HistoryService;
+use Modules\Chat\Domain\Exception\MessageNotFound;
+use Modules\Chat\Domain\Exception\RawMessageNotVisible;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 final readonly class HistoryController
 {
@@ -29,6 +32,12 @@ final readonly class HistoryController
 
     public function getRaw(int $messageId): JsonResponse
     {
-        return response()->json($this->service->getRawMessageData($messageId));
+        try {
+            return response()->json($this->service->getRawMessageData($messageId, tracking_id()));
+        } catch (MessageNotFound) {
+            abort(Response::HTTP_NOT_FOUND, 'Message not found.');
+        } catch (RawMessageNotVisible) {
+            abort(Response::HTTP_FORBIDDEN, 'You are not allowed to view this message.');
+        }
     }
 }

@@ -21,4 +21,9 @@ final readonly class MessageRepository implements MessageRepositoryInterface
             ->whereJsonContains('meta->question', $question)
             ->first();
     }
+
+    public function findWithChat(int $messageId): ?Message
+    {
+        return Message::with('chat')->find($messageId);
+    }
 }

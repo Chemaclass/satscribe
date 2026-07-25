@@ -11,4 +11,6 @@ use Modules\Shared\Domain\Enum\Chat\PromptPersona;
 interface MessageRepositoryInterface
 {
     public function findAssistantMessage(PromptInput $input, PromptPersona $persona, string $question): ?Message;
+
+    public function findWithChat(int $messageId): ?Message;
 }

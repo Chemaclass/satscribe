@@ -35,8 +35,11 @@ if echo "$cmd" | grep -qE 'git\s+(commit|push).*--no-verify'; then
   exit 2
 fi
 
-# Block force-push and history rewrites on shared branches
-if echo "$cmd" | grep -qE 'git\s+push.*(--force|-f)\b' && ! echo "$cmd" | grep -q '\-\-force-with-lease'; then
+# Block force-push and history rewrites on shared branches.
+# The flag has to be its own token in the same command segment: `.*` used to run
+# past a pipe and matched the `-f` inside an unrelated `[0-9a-f]` character
+# class, blocking ordinary pushes.
+if echo "$cmd" | grep -qE 'git\s+push[^;&|]*\s(-f|--force)(\s|$)' && ! echo "$cmd" | grep -q '\-\-force-with-lease'; then
   echo "BLOCKED: plain force-push. Use --force-with-lease, and never on main." >&2
   exit 2
 fi
