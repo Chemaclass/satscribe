@@ -5,13 +5,15 @@ declare(strict_types=1);
 namespace Modules\Faq\Infrastructure\Repository;
 
 use App\Models\Faq;
+
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Modules\Faq\Domain\Repository\FaqRepositoryInterface;
+use stdClass;
 
 final class FaqRepository implements FaqRepositoryInterface
 {
-    public function findByQuestion(string $question, ?string $lang = null): ?object
+    public function findByQuestion(string $question, ?string $lang = null): ?stdClass
     {
         $query = DB::table('faqs')->where('question', $question);
 
@@ -19,7 +21,11 @@ final class FaqRepository implements FaqRepositoryInterface
             $query->where('lang', $lang);
         }
 
-        return $query->first();
+        $row = $query->first();
+
+        // The query builder is typed to return a bare object; on this driver it
+        // is always stdClass (or null when no row matches).
+        return $row === null ? null : (object) (array) $row;
     }
 
     /**

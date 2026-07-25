@@ -20,6 +20,9 @@ class Message extends Model
         'meta' => 'array',
     ];
 
+    /**
+     * @return BelongsTo<Chat, $this>
+     */
     public function chat(): BelongsTo
     {
         return $this->belongsTo(Chat::class);

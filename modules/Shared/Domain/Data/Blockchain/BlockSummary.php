@@ -8,6 +8,9 @@ use Illuminate\Support\Collection;
 
 use function sprintf;
 
+/**
+ * @phpstan-import-type TRawVout from BlockData
+ */
 final class BlockSummary
 {
     /**
@@ -34,12 +37,13 @@ final class BlockSummary
         $coinbaseTx = $data->transactions[0] ?? [];
         $scriptsig = $coinbaseTx['vin'][0]['scriptsig'] ?? '';
         $miner = MinerIdentifier::extractFromCoinbaseHex($scriptsig);
+        /** @var list<TRawVout> $coinbaseOutputs */
         $coinbaseOutputs = $coinbaseTx['vout'] ?? [];
 
         $coinbaseValue = array_sum(array_column($coinbaseOutputs, 'value'));
 
         $hasOpReturn = collect($coinbaseOutputs)
-            ->contains(static fn ($out) => $out['scriptpubkey_type'] === 'op_return');
+            ->contains(static fn ($out) => ($out['scriptpubkey_type'] ?? null) === 'op_return');
 
         $topFees = collect($data->transactions)
             ->filter(static fn ($tx) => isset($tx['fee']))
@@ -51,6 +55,7 @@ final class BlockSummary
             ])
             ->values()
             ->all();
+        $topFees = array_values($topFees);
 
         $walletTypes = collect($data->transactions)
             ->flatMap(static fn ($tx) => $tx['vout'] ?? [])

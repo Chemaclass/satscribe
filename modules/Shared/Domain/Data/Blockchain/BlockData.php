@@ -5,6 +5,23 @@ declare(strict_types=1);
 namespace Modules\Shared\Domain\Data\Blockchain;
 
 /**
+ * Raw Blockstream payloads. Only the keys this codebase reads are listed and
+ * every shape is unsealed, since the API returns more.
+ *
+ * @phpstan-type TRawVout array{
+ *     scriptpubkey?: string,
+ *     scriptpubkey_address?: string,
+ *     scriptpubkey_type?: string,
+ *     value?: int,
+ *     ...
+ * }
+ * @phpstan-type TRawTx array{
+ *     txid?: string,
+ *     fee?: int,
+ *     vin?: list<array<string, mixed>>,
+ *     vout?: list<TRawVout>,
+ *     ...
+ * }
  * @phpstan-type TRawBlock array{
  *     id: string,
  *     height: int,
@@ -25,7 +42,7 @@ namespace Modules\Shared\Domain\Data\Blockchain;
 final readonly class BlockData implements BlockchainDataInterface
 {
     /**
-     * @param  list<array<string, mixed>>  $transactions  raw Blockstream transactions
+     * @param  list<TRawTx>  $transactions  raw Blockstream transactions
      */
     public function __construct(
         public string $hash,
@@ -48,7 +65,7 @@ final readonly class BlockData implements BlockchainDataInterface
 
     /**
      * @param  TRawBlock  $data
-     * @param  list<array<string, mixed>>  $transactions
+     * @param  list<TRawTx>  $transactions
      */
     public static function fromArray(array $data, array $transactions = []): self
     {
@@ -105,7 +122,7 @@ final readonly class BlockData implements BlockchainDataInterface
      *     nonce: int,
      *     bits: int,
      *     difficulty: float,
-     *     transactions: list<array<string, mixed>>,
+     *     transactions: list<TRawTx>,
      *     coinbase_message: string|null,
      * }
      */

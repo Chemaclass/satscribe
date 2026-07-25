@@ -33,7 +33,7 @@ final readonly class UtxoTraceFacade implements UtxoTraceFacadeInterface
      */
     public function getTransactionBacktrace(string $txid, int $depth = 10): array
     {
-        return $this->transactionTracer->getBacktrace($txid);
+        return $this->transactionTracer->getBacktrace($txid, $depth);
     }
 
     /**

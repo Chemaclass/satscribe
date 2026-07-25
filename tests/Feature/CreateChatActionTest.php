@@ -321,6 +321,9 @@ final class CreateChatActionTest extends TestCase
         return BlockchainData::forTransaction($tx, null);
     }
 
+    /**
+     * @param  array<string, mixed>  $meta
+     */
     private function createMessage(array $meta = []): Message
     {
         $message = new Message();

@@ -13,6 +13,19 @@ final class CreateChatRequest extends FormRequest
     public const DEFAULT_USER_QUESTION = ChatConstants::DEFAULT_USER_QUESTION;
 
     /**
+     * A bring-your-own key must never survive the request that carried it —
+     * not even in the session that a failed validation flashes input into.
+     *
+     * @var array<int, string>
+     */
+    protected $dontFlash = [
+        'current_password',
+        'password',
+        'password_confirmation',
+        'api_key',
+    ];
+
+    /**
      * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
@@ -26,6 +39,11 @@ final class CreateChatRequest extends FormRequest
                 },
             ],
             'question' => ['nullable', 'string', 'max:200'],
+            // Values are checked against the provider registry, which is the
+            // allowlist; these rules only bound the raw shape.
+            'provider' => ['nullable', 'string', 'max:32'],
+            'model' => ['nullable', 'string', 'max:128'],
+            'api_key' => ['nullable', 'string', 'max:256'],
         ];
     }
 
@@ -48,6 +66,16 @@ final class CreateChatRequest extends FormRequest
     public function getPersonaInput(): string
     {
         return (string) $this->string('persona', '');
+    }
+
+    public function getProviderInput(): string
+    {
+        return trim((string) $this->string('provider', ''));
+    }
+
+    public function getModelInput(): string
+    {
+        return trim((string) $this->string('model', ''));
     }
 
     public function isRefreshEnabled(): bool

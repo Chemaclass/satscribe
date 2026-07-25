@@ -21,6 +21,8 @@ final class HistoryServiceTest extends TestCase
     {
         $repo = $this->createMock(ChatRepositoryInterface::class);
         $paginator = $this->createStub(Paginator::class);
+        // Real AbstractPaginator::through() transforms in place and returns $this.
+        $paginator->method('through')->willReturn($paginator);
         $repo->expects($this->once())
             ->method('getPagination')
             ->with(false)
@@ -37,6 +39,8 @@ final class HistoryServiceTest extends TestCase
     {
         $repo = $this->createMock(ChatRepositoryInterface::class);
         $paginator = $this->createStub(Paginator::class);
+        // Real AbstractPaginator::through() transforms in place and returns $this.
+        $paginator->method('through')->willReturn($paginator);
         $repo->expects($this->once())
             ->method('getPagination')
             ->with(true)

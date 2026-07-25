@@ -28,6 +28,9 @@ final class TransactionTracerTest extends TestCase
         ];
 
         $facade = new class($map) implements BlockchainFacadeInterface {
+            /**
+             * @param  array<string, BlockchainData>  $map
+             */
             public function __construct(private readonly array $map)
             {
             }

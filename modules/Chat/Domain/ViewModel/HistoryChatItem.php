@@ -6,6 +6,7 @@ namespace Modules\Chat\Domain\ViewModel;
 
 use App\Models\Chat;
 use Carbon\Carbon;
+use RuntimeException;
 
 final readonly class HistoryChatItem
 {
@@ -33,6 +34,12 @@ final readonly class HistoryChatItem
         $assistantMsg = $chat->getFirstAssistantMessage();
         $raw = $assistantMsg->rawData ?? [];
 
+        // Eloquent types timestamps as nullable; a persisted chat always has one.
+        $createdAt = $chat->created_at;
+        if ($createdAt === null) {
+            throw new RuntimeException("Chat {$chat->ulid} has no created_at timestamp.");
+        }
+
         $mempoolUrl = $assistantMsg->isBlock()
             ? 'https://mempool.space/block/' . ($raw['hash'] ?? $assistantMsg->input)
             : 'https://mempool.space/tx/' . ($raw['txid'] ?? $assistantMsg->input);
@@ -49,7 +56,7 @@ final readonly class HistoryChatItem
             assistantMessageId: $assistantMsg->id,
             isBlock: $assistantMsg->isBlock(),
             mempoolUrl: $mempoolUrl,
-            createdAt: $chat->created_at,
+            createdAt: $createdAt,
         );
     }
 }

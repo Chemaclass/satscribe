@@ -20,6 +20,9 @@ final class UtxoTraceServiceTest extends TestCase
         $expected = ['foo' => 'bar'];
 
         $repo = new class($expected) implements UtxoTraceRepositoryInterface {
+            /**
+             * @param  array<string, mixed>  $data
+             */
             public function __construct(private readonly array $data)
             {
             }
@@ -71,6 +74,83 @@ final class UtxoTraceServiceTest extends TestCase
         $this->assertSame([], $service->buildBacktrace('tx', 1));
     }
 
+    /**
+     * Esplora's `vout` objects carry no index field: the fixture below is the
+     * real `/tx/{txid}` shape (verified against blockstream.info), and an
+     * output is identified by its position. Reading a non-existent `n` made
+     * every traced UTXO report `vout: null`.
+     */
+    public function test_vout_index_comes_from_the_output_position(): void
+    {
+        $tx = [
+            'txid' => 'txvoutindex',
+            'vin' => [],
+            'vout' => [
+                [
+                    'scriptpubkey' => '0014a1b2',
+                    'scriptpubkey_address' => 'bc1qfirst',
+                    'scriptpubkey_asm' => 'OP_0 OP_PUSHBYTES_20 a1b2',
+                    'scriptpubkey_type' => 'v0_p2wpkh',
+                    'value' => 1000,
+                ],
+                [
+                    'scriptpubkey' => '0014c3d4',
+                    'scriptpubkey_address' => 'bc1qsecond',
+                    'scriptpubkey_asm' => 'OP_0 OP_PUSHBYTES_20 c3d4',
+                    'scriptpubkey_type' => 'v0_p2wpkh',
+                    'value' => 2000,
+                ],
+                [
+                    'scriptpubkey' => '6a0568656c6c6f',
+                    'scriptpubkey_asm' => 'OP_RETURN OP_PUSHBYTES_5 68656c6c6f',
+                    'scriptpubkey_type' => 'op_return',
+                    'value' => 0,
+                ],
+            ],
+        ];
+
+        $service = new UtxoTracer(
+            $this->httpReturning($tx),
+            $this->createStub(LoggerInterface::class),
+            $this->nullRepository(),
+        );
+
+        $result = $service->buildBacktrace('txvoutindex', 1);
+
+        self::assertCount(3, $result);
+        self::assertSame([0, 1, 2], array_column(array_column($result, 'utxo'), 'vout'));
+        self::assertSame('bc1qfirst', $result[0]['utxo']['scriptpubkey_address']);
+        self::assertSame('bc1qsecond', $result[1]['utxo']['scriptpubkey_address']);
+        self::assertNull($result[2]['utxo']['scriptpubkey_address']);
+        self::assertSame([1000, 2000, 0], array_column(array_column($result, 'utxo'), 'value'));
+    }
+
+    /**
+     * The vout number survives the reference-deduplication pass, which keys
+     * nodes on `txid|vout|value`.
+     */
+    public function test_referenced_trace_keeps_the_vout_index(): void
+    {
+        $tx = [
+            'txid' => 'txrefindex',
+            'vin' => [],
+            'vout' => [
+                ['scriptpubkey_address' => 'bc1qfirst', 'scriptpubkey_type' => 'v0_p2wpkh', 'value' => 1000],
+                ['scriptpubkey_address' => 'bc1qsecond', 'scriptpubkey_type' => 'v0_p2wpkh', 'value' => 2000],
+            ],
+        ];
+
+        $service = new UtxoTracer(
+            $this->httpReturning($tx),
+            $this->createStub(LoggerInterface::class),
+            $this->nullRepository(),
+        );
+
+        $result = $service->getBacktrace('txrefindex', 1);
+
+        self::assertSame([0, 1], array_column(array_column($result['utxos'], 'utxo'), 'vout'));
+    }
+
     public function test_uses_transaction_cache_to_avoid_duplicate_requests(): void
     {
         $repo = new class() implements UtxoTraceRepositoryInterface {
@@ -90,15 +170,15 @@ final class UtxoTraceServiceTest extends TestCase
                 ['txid' => 'tx1', 'vout' => 1],
             ],
             'vout' => [
-                ['n' => 0, 'value' => 50],
+                ['scriptpubkey_type' => 'p2pkh', 'value' => 50],
             ],
         ];
 
         $tx1 = [
             'vin' => [],
             'vout' => [
-                ['n' => 0, 'value' => 25],
-                ['n' => 1, 'value' => 25],
+                ['scriptpubkey_type' => 'p2pkh', 'value' => 25],
+                ['scriptpubkey_type' => 'p2pkh', 'value' => 25],
             ],
         ];
 
@@ -126,5 +206,36 @@ final class UtxoTraceServiceTest extends TestCase
         $service = new UtxoTracer($http, $logger, $repo);
 
         $service->buildBacktrace('tx0', 1);
+    }
+
+    /**
+     * @param array<string, mixed> $tx
+     */
+    private function httpReturning(array $tx): HttpClientInterface
+    {
+        $response = $this->createConfiguredMock(Response::class, [
+            'failed' => false,
+            'json' => $tx,
+        ]);
+
+        $http = $this->createMock(HttpClientInterface::class);
+        $http->method('get')->willReturn($response);
+
+        return $http;
+    }
+
+    private function nullRepository(): UtxoTraceRepositoryInterface
+    {
+        return new class() implements UtxoTraceRepositoryInterface {
+            public function find(string $txid, int $depth): ?UtxoTrace
+            {
+                return null;
+            }
+
+            public function store(string $txid, int $depth, array $result): UtxoTrace
+            {
+                return new UtxoTrace();
+            }
+        };
     }
 }

@@ -14,8 +14,11 @@ final class FlaggedWordRepository implements FlaggedWordRepositoryInterface
      */
     public function getAllWords(): array
     {
-        return FlaggedWord::where('is_active', true)
-            ->pluck('word')
-            ->all();
+        return array_values(
+            FlaggedWord::where('is_active', true)
+                ->pluck('word')
+                ->map(static fn ($word) => (string) $word)
+                ->all(),
+        );
     }
 }

@@ -107,9 +107,15 @@ final class UserInputSanitizerTest extends TestCase
         $this->assertSame($input, $sanitizer->sanitize($input));
     }
 
+    /**
+     * @param  list<string>  $words
+     */
     private function createRepository(array $words): FlaggedWordRepositoryInterface
     {
         return new class($words) implements FlaggedWordRepositoryInterface {
+            /**
+             * @param  list<string>  $words
+             */
             public function __construct(private readonly array $words)
             {
             }

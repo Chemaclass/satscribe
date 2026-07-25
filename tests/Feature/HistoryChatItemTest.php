@@ -45,7 +45,7 @@ final class HistoryChatItemTest extends TestCase
             ],
         ]);
 
-        $item = HistoryChatItem::fromChat($chat->fresh(), 'owner-tracking');
+        $item = HistoryChatItem::fromChat($chat->refresh(), 'owner-tracking');
 
         $this->assertSame('test-ulid', $item->ulid);
         $this->assertTrue($item->isPublic);
@@ -90,7 +90,7 @@ final class HistoryChatItemTest extends TestCase
             ],
         ]);
 
-        $item = HistoryChatItem::fromChat($chat->fresh(), 'owner-tracking');
+        $item = HistoryChatItem::fromChat($chat->refresh(), 'owner-tracking');
 
         $this->assertFalse($item->isPublic);
         $this->assertTrue($item->isShared);
@@ -121,7 +121,7 @@ final class HistoryChatItemTest extends TestCase
             'meta' => ['type' => 'transaction', 'input' => 'abc123'],
         ]);
 
-        $item = HistoryChatItem::fromChat($chat->fresh(), 'different-tracking');
+        $item = HistoryChatItem::fromChat($chat->refresh(), 'different-tracking');
 
         $this->assertFalse($item->owned);
     }
@@ -149,7 +149,7 @@ final class HistoryChatItemTest extends TestCase
             'meta' => ['type' => 'block', 'input' => '800000', 'raw_data' => []],
         ]);
 
-        $item = HistoryChatItem::fromChat($chat->fresh(), 'owner-tracking');
+        $item = HistoryChatItem::fromChat($chat->refresh(), 'owner-tracking');
 
         $this->assertSame('https://mempool.space/block/800000', $item->mempoolUrl);
     }

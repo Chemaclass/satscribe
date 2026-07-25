@@ -196,6 +196,6 @@ final class ChatServiceTest extends TestCase
             'meta' => [],
         ]);
 
-        return $chat->fresh();
+        return $chat->refresh();
     }
 }

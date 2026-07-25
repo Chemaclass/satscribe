@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
+use function count;
+
 class Chat extends Model
 {
     protected $table = 'chats';
@@ -59,13 +61,18 @@ class Chat extends Model
     public function getLastUserMessage(): Message
     {
         if ($this->relationLoaded('messages')) {
-            return $this->messages->last(static fn (Message $m): bool => $m->role === 'user');
+            $message = $this->messages->last(static fn (Message $m): bool => $m->role === 'user');
+            if ($message === null) {
+                throw new ModelNotFoundException();
+            }
+
+            return $message;
         }
 
         return $this->messages()
             ->where('role', 'user')
             ->orderBy('id', 'desc')
-            ->first();
+            ->firstOrFail();
     }
 
     public function getFirstAssistantMessage(): Message
@@ -88,13 +95,18 @@ class Chat extends Model
     public function getLastAssistantMessage(): Message
     {
         if ($this->relationLoaded('messages')) {
-            return $this->messages->last(static fn (Message $m): bool => $m->role === 'assistant');
+            $message = $this->messages->last(static fn (Message $m): bool => $m->role === 'assistant');
+            if ($message === null) {
+                throw new ModelNotFoundException();
+            }
+
+            return $message;
         }
 
         return $this->messages()
             ->where('role', 'assistant')
             ->orderBy('id', 'desc')
-            ->first();
+            ->firstOrFail();
     }
 
     public function getForceRefreshAttribute(): bool
@@ -124,6 +136,9 @@ class Chat extends Model
         return $firstMsg?->meta['input'] ?? '';
     }
 
+    /**
+     * @param  array<string, mixed>  $meta  persisted verbatim to the JSON `meta` column
+     */
     public function addUserMessage(string $content, array $meta = []): Message
     {
         return $this->messages()->create([
@@ -133,6 +148,9 @@ class Chat extends Model
         ]);
     }
 
+    /**
+     * @param  array<string, mixed>  $meta  persisted verbatim to the JSON `meta` column
+     */
     public function addAssistantMessage(string $content, array $meta = []): Message
     {
         return $this->messages()->create([
@@ -148,15 +166,26 @@ class Chat extends Model
             ? $this->messages->first()
             : $this->messages()->first();
 
+        if (!$firstMessage instanceof Message) {
+            throw new ModelNotFoundException();
+        }
+
         return $firstMessage->isBlock();
     }
 
+    /**
+     * Pair each user message with its assistant reply. A trailing unpaired
+     * message yields a group with the other side null.
+     *
+     * @return list<array{userMsg: Message|null, assistantMsg: Message|null}>
+     */
     public function messageGroups(): array
     {
-        $messages = $this->messages->values();
+        $messages = array_values($this->messages->all());
+        $count = count($messages);
         $groups = [];
 
-        for ($i = 0; $i < $messages->count() - 1; ++$i) {
+        for ($i = 0; $i < $count - 1; ++$i) {
             if ($messages[$i]->role === 'user' && $messages[$i + 1]->role === 'assistant') {
                 $groups[] = [
                     'userMsg' => $messages[$i],
@@ -167,7 +196,7 @@ class Chat extends Model
         }
 
         // Handle last message if odd count
-        if ($i < $messages->count()) {
+        if ($i < $count) {
             if ($messages[$i]->role === 'user') {
                 $groups[] = ['userMsg' => $messages[$i], 'assistantMsg' => null];
             } else {
@@ -187,12 +216,14 @@ class Chat extends Model
             ? $this->messages->sortBy('created_at')
             : $this->messages()->orderBy('created_at')->get();
 
-        return $chatMessages
-            ->map(static fn ($msg) => [
-                'role' => $msg->role,
-                'content' => $msg->content,
-            ])
-            ->toArray();
+        return array_values(
+            $chatMessages
+                ->map(static fn (Message $msg) => [
+                    'role' => (string) $msg->role,
+                    'content' => (string) $msg->content,
+                ])
+                ->all(),
+        );
     }
 
     public function canShow(string $trackingId): bool

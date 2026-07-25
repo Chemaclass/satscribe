@@ -11,7 +11,9 @@ use Generator;
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Illuminate\Http\Client\Factory as HttpFactory;
 use Modules\Blockchain\Domain\PriceServiceInterface;
+use Modules\OpenAI\Domain\Data\ModelSelection;
 use Modules\OpenAI\Domain\Exception\OpenAIError;
+use Modules\OpenAI\Domain\ProviderRegistryInterface;
 use Modules\Shared\Domain\Chat\ChatConstants;
 use Modules\Shared\Domain\Chat\SentenceTrimmer;
 use Modules\Shared\Domain\Data\Blockchain\BlockchainData;
@@ -39,13 +41,8 @@ final readonly class OpenAIService
         private PersonaPromptBuilder $promptBuilder,
         private PriceServiceInterface $priceService, // @todo use BlockchainFacade instead
         private CarbonInterface $now,
-        private string $openAiApiKey,
-        private string $openAiModel,
-        private string $openAiModelFollowup,
+        private ProviderRegistryInterface $registry,
     ) {
-        if ($this->openAiApiKey === '') {
-            throw new OpenAIError('OPENAI_API_KEY is not configured.');
-        }
     }
 
     public function generateText(
@@ -55,9 +52,16 @@ final readonly class OpenAIService
         string $question,
         ?Chat $chat = null,
         string $additionalContext = '',
+        ?ModelSelection $selection = null,
     ): string {
+        // Follow-ups have historically used their own model, and no selection
+        // means "keep doing exactly what the config says".
+        $selection ??= $chat instanceof Chat
+            ? $this->registry->defaultFollowupSelection()
+            : $this->registry->defaultSelection();
+
         // Only cache initial requests (no chat history)
-        $cacheKey = $chat instanceof Chat ? null : $this->buildCacheKey($input, $persona, $question);
+        $cacheKey = $chat instanceof Chat ? null : $this->buildCacheKey($input, $persona, $question, $selection);
 
         if ($cacheKey !== null) {
             $cached = $this->cache->get($cacheKey);
@@ -69,7 +73,7 @@ final readonly class OpenAIService
             }
         }
 
-        $text = $this->callOpenAI($data, $input, $persona, $question, $chat, $additionalContext);
+        $text = $this->callOpenAI($data, $input, $persona, $question, $chat, $additionalContext, $selection);
 
         if ($cacheKey !== null) {
             $this->cache->put($cacheKey, $text, self::CACHE_TTL_SECONDS);
@@ -88,18 +92,21 @@ final readonly class OpenAIService
         string $question,
         ?Chat $chat = null,
         string $additionalContext = '',
+        ?ModelSelection $selection = null,
     ): Generator {
+        $selection ??= $this->registry->defaultSelection();
+
         $this->logger->debug('Calling OpenAI API with streaming', [
-            'model' => $this->openAiModel,
+            ...$selection->toLogContext(),
             'persona' => $persona->value,
         ]);
 
         $response = $this->httpFactory
-            ->withToken($this->openAiApiKey)
+            ->withToken($selection->apiKey())
             ->withOptions(['stream' => true])
             ->timeout(60)
-            ->post('https://api.openai.com/v1/chat/completions', [
-                'model' => $this->openAiModel,
+            ->post($selection->endpoint(), [
+                'model' => $selection->model,
                 'messages' => $this->buildMessages($data, $input, $persona, $question, $chat, $additionalContext),
                 'max_tokens' => $persona->maxTokens(),
                 'stream' => true,
@@ -107,6 +114,7 @@ final readonly class OpenAIService
 
         if ($response->failed()) {
             $this->logger->error('OpenAI API streaming request failed', [
+                ...$selection->toLogContext(),
                 'status' => $response->status(),
             ]);
 
@@ -149,24 +157,24 @@ final readonly class OpenAIService
         string $question,
         ?Chat $chat,
         string $additionalContext,
+        ModelSelection $selection,
     ): string {
-        $model = $chat instanceof Chat ? $this->openAiModelFollowup : $this->openAiModel;
-
         $this->logger->debug('Calling OpenAI API', [
-            'model' => $model,
+            ...$selection->toLogContext(),
             'persona' => $persona->value,
             'is_followup' => $chat instanceof Chat,
         ]);
 
-        $response = $this->http->withToken($this->openAiApiKey)
-            ->post('https://api.openai.com/v1/chat/completions', [
-                'model' => $model,
+        $response = $this->http->withToken($selection->apiKey())
+            ->post($selection->endpoint(), [
+                'model' => $selection->model,
                 'messages' => $this->buildMessages($data, $input, $persona, $question, $chat, $additionalContext),
                 'max_tokens' => $persona->maxTokens(),
             ]);
 
         if ($response->failed()) {
             $this->logger->error('OpenAI API request failed', [
+                ...$selection->toLogContext(),
                 'status' => $response->status(),
                 'body' => $response->body(),
             ]);
@@ -175,6 +183,7 @@ final readonly class OpenAIService
 
         if ($error = $response->json('error.message')) {
             $this->logger->error('OpenAI API responded with an error', [
+                ...$selection->toLogContext(),
                 'error' => $error,
                 'status' => $response->status(),
             ]);
@@ -232,11 +241,19 @@ final readonly class OpenAIService
         ];
     }
 
-    private function buildCacheKey(PromptInput $input, PromptPersona $persona, string $question): string
-    {
+    /**
+     * The model is part of the key: two providers answering the same question
+     * are two different answers, and must not share a cache entry.
+     */
+    private function buildCacheKey(
+        PromptInput $input,
+        PromptPersona $persona,
+        string $question,
+        ModelSelection $selection,
+    ): string {
         $questionHash = md5($question);
 
-        return "openai:{$input->type->value}:{$input->text}:{$persona->value}:{$questionHash}";
+        return "openai:{$selection->provider->id()}:{$selection->model}:{$input->type->value}:{$input->text}:{$persona->value}:{$questionHash}";
     }
 
     private function buildBlockchainContext(BlockchainData $data, string $additional): string

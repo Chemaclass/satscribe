@@ -15,6 +15,7 @@ use Modules\OpenAI\Domain\OpenAIFacadeInterface;
 use Modules\Shared\Domain\Data\Chat\PromptInput;
 use Modules\Shared\Domain\Enum\Chat\PromptPersona;
 use Psr\Log\LoggerInterface;
+use RuntimeException;
 
 final readonly class AddMessageAction implements AddMessageActionInterface
 {
@@ -36,9 +37,15 @@ final readonly class AddMessageAction implements AddMessageActionInterface
         $this->rateLimiter->enforce();
         $firstUserMessage = $chat->getFirstUserMessage();
 
-        $input = PromptInput::fromRaw($firstUserMessage->input);
+        $rawInput = $firstUserMessage->input;
+        if ($rawInput === null) {
+            throw new RuntimeException("Chat {$chat->id} has no input recorded on its first user message.");
+        }
+
+        $input = PromptInput::fromRaw($rawInput);
         $cleanMsg = $this->userInputSanitizer->sanitize($message);
-        $persona = PromptPersona::from($firstUserMessage->persona);
+        $persona = PromptPersona::tryFrom((string) $firstUserMessage->persona)
+            ?? PromptPersona::from(PromptPersona::DEFAULT);
 
         $aiResponse = $this->generateAiResponse($input, $persona, $cleanMsg, $chat);
 

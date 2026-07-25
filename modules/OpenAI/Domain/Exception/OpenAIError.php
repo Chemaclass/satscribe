@@ -6,6 +6,10 @@ namespace Modules\OpenAI\Domain\Exception;
 
 use RuntimeException;
 
-final class OpenAIError extends RuntimeException
+/**
+ * Not final: {@see UnsupportedModelError} extends it so callers that already
+ * catch OpenAIError keep handling model-selection failures unchanged.
+ */
+class OpenAIError extends RuntimeException
 {
 }

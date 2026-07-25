@@ -14,9 +14,11 @@ import {
     DEFAULT_RELAYS,
 } from './nostr';
 import { nip19, getPublicKey, getSignature, getEventHash, generatePrivateKey } from 'nostr-tools';
+import { classifyPromptInput, isBlockInput, promptInputIcon, promptInputLabel } from './prompt-input';
 
 window.Alpine = Alpine;
 window.StorageClient = StorageClient;
+window.PromptInput = { classifyPromptInput, isBlockInput, promptInputIcon, promptInputLabel };
 window.nostrTools = { nip19, getPublicKey, getSignature, getEventHash, generatePrivateKey };
 window.DEFAULT_RELAYS = DEFAULT_RELAYS;
 window.publishProfileEvent = publishProfileEvent;

@@ -41,9 +41,22 @@ return [
     // position rather than the setting. Consumers treat '' as "not configured".
     'openai' => [
         'key' => env('OPENAI_API_KEY', ''),
+        'base_url' => env('OPENAI_BASE_URL', 'https://api.openai.com/v1'),
         'model' => env('OPENAI_MODEL', 'gpt-4'),
         'model_followup' => env('OPENAI_MODEL_FOLLOWUP', 'gpt-4o-mini'),
         'max_attempts' => env('OPENAI_MAX_ATTEMPTS', 200),
+    ],
+
+    // Optional OpenAI-compatible providers. With a key set here the server can
+    // serve their models without the visitor supplying one; left empty, those
+    // models are only reachable with a bring-your-own key. Base URLs are not
+    // configurable on purpose — they are pinned in the provider registry.
+    'openrouter' => [
+        'key' => env('OPENROUTER_API_KEY', ''),
+    ],
+
+    'groq' => [
+        'key' => env('GROQ_API_KEY', ''),
     ],
 
     'alby' => [

@@ -11,7 +11,8 @@ if (!\function_exists('client_ip')) {
          * @see https://developers.cloudflare.com/fundamentals/reference/http-headers/#cf-connecting-ip
          */
         return Request::header('CF-Connecting-IP')
-            ?? Request::ip();
+            ?? Request::ip()
+            ?? '';
     }
 }
 

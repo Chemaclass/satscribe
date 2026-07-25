@@ -12,6 +12,7 @@ use Illuminate\Translation\Translator;
 use Modules\Blockchain\Domain\PriceServiceInterface;
 use Modules\OpenAI\Application\OpenAIService;
 use Modules\OpenAI\Application\PersonaPromptBuilder;
+use Modules\OpenAI\Application\ProviderRegistry;
 use Modules\OpenAI\Domain\Exception\OpenAIError;
 use Modules\Shared\Domain\Data\Blockchain\BlockchainData;
 use Modules\Shared\Domain\Data\Blockchain\BlockData;
@@ -72,9 +73,12 @@ final class OpenAIServiceTest extends TestCase
             new PersonaPromptBuilder('en'),
             $priceService,
             now(),
-            openAiApiKey: 'api-key',
-            openAiModel: 'model',
-            openAiModelFollowup: 'model-mini',
+            new ProviderRegistry(
+                openAiBaseUrl: 'https://api.openai.com/v1',
+                openAiApiKey: 'api-key',
+                openAiModel: 'model',
+                openAiModelFollowup: 'model-mini',
+            ),
         );
 
         $result = $service->generateText($data, $input, PromptPersona::Developer, 'Question');
@@ -116,9 +120,12 @@ final class OpenAIServiceTest extends TestCase
             new PersonaPromptBuilder('en'),
             $priceService,
             now(),
-            openAiApiKey: 'api-key',
-            openAiModel: 'model',
-            openAiModelFollowup: 'model-mini',
+            new ProviderRegistry(
+                openAiBaseUrl: 'https://api.openai.com/v1',
+                openAiApiKey: 'api-key',
+                openAiModel: 'model',
+                openAiModelFollowup: 'model-mini',
+            ),
         );
 
         $this->expectException(OpenAIError::class);
@@ -161,9 +168,12 @@ final class OpenAIServiceTest extends TestCase
             new PersonaPromptBuilder('en'),
             $priceService,
             now(),
-            openAiApiKey: 'api-key',
-            openAiModel: 'model',
-            openAiModelFollowup: 'model-mini',
+            new ProviderRegistry(
+                openAiBaseUrl: 'https://api.openai.com/v1',
+                openAiApiKey: 'api-key',
+                openAiModel: 'model',
+                openAiModelFollowup: 'model-mini',
+            ),
         );
 
         $this->expectException(OpenAIError::class);
@@ -214,9 +224,12 @@ final class OpenAIServiceTest extends TestCase
             new PersonaPromptBuilder('en'),
             $priceService,
             now(),
-            openAiApiKey: 'api-key',
-            openAiModel: 'model',
-            openAiModelFollowup: 'model-mini',
+            new ProviderRegistry(
+                openAiBaseUrl: 'https://api.openai.com/v1',
+                openAiApiKey: 'api-key',
+                openAiModel: 'model',
+                openAiModelFollowup: 'model-mini',
+            ),
         );
 
         $service->generateText($data, $input, PromptPersona::Developer, '');
@@ -272,9 +285,12 @@ final class OpenAIServiceTest extends TestCase
             new PersonaPromptBuilder('en'),
             $priceService,
             now(),
-            openAiApiKey: 'api-key',
-            openAiModel: 'model',
-            openAiModelFollowup: 'model-mini',
+            new ProviderRegistry(
+                openAiBaseUrl: 'https://api.openai.com/v1',
+                openAiApiKey: 'api-key',
+                openAiModel: 'model',
+                openAiModelFollowup: 'model-mini',
+            ),
         );
 
         $service->generateText($data, $input, PromptPersona::Developer, '');
@@ -330,9 +346,12 @@ final class OpenAIServiceTest extends TestCase
             new PersonaPromptBuilder('en'),
             $priceService,
             now(),
-            openAiApiKey: 'api-key',
-            openAiModel: 'model',
-            openAiModelFollowup: 'model-mini',
+            new ProviderRegistry(
+                openAiBaseUrl: 'https://api.openai.com/v1',
+                openAiApiKey: 'api-key',
+                openAiModel: 'model',
+                openAiModelFollowup: 'model-mini',
+            ),
         );
 
         $service->generateText($data, $input, PromptPersona::Developer, '');

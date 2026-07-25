@@ -102,6 +102,9 @@ final readonly class ChatRepository implements ChatRepositoryInterface
         ]);
     }
 
+    /**
+     * @return Paginator<int, Chat>
+     */
     public function getPagination(bool $showAll): Paginator
     {
         $query = Chat::query()->with('messages');

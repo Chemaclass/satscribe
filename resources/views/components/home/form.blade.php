@@ -47,7 +47,10 @@
                                 :disabled="isSubmitting"
                                 autocomplete="off"
                                 spellcheck="false"
-                                class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                                inputmode="text"
+                                aria-describedby="search-detected search-helper"
+                                {{-- text-base keeps iOS Safari from zooming in when the field is focused --}}
+                                class="w-full px-4 py-2 text-base border rounded-md focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                                 placeholder="{{ __('home.placeholder', ['height' => $latestBlockHeight]) }}"
                         />
                     </div>
@@ -57,8 +60,26 @@
                     @enderror
                 </div>
 
+                {{--
+                    What the server will treat this input as. The verdict comes from
+                    resources/js/prompt-input.js, which mirrors PromptInput::fromRaw(),
+                    so the badge can never disagree with what actually gets fetched.
+                --}}
+                <p
+                    id="search-detected"
+                    x-show="showDetected"
+                    x-cloak
+                    class="detected-badge mt-2"
+                    aria-live="polite"
+                >
+                    <span x-show="detectedIsBlock" x-cloak><i data-lucide="box" class="w-3.5 h-3.5"></i></span>
+                    <span x-show="!detectedIsBlock" x-cloak><i data-lucide="arrow-right-left" class="w-3.5 h-3.5"></i></span>
+                    <span>{{ __('Detected') }}:</span>
+                    <strong x-text="detectedLabel"></strong>
+                </p>
+
                 {{-- Helper text --}}
-                <p x-text="helperText" :class="helperClass" class="text-sm mt-1 block cursor-pointer" @click="focusSearchInput"></p>
+                <p id="search-helper" x-text="helperText" :class="helperClass" class="text-sm mt-1 block cursor-pointer" @click="focusSearchInput"></p>
 
                 {{-- Advanced options --}}
                 <div x-data="{ showAdvanced: false }" class="form-group ">

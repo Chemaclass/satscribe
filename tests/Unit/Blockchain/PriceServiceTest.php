@@ -35,7 +35,7 @@ final class PriceServiceTest extends TestCase
         $http = self::createStub(HttpClientInterface::class);
         $logger = self::createStub(LoggerInterface::class);
         $now = Carbon::parse('2025-01-15');
-        $timestamp = Carbon::parse('2025-01-10')->timestamp;
+        $timestamp = (int) Carbon::parse('2025-01-10')->timestamp;
 
         $cache = $this->createMock(Repository::class);
         $cache->expects($this->once())
@@ -60,7 +60,7 @@ final class PriceServiceTest extends TestCase
         $cache = self::createStub(Repository::class);
         $logger = self::createStub(LoggerInterface::class);
         $now = Carbon::parse('2025-01-15');
-        $timestamp = Carbon::parse('2023-01-01')->timestamp; // More than 1 year ago
+        $timestamp = (int) Carbon::parse('2023-01-01')->timestamp; // More than 1 year ago
 
         $service = new PriceService($http, $logger, $cache, enabled: true, now: $now);
 
@@ -95,7 +95,7 @@ final class PriceServiceTest extends TestCase
     public function test_historical_price_fetches_from_api_when_not_cached(): void
     {
         $now = Carbon::parse('2025-01-15');
-        $timestamp = Carbon::parse('2025-01-10')->timestamp;
+        $timestamp = (int) Carbon::parse('2025-01-10')->timestamp;
 
         $response = $this->createMock(Response::class);
         $response->method('successful')->willReturn(true);

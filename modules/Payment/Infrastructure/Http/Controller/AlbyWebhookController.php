@@ -14,11 +14,13 @@ final class AlbyWebhookController
     public function __invoke(Request $request, AlbySettleWebhookAction $action): JsonResponse
     {
         try {
+            // A missing Svix header means the request is unsigned; '' fails
+            // verification and surfaces as a 401 rather than a 500.
             $action->execute(
                 payload: $request->getContent(),
-                svixId: $request->header('svix-id'),
-                svixTimestamp: $request->header('svix-timestamp'),
-                svixSignature: $request->header('svix-signature'),
+                svixId: $request->header('svix-id') ?? '',
+                svixTimestamp: $request->header('svix-timestamp') ?? '',
+                svixSignature: $request->header('svix-signature') ?? '',
             );
 
             return response()->json(['success' => true]);

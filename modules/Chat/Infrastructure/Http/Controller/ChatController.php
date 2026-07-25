@@ -14,7 +14,9 @@ use Modules\Chat\Application\ChatService;
 use Modules\Chat\Domain\AddMessageStreamActionInterface;
 use Modules\Chat\Domain\CreateChatStreamActionInterface;
 use Modules\Chat\Infrastructure\Http\Request\CreateChatRequest;
+use Modules\OpenAI\Domain\Data\ModelSelection;
 use Modules\OpenAI\Domain\Exception\OpenAIError;
+use Modules\OpenAI\Domain\OpenAIFacadeInterface;
 use Modules\Shared\Domain\Data\Chat\PromptInput;
 use Modules\Shared\Domain\Enum\Chat\PromptPersona;
 use Psr\Log\LoggerInterface;
@@ -22,13 +24,22 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
+use function is_string;
+
 final readonly class ChatController
 {
+    /**
+     * Header a bring-your-own key may arrive in. Preferred over the body field
+     * of the same name because it keeps the key out of request-body logging.
+     */
+    private const API_KEY_HEADER = 'X-Ai-Api-Key';
+
     public function __construct(
         private ChatService $chatService,
         private BlockchainFacadeInterface $blockchainFacade,
         private CreateChatStreamActionInterface $createChatStreamAction,
         private AddMessageStreamActionInterface $addMessageStreamAction,
+        private OpenAIFacadeInterface $openAIFacade,
         private LoggerInterface $logger,
     ) {
     }
@@ -57,8 +68,14 @@ final readonly class ChatController
 
         $message = (string) $request->input('message');
 
+        // Resolved inside the stream closure so a rejected model is reported as
+        // an SSE error event rather than a 500 the chat UI cannot render.
         return $this->streamEvents(
-            fn (): Generator => $this->addMessageStreamAction->execute($chat, $message),
+            fn (): Generator => $this->addMessageStreamAction->execute(
+                $chat,
+                $message,
+                $this->modelSelection($request),
+            ),
             'Streaming message failed',
         );
     }
@@ -102,6 +119,8 @@ final readonly class ChatController
         $this->logger->debug('Creating streaming chat request', [
             'search' => $request->hasSearchInput() ? $request->getSearchInput() : null,
             'persona' => $request->getPersonaInput(),
+            'provider' => $request->getProviderInput(),
+            'model' => $request->getModelInput(),
             'ip' => $request->ip(),
         ]);
 
@@ -116,7 +135,13 @@ final readonly class ChatController
         $isPublic = !$request->isPrivate();
 
         return $this->streamEvents(
-            fn (): Generator => $this->createChatStreamAction->execute($search, $persona, $question, $isPublic),
+            fn (): Generator => $this->createChatStreamAction->execute(
+                $search,
+                $persona,
+                $question,
+                $isPublic,
+                $this->modelSelection($request),
+            ),
             'Streaming chat failed',
         );
     }
@@ -139,6 +164,33 @@ final readonly class ChatController
         $chat->save();
 
         return response()->json(['is_public' => $chat->is_public]);
+    }
+
+    /**
+     * Maps the raw provider/model/key inputs onto a validated selection. The
+     * key is read here and handed straight on: it is never logged, and nothing
+     * downstream persists it.
+     */
+    private function modelSelection(Request $request): ?ModelSelection
+    {
+        $apiKey = $request->header(self::API_KEY_HEADER);
+
+        if (!is_string($apiKey) || $apiKey === '') {
+            $apiKey = $request->input('api_key');
+        }
+
+        return $this->openAIFacade->resolveSelection(
+            $this->stringInput($request, 'provider'),
+            $this->stringInput($request, 'model'),
+            is_string($apiKey) ? $apiKey : null,
+        );
+    }
+
+    private function stringInput(Request $request, string $key): ?string
+    {
+        $value = $request->input($key);
+
+        return is_string($value) ? $value : null;
     }
 
     private function abortUnlessOwner(Chat $chat, string $reason): void

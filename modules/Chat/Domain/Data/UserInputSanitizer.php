@@ -21,11 +21,13 @@ final readonly class UserInputSanitizer
 
         foreach ($this->flaggedWordRepository->getAllWords() as $word) {
             $pattern = '/\b' . preg_quote($word, '/') . '\b/i';
+            // preg_replace only returns null on a malformed pattern; these are
+            // built from preg_quote, so keep the text unchanged if that ever happens.
             $sanitized = preg_replace(
                 $pattern,
                 str_repeat('*', strlen($word)),
-                (string) $sanitized,
-            );
+                $sanitized,
+            ) ?? $sanitized;
         }
 
         return $sanitized;
@@ -35,6 +37,6 @@ final readonly class UserInputSanitizer
     {
         $urlPattern = '/\b(?:https?:\/\/|www\.)[^\s<>"\']+/i';
 
-        return preg_replace($urlPattern, '[link removed]', $text);
+        return preg_replace($urlPattern, '[link removed]', $text) ?? $text;
     }
 }

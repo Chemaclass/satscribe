@@ -6,12 +6,16 @@ namespace Svix;
 
 class Webhook
 {
+    /** @var list<array{string, array<string, string>}> */
     public array $calls = [];
 
     public function __construct(private readonly string $secret)
     {
     }
 
+    /**
+     * @param  array<string, string>  $headers
+     */
     public function verify(string $payload, array $headers): void
     {
         if ($this->secret === 'throw') {
@@ -26,6 +30,7 @@ namespace Illuminate\Cache;
 
 class RateLimiter
 {
+    /** @var list<string> */
     public array $cleared = [];
 
     public function clear(string $key): void
@@ -69,6 +74,7 @@ final class AlbySettleWebhookActionTest extends TestCase
         $rate = new \Illuminate\Cache\RateLimiter();
 
         $repo = new class() implements PaymentRepositoryInterface {
+            /** @var array<string, mixed> */
             public array $data = [];
             public function create(array $data): Payment
             {
@@ -87,7 +93,7 @@ final class AlbySettleWebhookActionTest extends TestCase
             'state' => 'SETTLED',
             'memo' => 'memo #deadbeef',
             'amount' => 1,
-        ]);
+        ], JSON_THROW_ON_ERROR);
 
         $action->execute($payload, 'id', 't', 's');
 

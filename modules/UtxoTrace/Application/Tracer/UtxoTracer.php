@@ -18,8 +18,10 @@ use Psr\Log\LoggerInterface;
  * `TTraceNode['source']` is a `list<TTraceNode>`; PHPStan rejects recursive
  * type aliases, so it is widened at that one point only.
  *
+ * Esplora `vout` objects carry no index field of their own — an output is
+ * identified by its position in the array, which is what `vin[].vout` refers to.
+ *
  * @phpstan-type TVout array{
- *     n?: int,
  *     scriptpubkey?: string,
  *     scriptpubkey_address?: string,
  *     scriptpubkey_type?: string,
@@ -43,7 +45,7 @@ use Psr\Log\LoggerInterface;
  * @phpstan-type TUtxoEntry array{
  *     utxo: array{
  *         txid: string,
- *         vout: int|null,
+ *         vout: int,
  *         scriptpubkey: string|null,
  *         scriptpubkey_address: string|null,
  *         scriptpubkey_type: string|null,
@@ -82,7 +84,12 @@ final readonly class UtxoTracer
                 'depth' => $depth,
             ]);
 
-            return $cached->result;
+            // store() only ever persists a TReferencedTrace, but Eloquent's
+            // JSON cast erases that to mixed on the way back out.
+            /** @var TReferencedTrace $result */
+            $result = $cached->result;
+
+            return $result;
         }
 
         $result = $this->buildReferences($this->buildBacktrace($txid, $depth));
@@ -113,12 +120,14 @@ final readonly class UtxoTracer
         $trace = $this->traceInputs($txid, $depth, 0);
 
         $result = [];
-        foreach ($tx['vout'] as $output) {
+        foreach ($tx['vout'] as $index => $output) {
             $this->logger->debug('Tracing output', ['output' => $output]);
             $result[] = [
                 'utxo' => [
                     'txid' => $txid,
-                    'vout' => $output['n'] ?? null,
+                    // The position in the array *is* the vout number; Esplora
+                    // ships no index field inside the output object.
+                    'vout' => $index,
                     'scriptpubkey' => $output['scriptpubkey'] ?? null,
                     'scriptpubkey_address' => $output['scriptpubkey_address'] ?? null,
                     'scriptpubkey_type' => $output['scriptpubkey_type'] ?? null,

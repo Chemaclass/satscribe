@@ -9,6 +9,8 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\LazyCollection;
 use Modules\Faq\Domain\Repository\FaqRepositoryInterface;
+use RuntimeException;
+use stdClass;
 
 use function count;
 
@@ -49,7 +51,17 @@ final class ImportFaqs extends Command
     private function readCsvLines(string $filePath): Generator
     {
         $handle = fopen($filePath, 'r');
-        $header = fgetcsv($handle);
+        if ($handle === false) {
+            throw new RuntimeException("Unable to open {$filePath} for reading.");
+        }
+
+        $rawHeader = fgetcsv($handle);
+        if ($rawHeader === false) {
+            fclose($handle);
+            throw new RuntimeException("{$filePath} has no CSV header row.");
+        }
+
+        $header = array_map(static fn ($column) => (string) $column, $rawHeader);
 
         while (($line = fgetcsv($handle)) !== false) {
             if (count($line) !== count($header)) {
@@ -74,7 +86,7 @@ final class ImportFaqs extends Command
         foreach ($chunk as $row) {
             $this->processRow($row, $now, $rows);
         }
-        $this->faqRepository->insertMany($rows);
+        $this->faqRepository->insertMany(array_values($rows));
     }
 
     /**
@@ -99,7 +111,7 @@ final class ImportFaqs extends Command
             'updated_at' => $now,
         ];
 
-        if ($existing) {
+        if ($existing instanceof stdClass) {
             $this->faqRepository->update($existing->id, $data);
         } else {
             $data['question'] = $question;

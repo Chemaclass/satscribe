@@ -8,6 +8,7 @@ use App\Models\FlaggedWord;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 use Modules\Chat\Domain\Enum\FlaggedWordSeverity;
+use RuntimeException;
 
 final class ImportFlaggedWords extends Command
 {
@@ -45,7 +46,12 @@ final class ImportFlaggedWords extends Command
      */
     private function readLines(string $path): array
     {
-        return file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        if ($lines === false) {
+            throw new RuntimeException("Unable to read {$path}.");
+        }
+
+        return $lines;
     }
 
     /**
@@ -87,7 +93,7 @@ final class ImportFlaggedWords extends Command
      */
     private function parseLine(string $line): ?array
     {
-        $columns = array_map('trim', str_getcsv($line));
+        $columns = array_map(static fn ($column) => trim((string) $column), str_getcsv($line));
         $word = $columns[0];
 
         if (!$word) {

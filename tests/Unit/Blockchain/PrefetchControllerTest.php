@@ -29,7 +29,7 @@ final class PrefetchControllerTest extends TestCase
 
         $request = new Request(['q' => '100']);
         $response = $controller->prefetch($request);
-        $data = json_decode($response->getContent(), true);
+        $data = json_decode((string) $response->getContent(), true);
 
         $this->assertSame(Response::HTTP_OK, $response->getStatusCode());
         $this->assertSame('ok', $data['status']);
@@ -43,7 +43,7 @@ final class PrefetchControllerTest extends TestCase
 
         $request = new Request();
         $response = $controller->prefetch($request);
-        $data = json_decode($response->getContent(), true);
+        $data = json_decode((string) $response->getContent(), true);
 
         $this->assertSame(Response::HTTP_BAD_REQUEST, $response->getStatusCode());
         $this->assertSame('error', $data['status']);
@@ -59,7 +59,7 @@ final class PrefetchControllerTest extends TestCase
 
         $request = new Request(['q' => 'abc123def456abc123def456abc123def456abc123def456abc123def456abc1']);
         $response = $controller->prefetch($request);
-        $data = json_decode($response->getContent(), true);
+        $data = json_decode((string) $response->getContent(), true);
 
         $this->assertSame(Response::HTTP_NOT_FOUND, $response->getStatusCode());
         $this->assertSame('error', $data['status']);

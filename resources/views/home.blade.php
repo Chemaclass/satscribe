@@ -10,6 +10,7 @@
             x-data="searchInputValidator('{{ old('search', $search ?? '') }}', {{ $maxBitcoinBlockHeight }})"
             x-init="
             validate();
+            bindStopButton();
             $watch('isSubmitting', value => {
                 if (value) {
                     window.refreshLucideIcons?.();
@@ -35,6 +36,8 @@
             />
 
             @if(!isset($chat))
+                <x-home.examples />
+
                 <div
                     class="mt-6 mb-6 text-center text-gray-500 text-sm space-y-2 home-narrative"
                     x-show="!hasSubmitted"
@@ -53,7 +56,7 @@
                     'suggestions' => $suggestions,
                 ])
             @else
-                <section id="chat-container" class="flex flex-col flex-grow min-h-0"></section>
+                <section id="chat-container" class="relative flex flex-col flex-grow min-h-0"></section>
             @endif
         </div>
 
@@ -94,6 +97,9 @@
                     "On it! I'm making sure every detail is spot-on.",
                 ],
                 lastRequest: null,
+                streamController: null,
+                isStreaming: false,
+                detectedKind: 'empty',
 
                 async submitForm(form) {
                     if (window.__PAYWALL_ACTIVE) return;
@@ -105,23 +111,36 @@
                     const chatContainer = document.getElementById('chat-container');
                     if (chatContainer) {
                         const searchInput = this.input.trim();
-                        const isBlock = searchInput.length < 10 || searchInput.startsWith('00000000');
-                        const contextIcon = isBlock ? 'box' : 'arrow-right-left';
-                        const contextLabel = isBlock
-                            ? `{{ __('Block') }} #${searchInput || '...'}`
-                            : `{{ __('Transaction') }} ${searchInput.substring(0, 12)}...`;
+                        const contextIcon = window.PromptInput.promptInputIcon(searchInput);
+                        const contextLabel = searchInput === ''
+                            ? @js(__('Latest block'))
+                            : window.PromptInput.promptInputLabel(searchInput, {
+                                block: @js(__('Block')),
+                                transaction: @js(__('Transaction')),
+                            });
 
                         // Create scrollable structure for new chat with header
                         chatContainer.innerHTML = `
-                            <div id="chat-header" class="flex-shrink-0 flex items-center justify-between p-2 border-b border-gray-200">
-                                <div class="flex items-center gap-2">
-                                    <i data-lucide="${contextIcon}" class="w-4 h-4 text-gray-500"></i>
-                                    <span id="chat-context-label" class="text-sm font-medium text-gray-700">${contextLabel}</span>
+                            <div id="chat-header" class="flex-shrink-0 flex items-center justify-between gap-2 p-2 border-b border-gray-200">
+                                <div class="flex items-center gap-2 min-w-0">
+                                    <i data-lucide="${contextIcon}" class="w-4 h-4 shrink-0 text-gray-500"></i>
+                                    <span id="chat-context-label" class="text-sm font-medium text-gray-700 truncate">${this.escapeHtml(contextLabel)}</span>
                                 </div>
-                                <a href="{{ route('home.index') }}" class="flex items-center gap-1 text-sm text-orange-600 hover:text-orange-700">
-                                    <i data-lucide="plus" class="w-4 h-4"></i>
-                                    {{ __('New Chat') }}
-                                </a>
+                                <div class="flex items-center gap-3 shrink-0">
+                                    <button
+                                        id="stop-streaming-btn"
+                                        type="button"
+                                        class="hidden items-center gap-1 text-sm text-gray-600 hover:text-red-600 cursor-pointer"
+                                        title="{{ __('Stop generating') }}"
+                                    >
+                                        <i data-lucide="square" class="w-4 h-4"></i>
+                                        <span class="hidden sm:inline">{{ __('Stop') }}</span>
+                                    </button>
+                                    <a href="{{ route('home.index') }}" class="flex items-center gap-1 text-sm text-orange-600 hover:text-orange-700">
+                                        <i data-lucide="plus" class="w-4 h-4"></i>
+                                        <span class="hidden sm:inline">{{ __('New Chat') }}</span>
+                                    </a>
+                                </div>
                             </div>
                             <div id="chat-messages-scroll" class="flex-grow overflow-y-auto p-2 relative">
                                 <div id="chat-message-groups"></div>
@@ -134,6 +153,7 @@
                         `;
                         window.refreshLucideIcons?.();
                         this.setupScrollListener();
+                        this.bindStopButton();
                     }
 
                     const chatMessageGroups = document.getElementById('chat-message-groups');
@@ -162,9 +182,16 @@
                         // Scroll to bottom of chat
                         scrollChatToBottom(false);
 
+                        const assistantEl = document.getElementById(`assistant-message-${assistantMsgCount}`);
+                        const retry = () => this.submitForm(form);
+
+                        this.streamController = new AbortController();
+                        this.setStreamingUi(true);
+
                         const response = await fetch('/stream', {
                             method: 'POST',
                             body: formData,
+                            signal: this.streamController.signal,
                             headers: {
                                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                                 'X-Requested-With': 'XMLHttpRequest',
@@ -174,109 +201,69 @@
                         if (response.status === 429) {
                             const data = await response.json();
                             window.dispatchEvent(new CustomEvent('rate-limit-reached', {detail: data}));
+                            this.renderStreamOutcome(assistantEl, {status: 'rate-limited', detail: data}, retry);
                             return;
                         }
 
-                        const reader = response.body.getReader();
-                        const decoder = new TextDecoder();
-                        let streamedContent = '';
-                        const assistantEl = document.getElementById(`assistant-message-${assistantMsgCount}`);
-                        const contentEl = assistantEl?.querySelector('.streaming-content');
-                        const skeletonEl = assistantEl?.querySelector('.skeleton-container');
-                        const actionsEl = assistantEl?.querySelector('.message-actions');
-                        let firstChunk = true;
+                        if (!response.ok) {
+                            this.renderStreamOutcome(assistantEl, {status: 'http-error', detail: response.status}, retry);
+                            return;
+                        }
 
-                        while (true) {
-                            const {done, value} = await reader.read();
-                            if (done) break;
+                        const outcome = await this.consumeStream(response, assistantEl);
 
-                            const text = decoder.decode(value, {stream: true});
-                            const lines = text.split('\n');
+                        if (outcome.status === 'done') {
+                            const data = outcome.data ?? {};
 
-                            for (const line of lines) {
-                                if (line.startsWith('data: ')) {
-                                    try {
-                                        const event = JSON.parse(line.slice(6));
+                            // Update max block height first (needed for validation)
+                            if (data.maxBitcoinBlockHeight) {
+                                this.maxBitcoinBlockHeight = data.maxBitcoinBlockHeight;
+                            }
 
-                                        if (event.type === 'chunk') {
-                                            // Hide skeleton on first chunk
-                                            if (firstChunk) {
-                                                if (skeletonEl) skeletonEl.classList.add('hidden');
-                                                if (contentEl) contentEl.classList.remove('hidden');
-                                                firstChunk = false;
-                                            }
-                                            streamedContent += event.data;
-                                            if (contentEl) {
-                                                contentEl.innerHTML = marked.parse(streamedContent);
-                                                // Auto-scroll during streaming if user is near bottom
-                                                if (isNearBottom()) {
-                                                    scrollChatToBottom();
-                                                }
-                                            }
-                                        } else if (event.type === 'done') {
-                                            const loader = assistantEl?.querySelector('.loading-dots-container');
-                                            if (loader) loader.remove();
-                                            // Show action buttons
-                                            if (actionsEl) actionsEl.classList.remove('hidden');
-
-                                            // Update max block height first (needed for validation)
-                                            if (event.data.maxBitcoinBlockHeight) {
-                                                this.maxBitcoinBlockHeight = event.data.maxBitcoinBlockHeight;
-                                            }
-
-                                            // Update search input and chat header with the block/tx that was used
-                                            if (event.data.search) {
-                                                const search = event.data.search;
-                                                if (!this.input.trim()) {
-                                                    this.input = search;
-                                                    const searchInput = document.getElementById('search-input');
-                                                    if (searchInput) searchInput.value = search;
-                                                    this.validate(); // Re-validate with the new input
-                                                }
-                                                // Update chat header label
-                                                const contextLabel = document.getElementById('chat-context-label');
-                                                if (contextLabel) {
-                                                    const isBlock = search.length < 10 || search.startsWith('00000000');
-                                                    contextLabel.textContent = isBlock
-                                                        ? `{{ __('Block') }} #${search}`
-                                                        : `{{ __('Transaction') }} ${search.substring(0, 12)}...`;
-                                                }
-                                            }
-
-                                            if (event.data.chatUlid) {
-                                                const url = new URL(window.location);
-                                                url.pathname = `/chats/${event.data.chatUlid}`;
-                                                window.history.pushState({}, '', url);
-                                            }
-
-                                            if (event.data.suggestions) {
-                                                this.renderSuggestions(event.data.chatUlid, event.data.suggestions);
-                                            }
-                                        } else if (event.type === 'error') {
-                                            if (contentEl) {
-                                                contentEl.innerHTML = `<span class="text-red-700">${this.escapeHtml(event.data)}</span>`;
-                                            }
-                                        }
-                                    } catch (e) {
-                                        // Ignore parse errors for incomplete chunks
-                                    }
+                            // Update search input and chat header with the block/tx that was used
+                            if (data.search) {
+                                if (!this.input.trim()) {
+                                    this.input = data.search;
+                                    const searchInput = document.getElementById('search-input');
+                                    if (searchInput) searchInput.value = data.search;
+                                    this.validate(); // Re-validate with the new input
+                                }
+                                const contextLabel = document.getElementById('chat-context-label');
+                                if (contextLabel) {
+                                    contextLabel.textContent = window.PromptInput.promptInputLabel(data.search, {
+                                        block: @js(__('Block')),
+                                        transaction: @js(__('Transaction')),
+                                    });
                                 }
                             }
+
+                            if (data.chatUlid) {
+                                const url = new URL(window.location);
+                                url.pathname = `/chats/${data.chatUlid}`;
+                                window.history.pushState({}, '', url);
+                            }
+
+                            if (data.suggestions) {
+                                this.renderSuggestions(data.chatUlid, data.suggestions);
+                            }
+                        } else {
+                            this.renderStreamOutcome(assistantEl, outcome, retry);
                         }
 
                         window.refreshLucideIcons?.();
                     } catch (error) {
-                        const assistantDiv = document.getElementById(`assistant-message-${assistantMsgCount}`);
-                        if (assistantDiv) {
-                            assistantDiv.innerHTML = `
-            <div class="inline-block rounded px-3 py-2 text-red-700">
-                Error fetching assistant response.
-            </div>
-        `;
-                        }
+                        if (error?.name === 'AbortError') return;
+
+                        this.renderStreamOutcome(
+                            document.getElementById(`assistant-message-${assistantMsgCount}`),
+                            {status: 'network', detail: error?.message ?? ''},
+                            () => this.submitForm(form),
+                        );
 
                         return Promise.reject(error);
                     } finally {
+                        this.setStreamingUi(false);
+                        this.streamController = null;
                         this.isSubmitting = false;
                         this.hasSubmitted = true;
                         // Ensure focus returns to input after completion
@@ -311,20 +298,21 @@
                     const formHtml = `
                         <div id="chat-message-form-container" class="flex-shrink-0 border-t border-gray-200 bg-inherit p-2">
                             <div x-data="{ message: '' }" class="w-full pt-1">
-                                <form @submit.prevent="sendMessageToChat('${chatUlid}', message)" class="flex w-full gap-2">
+                                <form @submit.prevent="sendMessageToChat('${chatUlid}', message)" class="flex w-full items-center gap-2">
                                     <input
                                         id="customFollowUp"
                                         type="text"
                                         x-model="message"
-                                        class="w-3/4 p-2 border rounded"
+                                        :disabled="isStreaming"
+                                        class="flex-1 min-w-0 p-2 text-base border rounded disabled:opacity-50"
                                         placeholder="{{ __('Ask a follow-up question...') }}"
                                         autocomplete="off"
                                     />
-                                    <button type="submit" class="w-1/4 form-button flex items-center justify-center">
-                                        <span class="submit-icon mr-2">
+                                    <button type="submit" :disabled="isStreaming" class="form-button shrink-0 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed">
+                                        <span class="submit-icon sm:mr-2">
                                             <i data-lucide="send" class="w-4 h-4"></i>
                                         </span>
-                                        <span class="submit-text">{{ __('Send') }}</span>
+                                        <span class="submit-text hidden sm:inline">{{ __('Send') }}</span>
                                     </button>
                                 </form>
                             </div>
@@ -361,11 +349,8 @@
                 },
 
                 get helperText() {
-                    if (!this.input.trim()) return 'Enter a valid TXID, block height, or block hash.';
-                    if (!this.valid) return 'Invalid format. Must be a TXID, block height, or block hash.';
-                    if (this.isBlockHash) return 'Valid block hash found.';
-                    if (this.isHex64) return 'Valid TXID found.';
-                    if (this.isBlockHeight) return 'Valid block height found.';
+                    if (!this.input.trim()) return @js(__('home.helper.empty'));
+                    if (!this.valid) return @js(__('home.helper.invalid'));
                     return '';
                 },
 
@@ -374,17 +359,53 @@
                     return this.valid ? 'text-green-600 font-medium' : 'text-red-600';
                 },
 
+                // What the *server* will treat this input as, surfaced before the
+                // user submits. Kinds come straight from prompt-input.js.
+                get detectedLabel() {
+                    return {
+                        'block-height': @js(__('Block height')),
+                        'block-hash': @js(__('Block hash')),
+                        'transaction': @js(__('Transaction ID')),
+                    }[this.detectedKind] ?? '';
+                },
+
+                get detectedIsBlock() {
+                    return this.detectedKind === 'block-height' || this.detectedKind === 'block-hash';
+                },
+
+                get showDetected() {
+                    return this.detectedLabel !== '';
+                },
+
                 validate() {
-                    const trimmed = this.input.trim();
-                    const height = parseInt(trimmed, 10);
+                    const result = window.PromptInput.classifyPromptInput(this.input, this.maxBitcoinBlockHeight);
 
-                    this.isHex64 = /^[a-fA-F0-9]{64}$/.test(trimmed);
-                    this.isBlockHeight = /^\d+$/.test(trimmed) && height <= this.maxBitcoinBlockHeight;
-                    this.isBlockHash = this.isHex64 && trimmed.startsWith('00000000');
-                    this.valid = this.isHex64 || this.isBlockHeight || this.isBlockHash;
+                    this.isHex64 = result.isHex64;
+                    this.isBlockHeight = result.isBlockHeight;
+                    this.isBlockHash = result.isBlockHash;
+                    this.valid = result.valid;
+                    this.detectedKind = result.kind;
 
-                    if (this.valid && !this.prefetchedInputs[trimmed]) {
-                        this.prefetch(trimmed);
+                    if (this.valid && !this.prefetchedInputs[result.value]) {
+                        this.prefetch(result.value);
+                    }
+                },
+
+                // Empty-state examples: fill the form and run it in one click.
+                async runExample(search, question = '') {
+                    this.input = search;
+                    const searchInput = document.getElementById('search-input');
+                    if (searchInput) searchInput.value = search;
+
+                    const questionInput = document.getElementById('question');
+                    if (questionInput) questionInput.value = question;
+
+                    this.validate();
+
+                    const form = document.getElementById('satscribe-form');
+                    if (form) {
+                        this.hasSubmitted = true;
+                        await this.submitForm(form);
                     }
                 },
 
@@ -461,10 +482,17 @@
                         customFollowUp.focus();
                     }
 
+                    const assistantEl = document.getElementById(`assistant-message-${assistantMsgCount}`);
+                    const retry = () => this.sendMessageToChat(chatUlid, message);
+
                     try {
+                        this.streamController = new AbortController();
+                        this.setStreamingUi(true);
+
                         // Use streaming endpoint for follow-up messages
                         const response = await fetch(`/chats/${chatUlid}/messages/stream`, {
                             method: 'POST',
+                            signal: this.streamController.signal,
                             headers: {
                                 'Content-Type': 'application/json',
                                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
@@ -476,86 +504,35 @@
                         if (response.status === 429) {
                             const data = await response.json();
                             window.dispatchEvent(new CustomEvent('rate-limit-reached', {detail: data}));
-                            this.moveFormContainerToBottom(chatContainer);
+                            this.renderStreamOutcome(assistantEl, {status: 'rate-limited', detail: data}, retry);
                             return;
                         }
 
                         if (!response.ok) {
-                            throw new Error(`HTTP error: ${response.status}`);
+                            this.renderStreamOutcome(assistantEl, {status: 'http-error', detail: response.status}, retry);
+                            return;
                         }
 
-                        const reader = response.body.getReader();
-                        const decoder = new TextDecoder();
-                        let streamedContent = '';
-                        const assistantEl = document.getElementById(`assistant-message-${assistantMsgCount}`);
-                        const contentEl = assistantEl?.querySelector('.streaming-content');
-                        const skeletonEl = assistantEl?.querySelector('.skeleton-container');
-                        const actionsEl = assistantEl?.querySelector('.message-actions');
-                        let firstChunk = true;
+                        const outcome = await this.consumeStream(response, assistantEl);
 
-                        while (true) {
-                            const {done, value} = await reader.read();
-                            if (done) break;
-
-                            const text = decoder.decode(value, {stream: true});
-                            const lines = text.split('\n');
-
-                            for (const line of lines) {
-                                if (line.startsWith('data: ')) {
-                                    try {
-                                        const event = JSON.parse(line.slice(6));
-
-                                        if (event.type === 'chunk') {
-                                            // Hide skeleton on first chunk
-                                            if (firstChunk) {
-                                                if (skeletonEl) skeletonEl.classList.add('hidden');
-                                                if (contentEl) contentEl.classList.remove('hidden');
-                                                firstChunk = false;
-                                            }
-                                            streamedContent += event.data;
-                                            if (contentEl) {
-                                                contentEl.innerHTML = marked.parse(streamedContent);
-                                                // Auto-scroll during streaming if user is near bottom
-                                                if (isNearBottom()) {
-                                                    scrollChatToBottom();
-                                                }
-                                            }
-                                        } else if (event.type === 'done') {
-                                            const loader = assistantEl?.querySelector('.loading-dots-container');
-                                            if (loader) loader.remove();
-                                            // Show action buttons
-                                            if (actionsEl) actionsEl.classList.remove('hidden');
-
-                                            if (event.data.suggestions) {
-                                                this.updateSuggestionsList(chatUlid, event.data.suggestions);
-                                            }
-                                        } else if (event.type === 'error') {
-                                            if (skeletonEl) skeletonEl.classList.add('hidden');
-                                            if (contentEl) {
-                                                contentEl.classList.remove('hidden');
-                                                contentEl.innerHTML = `<span class="text-red-700">${this.escapeHtml(event.data)}</span>`;
-                                            }
-                                        }
-                                    } catch (e) {
-                                        // Ignore parse errors for incomplete chunks
-                                    }
-                                }
+                        if (outcome.status === 'done') {
+                            if (outcome.data?.suggestions) {
+                                this.updateSuggestionsList(chatUlid, outcome.data.suggestions);
                             }
+                        } else {
+                            this.renderStreamOutcome(assistantEl, outcome, retry);
                         }
 
-                        // Move form container to the bottom and show it
-                        this.moveFormContainerToBottom(chatContainer);
                         window.refreshLucideIcons?.();
                     } catch (e) {
-                        console.error(e);
-                        const assistantEl = document.getElementById(`assistant-message-${assistantMsgCount}`);
-                        if (assistantEl) {
-                            const contentEl = assistantEl.querySelector('.streaming-content');
-                            if (contentEl) {
-                                contentEl.innerHTML = `<span class="text-red-700">Error fetching response.</span>`;
-                            }
+                        if (e?.name !== 'AbortError') {
+                            console.error(e);
+                            this.renderStreamOutcome(assistantEl, {status: 'network', detail: e?.message ?? ''}, retry);
                         }
-                        // Still show the form container on error
+                    } finally {
+                        this.setStreamingUi(false);
+                        this.streamController = null;
+                        // Always give the composer back, whatever the outcome was
                         this.moveFormContainerToBottom(chatContainer);
                     }
                 },
@@ -642,11 +619,262 @@
                     });
                 },
 
+                /**
+                 * Reads one SSE response into the assistant placeholder. Both the
+                 * initial search and the follow-up flow go through here, so progress,
+                 * cancellation and error handling can only ever behave one way.
+                 *
+                 * Returns {status, data, content}:
+                 *   done        the server sent its final payload
+                 *   error       the server sent an `error` event
+                 *   stopped     the user pressed Stop
+                 *   interrupted the connection closed before `done` arrived
+                 */
+                async consumeStream(response, assistantEl) {
+                    const contentEl = assistantEl?.querySelector('.streaming-content');
+                    const skeletonEl = assistantEl?.querySelector('.skeleton-container');
+                    const actionsEl = assistantEl?.querySelector('.message-actions');
+                    const statusEl = assistantEl?.querySelector('.stream-status');
+
+                    const reader = response.body.getReader();
+                    const decoder = new TextDecoder();
+
+                    let streamedContent = '';
+                    // SSE frames are split across network reads; buffering the tail
+                    // keeps a chunk that straddles the boundary from being dropped.
+                    let buffer = '';
+                    let firstChunk = true;
+                    let outcome = {status: 'interrupted', data: null};
+
+                    if (statusEl) statusEl.textContent = @js(__('home.stream.waiting'));
+
+                    try {
+                        while (true) {
+                            const {done, value} = await reader.read();
+                            if (done) break;
+
+                            buffer += decoder.decode(value, {stream: true});
+                            const lines = buffer.split('\n');
+                            buffer = lines.pop() ?? '';
+
+                            for (const line of lines) {
+                                if (!line.startsWith('data: ')) continue;
+
+                                let event;
+                                try {
+                                    event = JSON.parse(line.slice(6));
+                                } catch (e) {
+                                    continue;
+                                }
+
+                                if (event.type === 'chunk') {
+                                    if (firstChunk) {
+                                        if (skeletonEl) skeletonEl.classList.add('hidden');
+                                        if (contentEl) contentEl.classList.remove('hidden');
+                                        firstChunk = false;
+                                    }
+                                    streamedContent += event.data;
+                                    if (contentEl) {
+                                        contentEl.innerHTML = marked.parse(streamedContent);
+                                        if (isNearBottom()) {
+                                            scrollChatToBottom();
+                                        }
+                                    }
+                                    if (statusEl) {
+                                        statusEl.textContent = this.writingProgressLabel(streamedContent);
+                                    }
+                                } else if (event.type === 'done') {
+                                    outcome = {status: 'done', data: event.data};
+                                } else if (event.type === 'error') {
+                                    outcome = {status: 'error', detail: event.data};
+                                }
+                            }
+                        }
+                    } catch (e) {
+                        if (e?.name !== 'AbortError') throw e;
+                        outcome = {status: 'stopped', data: null};
+                    }
+
+                    if (outcome.status === 'done') {
+                        const loader = assistantEl?.querySelector('.loading-dots-container');
+                        if (loader) loader.remove();
+                        if (actionsEl) actionsEl.classList.remove('hidden');
+                    }
+
+                    // A stream that closed mid-answer still has readable text; keep it.
+                    return {...outcome, content: streamedContent};
+                },
+
+                writingProgressLabel(content) {
+                    const words = content.trim() ? content.trim().split(/\s+/).length : 0;
+
+                    return @js(__('home.stream.writing')).replace(':count', words.toLocaleString());
+                },
+
+                setStreamingUi(active) {
+                    this.isStreaming = active;
+                    const btn = document.getElementById('stop-streaming-btn');
+                    if (!btn) return;
+
+                    btn.classList.toggle('hidden', !active);
+                    btn.classList.toggle('flex', active);
+                },
+
+                bindStopButton() {
+                    const btn = document.getElementById('stop-streaming-btn');
+                    if (!btn || btn.dataset.bound === '1') return;
+
+                    btn.dataset.bound = '1';
+                    btn.addEventListener('click', () => this.stopStreaming());
+                },
+
+                stopStreaming() {
+                    if (this.streamController) {
+                        this.streamController.abort();
+                    }
+                    this.setStreamingUi(false);
+                },
+
+                /** Server error strings mapped onto the states the UI knows how to explain. */
+                classifyStreamError(message) {
+                    const text = String(message ?? '');
+
+                    if (/^(Transaction lookup failed|Block or transactions fetch failed)/i.test(text)) {
+                        return 'not-found';
+                    }
+                    if (/daily (OpenAI )?limit/i.test(text)) {
+                        return 'quota';
+                    }
+
+                    return 'generic';
+                },
+
+                formatRetryAfter(seconds) {
+                    const total = Number(seconds);
+                    if (!Number.isFinite(total) || total <= 0) return '';
+
+                    if (total < 60) return @js(__('home.stream.in_seconds')).replace(':count', String(Math.ceil(total)));
+                    if (total < 3600) return @js(__('home.stream.in_minutes')).replace(':count', String(Math.ceil(total / 60)));
+
+                    return @js(__('home.stream.in_hours')).replace(':count', String(Math.ceil(total / 3600)));
+                },
+
+                /**
+                 * Anything other than a clean `done` ends up here. A missing block or
+                 * transaction is a normal empty result, not a failure, so it gets a
+                 * neutral card rather than red error text.
+                 */
+                renderStreamOutcome(assistantEl, outcome, retry = null) {
+                    if (!assistantEl) return;
+
+                    const skeletonEl = assistantEl.querySelector('.skeleton-container');
+                    const loader = assistantEl.querySelector('.loading-dots-container');
+                    const noticeEl = assistantEl.querySelector('.stream-notice');
+                    if (skeletonEl) skeletonEl.classList.add('hidden');
+                    if (loader) loader.remove();
+                    if (!noticeEl) return;
+
+                    if (outcome.content) {
+                        assistantEl.querySelector('.streaming-content')?.classList.remove('hidden');
+                        assistantEl.querySelector('.message-actions')?.classList.remove('hidden');
+                    }
+
+                    noticeEl.innerHTML = this.buildStreamNotice(outcome);
+                    noticeEl.classList.remove('hidden');
+
+                    const retryBtn = noticeEl.querySelector('[data-stream-action="retry"]');
+                    if (retryBtn && retry) {
+                        retryBtn.addEventListener('click', () => {
+                            noticeEl.classList.add('hidden');
+                            retry();
+                        });
+                    } else if (retryBtn) {
+                        retryBtn.remove();
+                    }
+
+                    const payBtn = noticeEl.querySelector('[data-stream-action="pay"]');
+                    if (payBtn) {
+                        payBtn.addEventListener('click', () => {
+                            window.dispatchEvent(new CustomEvent('rate-limit-reached', {detail: outcome.detail}));
+                        });
+                    }
+
+                    window.refreshLucideIcons?.();
+                    if (isNearBottom()) scrollChatToBottom();
+                },
+
+                buildStreamNotice(outcome) {
+                    const retryButton = `
+                        <button type="button" data-stream-action="retry" class="stream-notice__action">
+                            <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                            <span>{{ __('Try again') }}</span>
+                        </button>`;
+
+                    const card = (tone, icon, title, body, actions = retryButton) => `
+                        <div class="stream-notice__card stream-notice__card--${tone}">
+                            <div class="flex items-start gap-2">
+                                <i data-lucide="${icon}" class="w-4 h-4 mt-0.5 shrink-0"></i>
+                                <div class="min-w-0">
+                                    <p class="font-medium">${title}</p>
+                                    <p class="stream-notice__body">${body}</p>
+                                    <div class="flex flex-wrap items-center gap-3 mt-2">${actions}</div>
+                                </div>
+                            </div>
+                        </div>`;
+
+                    if (outcome.status === 'stopped') {
+                        return card('neutral', 'square', @js(__('home.stream.stopped.title')), @js(__('home.stream.stopped.body')));
+                    }
+
+                    if (outcome.status === 'rate-limited') {
+                        const resetsIn = this.formatRetryAfter(outcome.detail?.retryAfter);
+                        const max = outcome.detail?.maxAttempts ?? '';
+                        const title = @js(__('home.stream.quota.title')).replace(':count', String(max));
+                        const body = resetsIn
+                            ? @js(__('home.stream.quota.resets')).replace(':when', resetsIn)
+                            : @js(__('home.stream.quota.body'));
+                        const actions = `
+                            <button type="button" data-stream-action="pay" class="stream-notice__action">
+                                <i data-lucide="zap" class="w-3.5 h-3.5"></i>
+                                <span>{{ __('Support with a zap') }}</span>
+                            </button>${retryButton}`;
+
+                        return card('warn', 'zap', title, body, actions);
+                    }
+
+                    if (outcome.status === 'network') {
+                        return card('warn', 'circle-alert', @js(__('home.stream.network.title')), @js(__('home.stream.network.body')));
+                    }
+
+                    if (outcome.status === 'http-error') {
+                        const title = @js(__('home.stream.http.title')).replace(':status', String(outcome.detail ?? ''));
+
+                        return card('error', 'circle-alert', title, @js(__('home.stream.http.body')));
+                    }
+
+                    if (outcome.status === 'interrupted') {
+                        return card('warn', 'circle-alert', @js(__('home.stream.interrupted.title')), @js(__('home.stream.interrupted.body')));
+                    }
+
+                    const kind = this.classifyStreamError(outcome.detail);
+
+                    if (kind === 'not-found') {
+                        return card('neutral', 'search-x', @js(__('home.stream.not_found.title')), @js(__('home.stream.not_found.body')));
+                    }
+
+                    if (kind === 'quota') {
+                        return card('warn', 'zap', @js(__('home.stream.quota.title')).replace(':count', ''), this.escapeHtml(String(outcome.detail ?? '')));
+                    }
+
+                    return card('error', 'circle-alert', @js(__('home.stream.generic.title')), this.escapeHtml(String(outcome.detail ?? '')));
+                },
+
                 // Markup for a user message plus the assistant placeholder that the
                 // streaming code then fills in. Both the initial search and the
                 // follow-up flow insert this, and the streaming code below looks up
-                // .streaming-content / .skeleton-container / .message-actions inside
-                // it, so the two must never drift apart.
+                // .streaming-content / .skeleton-container / .message-actions /
+                // .stream-status / .stream-notice inside it, so the two must never
+                // drift apart.
                 buildPendingExchangeHtml(userMessage, assistantMsgCount) {
                     const nostrImg = StorageClient.getNostrImage();
                     const userIcon = nostrImg ?
@@ -669,6 +897,7 @@
                         <span class="font-semibold">Scribe</span>
                         <span class="ml-2 flex items-center gap-1 loading-dots-container">
                             <x-dots-loader />
+                            <span class="stream-status text-xs text-gray-500 ml-1">{{ __('home.stream.fetching') }}</span>
                         </span>
                     </div>
                     <div class="loading-skeleton mb-2 space-y-2 skeleton-container">
@@ -677,6 +906,7 @@
                         <div class="h-4 bg-gray-200 rounded animate-pulse w-5/6"></div>
                     </div>
                     <div class="inline-block rounded px-3 py-2 prose streaming-content hidden"></div>
+                    <div class="stream-notice hidden"></div>
                     <div class="message-actions flex items-center gap-2 mt-1 ml-3 hidden">
                         <button type="button" onclick="copyMessageContent(this)" class="text-xs text-gray-500 hover:text-gray-700 flex items-center gap-1 copy-btn">
                             <i data-lucide="copy" class="w-3 h-3"></i>

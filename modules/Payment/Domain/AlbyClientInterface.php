@@ -13,19 +13,13 @@ interface AlbyClientInterface
     /**
      * Create a new Lightning invoice.
      *
-     * `id` and `r_hash` are added client-side as aliases of `payment_hash`.
-     * The remaining keys are Alby's, of which only those consumed by
-     * CachedInvoiceValidator are listed; the shape is intentionally unsealed.
+     * `id` and `r_hash` are added client-side as aliases of `payment_hash`,
+     * which is the only key the client validates — hence the only one that can
+     * be guaranteed. Alby also returns `payment_request`, `created_at` and
+     * `expiry`, which CachedInvoiceValidator checks for at runtime; they are
+     * deliberately NOT declared here, since nothing verifies them on this path.
      *
-     * @return array{
-     *     id: string,
-     *     r_hash: string,
-     *     payment_hash: string,
-     *     payment_request: string,
-     *     created_at: string,
-     *     expiry: int,
-     *     ...
-     * }
+     * @return array{id: string, r_hash: string, payment_hash: string, ...}
      */
     public function createInvoice(InvoiceData $invoice): array;
 

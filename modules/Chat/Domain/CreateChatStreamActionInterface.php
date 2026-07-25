@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\Chat\Domain;
 
 use Generator;
+use Modules\OpenAI\Domain\Data\ModelSelection;
 use Modules\Shared\Domain\Data\Chat\PromptInput;
 use Modules\Shared\Domain\Enum\Chat\PromptPersona;
 
@@ -18,6 +19,8 @@ use Modules\Shared\Domain\Enum\Chat\PromptPersona;
 interface CreateChatStreamActionInterface
 {
     /**
+     * @param ?ModelSelection $selection null keeps the configured default model
+     *
      * @return Generator<TStreamEvent>
      */
     public function execute(
@@ -25,5 +28,6 @@ interface CreateChatStreamActionInterface
         PromptPersona $persona,
         string $question,
         bool $isPublic = false,
+        ?ModelSelection $selection = null,
     ): Generator;
 }

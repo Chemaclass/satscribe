@@ -10,6 +10,7 @@ use Modules\Chat\Domain\CreateChatStreamActionInterface;
 use Modules\Chat\Domain\Data\QuestionPlaceholder;
 use Modules\Chat\Domain\Data\UserInputSanitizer;
 use Modules\Chat\Domain\Repository\ChatRepositoryInterface;
+use Modules\OpenAI\Domain\Data\ModelSelection;
 use Modules\OpenAI\Domain\OpenAIFacadeInterface;
 use Modules\Shared\Domain\Chat\SentenceTrimmer;
 use Modules\Shared\Domain\Data\Chat\PromptInput;
@@ -40,6 +41,7 @@ final readonly class CreateChatStreamAction implements CreateChatStreamActionInt
         PromptPersona $persona,
         string $question,
         bool $isPublic = false,
+        ?ModelSelection $selection = null,
     ): Generator {
         $this->logger->debug('Create chat stream action started', [
             'input' => $input->text,
@@ -54,7 +56,17 @@ final readonly class CreateChatStreamAction implements CreateChatStreamActionInt
 
         $fullResponse = '';
 
-        foreach ($this->openaiFacade->generateTextStreaming($blockchainData, $input, $persona, $cleanQuestion, null, $additional) as $chunk) {
+        $stream = $this->openaiFacade->generateTextStreaming(
+            $blockchainData,
+            $input,
+            $persona,
+            $cleanQuestion,
+            null,
+            $additional,
+            $selection,
+        );
+
+        foreach ($stream as $chunk) {
             $fullResponse .= $chunk;
 
             yield [

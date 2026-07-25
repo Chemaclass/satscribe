@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace Modules\Faq\Domain\Repository;
 
 use App\Models\Faq;
+
 use Illuminate\Support\Collection;
+use stdClass;
 
 interface FaqRepositoryInterface
 {
-    public function findByQuestion(string $question, ?string $lang = null): ?object;
+    public function findByQuestion(string $question, ?string $lang = null): ?stdClass;
 
     /**
      * Column => value. Values stay `mixed` because callers pass date objects

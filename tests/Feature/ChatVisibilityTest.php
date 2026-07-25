@@ -48,6 +48,9 @@ final class ChatVisibilityTest extends TestCase
         $response->assertStatus(200);
     }
 
+    /**
+     * @param  array<string, mixed>  $attrs
+     */
     private function createChat(array $attrs): Chat
     {
         $chat = Chat::create(array_merge([

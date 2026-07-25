@@ -14,11 +14,13 @@ use Modules\Chat\Domain\Data\QuestionPlaceholder;
 use Modules\Chat\Domain\Data\UserInputSanitizer;
 use Modules\Chat\Domain\Repository\ChatRepositoryInterface;
 use Modules\Chat\Domain\Repository\MessageRepositoryInterface;
+use Modules\OpenAI\Domain\Data\ModelSelection;
 use Modules\OpenAI\Domain\OpenAIFacadeInterface;
 use Modules\Shared\Domain\Chat\SentenceTrimmer;
 use Modules\Shared\Domain\Data\Chat\PromptInput;
 use Modules\Shared\Domain\Enum\Chat\PromptPersona;
 use Psr\Log\LoggerInterface;
+use RuntimeException;
 
 /**
  * @phpstan-import-type TStreamEvent from CreateChatStreamActionInterface
@@ -41,17 +43,28 @@ final readonly class AddMessageStreamAction implements AddMessageStreamActionInt
     /**
      * @return Generator<TStreamEvent>
      */
-    public function execute(Chat $chat, string $message): Generator
+    public function execute(Chat $chat, string $message, ?ModelSelection $selection = null): Generator
     {
         $this->logger->debug('Adding streaming message to chat', ['chat_id' => $chat->id]);
         $this->rateLimiter->enforce();
 
         $firstUserMessage = $chat->getFirstUserMessage();
-        $input = PromptInput::fromRaw($firstUserMessage->input);
-        $cleanMsg = $this->userInputSanitizer->sanitize($message);
-        $persona = PromptPersona::from($firstUserMessage->persona);
+        $rawInput = $firstUserMessage->input;
+        if ($rawInput === null) {
+            throw new RuntimeException("Chat {$chat->id} has no input recorded on its first user message.");
+        }
 
-        $cachedMessage = $this->messageRepository->findAssistantMessage($input, $persona, $cleanMsg);
+        $input = PromptInput::fromRaw($rawInput);
+        $cleanMsg = $this->userInputSanitizer->sanitize($message);
+        $persona = PromptPersona::tryFrom((string) $firstUserMessage->persona)
+            ?? PromptPersona::from(PromptPersona::DEFAULT);
+
+        // The message cache is keyed by input/persona/question, not by model, so
+        // it can only be reused when the request took the default model.
+        $cachedMessage = $selection instanceof ModelSelection
+            ? null
+            : $this->messageRepository->findAssistantMessage($input, $persona, $cleanMsg);
+
         if ($cachedMessage instanceof Message) {
             yield [
                 'type' => 'chunk',
@@ -68,7 +81,17 @@ final readonly class AddMessageStreamAction implements AddMessageStreamActionInt
 
         $fullResponse = '';
 
-        foreach ($this->openAIFacade->generateTextStreaming($data, $input, $persona, $cleanMsg, $chat, $additional) as $chunk) {
+        $stream = $this->openAIFacade->generateTextStreaming(
+            $data,
+            $input,
+            $persona,
+            $cleanMsg,
+            $chat,
+            $additional,
+            $selection,
+        );
+
+        foreach ($stream as $chunk) {
             $fullResponse .= $chunk;
 
             yield [

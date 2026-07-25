@@ -5,30 +5,49 @@
 ])
 
 @php
+    use Modules\Shared\Domain\Data\Chat\PromptInput;
+
     $filteredSuggestions = collect($suggestions)
         ->filter(fn($s) => trim($s) !== trim($question))
         ->values();
 
     /** @var \App\Models\Chat $chat */
     $message = $chat->getLastUserMessage();
-    $chatInput = data_get($message, 'meta.input', '');
-    $isBlock = strlen($chatInput) < 10 || str_starts_with($chatInput, '00000000');
-    $chatContext = $isBlock
-        ? __('Block') . ' #' . $chatInput
-        : __('Transaction') . ' ' . Str::limit($chatInput, 12, '...');
+    $chatInput = (string) data_get($message, 'meta.input', '');
+
+    // Same verdict the backend used when it fetched this chat's data. Mirrored
+    // in resources/js/prompt-input.js for the streaming path.
+    $isBlock = PromptInput::fromRaw($chatInput)->isBlock();
+    $chatContext = match (true) {
+        !$isBlock => __('Transaction') . ' ' . Str::limit($chatInput, 12, '...'),
+        ctype_digit($chatInput) => __('Block') . ' #' . $chatInput,
+        default => __('Block') . ' ' . Str::limit($chatInput, 12, '...'),
+    };
 @endphp
 
-<section id="chat-container" class="chat-body w-full flex flex-col flex-grow min-h-0">
+<section id="chat-container" class="chat-body relative w-full flex flex-col flex-grow min-h-0">
     <!-- Chat header with context and New Chat button -->
-    <div id="chat-header" class="flex-shrink-0 flex items-center justify-between p-2 border-b border-gray-200">
-        <div class="flex items-center gap-2">
-            <i data-lucide="{{ $isBlock ? 'box' : 'arrow-right-left' }}" class="w-4 h-4 text-gray-500"></i>
-            <span class="text-sm font-medium text-gray-700">{{ $chatContext }}</span>
+    <div id="chat-header" class="flex-shrink-0 flex items-center justify-between gap-2 p-2 border-b border-gray-200">
+        <div class="flex items-center gap-2 min-w-0">
+            <i data-lucide="{{ $isBlock ? 'box' : 'arrow-right-left' }}" class="w-4 h-4 shrink-0 text-gray-500"></i>
+            <span class="text-sm font-medium text-gray-700 truncate">{{ $chatContext }}</span>
         </div>
-        <a href="{{ route('home.index') }}" class="flex items-center gap-1 text-sm text-orange-600 hover:text-orange-700">
-            <i data-lucide="plus" class="w-4 h-4"></i>
-            {{ __('New Chat') }}
-        </a>
+        <div class="flex items-center gap-3 shrink-0">
+            {{-- Toggled by setStreamingUi() while a follow-up answer is streaming --}}
+            <button
+                id="stop-streaming-btn"
+                type="button"
+                class="hidden items-center gap-1 text-sm text-gray-600 hover:text-red-600 cursor-pointer"
+                title="{{ __('Stop generating') }}"
+            >
+                <i data-lucide="square" class="w-4 h-4"></i>
+                <span class="hidden sm:inline">{{ __('Stop') }}</span>
+            </button>
+            <a href="{{ route('home.index') }}" class="flex items-center gap-1 text-sm text-orange-600 hover:text-orange-700">
+                <i data-lucide="plus" class="w-4 h-4"></i>
+                <span class="hidden sm:inline">{{ __('New Chat') }}</span>
+            </a>
+        </div>
     </div>
 
     <!-- Scrollable messages area -->

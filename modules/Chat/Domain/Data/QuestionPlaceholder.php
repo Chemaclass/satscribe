@@ -67,12 +67,13 @@ final class QuestionPlaceholder
         $blockPrompts = collect(self::SAMPLE_QUESTIONS['block'])->shuffle()->take(2);
         $bothPrompts = collect(self::SAMPLE_QUESTIONS['both'])->shuffle()->take(1);
 
-        return $blockPrompts
-            ->merge($bothPrompts)
-            ->shuffle()
-            ->map(static fn (string $prompt) => __($prompt))
-            ->values()
-            ->all();
+        return array_values(
+            $blockPrompts
+                ->merge($bothPrompts)
+                ->shuffle()
+                ->map(static fn (string $prompt) => (string) __($prompt))
+                ->all(),
+        );
     }
 
     /**
@@ -83,12 +84,13 @@ final class QuestionPlaceholder
         $blockPrompts = collect(self::SAMPLE_QUESTIONS['transaction'])->shuffle()->take(2);
         $bothPrompts = collect(self::SAMPLE_QUESTIONS['both'])->shuffle()->take(1);
 
-        return $blockPrompts
-            ->merge($bothPrompts)
-            ->shuffle()
-            ->map(static fn (string $prompt) => __($prompt))
-            ->values()
-            ->all();
+        return array_values(
+            $blockPrompts
+                ->merge($bothPrompts)
+                ->shuffle()
+                ->map(static fn (string $prompt) => (string) __($prompt))
+                ->all(),
+        );
     }
 
     /**

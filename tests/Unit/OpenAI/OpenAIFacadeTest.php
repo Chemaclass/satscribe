@@ -13,6 +13,9 @@ use Modules\Blockchain\Domain\PriceServiceInterface;
 use Modules\OpenAI\Application\OpenAIFacade;
 use Modules\OpenAI\Application\OpenAIService;
 use Modules\OpenAI\Application\PersonaPromptBuilder;
+use Modules\OpenAI\Application\ProviderRegistry;
+use Modules\OpenAI\Domain\Data\AiProviderDefinition;
+use Modules\OpenAI\Domain\Exception\UnsupportedModelError;
 use Modules\Shared\Domain\Data\Blockchain\BlockchainData;
 use Modules\Shared\Domain\Data\Blockchain\BlockData;
 use Modules\Shared\Domain\Data\Chat\PromptInput;
@@ -65,15 +68,73 @@ final class OpenAIFacadeTest extends TestCase
             new PersonaPromptBuilder('en'),
             self::createStub(PriceServiceInterface::class),
             now(),
-            openAiApiKey: 'key',
-            openAiModel: 'model',
-            openAiModelFollowup: 'model-mini',
+            $registry = new ProviderRegistry(
+                openAiBaseUrl: 'https://api.openai.com/v1',
+                openAiApiKey: 'key',
+                openAiModel: 'model',
+                openAiModelFollowup: 'model-mini',
+            ),
         );
-        $facade = new OpenAIFacade($service);
+        $facade = new OpenAIFacade($service, $registry);
 
         $result = $facade->generateText($data, $input, PromptPersona::Educator, 'Question');
 
         $this->assertSame('Sentence 1.', $result);
+    }
+
+    public function test_resolve_selection_returns_null_when_the_request_expressed_no_preference(): void
+    {
+        self::assertNull($this->facade()->resolveSelection(null, null, null));
+        self::assertNull($this->facade()->resolveSelection('', '  ', ''));
+    }
+
+    public function test_resolve_selection_validates_against_the_registry(): void
+    {
+        $selection = $this->facade()->resolveSelection('groq', 'llama-3.1-8b-instant', 'sk-user-key-0123456789');
+
+        self::assertNotNull($selection);
+        self::assertSame('groq', $selection->provider->id());
+        self::assertSame('https://api.groq.com/openai/v1/chat/completions', $selection->endpoint());
+    }
+
+    public function test_resolve_selection_rejects_an_unlisted_provider(): void
+    {
+        $this->expectException(UnsupportedModelError::class);
+
+        $this->facade()->resolveSelection('https://evil.test', 'gpt-4o', 'sk-user-key-0123456789');
+    }
+
+    public function test_available_providers_exposes_the_allowlist(): void
+    {
+        $ids = array_map(
+            static fn (AiProviderDefinition $provider): string => $provider->id(),
+            $this->facade()->availableProviders(),
+        );
+
+        self::assertSame(['openai', 'openrouter', 'groq'], $ids);
+    }
+
+    private function facade(): OpenAIFacade
+    {
+        $registry = new ProviderRegistry(
+            openAiBaseUrl: 'https://api.openai.com/v1',
+            openAiApiKey: 'key',
+            openAiModel: 'model',
+            openAiModelFollowup: 'model-mini',
+        );
+
+        $service = new OpenAIService(
+            self::createStub(HttpClientInterface::class),
+            self::createStub(HttpFactory::class),
+            $this->createPassthroughCache(),
+            self::createStub(LoggerInterface::class),
+            new PersonaPromptBuilder('en'),
+            self::createStub(PriceServiceInterface::class),
+            now(),
+            $registry,
+        );
+
+        return new OpenAIFacade($service, $registry);
     }
 
     private function createPassthroughCache(): CacheRepository

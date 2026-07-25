@@ -33,7 +33,8 @@ final class ChatRepositoryTest extends TestCase
         $chat->method('getFirstUserMessage')->willReturn($firstMsg);
         $chat->method('getFirstAssistantMessage')->willReturn($firstMsg);
 
-        $capturedMeta = null;
+        /** @var array<string, mixed> $capturedMeta */
+        $capturedMeta = [];
         $chat->expects($this->once())
             ->method('addUserMessage')
             ->with(

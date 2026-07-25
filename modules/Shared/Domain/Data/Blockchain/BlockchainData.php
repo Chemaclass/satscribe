@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Modules\Shared\Domain\Data\Blockchain;
 
+use LogicException;
+
 final readonly class BlockchainData
 {
     private function __construct(
@@ -43,7 +45,13 @@ final readonly class BlockchainData
             return $this->transaction;
         }
 
-        return $this->block;
+        if ($this->block instanceof BlockData) {
+            return $this->block;
+        }
+
+        // Unreachable: forBlock()/forTransaction() are the only constructors and
+        // each guarantees one of the two is set. This encodes that invariant.
+        throw new LogicException('BlockchainData holds neither a block nor a transaction.');
     }
 
     public function toPrompt(): string
