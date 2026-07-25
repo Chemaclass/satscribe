@@ -98,7 +98,7 @@ final readonly class BlockchainService
         }
 
         try {
-            $response = $this->http->get(self::BASE_URL . "/block-height/{$input}");
+            $response = $this->http->get(self::BASE_URL . '/block-height/' . rawurlencode($input));
         } catch (Throwable $e) {
             $this->logger->error('Block height lookup error', ['height' => $input, 'error' => $e->getMessage()]);
             throw BlockchainException::blockOrTxFetchFailed($input);
@@ -118,7 +118,7 @@ final readonly class BlockchainService
     private function fetchBlock(string $hash): array
     {
         try {
-            $response = $this->http->get(self::BASE_URL . "/block/{$hash}");
+            $response = $this->http->get(self::BASE_URL . '/block/' . rawurlencode($hash));
         } catch (Throwable $e) {
             $this->logger->error('Block fetch error', ['hash' => $hash, 'error' => $e->getMessage()]);
             throw BlockchainException::blockOrTxFetchFailed($hash);
@@ -150,7 +150,7 @@ final readonly class BlockchainService
     private function fetchBlockTransactions(string $hash): array
     {
         try {
-            $response = $this->http->get(self::BASE_URL . "/block/{$hash}/txs");
+            $response = $this->http->get(self::BASE_URL . '/block/' . rawurlencode($hash) . '/txs');
         } catch (Throwable $e) {
             $this->logger->error('Block transactions fetch error', ['hash' => $hash, 'error' => $e->getMessage()]);
             throw BlockchainException::blockOrTxFetchFailed($hash);
@@ -217,7 +217,7 @@ final readonly class BlockchainService
     private function fetchTransaction(string $txid): array
     {
         try {
-            $response = $this->http->get(self::BASE_URL . "/tx/{$txid}");
+            $response = $this->http->get(self::BASE_URL . '/tx/' . rawurlencode($txid));
         } catch (Throwable $e) {
             $this->logger->error('Transaction fetch error', ['txid' => $txid, 'error' => $e->getMessage()]);
             throw BlockchainException::txLookupFailed($txid);
@@ -249,7 +249,7 @@ final readonly class BlockchainService
     private function fetchTransactionStatus(string $txid): array
     {
         try {
-            $response = $this->http->get(self::BASE_URL . "/tx/{$txid}/status");
+            $response = $this->http->get(self::BASE_URL . '/tx/' . rawurlencode($txid) . '/status');
         } catch (Throwable $e) {
             $this->logger->error('Transaction status fetch error', ['txid' => $txid, 'error' => $e->getMessage()]);
             throw BlockchainException::txLookupFailed($txid);

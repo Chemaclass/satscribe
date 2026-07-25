@@ -26,6 +26,16 @@ final readonly class PrefetchController
             return new JsonResponse(['status' => 'error', 'message' => 'Missing query'], Response::HTTP_BAD_REQUEST);
         }
 
+        // Creating a chat demands a txid or a height; this route reaches the
+        // same lookup and must demand the same, or the text lands unchecked in
+        // the path of an outbound Blockstream URL.
+        if (!PromptInput::isValid($query)) {
+            return new JsonResponse(
+                ['status' => 'error', 'message' => 'Not a Bitcoin TXID, block hash or height'],
+                Response::HTTP_BAD_REQUEST,
+            );
+        }
+
         try {
             $input = PromptInput::fromRaw($query);
             $this->blockchainFacade->getBlockchainData($input);

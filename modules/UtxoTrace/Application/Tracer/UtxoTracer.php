@@ -217,7 +217,7 @@ final class UtxoTracer
             return $this->transactionCache[$txid];
         }
 
-        $url = self::BASE_URL . "/tx/{$txid}";
+        $url = self::BASE_URL . '/tx/' . rawurlencode($txid);
         $this->logger->debug('Blockstream API call', [
             'url' => $url,
         ]);

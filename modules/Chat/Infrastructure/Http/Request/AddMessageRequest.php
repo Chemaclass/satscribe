@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Modules\Chat\Infrastructure\Http\Request;
 
-use Illuminate\Contracts\Validation\ValidationRule;
 use App\Models\Chat;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Modules\Shared\Domain\Chat\ChatConstants;
 
