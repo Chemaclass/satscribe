@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Modules\Shared\Domain\Data\Payment;
+namespace Modules\Payment\Domain\Data;
 
 final readonly class InvoiceData
 {

@@ -9,22 +9,17 @@ use Closure;
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
-use Modules\Payment\Domain\AlbyClientInterface;
-use Modules\Payment\Domain\CachedInvoiceValidatorInterface;
-use Modules\Shared\Domain\Data\Payment\InvoiceData;
+use Modules\Shared\Domain\RateLimit\PaywallInvoiceIssuerInterface;
 use Modules\Shared\Domain\RateLimit\RateLimitKeys;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Response;
-
-use function sprintf;
 
 final readonly class IpRateLimiter
 {
     private const INVOICE_CACHE_MARGIN_SECONDS = 10;
 
     public function __construct(
-        private CachedInvoiceValidatorInterface $invoiceValidator,
-        private AlbyClientInterface $albyClient,
+        private PaywallInvoiceIssuerInterface $invoiceIssuer,
         private CacheRepository $cache,
         private LoggerInterface $logger,
         private CarbonInterface $now,
@@ -93,7 +88,7 @@ final readonly class IpRateLimiter
 
         $cachedInvoice = $this->cache->get($invoiceCacheKey);
 
-        if ($this->invoiceValidator->isValidCachedInvoice($cachedInvoice)) {
+        if ($this->invoiceIssuer->isReusable($cachedInvoice)) {
             $this->logger->debug('Using valid cached invoice', ['invoice' => $cachedInvoice]);
             return $this->buildRateLimitedResponse($rateLimitKey, $cachedInvoice, $maxAttempts);
         }
@@ -123,11 +118,11 @@ final readonly class IpRateLimiter
      */
     private function buildInvoice(string $shortHash, int $invoiceAmount): array
     {
-        return $this->albyClient->createInvoice(new InvoiceData(
-            amount: $invoiceAmount,
-            memo: sprintf('Zap to keep Satscribe alive ⚡️ #%s', $shortHash),
-            expiry: $this->lnInvoiceExpirySeconds,
-        ));
+        return $this->invoiceIssuer->issue(
+            $shortHash,
+            $invoiceAmount,
+            $this->lnInvoiceExpirySeconds,
+        );
     }
 
     /**

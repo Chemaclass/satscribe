@@ -7,7 +7,7 @@ namespace Tests\Feature;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\RateLimiter;
 use Modules\Payment\Domain\AlbyClientInterface;
-use Modules\Shared\Domain\Data\Payment\InvoiceData;
+use Modules\Payment\Domain\Data\InvoiceData;
 use Modules\Shared\Domain\RateLimit\RateLimitKeys;
 use Tests\TestCase;
 

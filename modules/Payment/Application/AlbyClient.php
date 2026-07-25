@@ -9,7 +9,7 @@ use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Psr7\Request as GuzzleRequest;
 use JsonException;
 use Modules\Payment\Domain\AlbyClientInterface;
-use Modules\Shared\Domain\Data\Payment\InvoiceData;
+use Modules\Payment\Domain\Data\InvoiceData;
 use RuntimeException;
 
 use function is_array;
