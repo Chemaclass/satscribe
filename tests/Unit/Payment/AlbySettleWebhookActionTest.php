@@ -30,8 +30,8 @@ namespace Tests\Unit\Payment;
 
 use App\Models\Payment;
 use Illuminate\Cache\ArrayStore;
-use Illuminate\Cache\Repository as CacheRepository;
 use Illuminate\Cache\RateLimiter;
+use Illuminate\Cache\Repository as CacheRepository;
 use Illuminate\Contracts\Cache\Repository;
 use Modules\Payment\Application\AlbySettleWebhookAction;
 use Modules\Payment\Domain\Exception\InvalidAlbyWebhookSignatureException;
