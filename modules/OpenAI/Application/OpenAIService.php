@@ -126,7 +126,7 @@ final readonly class OpenAIService
                 'status' => $response->status(),
             ]);
 
-            throw new OpenAIError('OpenAI API streaming request failed');
+            throw OpenAIError::providerRejected($selection->provider->label(), $response->status());
         }
 
         $body = $response->toPsrResponse()->getBody();
@@ -194,7 +194,7 @@ final readonly class OpenAIService
                 'status' => $response->status(),
                 'body' => $response->body(),
             ]);
-            throw new OpenAIError('OpenAI API request failed');
+            throw OpenAIError::providerRejected($selection->provider->label(), $response->status());
         }
 
         $error = $response->json('error.message');

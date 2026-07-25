@@ -20,6 +20,7 @@ use Modules\Shared\Domain\Data\Chat\PromptInput;
 use Modules\Shared\Domain\Enum\Chat\PromptPersona;
 use Modules\Shared\Domain\Enum\Chat\PromptType;
 use Modules\Shared\Domain\HttpClientInterface;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Stringable;
@@ -174,6 +175,52 @@ final class OpenAIServiceStreamingTest extends TestCase
         }
 
         $this->assertLogsFreeOfTheUserKey();
+    }
+
+    /**
+     * A generic "request failed" leaves an operator with a dead site and no way
+     * to tell a bad key from an exhausted quota. The provider's status says
+     * which, and reporting it reveals nothing about the key.
+     *
+     * @param non-empty-string $expected
+     */
+    #[DataProvider('providerFailures')]
+    public function test_a_rejected_stream_reports_why(int $status, string $expected): void
+    {
+        $factory = new HttpFactory();
+        $factory->fake(['*' => HttpFactory::response('nope', $status)]);
+
+        $registry = $this->registry();
+        $selection = $registry->selectionFrom('groq', 'llama-3.1-8b-instant', self::USER_KEY);
+
+        try {
+            iterator_to_array($this->service($factory, $registry)->generateTextStreaming(
+                $this->data(),
+                $this->input(),
+                PromptPersona::Developer,
+                'Question',
+                null,
+                '',
+                $selection,
+            ));
+            self::fail('Expected a rejected stream to throw.');
+        } catch (OpenAIError $e) {
+            self::assertStringContainsString($expected, $e->getMessage());
+            self::assertStringContainsString('Groq', $e->getMessage());
+            self::assertStringNotContainsString(self::USER_KEY, $e->getMessage());
+        }
+    }
+
+    /**
+     * @return iterable<string, array{int, non-empty-string}>
+     */
+    public static function providerFailures(): iterable
+    {
+        yield 'bad key' => [401, 'rejected the configured API key'];
+        yield 'forbidden' => [403, 'rejected the configured API key'];
+        yield 'unknown model' => [404, 'does not offer the configured model'];
+        yield 'quota' => [429, 'rate limited or out of quota'];
+        yield 'outage' => [503, 'is having an outage'];
     }
 
     public function test_selection_keeps_the_key_out_of_its_serialised_forms(): void
