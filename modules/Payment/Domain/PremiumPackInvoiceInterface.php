@@ -19,4 +19,11 @@ interface PremiumPackInvoiceInterface
      * mapping has gone.
      */
     public function identityFor(string $reference): ?string;
+
+    /**
+     * The identity an invoice was minted for, looked up by its payment hash.
+     * Lets a status poll prove the invoice belongs to the caller before any
+     * credit is granted.
+     */
+    public function identityForPaymentHash(string $paymentHash): ?string;
 }

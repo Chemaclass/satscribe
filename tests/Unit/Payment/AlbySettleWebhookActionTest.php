@@ -277,6 +277,11 @@ final class StubPackInvoice implements PremiumPackInvoiceInterface
     {
         return $this->identities[$reference] ?? null;
     }
+
+    public function identityForPaymentHash(string $paymentHash): ?string
+    {
+        return null;
+    }
 }
 
 final class StubPremiumCredits implements PremiumCreditsInterface

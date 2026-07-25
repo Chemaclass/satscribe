@@ -37,11 +37,24 @@ final readonly class PremiumPackInvoice implements PremiumPackInvoiceInterface
 
         $this->cache->put($this->keyFor($reference), $npub, self::MAPPING_TTL_SECONDS);
 
-        return $this->albyClient->createInvoice(new InvoiceData(
+        $invoice = $this->albyClient->createInvoice(new InvoiceData(
             amount: $this->packSats,
             memo: InvoiceMemo::forPremiumPack($reference),
             expiry: $this->expirySeconds,
         ));
+
+        // Remembered against the payment hash as well, so the buyer's own
+        // status poll can prove the invoice is theirs before granting.
+        $this->cache->put($this->hashKeyFor($invoice['payment_hash']), $npub, self::MAPPING_TTL_SECONDS);
+
+        return $invoice;
+    }
+
+    public function identityForPaymentHash(string $paymentHash): ?string
+    {
+        $npub = $this->cache->get($this->hashKeyFor($paymentHash));
+
+        return is_string($npub) && $npub !== '' ? $npub : null;
     }
 
     public function identityFor(string $reference): ?string
@@ -59,5 +72,10 @@ final readonly class PremiumPackInvoice implements PremiumPackInvoiceInterface
     private function keyFor(string $reference): string
     {
         return 'premium_pack_identity:' . $reference;
+    }
+
+    private function hashKeyFor(string $paymentHash): string
+    {
+        return 'premium_pack_hash:' . $paymentHash;
     }
 }

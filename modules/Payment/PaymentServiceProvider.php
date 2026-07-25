@@ -9,12 +9,14 @@ use Modules\Payment\Application\AlbyClient;
 use Modules\Payment\Application\AlbySettleWebhookAction;
 use Modules\Payment\Application\CachedInvoiceValidator;
 use Modules\Payment\Application\ConfirmInvoicePaymentAction;
+use Modules\Payment\Application\ConfirmPremiumPackAction;
 use Modules\Payment\Application\PaywallInvoiceIssuer;
 use Modules\Payment\Application\PremiumAccess;
 use Modules\Payment\Application\PremiumPackInvoice;
 use Modules\Payment\Domain\AlbyClientInterface;
 use Modules\Payment\Domain\CachedInvoiceValidatorInterface;
 use Modules\Payment\Domain\ConfirmInvoicePaymentActionInterface;
+use Modules\Payment\Domain\ConfirmPremiumPackActionInterface;
 use Modules\Payment\Domain\PremiumAccessInterface;
 use Modules\Payment\Domain\PremiumCreditsInterface;
 use Modules\Payment\Domain\PremiumPackInvoiceInterface;
@@ -36,6 +38,7 @@ final class PaymentServiceProvider extends ServiceProvider
         PremiumCreditsInterface::class => PremiumCreditRepository::class,
         PremiumAccessInterface::class => PremiumAccess::class,
         PremiumPackInvoiceInterface::class => PremiumPackInvoice::class,
+        ConfirmPremiumPackActionInterface::class => ConfirmPremiumPackAction::class,
     ];
 
     /** @var array<class-string, class-string> */
@@ -64,7 +67,7 @@ final class PaymentServiceProvider extends ServiceProvider
             ->needs('$webhookSecret')
             ->giveConfig('services.alby.webhook_secret');
 
-        foreach ([PremiumPackInvoice::class, AlbySettleWebhookAction::class] as $needsPackSize) {
+        foreach ([PremiumPackInvoice::class, AlbySettleWebhookAction::class, ConfirmPremiumPackAction::class] as $needsPackSize) {
             $this->app->when($needsPackSize)
                 ->needs('$packMessages')
                 ->giveConfig('services.premium.pack_messages');
