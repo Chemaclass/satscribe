@@ -80,6 +80,13 @@ return [
 
     'locale' => env('APP_LOCALE', 'en'),
 
+    /*
+    | Locales the app ships translations for (resources/lang/<locale>.json).
+    | ?lang= is user input that ends up as a translation file path, so it is
+    | only honoured when it appears in this list.
+    */
+    'supported_locales' => ['en', 'de', 'es'],
+
     'fallback_locale' => env('APP_FALLBACK_LOCALE', 'en'),
 
     'faker_locale' => env('APP_FAKER_LOCALE', 'en_US'),

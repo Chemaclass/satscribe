@@ -10,6 +10,10 @@ use Illuminate\Support\Facades\View;
 use Modules\Faq\Domain\Repository\FaqRepositoryInterface;
 use Symfony\Component\HttpFoundation\Response;
 
+use function in_array;
+use function is_array;
+use function is_string;
+
 final readonly class SetLocale
 {
     public function __construct(
@@ -27,12 +31,27 @@ final readonly class SetLocale
         return $next($request);
     }
 
+    /**
+     * ?lang= is unvalidated user input that reaches app()->setLocale(), which
+     * Laravel expands into a translation file path. Anything outside the
+     * shipped set — a bogus code, a traversal attempt, a non-string left in the
+     * session — resolves to the default instead.
+     */
     private function resolveLocale(Request $request): string
     {
+        $default = (string) config('app.locale');
+
         if ($request->has('lang')) {
             session(['app_locale' => $request->get('lang')]);
         }
 
-        return session('app_locale', config('app.locale'));
+        $locale = session('app_locale', $default);
+        $supported = config('app.supported_locales');
+
+        if (!is_string($locale) || !is_array($supported) || !in_array($locale, $supported, true)) {
+            return $default;
+        }
+
+        return $locale;
     }
 }
