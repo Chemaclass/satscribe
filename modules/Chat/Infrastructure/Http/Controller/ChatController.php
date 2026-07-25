@@ -6,6 +6,7 @@ namespace Modules\Chat\Infrastructure\Http\Controller;
 
 use App\Models\Chat;
 use Generator;
+use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Modules\Blockchain\Domain\BlockchainFacadeInterface;
@@ -214,7 +215,11 @@ final readonly class ChatController
                 foreach ($events() as $event) {
                     $this->emit($event);
                 }
-            } catch (BlockchainException|OpenAIError $e) {
+            } catch (BlockchainException|OpenAIError|ThrottleRequestsException $e) {
+                // The daily quota is enforced from inside the generator, so a
+                // throttle escapes after the SSE headers are already sent. Left
+                // uncaught it just kills the stream, and the client sees a
+                // skeleton that never resolves rather than a reason.
                 $this->logger->error($errorLogMessage, ['error' => $e->getMessage()]);
                 $this->emit(['type' => 'error', 'data' => $e->getMessage()]);
             }

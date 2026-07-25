@@ -26,22 +26,10 @@ class Webhook
     }
 }
 
-namespace Illuminate\Cache;
-
-class RateLimiter
-{
-    /** @var list<string> */
-    public array $cleared = [];
-
-    public function clear(string $key): void
-    {
-        $this->cleared[] = $key;
-    }
-}
-
 namespace Tests\Unit\Payment;
 
 use App\Models\Payment;
+use Illuminate\Cache\RateLimiter;
 use Illuminate\Contracts\Cache\Repository;
 use Modules\Payment\Application\AlbySettleWebhookAction;
 use Modules\Payment\Domain\Exception\InvalidAlbyWebhookSignatureException;
@@ -55,7 +43,7 @@ final class AlbySettleWebhookActionTest extends TestCase
     public function test_fails_when_secret_missing(): void
     {
         $cache = $this->createStub(Repository::class);
-        $rate = new \Illuminate\Cache\RateLimiter();
+        $rate = new RecordingRateLimiter($this->createStub(Repository::class));
         $repo = $this->createStub(PaymentRepositoryInterface::class);
         $logger = $this->createStub(LoggerInterface::class);
 
@@ -71,7 +59,7 @@ final class AlbySettleWebhookActionTest extends TestCase
         $cache = $this->createStub(Repository::class);
         $cache->method('pull')->willReturn(['tracking_id' => 'track']);
 
-        $rate = new \Illuminate\Cache\RateLimiter();
+        $rate = new RecordingRateLimiter($this->createStub(Repository::class));
 
         $repo = new class() implements PaymentRepositoryInterface {
             /** @var array<string, mixed> */
@@ -100,5 +88,22 @@ final class AlbySettleWebhookActionTest extends TestCase
         $this->assertSame('hash', $repo->data['payment_hash']);
         $this->assertContains(RateLimitKeys::forTrackingId('track'), $rate->cleared);
         $this->assertContains('ln_invoice:deadbeef', $rate->cleared);
+    }
+}
+
+/**
+ * Records cleared keys without stubbing Laravel's class out of existence.
+ * An earlier version of this test declared its own Illuminate\Cache\RateLimiter,
+ * which shadowed the real one for the whole PHPUnit process and left it with a
+ * single method, breaking any other test that used rate limiting.
+ */
+final class RecordingRateLimiter extends RateLimiter
+{
+    /** @var list<string> */
+    public array $cleared = [];
+
+    public function clear($key): void
+    {
+        $this->cleared[] = (string) $key;
     }
 }
