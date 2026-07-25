@@ -23,7 +23,7 @@ final class UtxoTraceServiceTest extends TestCase
             public function __construct(private readonly array $data)
             {
             }
-            public function find(string $txid, int $depth): ?UtxoTrace
+            public function find(string $txid, int $depth): UtxoTrace
             {
                 $trace = new UtxoTrace();
                 $trace->result = $this->data;

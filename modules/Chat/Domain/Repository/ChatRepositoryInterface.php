@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Modules\Chat\Domain\Repository;
 
 use App\Models\Chat;
-use Illuminate\Contracts\Pagination\Paginator;
+use Illuminate\Pagination\Paginator;
 use Modules\Shared\Domain\Data\Blockchain\BlockchainDataInterface;
 use Modules\Shared\Domain\Data\Chat\PromptInput;
 use Modules\Shared\Domain\Enum\Chat\PromptPersona;

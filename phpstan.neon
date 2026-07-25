@@ -3,8 +3,19 @@ includes:
     - vendor/larastan/larastan/extension.neon
 
 parameters:
-    level: 1
+    level: 5
     paths:
         - app
         - modules
         - tests
+
+    ignoreErrors:
+        # Mockery's expectation API is invisible to PHPStan: mock() is declared
+        # as returning the mocked interface, while at runtime it returns a
+        # MockInterface carrying expects()/shouldReceive()/andReturnArg().
+        # Installing phpstan/phpstan-mockery would resolve this properly; until
+        # then the suppression is scoped to tests so production code is unaffected.
+        -
+            identifier: method.notFound
+            path: tests/*
+            message: '#Call to an undefined method .*::(expects|method|andReturnArg|with|shouldReceive|allows)\(\)#'

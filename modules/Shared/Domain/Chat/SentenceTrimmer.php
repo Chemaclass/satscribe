@@ -23,7 +23,7 @@ final class SentenceTrimmer
         // being mistaken for a sentence end.
         preg_match_all('/[.?!…](?=\s|$)/u', $text, $matches, PREG_OFFSET_CAPTURE);
 
-        if (isset($matches[0]) && $matches[0] !== []) {
+        if ($matches[0] !== []) {
             $last = end($matches[0]);
             // PREG_OFFSET_CAPTURE reports BYTE offsets even under /u, so the cut
             // must stay in bytes. Mixing it with mb_substr over-counted by one

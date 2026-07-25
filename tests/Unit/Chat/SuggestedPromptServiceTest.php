@@ -17,7 +17,6 @@ final class SuggestedPromptServiceTest extends TestCase
 
         $result = $service->getGroupedPrompts(null);
 
-        $this->assertIsArray($result);
         $this->assertNotEmpty($result);
 
         // Should have same categories as SAMPLE_QUESTIONS
@@ -58,7 +57,6 @@ final class SuggestedPromptServiceTest extends TestCase
         // Each prompt should be a string (translated)
         foreach ($result as $prompts) {
             foreach ($prompts as $prompt) {
-                $this->assertIsString($prompt);
                 $this->assertNotEmpty($prompt);
             }
         }

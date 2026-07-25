@@ -13,7 +13,6 @@ final class QuestionPlaceholderTest extends TestCase
     {
         $result = QuestionPlaceholder::rand();
 
-        $this->assertIsString($result);
         $this->assertNotEmpty($result);
     }
 
@@ -21,7 +20,6 @@ final class QuestionPlaceholderTest extends TestCase
     {
         $result = QuestionPlaceholder::forBlock();
 
-        $this->assertIsArray($result);
         $this->assertCount(3, $result);
     }
 
@@ -30,7 +28,6 @@ final class QuestionPlaceholderTest extends TestCase
         $result = QuestionPlaceholder::forBlock();
 
         foreach ($result as $prompt) {
-            $this->assertIsString($prompt);
             $this->assertNotEmpty($prompt);
         }
     }
@@ -39,7 +36,6 @@ final class QuestionPlaceholderTest extends TestCase
     {
         $result = QuestionPlaceholder::forTx();
 
-        $this->assertIsArray($result);
         $this->assertCount(3, $result);
     }
 
@@ -48,7 +44,6 @@ final class QuestionPlaceholderTest extends TestCase
         $result = QuestionPlaceholder::forTx();
 
         foreach ($result as $prompt) {
-            $this->assertIsString($prompt);
             $this->assertNotEmpty($prompt);
         }
     }
@@ -57,7 +52,6 @@ final class QuestionPlaceholderTest extends TestCase
     {
         $result = QuestionPlaceholder::groupedPrompts();
 
-        $this->assertIsArray($result);
         $this->assertArrayHasKey('transaction', $result);
         $this->assertArrayHasKey('block', $result);
         $this->assertArrayHasKey('both', $result);

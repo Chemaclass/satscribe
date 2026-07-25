@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Modules\Chat\Infrastructure\Repository;
 
 use App\Models\Chat;
-use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Pagination\Paginator;
 use Modules\Chat\Domain\Repository\ChatRepositoryInterface;
 use Modules\Shared\Domain\Data\Blockchain\BlockchainDataInterface;
 use Modules\Shared\Domain\Data\Chat\PromptInput;
