@@ -37,12 +37,10 @@ final readonly class IpRateLimiter
         $this->logTracking($trackingId, $invoiceCacheKey);
         $this->cacheTrackingMapping($shortHash, $trackingId);
 
-        $config = nostr_pubkey()
-            ? config('services.rate_limit.nostr')
-            : config('services.rate_limit.guest');
+        $tier = nostr_pubkey() ? 'nostr' : 'guest';
 
-        $maxAttempts = (int) ($config['max_attempts'] ?? 0);
-        $invoiceAmount = (int) ($config['invoice_amount'] ?? 0);
+        $maxAttempts = config_int("services.rate_limit.{$tier}.max_attempts");
+        $invoiceAmount = config_int("services.rate_limit.{$tier}.invoice_amount");
 
         if (RateLimiter::tooManyAttempts($rateLimitKey, $maxAttempts)) {
             return $this->handleRateLimited(
