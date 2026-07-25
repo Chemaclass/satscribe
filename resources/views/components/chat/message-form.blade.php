@@ -1,4 +1,7 @@
 @props(['chat'])
+@php
+    use Modules\Shared\Domain\Chat\ChatConstants;
+@endphp
 <div x-data="{ message: '', isSending: false }" class="w-full pt-1">
     <form @submit.prevent="if (!isSending && !isStreaming && message.trim()) { isSending = true; sendMessageToChat('{{ $chat->ulid }}', message).finally(() => { isSending = false; message = ''; }); }" class="flex w-full items-center gap-2">
         <input
@@ -11,6 +14,9 @@
             {{-- text-base keeps iOS Safari from zooming in when the field is focused --}}
             class="flex-1 min-w-0 p-2 text-base border rounded disabled:opacity-50"
             placeholder="{{ __('Ask a follow-up question...') }}"
+            {{-- Mirrors the server rule so the limit is visible while typing
+                 rather than arriving as a rejected request. --}}
+            maxlength="{{ ChatConstants::MAX_QUESTION_LENGTH }}"
             autocomplete="off"
         />
         <button

@@ -15,6 +15,7 @@ use Modules\Chat\Application\ChatService;
 use Modules\Chat\Domain\AddMessageStreamActionInterface;
 use Modules\Chat\Domain\CreateChatStreamActionInterface;
 use Modules\Chat\Domain\Repository\ChatRepositoryInterface;
+use Modules\Chat\Infrastructure\Http\Request\AddMessageRequest;
 use Modules\Chat\Infrastructure\Http\Request\CreateChatRequest;
 use Modules\OpenAI\Domain\Data\ModelSelection;
 use Modules\OpenAI\Domain\Exception\OpenAIError;
@@ -56,20 +57,16 @@ final readonly class ChatController
         return view('home', $this->chatService->getChatData($chat));
     }
 
-    public function addMessage(Request $request, Chat $chat): JsonResponse
+    public function addMessage(AddMessageRequest $request, Chat $chat): JsonResponse
     {
-        $this->abortUnlessOwner($chat, 'You are not allowed to send messages to this chat.');
-
         return response()->json(
-            $this->chatService->addMessage($chat, as_string($request->input('message'))),
+            $this->chatService->addMessage($chat, $request->getMessageInput()),
         );
     }
 
-    public function addMessageStream(Request $request, Chat $chat): StreamedResponse
+    public function addMessageStream(AddMessageRequest $request, Chat $chat): StreamedResponse
     {
-        $this->abortUnlessOwner($chat, 'You are not allowed to send messages to this chat.');
-
-        $message = as_string($request->input('message'));
+        $message = $request->getMessageInput();
 
         // Resolved inside the stream closure so a rejected model is reported as
         // an SSE error event rather than a 500 the chat UI cannot render.

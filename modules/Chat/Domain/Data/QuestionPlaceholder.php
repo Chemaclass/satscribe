@@ -64,14 +64,6 @@ final class QuestionPlaceholder
     /**
      * @return list<string>
      */
-    private static function all(): array
-    {
-        return array_merge(...array_values(self::SAMPLE_QUESTIONS));
-    }
-
-    /**
-     * @return list<string>
-     */
     public static function forBlock(): array
     {
         $blockPrompts = collect(self::SAMPLE_QUESTIONS['block'])->shuffle()->take(2);
@@ -120,5 +112,13 @@ final class QuestionPlaceholder
                 ->values(),
             )
             ->all();
+    }
+
+    /**
+     * @return list<string>
+     */
+    private static function all(): array
+    {
+        return array_merge(...array_values(self::SAMPLE_QUESTIONS));
     }
 }

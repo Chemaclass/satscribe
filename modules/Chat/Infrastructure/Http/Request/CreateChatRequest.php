@@ -38,7 +38,7 @@ final class CreateChatRequest extends FormRequest
                     }
                 },
             ],
-            'question' => ['nullable', 'string', 'max:200'],
+            'question' => ['nullable', 'string', 'max:' . ChatConstants::MAX_QUESTION_LENGTH],
             // Values are checked against the provider registry, which is the
             // allowlist; these rules only bound the raw shape.
             'provider' => ['nullable', 'string', 'max:32'],
