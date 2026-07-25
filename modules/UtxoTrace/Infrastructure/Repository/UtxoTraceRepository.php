@@ -17,6 +17,7 @@ final readonly class UtxoTraceRepository implements UtxoTraceRepositoryInterface
     {
         return UtxoTrace::where('txid', $txid)
             ->where('depth', $depth)
+            ->where('version', self::CURRENT_VERSION)
             ->first();
     }
 
@@ -25,9 +26,11 @@ final readonly class UtxoTraceRepository implements UtxoTraceRepositoryInterface
      */
     public function store(string $txid, int $depth, array $result): UtxoTrace
     {
+        // Keyed on (txid, depth) only, so a row left by an older version is
+        // overwritten rather than accumulating alongside the new one.
         return UtxoTrace::updateOrCreate(
             ['txid' => $txid, 'depth' => $depth],
-            ['result' => $result],
+            ['result' => $result, 'version' => self::CURRENT_VERSION],
         );
     }
 }

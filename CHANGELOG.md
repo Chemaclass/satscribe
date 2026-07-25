@@ -44,6 +44,10 @@ Anything older than the first section below lives in `git log`.
 - The answer cache returned whichever matching row the database happened to
   yield rather than the newest, so the first answer ever generated for a
   question was served indefinitely.
+- **UTXO traces computed before the vout fix were served forever.** The table is
+  a cache with no expiry, so rows recording `vout: null` for every output were
+  never replaced. Stored traces now carry a version and a stale row is
+  recomputed on next request.
 - **The block tip height was fetched from Blockstream on every page view.** Only
   the derived maximum read the cache; the current height itself never did, so
   each home and chat render made its own uncached outbound call. Now cached for

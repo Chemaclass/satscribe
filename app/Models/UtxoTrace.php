@@ -11,11 +11,13 @@ final class UtxoTrace extends Model
     protected $fillable = [
         'txid',
         'depth',
+        'version',
         'result',
     ];
 
     protected $casts = [
         'result' => 'array',
         'depth' => 'integer',
+        'version' => 'integer',
     ];
 }
