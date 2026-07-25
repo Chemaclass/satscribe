@@ -216,4 +216,62 @@ final class MessageRepositoryTest extends TestCase
 
         $this->assertSame(3, (new MessageRepository())->countAll());
     }
+
+    /**
+     * A blank answer is what the empty-response guard exists to prevent, but the
+     * cache path returns before that guard runs. Chats saved before the guard
+     * existed still hold empty assistant messages, so an unusable answer must
+     * not count as a cache hit.
+     */
+    public function test_find_assistant_message_skips_an_empty_answer(): void
+    {
+        $chat = Chat::create(['ulid' => 'test-ulid', 'is_public' => true]);
+
+        $meta = [
+            'type' => 'transaction',
+            'input' => 'abc123txid',
+            'persona' => 'educator',
+            'question' => 'What is this?',
+        ];
+
+        Message::create([
+            'chat_id' => $chat->id,
+            'role' => 'assistant',
+            'content' => '',
+            'meta' => $meta,
+        ]);
+
+        $result = (new MessageRepository())->findAssistantMessage(
+            new PromptInput(PromptType::Transaction, 'abc123txid'),
+            PromptPersona::Educator,
+            'What is this?',
+        );
+
+        $this->assertNull($result);
+    }
+
+    public function test_find_assistant_message_skips_a_whitespace_only_answer(): void
+    {
+        $chat = Chat::create(['ulid' => 'test-ulid', 'is_public' => true]);
+
+        Message::create([
+            'chat_id' => $chat->id,
+            'role' => 'assistant',
+            'content' => "  \n ",
+            'meta' => [
+                'type' => 'transaction',
+                'input' => 'abc123txid',
+                'persona' => 'educator',
+                'question' => 'What is this?',
+            ],
+        ]);
+
+        $result = (new MessageRepository())->findAssistantMessage(
+            new PromptInput(PromptType::Transaction, 'abc123txid'),
+            PromptPersona::Educator,
+            'What is this?',
+        );
+
+        $this->assertNull($result);
+    }
 }

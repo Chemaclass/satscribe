@@ -44,6 +44,10 @@ Anything older than the first section below lives in `git log`.
 - The answer cache returned whichever matching row the database happened to
   yield rather than the newest, so the first answer ever generated for a
   question was served indefinitely.
+- **Empty answers were replayed from the cache.** The cached-reply path returns
+  before the empty-response guard runs, so a blank assistant message stored
+  before that guard existed was served as a successful answer indefinitely. A
+  blank answer no longer counts as a cache hit.
 - **UTXO traces computed before the vout fix were served forever.** The table is
   a cache with no expiry, so rows recording `vout: null` for every output were
   never replaced. Stored traces now carry a version and a stale row is
