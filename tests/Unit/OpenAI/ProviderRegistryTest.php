@@ -233,4 +233,29 @@ final class ProviderRegistryTest extends TestCase
             groqApiKey: $groqKey,
         );
     }
+
+    /**
+     * "Automatic" means the same thing whether or not a key was pasted. The
+     * blank-provider branch used to hardcode OpenAI, so a visitor who chose
+     * Automatic and supplied, say, a Groq key had that key sent to
+     * api.openai.com — a provider they never named.
+     */
+    public function test_automatic_with_a_user_key_uses_the_default_provider(): void
+    {
+        $registry = $this->registry(groqKey: 'groq-key');
+
+        $selection = $registry->selectionFrom('', '', self::USER_KEY);
+
+        self::assertSame('groq', $selection->provider->id());
+        self::assertSame($registry->defaultSelection()->model, $selection->model);
+        self::assertTrue($selection->usesUserKey);
+    }
+
+    public function test_automatic_with_a_user_key_still_falls_back_to_openai(): void
+    {
+        $selection = $this->registry(openAiKey: 'server-key')->selectionFrom('', '', self::USER_KEY);
+
+        self::assertSame('openai', $selection->provider->id());
+        self::assertSame('gpt-4', $selection->model);
+    }
 }

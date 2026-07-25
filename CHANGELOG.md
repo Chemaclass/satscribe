@@ -11,6 +11,11 @@ Anything older than the first section below lives in `git log`.
 
 ### Security
 
+- **A pasted API key could go to a provider the visitor never chose.** Leaving
+  the picker on "Automatic" and supplying a key resolved to OpenAI outright, so
+  a Groq or OpenRouter key was sent to api.openai.com. Automatic now means the
+  same default on both paths.
+
 - **A message's stored payload was readable by anyone.** `history/{id}/raw` took a
   bare integer and returned that message's data with no ownership check, so a
   private chat's contents were reachable by counting upwards. It now applies the

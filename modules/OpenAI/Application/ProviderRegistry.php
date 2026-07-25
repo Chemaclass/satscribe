@@ -86,10 +86,12 @@ final readonly class ProviderRegistry implements ProviderRegistryInterface
         $modelId = trim($modelId ?? '');
 
         if ($providerId === '') {
-            // No provider asked for: stay on the configured default, so an
-            // untouched request behaves exactly as it did before.
-            $definition = $this->definition(AiProvider::OpenAI);
-            $model = $modelId === '' ? $this->openAiModel : $modelId;
+            // "Automatic" — the same default defaultSelection() resolves to.
+            // This branch used to name OpenAI outright, so a visitor who left
+            // the picker on Automatic and pasted, say, a Groq key had that key
+            // sent to api.openai.com: a provider they never chose.
+            $definition = $this->defaultDefinition();
+            $model = $modelId === '' ? $this->defaultModelFor($definition, $this->openAiModel) : $modelId;
 
             if ($modelId !== '' && !$definition->supports($modelId)) {
                 throw $this->unsupportedModel($definition, $modelId);
