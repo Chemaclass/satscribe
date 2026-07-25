@@ -22,7 +22,7 @@ final readonly class PromptInput
      */
     public static function isValid(string|int $input): bool
     {
-        return is_numeric($input) || preg_match('/^[a-f0-9]{64}$/i', (string) $input) === 1;
+        return is_numeric($input) || preg_match('/^[a-f0-9]{64}$/i', $input) === 1;
     }
 
     public static function fromRaw(string|int $input): self

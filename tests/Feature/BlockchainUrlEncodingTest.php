@@ -45,7 +45,7 @@ final class BlockchainUrlEncodingTest extends TestCase
 
         $this->getJson('/api/prefetch?q=' . $txid)->assertStatus(404);
 
-        Http::assertSent(static fn ($request): bool => str_contains($request->url(), $txid));
+        Http::assertSent(static fn ($request): bool => str_contains((string) $request->url(), $txid));
     }
 
     public function test_a_block_height_is_still_accepted(): void
@@ -54,6 +54,6 @@ final class BlockchainUrlEncodingTest extends TestCase
 
         $this->getJson('/api/prefetch?q=210000')->assertStatus(404);
 
-        Http::assertSent(static fn ($request): bool => str_contains($request->url(), '210000'));
+        Http::assertSent(static fn ($request): bool => str_contains((string) $request->url(), '210000'));
     }
 }

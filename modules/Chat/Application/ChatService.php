@@ -35,8 +35,9 @@ final readonly class ChatService
     {
         $chat->load('messages');
 
-        /** @var Message $firstMsg */
-        $firstMsg = $chat->messages()->first();
+        // Reads the eager-loaded relation and raises a not-found when the chat
+        // has no messages, rather than re-querying and dereferencing null.
+        $firstMsg = $chat->getFirstUserMessage();
 
         return [
             'questionPlaceholder' => QuestionPlaceholder::rand(),
