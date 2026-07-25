@@ -1,6 +1,10 @@
 # Release Automation
 
-Releases are handled entirely through GitHub Actions. Every push to `main` triggers the [`release.yml`](workflows/deploy.yml) workflow which connects to the VPS and executes the `deploy.sh` script. This script performs a zero‑downtime deployment and keeps a history of timestamped releases.
+Releases are handled entirely through GitHub Actions. Every push to `main` triggers the [`deploy.yml`](workflows/deploy.yml) workflow, which connects to the VPS and runs `deploy-satscribe` — a wrapper around the `deploy.sh` script. This performs a zero-downtime deployment and keeps a history of timestamped releases.
+
+There are no version tags: `main` is always what is live. User-visible changes are recorded in [CHANGELOG.md](../CHANGELOG.md).
+
+> **Pushing to `main` deploys to production.** There is no staging step and no manual approval.
 
 ## Release Flow
 
@@ -8,7 +12,7 @@ Releases are handled entirely through GitHub Actions. Every push to `main` trigg
        Push to main
             |
             v
-  GitHub Actions (release.yml)
+  GitHub Actions (deploy.yml)
             |
             v
         SSH to VPS

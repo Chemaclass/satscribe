@@ -73,8 +73,56 @@ composer dev
 - Submit pull requests from a topic branch and include tests for new functionality.
 - Review open pull requests and help improve the codebase.
 
-Run the tests locally with:
+## Coding guidelines
+
+Business logic belongs in `modules/`, never in `app/`. Read
+[docs/architecture.md](../docs/architecture.md) first — the layer contract and
+the "interface first, repositories are the only Eloquent gateway" rules are what
+most review comments are about.
+
+Every PHP file declares `strict_types=1`, classes are `final` unless something
+extends them, and immutable ones are `readonly`. Type declarations get a `T`
+prefix (`TRawBlock`); input DTOs use a `Transfer` suffix and handler outputs a
+`Result` suffix, with no prefix.
+
+External data — API responses, webhook bodies, cache entries, session values,
+request fields — is untyped and untrusted. Validate it where it enters rather
+than casting `mixed` deeper in.
+
+## Tests
+
+Write the failing test first. Unit tests mirror `modules/` one-to-one under
+`tests/Unit/`, mock the interfaces from each module's `Domain/`, and never touch
+the database or the network. Anything needing the framework — routes, middleware,
+repositories — is a feature test.
+
+Use `mock()` directly rather than `Mockery::mock()`.
+
+## The gate
 
 ```bash
 composer fix && composer test
 ```
+
+`composer test` runs PHPStan at level 8 over `app`, `modules` and `tests`,
+followed by PHPUnit. Both must pass before a PR is reviewed. You can have this
+run automatically on every commit:
+
+```bash
+git config core.hooksPath githooks
+```
+
+## Commits
+
+Conventional commits, imperative mood, no trailing period:
+
+```
+<type>(<scope>): <subject>
+```
+
+`feat`, `fix`, `ref` (**not** `refactor`), `test`, `docs`, `chore`. Scope is the
+module in lowercase when the change is confined to one, e.g.
+`feat(chat): stream assistant replies`.
+
+Add a `## Unreleased` entry to [CHANGELOG.md](../CHANGELOG.md) for anything a
+user or operator would notice.

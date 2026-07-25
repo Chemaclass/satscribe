@@ -2,7 +2,7 @@
 
 **Satscribe** is a web application that transforms Bitcoin blocks and transactions into insightful, human-readable conversations.
 
-Enter a transaction ID , block hash, or block height. The app fetches the blockchain data via the Blockstream API and generates a plain-language explanation using OpenAI. Each chat is stored, so you can revisit or share it anytime.
+Enter a transaction ID, block hash, or block height. The app fetches the blockchain data via the Blockstream API and generates a plain-language explanation with an AI model. Each chat is stored, so you can revisit or share it anytime.
 
 Satscribe doesn’t require user accounts or passwords. Instead, it leverages the Nostr protocol to establish ownership of chats in a decentralized, privacy-friendly way.
 
@@ -11,7 +11,8 @@ Satscribe doesn’t require user accounts or passwords. Instead, it leverages th
 ## 🚀 Features
 
 - 🔎 Search the blockchain by **txID**, **block hash** or **height**
-- 🤖 Chat-powered summaries using GPT-4o
+- 🤖 Streaming AI summaries from **OpenAI**, **Groq** or **OpenRouter**
+- 🆓 Free-tier models by default — or bring your own API key
 - 🌐 Fetches data from Blockstream and CoinGecko
 - 💬 Ask follow-up questions and pick a persona (Educator, Developer, Storyteller)
 - 💾 Chats are saved and can be shared or kept private
@@ -35,7 +36,29 @@ Satscribe doesn’t require user accounts or passwords. Instead, it leverages th
 - Node.js 20+ and npm
 - SQLite
 - Laravel 12.x
-- OpenAI API Key
+- An API key for **one** AI provider — see [AI providers](#-ai-providers)
+
+---
+
+## 🤖 AI providers
+
+Satscribe talks to any OpenAI-compatible chat-completions API. Three are
+allowlisted; a provider not in that list can never become an outbound request.
+
+| Provider | Env var | Free tier |
+|---|---|---|
+| Groq | `GROQ_API_KEY` | ✅ Llama 3.3 70B, Llama 3.1 8B |
+| OpenRouter | `OPENROUTER_API_KEY` | ✅ Llama 3.3 70B, DeepSeek V3 |
+| OpenAI | `OPENAI_API_KEY` | ❌ paid only |
+
+Set **at least one**. When a free-tier key is present it becomes the default, so
+the app never spends OpenAI credit unless that is the only key configured.
+`free` means "costs nothing at the provider's free tier" — every provider still
+requires a key.
+
+Visitors can also supply their own key in the model picker. It is kept in
+`localStorage`, sent as an `X-Ai-Api-Key` header, and is never logged or stored
+server-side.
 
 ---
 
@@ -50,12 +73,15 @@ npm install
 cp .env.example .env
 php artisan key:generate
 ```
-Then configure your .env
+Then configure your .env. A free Groq key is the quickest way to a working install:
 ```dotenv
 DB_CONNECTION=sqlite
 
-OPENAI_API_KEY=sk-...
-OPENAI_MODEL=gpt-4o
+# Pick at least one provider
+GROQ_API_KEY=gsk_...
+# OPENROUTER_API_KEY=sk-or-...
+# OPENAI_API_KEY=sk-...
+# OPENAI_MODEL=gpt-4o-mini
 ```
 And migrate the DB:
 ```bash
@@ -77,11 +103,18 @@ If your browser doesn't have a Nostr extension, you can still sign in with your 
 
 ## 🧪 Testing
 
-Run the automated test suite with:
+`composer test` is the gate: it runs PHPStan (level 8 over `app`, `modules` and
+`tests`) followed by PHPUnit.
 
 ```bash
-composer fix && composer test
+composer fix && composer test          # format, then the full gate
+composer phpstan                       # static analysis only
+vendor/bin/phpunit --testsuite=unit    # fast loop
+vendor/bin/phpunit --filter <name>     # one class or method
 ```
+
+Unit tests mock the interfaces in each module's `Domain/` and never touch the
+database or the network; anything needing the framework is a feature test.
 
 ## 🔧 Git hooks
 
@@ -94,8 +127,16 @@ git config core.hooksPath githooks
 
 ## 🏛️ Architecture
 
-See [docs/architecture.md](docs/architecture.md) for an overview of the module structure and suggested improvements.
+Business logic lives in `modules/`, each split into `Domain`, `Application` and
+`Infrastructure`, with dependencies pointing one way:
+**Infrastructure → Application → Domain**. See
+[docs/architecture.md](docs/architecture.md) for the module map and the rules
+that keep those boundaries.
 
+## 📝 Changelog
+
+Notable changes are listed in [CHANGELOG.md](CHANGELOG.md). The project deploys
+continuously from `main` and does not tag versions.
 
 ## 🤝 Contributing
 
