@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Modules\Shared\Domain\Data\Blockchain;
 
+use function is_string;
+
 /**
  * Raw Blockstream payloads. Only the keys this codebase reads are listed and
  * every shape is unsealed, since the API returns more.
@@ -71,8 +73,11 @@ final readonly class BlockData implements BlockchainDataInterface
     {
         $coinbaseMessage = null;
 
-        if (!empty($transactions[0]['vin'][0]['scriptsig'])) {
-            $coinbaseScript = $transactions[0]['vin'][0]['scriptsig'];
+        // scriptsig is a raw Blockstream field, so it is not guaranteed to be
+        // the hex string the decoder expects.
+        $coinbaseScript = $transactions[0]['vin'][0]['scriptsig'] ?? null;
+
+        if (is_string($coinbaseScript) && $coinbaseScript !== '') {
             $coinbaseMessage = self::decodeCoinbaseScript($coinbaseScript);
         }
 

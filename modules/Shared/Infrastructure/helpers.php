@@ -48,7 +48,7 @@ if (!\function_exists('as_string')) {
             return $value;
         }
 
-        if (\is_int($value) || \is_float($value) || $value instanceof \Stringable) {
+        if (\is_int($value) || \is_float($value) || $value instanceof Stringable) {
             return (string) $value;
         }
 

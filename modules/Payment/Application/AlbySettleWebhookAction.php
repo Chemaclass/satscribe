@@ -7,6 +7,7 @@ namespace Modules\Payment\Application;
 use Illuminate\Cache\RateLimiter;
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Modules\Payment\Domain\Data\AlbySettleWebhookPayload;
+use Modules\Payment\Domain\Exception\InvalidAlbyWebhookPayloadException;
 use Modules\Payment\Domain\Exception\InvalidAlbyWebhookSignatureException;
 use Modules\Payment\Domain\Repository\PaymentRepositoryInterface;
 use Modules\Shared\Domain\RateLimit\RateLimitKeys;
@@ -70,6 +71,12 @@ final readonly class AlbySettleWebhookAction
             $this->logger->info('Webhook signature successfully verified');
 
             $data = json_decode($payload, true, flags: JSON_THROW_ON_ERROR);
+
+            if (!is_array($data)) {
+                throw InvalidAlbyWebhookPayloadException::malformed('body', 'a JSON object');
+            }
+
+            /** @var array<string, mixed> $data */
             return AlbySettleWebhookPayload::fromArray($data);
         } catch (Throwable $e) {
             $this->logger->warning('Webhook signature verification failed', ['error' => $e->getMessage()]);

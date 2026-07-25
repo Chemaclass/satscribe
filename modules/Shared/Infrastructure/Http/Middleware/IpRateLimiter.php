@@ -14,6 +14,8 @@ use Modules\Shared\Domain\RateLimit\RateLimitKeys;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Response;
 
+use function is_array;
+
 final readonly class IpRateLimiter
 {
     private const INVOICE_CACHE_MARGIN_SECONDS = 10;
@@ -84,9 +86,14 @@ final readonly class IpRateLimiter
     ): Response {
         $this->logger->info('Too many attempts, preparing invoice', ['key' => $rateLimitKey]);
 
-        $cachedInvoice = $this->cache->get($invoiceCacheKey);
+        // Cache contents are untyped, so an entry written by an older release
+        // need not still be an invoice payload.
+        $cached = $this->cache->get($invoiceCacheKey);
 
-        if ($this->invoiceIssuer->isReusable($cachedInvoice)) {
+        /** @var array<string, mixed>|null $cachedInvoice */
+        $cachedInvoice = is_array($cached) ? $cached : null;
+
+        if ($cachedInvoice !== null && $this->invoiceIssuer->isReusable($cachedInvoice)) {
             $this->logger->debug('Using valid cached invoice', ['invoice' => $cachedInvoice]);
             return $this->buildRateLimitedResponse($rateLimitKey, $cachedInvoice, $maxAttempts);
         }
