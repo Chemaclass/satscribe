@@ -72,10 +72,6 @@ const StorageClient = {
             this.setRelays(relays);
         }
     },
-    removeRelay(relay) {
-        const relays = this.getRelays().filter(r => r !== relay);
-        this.setRelays(relays);
-    },
     clearNostrRelays() {
         localStorage.removeItem('nostr_relays');
     },

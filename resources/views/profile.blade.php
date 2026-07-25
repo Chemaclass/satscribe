@@ -38,19 +38,6 @@
                     <span class="block h-4 w-4/6 rounded skeleton"></span>
                 </p>
 
-                {{-- Metadata --}}
-{{--                <div class="space-y-1 text-sm">--}}
-{{--                    <a id="profile-url" href="#" class="hidden link break-all"></a>--}}
-{{--                    <div id="profile-nip05" class="hidden break-all"></div>--}}
-{{--                    <div id="profile-lud16" class="hidden break-all"></div>--}}
-{{--                </div>--}}
-
-                {{-- Social Stats --}}
-{{--                <div class="flex gap-6 text-sm pt-2 border-t border-gray-200">--}}
-{{--                    <div class="h-4 w-24 rounded skeleton"></div>--}}
-{{--                    <div class="h-4 w-24 rounded skeleton"></div>--}}
-{{--                </div>--}}
-
                 {{-- App Stats --}}
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 border-gray-200">
                     <div class="space-y-1">

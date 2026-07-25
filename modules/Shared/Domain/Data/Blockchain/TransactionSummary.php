@@ -8,6 +8,9 @@ use function count;
 
 final class TransactionSummary
 {
+    /**
+     * @param  array<string, int>  $walletTypes  script type => occurrence count
+     */
     public function __construct(
         public string $txid,
         public bool $isConfirmed,
@@ -35,7 +38,7 @@ final class TransactionSummary
         $outputs = collect($tx->vout);
 
         $totalInput = $inputs->sum(static fn ($vin) => $vin['prevout']['value'] ?? 0);
-        $totalOutput = $outputs->sum('value');
+        $totalOutput = $outputs->sum(static fn ($out) => $out['value'] ?? 0);
 
         $hasOpReturn = $outputs->contains(static fn ($out) => $out['scriptpubkey_type'] === 'op_return');
         $hasMultiSig = $outputs->contains(static fn ($out) => $out['scriptpubkey_type'] === 'multisig');

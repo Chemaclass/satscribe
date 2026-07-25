@@ -154,47 +154,7 @@
                         const rawQuestion = formData.get('question');
                         const userMessage = rawQuestion?.trim() ? rawQuestion.trim() : @js(__('Give me a generic overview.'));
 
-                        const nostrImg = StorageClient.getNostrImage();
-                        const userIcon = nostrImg ?
-                            `<img src="${nostrImg}" alt="user" class="w-6 h-6 rounded-full nostr-avatar object-cover">` :
-                            `<span class="w-6 h-6 rounded-full bg-gray-300/50 flex items-center justify-center nostr-avatar-placeholder"><i data-lucide="user" class="w-4 h-4 text-gray-500"></i></span>`;
-
-                        const userHtml = `
-            <div class="chat-message-group mb-6">
-                <div class="user-message mb-2 text-right" data-owned="1">
-                    <div class="flex items-center gap-1 justify-end">
-                        <div class="inline-block rounded px-3 py-2">
-                            ${this.escapeHtml(userMessage)}
-                        </div>
-                        ${userIcon}
-                    </div>
-                </div>
-                <div id="assistant-message-${assistantMsgCount}" class="assistant-message text-left">
-                    <div class="flex items-center gap-1">
-                        <i data-lucide="bot" class="w-6 h-6"></i>
-                        <span class="font-semibold">Scribe</span>
-                        <span class="ml-2 flex items-center gap-1 loading-dots-container">
-                            <span class="dots-loader">
-                                <span class="dot"></span><span class="dot"></span><span class="dot"></span>
-                                <span class="dot"></span><span class="dot"></span><span class="dot"></span>
-                            </span>
-                        </span>
-                    </div>
-                    <div class="loading-skeleton mb-2 space-y-2 skeleton-container">
-                        <div class="h-4 bg-gray-200 rounded animate-pulse w-3/4"></div>
-                        <div class="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
-                        <div class="h-4 bg-gray-200 rounded animate-pulse w-5/6"></div>
-                    </div>
-                    <div class="inline-block rounded px-3 py-2 prose streaming-content hidden"></div>
-                    <div class="message-actions flex items-center gap-2 mt-1 ml-3 hidden">
-                        <button type="button" onclick="copyMessageContent(this)" class="text-xs text-gray-500 hover:text-gray-700 flex items-center gap-1 copy-btn">
-                            <i data-lucide="copy" class="w-3 h-3"></i>
-                            <span>{{ __('Copy') }}</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        `;
+                        const userHtml = this.buildPendingExchangeHtml(userMessage, assistantMsgCount);
                         chatMessageGroups.insertAdjacentHTML('beforeend', userHtml);
                         window.refreshLucideIcons?.();
                         window.setUserAvatar?.(StorageClient.getNostrImage());
@@ -486,47 +446,7 @@
 
                     const assistantMsgCount = document.querySelectorAll('.assistant-message').length;
 
-                    const nostrImg = StorageClient.getNostrImage();
-                    const userIcon = nostrImg ?
-                        `<img src="${nostrImg}" alt="user" class="w-6 h-6 rounded-full nostr-avatar object-cover">` :
-                        `<span class="w-6 h-6 rounded-full bg-gray-300/50 flex items-center justify-center nostr-avatar-placeholder"><i data-lucide="user" class="w-4 h-4 text-gray-500"></i></span>`;
-
-                    const userHtml = `
-            <div class="chat-message-group mb-6">
-                <div class="user-message mb-2 text-right" data-owned="1">
-                    <div class="flex items-center gap-1 justify-end">
-                        <div class="inline-block rounded px-3 py-2">
-                            ${this.escapeHtml(message)}
-                        </div>
-                        ${userIcon}
-                    </div>
-                </div>
-                <div id="assistant-message-${assistantMsgCount}" class="assistant-message text-left">
-                    <div class="flex items-center gap-1">
-                        <i data-lucide="bot" class="w-6 h-6"></i>
-                        <span class="font-semibold">Scribe</span>
-                        <span class="ml-2 flex items-center gap-1 loading-dots-container">
-                            <span class="dots-loader">
-                                <span class="dot"></span><span class="dot"></span><span class="dot"></span>
-                                <span class="dot"></span><span class="dot"></span><span class="dot"></span>
-                            </span>
-                        </span>
-                    </div>
-                    <div class="loading-skeleton mb-2 space-y-2 skeleton-container">
-                        <div class="h-4 bg-gray-200 rounded animate-pulse w-3/4"></div>
-                        <div class="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
-                        <div class="h-4 bg-gray-200 rounded animate-pulse w-5/6"></div>
-                    </div>
-                    <div class="inline-block rounded px-3 py-2 prose streaming-content hidden"></div>
-                    <div class="message-actions flex items-center gap-2 mt-1 ml-3 hidden">
-                        <button type="button" onclick="copyMessageContent(this)" class="text-xs text-gray-500 hover:text-gray-700 flex items-center gap-1 copy-btn">
-                            <i data-lucide="copy" class="w-3 h-3"></i>
-                            <span>{{ __('Copy') }}</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        `;
+                    const userHtml = this.buildPendingExchangeHtml(message, assistantMsgCount);
                     chatGroups.insertAdjacentHTML('beforeend', userHtml);
                     window.refreshLucideIcons?.();
                     window.setUserAvatar?.(StorageClient.getNostrImage());
@@ -720,6 +640,52 @@
                             '/': '&#47;', '<': '&lt;', '>': '&gt;'
                         }[a];
                     });
+                },
+
+                // Markup for a user message plus the assistant placeholder that the
+                // streaming code then fills in. Both the initial search and the
+                // follow-up flow insert this, and the streaming code below looks up
+                // .streaming-content / .skeleton-container / .message-actions inside
+                // it, so the two must never drift apart.
+                buildPendingExchangeHtml(userMessage, assistantMsgCount) {
+                    const nostrImg = StorageClient.getNostrImage();
+                    const userIcon = nostrImg ?
+                        `<img src="${nostrImg}" alt="user" class="w-6 h-6 rounded-full nostr-avatar object-cover">` :
+                        `<span class="w-6 h-6 rounded-full bg-gray-300/50 flex items-center justify-center nostr-avatar-placeholder"><i data-lucide="user" class="w-4 h-4 text-gray-500"></i></span>`;
+
+                    return `
+            <div class="chat-message-group mb-6">
+                <div class="user-message mb-2 text-right" data-owned="1">
+                    <div class="flex items-center gap-1 justify-end">
+                        <div class="inline-block rounded px-3 py-2">
+                            ${this.escapeHtml(userMessage)}
+                        </div>
+                        ${userIcon}
+                    </div>
+                </div>
+                <div id="assistant-message-${assistantMsgCount}" class="assistant-message text-left">
+                    <div class="flex items-center gap-1">
+                        <i data-lucide="bot" class="w-6 h-6"></i>
+                        <span class="font-semibold">Scribe</span>
+                        <span class="ml-2 flex items-center gap-1 loading-dots-container">
+                            <x-dots-loader />
+                        </span>
+                    </div>
+                    <div class="loading-skeleton mb-2 space-y-2 skeleton-container">
+                        <div class="h-4 bg-gray-200 rounded animate-pulse w-3/4"></div>
+                        <div class="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
+                        <div class="h-4 bg-gray-200 rounded animate-pulse w-5/6"></div>
+                    </div>
+                    <div class="inline-block rounded px-3 py-2 prose streaming-content hidden"></div>
+                    <div class="message-actions flex items-center gap-2 mt-1 ml-3 hidden">
+                        <button type="button" onclick="copyMessageContent(this)" class="text-xs text-gray-500 hover:text-gray-700 flex items-center gap-1 copy-btn">
+                            <i data-lucide="copy" class="w-3 h-3"></i>
+                            <span>{{ __('Copy') }}</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
                 },
 
                 setupScrollListener() {

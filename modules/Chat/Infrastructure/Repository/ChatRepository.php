@@ -21,15 +21,12 @@ final readonly class ChatRepository implements ChatRepositoryInterface
     ) {
     }
 
-    /**
-     * Find a chat matching given details or return null.
-     */
     public function findByCriteria(
         PromptInput $input,
         PromptPersona $persona,
         string $question = '',
     ): ?Chat {
-        // Find an existing chat by input type, input, persona, and question (legacy compatibility)
+        // Search criteria live in the first user message's meta JSON, not on the chat row.
         return Chat::query()
             ->where('tracking_id', '=', $this->trackingId)
             ->whereHas('messages', static function ($q) use ($input, $persona, $question): void {
@@ -41,9 +38,6 @@ final readonly class ChatRepository implements ChatRepositoryInterface
             })->first();
     }
 
-    /**
-     * Create a chat and attach user & assistant messages using the legacy pattern.
-     */
     public function createChat(
         PromptInput $input,
         string $aiResponse,

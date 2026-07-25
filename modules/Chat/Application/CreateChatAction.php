@@ -5,8 +5,7 @@ declare(strict_types=1);
 namespace Modules\Chat\Application;
 
 use App\Models\Chat;
-use Illuminate\Http\Exceptions\ThrottleRequestsException;
-use Illuminate\Support\Facades\RateLimiter;
+use App\Models\Message;
 use Modules\Blockchain\Domain\BlockchainFacadeInterface;
 use Modules\Chat\Domain\CreateChatActionInterface;
 use Modules\Chat\Domain\Data\CreateChatActionResult;
@@ -21,8 +20,6 @@ use Psr\Log\LoggerInterface;
 
 final readonly class CreateChatAction implements CreateChatActionInterface
 {
-    private const RATE_LIMIT_SECONDS = 86400; // 24 hours
-
     public function __construct(
         private BlockchainFacadeInterface $blockchainFacade,
         private OpenAIFacadeInterface $openaiFacade,
@@ -30,9 +27,8 @@ final readonly class CreateChatAction implements CreateChatActionInterface
         private MessageRepositoryInterface $messageRepository,
         private UserInputSanitizer $userInputSanitizer,
         private AdditionalContextBuilder $contextBuilder,
+        private OpenAiRateLimiter $rateLimiter,
         private LoggerInterface $logger,
-        private string $trackingId = '',
-        private int $maxOpenAIAttempts = 1000,
     ) {
     }
 
@@ -48,7 +44,7 @@ final readonly class CreateChatAction implements CreateChatActionInterface
             'persona' => $persona->value,
             'refresh' => $refreshEnabled,
         ]);
-        // Return a cached result unless forced to refresh
+
         if (!$refreshEnabled) {
             $chat = $this->repository->findByCriteria($input, $persona, $question);
 
@@ -71,7 +67,7 @@ final readonly class CreateChatAction implements CreateChatActionInterface
         bool $refreshEnabled,
         bool $isPublic,
     ): Chat {
-        $this->enforceRateLimit();
+        $this->rateLimiter->enforce();
 
         $blockchainData = $this->blockchainFacade->getBlockchainData($input);
         $cleanQuestion = $this->userInputSanitizer->sanitize($question);
@@ -88,19 +84,6 @@ final readonly class CreateChatAction implements CreateChatActionInterface
             $cleanQuestion,
             $isPublic,
         );
-    }
-
-    private function enforceRateLimit(): void
-    {
-        $key = "openai:{$this->trackingId}";
-
-        if (RateLimiter::tooManyAttempts($key, $this->maxOpenAIAttempts)) {
-            throw new ThrottleRequestsException(
-                "You have reached the daily OpenAI limit of {$this->maxOpenAIAttempts} requests.",
-            );
-        }
-
-        RateLimiter::hit($key, self::RATE_LIMIT_SECONDS);
     }
 
     private function generateAiResponse(
@@ -121,7 +104,11 @@ final readonly class CreateChatAction implements CreateChatActionInterface
         BlockchainData $blockchainData,
         string $cleanQuestion,
     ): string {
-        return $this->messageRepository->findAssistantMessage($input, $persona, $question)->content
-            ?? $this->generateAiResponse($blockchainData, $input, $persona, $cleanQuestion);
+        $message = $this->messageRepository->findAssistantMessage($input, $persona, $question);
+        if ($message instanceof Message) {
+            return $message->content;
+        }
+
+        return $this->generateAiResponse($blockchainData, $input, $persona, $cleanQuestion);
     }
 }

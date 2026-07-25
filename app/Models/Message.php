@@ -25,11 +25,6 @@ class Message extends Model
         return $this->belongsTo(Chat::class);
     }
 
-    public function getTrackingIdAttribute(): ?string
-    {
-        return $this->chat->tracking_id;
-    }
-
     public function isBlock(): bool
     {
         return $this->getTypeAttribute() === 'block';

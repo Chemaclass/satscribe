@@ -15,8 +15,6 @@ final readonly class FaqService
     }
 
     /**
-     * Fetch FAQ data for the given search term.
-     *
      * @return array<string, mixed>
      */
     public function getFaqData(string $search): array

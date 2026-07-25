@@ -51,8 +51,6 @@ final class MinerIdentifier
     ];
 
     /**
-     * Attempt to extract a known miner name from a coinbase scriptsig hex.
-     *
      * @param  string  $scriptsig  Hex string of the coinbase input script
      */
     public static function extractFromCoinbaseHex(string $scriptsig): string

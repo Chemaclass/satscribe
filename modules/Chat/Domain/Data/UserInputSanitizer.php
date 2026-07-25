@@ -33,7 +33,6 @@ final readonly class UserInputSanitizer
 
     private function removeUrls(string $text): string
     {
-        // Matches common URL patterns (http, https, www, etc.)
         $urlPattern = '/\b(?:https?:\/\/|www\.)[^\s<>"\']+/i';
 
         return preg_replace($urlPattern, '[link removed]', $text);

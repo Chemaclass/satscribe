@@ -19,11 +19,11 @@ final readonly class InvoiceData
 
     /**
      * @param  array{
-     *     amount: int,
-     *     memo: string,
-     *     description: string,
-     *     description_hash: string,
-     *     expiry: int,
+     *     amount?: int,
+     *     memo?: string,
+     *     description?: ?string,
+     *     description_hash?: ?string,
+     *     expiry?: int,
      * }  $data
      */
     public static function create(array $data): self
@@ -45,6 +45,15 @@ final readonly class InvoiceData
         );
     }
 
+    /**
+     * @return array{
+     *     amount: int,
+     *     memo: string,
+     *     description?: string,
+     *     description_hash?: string,
+     *     expiry: int,
+     * }
+     */
     public function toArray(): array
     {
         return array_filter([

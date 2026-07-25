@@ -60,14 +60,7 @@
                         class="relative h-10 w-full bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded">
                     <span x-show="!generating">{{ __('Generate New Key') }}</span>
                     <span x-show="generating" class="absolute inset-0 flex items-center justify-center" x-cloak>
-                        <span class="dots-loader">
-                            <span class="dot"></span>
-                            <span class="dot"></span>
-                            <span class="dot"></span>
-                            <span class="dot"></span>
-                            <span class="dot"></span>
-                            <span class="dot"></span>
-                        </span>
+                        <x-dots-loader />
                     </span>
                 </button>
             </div>

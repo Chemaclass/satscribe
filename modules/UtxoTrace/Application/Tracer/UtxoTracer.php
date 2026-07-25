@@ -7,8 +7,53 @@ namespace Modules\UtxoTrace\Application\Tracer;
 use App\Models\UtxoTrace;
 use Modules\Shared\Domain\HttpClientInterface;
 use Modules\UtxoTrace\Domain\Repository\UtxoTraceRepositoryInterface;
+use Modules\UtxoTrace\Domain\UtxoTraceFacadeInterface;
 use Psr\Log\LoggerInterface;
 
+/**
+ * Shapes below are derived from how this class reads the Blockstream
+ * `/tx/{txid}` response, not from the full API contract, so the external
+ * payload shapes are left unsealed.
+ *
+ * `TTraceNode['source']` is a `list<TTraceNode>`; PHPStan rejects recursive
+ * type aliases, so it is widened at that one point only.
+ *
+ * @phpstan-type TVout array{
+ *     n?: int,
+ *     scriptpubkey?: string,
+ *     scriptpubkey_address?: string,
+ *     scriptpubkey_type?: string,
+ *     value?: int,
+ *     ...
+ * }
+ * @phpstan-type TTransaction array{
+ *     vin?: array<int, array<string, mixed>>,
+ *     vout?: array<int, TVout>,
+ *     ...
+ * }
+ * @phpstan-type TTraceNode array{
+ *     txid: string,
+ *     vout: int,
+ *     scriptpubkey: string|null,
+ *     scriptpubkey_address: string|null,
+ *     scriptpubkey_type: string|null,
+ *     value: int,
+ *     source: list<array<string, mixed>>,
+ * }
+ * @phpstan-type TUtxoEntry array{
+ *     utxo: array{
+ *         txid: string,
+ *         vout: int|null,
+ *         scriptpubkey: string|null,
+ *         scriptpubkey_address: string|null,
+ *         scriptpubkey_type: string|null,
+ *         value: int,
+ *     },
+ *     trace: list<TTraceNode>,
+ * }
+ *
+ * @phpstan-import-type TReferencedTrace from UtxoTraceFacadeInterface
+ */
 final readonly class UtxoTracer
 {
     private const BASE_URL = 'https://blockstream.info/api';
@@ -21,8 +66,13 @@ final readonly class UtxoTracer
     }
 
     /**
-     * Same trace() response but using references to avoid repeating
-     * identical child traces.
+     * Same response as buildBacktrace() but using references to avoid
+     * repeating identical child traces.
+     *
+     * Cached rows replay a previously stored TReferencedTrace, but Eloquent's
+     * JSON cast returns mixed, so that arm is not statically provable.
+     *
+     * @return TReferencedTrace
      */
     public function getBacktrace(string $txid, int $depth = 1): array
     {
@@ -45,18 +95,10 @@ final readonly class UtxoTracer
     /**
      * Trace all UTXOs produced by a transaction.
      *
-     * @return array<int, array{
-     *     utxo: array{
-     *       txid: string,
-     *       vout: int,
-     *       value: int,
-     *     },
-     *     trace: array,
-     * }>
+     * @return list<TUtxoEntry>
      */
     public function buildBacktrace(string $txid, int $depth = 2): array
     {
-        // todo: consider make this method private and/or extract to class to keep unit tests
         $this->logger->debug('Starting UTXO trace', [
             'txid' => $txid,
             'depth' => $depth,
@@ -91,6 +133,10 @@ final readonly class UtxoTracer
 
     /**
      * Convert full traces into a map of references to avoid duplication.
+     *
+     * @param  list<TUtxoEntry>  $traces
+     *
+     * @return TReferencedTrace
      */
     private function buildReferences(array $traces): array
     {
@@ -137,6 +183,9 @@ final readonly class UtxoTracer
         ];
     }
 
+    /**
+     * @return TTransaction empty when the API call fails
+     */
     private function getTransaction(string $txid): array
     {
         static $cache = [];
@@ -164,6 +213,9 @@ final readonly class UtxoTracer
         return $cache[$txid] = $response->json();
     }
 
+    /**
+     * @return list<TTraceNode>
+     */
     private function traceInputs(string $txid, int $depth, int $level): array
     {
         if ($depth <= 0) {
@@ -196,6 +248,11 @@ final readonly class UtxoTracer
         )));
     }
 
+    /**
+     * @param  array<string, mixed>  $input  a Blockstream `vin` entry
+     *
+     * @return TTraceNode|null null when the input lacks a txid or vout
+     */
     private function traceInput(array $input, int $depth, int $level, int $index, string $parentTxid): ?array
     {
         $prevTxid = $input['txid'] ?? null;
@@ -232,6 +289,9 @@ final readonly class UtxoTracer
         ];
     }
 
+    /**
+     * @return TVout empty when the transaction has no such output
+     */
     private function getVout(string $txid, int $vout): array
     {
         return $this->getTransaction($txid)['vout'][$vout] ?? [];

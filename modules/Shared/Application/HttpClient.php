@@ -11,8 +11,6 @@ use Illuminate\Http\Client\Response;
 use Modules\Shared\Domain\HttpClientInterface;
 use Throwable;
 
-use function assert;
-
 final readonly class HttpClient implements HttpClientInterface
 {
     private const DEFAULT_TIMEOUT_SECONDS = 15;
@@ -27,6 +25,9 @@ final readonly class HttpClient implements HttpClientInterface
     ) {
     }
 
+    /**
+     * @param  array<string, scalar|null>  $query
+     */
     public function get(string $url, array $query = []): Response
     {
         return $this->buildRequest()->get($url, $query);
@@ -34,10 +35,7 @@ final readonly class HttpClient implements HttpClientInterface
 
     public function withToken(string $token, string $type = 'Bearer'): PendingRequest
     {
-        $request = $this->buildRequest()->withToken($token, $type);
-        assert($request instanceof PendingRequest);
-
-        return $request;
+        return $this->buildRequest()->withToken($token, $type);
     }
 
     private function buildRequest(): PendingRequest

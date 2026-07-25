@@ -14,6 +14,9 @@ enum PromptPersona: string
 
     public const DEFAULT = self::Storyteller->value;
 
+    /**
+     * @return Collection<string, string> persona value => description
+     */
     public static function descriptions(): Collection
     {
         return collect(self::cases())
@@ -27,6 +30,9 @@ enum PromptPersona: string
         return __("persona.{$this->value}.description");
     }
 
+    /**
+     * @return list<array{value: string, label: string, description: string, enabled: bool}>
+     */
     public static function options(): array
     {
         return array_map(

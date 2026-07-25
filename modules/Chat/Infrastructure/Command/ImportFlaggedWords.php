@@ -40,11 +40,17 @@ final class ImportFlaggedWords extends Command
         return true;
     }
 
+    /**
+     * @return list<string>
+     */
     private function readLines(string $path): array
     {
         return file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
     }
 
+    /**
+     * @param  list<string>  $lines
+     */
     private function importLines(array $lines): int
     {
         $inserted = 0;
@@ -76,10 +82,13 @@ final class ImportFlaggedWords extends Command
         return $inserted;
     }
 
+    /**
+     * @return array{string, FlaggedWordSeverity, bool}|null null for an unusable line
+     */
     private function parseLine(string $line): ?array
     {
         $columns = array_map('trim', str_getcsv($line));
-        $word = $columns[0] ?? null;
+        $word = $columns[0];
 
         if (!$word) {
             $this->warn("Skipped invalid line: '{$line}'");

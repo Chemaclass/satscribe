@@ -41,7 +41,7 @@ use Illuminate\Contracts\Cache\Repository;
 use Modules\Payment\Application\AlbySettleWebhookAction;
 use Modules\Payment\Domain\Exception\InvalidAlbyWebhookSignatureException;
 use Modules\Payment\Domain\Repository\PaymentRepositoryInterface;
-use Modules\Shared\Infrastructure\Http\Middleware\IpRateLimiter;
+use Modules\Shared\Domain\RateLimit\RateLimitKeys;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
@@ -92,7 +92,7 @@ final class AlbySettleWebhookActionTest extends TestCase
         $action->execute($payload, 'id', 't', 's');
 
         $this->assertSame('hash', $repo->data['payment_hash']);
-        $this->assertContains(IpRateLimiter::createRateLimitKey('track'), $rate->cleared);
+        $this->assertContains(RateLimitKeys::forTrackingId('track'), $rate->cleared);
         $this->assertContains('ln_invoice:deadbeef', $rate->cleared);
     }
 }

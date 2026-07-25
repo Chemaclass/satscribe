@@ -9,6 +9,9 @@ use swentel\nostr\Event\Event;
 
 final class EventSignatureVerifier implements EventSignatureVerifierInterface
 {
+    /**
+     * @param  array<array-key, mixed>  $event
+     */
     public function verify(array $event): bool
     {
         return (new Event())->verify(

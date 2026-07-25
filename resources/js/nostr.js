@@ -19,6 +19,11 @@ export const DEFAULT_RELAYS = [
     'wss://relay.primal.net/',
 ];
 
+/**
+ * Default relays plus any valid custom relays from local storage.
+ *
+ * @returns {string[]} Deduplicated relay websocket URLs.
+ */
 export function getRelays() {
     const relays = [...DEFAULT_RELAYS];
     const custom = StorageClient.getRelays();
@@ -181,6 +186,13 @@ export function applyNostrAvatarToMessages() {
     }
 }
 
+/**
+ * Publish a kind-0 profile event carrying only a display name.
+ *
+ * @param {string} privkey Hex-encoded secret key (not nsec).
+ * @param {string} name Display name to put in the event content.
+ * @returns {Promise<void>} Resolves once a relay acks, or after a 3s timeout.
+ */
 export function publishProfileEvent(privkey, name) {
     return new Promise(resolve => {
         try {
@@ -457,6 +469,14 @@ export function initNostrAuth() {
     });
 }
 
+/**
+ * Broadcast an already-signed event to every configured relay.
+ *
+ * @param {{kind: number, pubkey: string, created_at: number, content: string,
+ *          tags: string[][], id: string, sig: string}} event Signed NIP-01 event.
+ * @returns {Promise<void>} Resolves once a relay acks, or after a 3s timeout.
+ *          Never rejects; publish failures are logged and swallowed.
+ */
 function publishSignedEvent(event) {
     return new Promise(resolve => {
         try {
@@ -484,6 +504,13 @@ function publishSignedEvent(event) {
     });
 }
 
+/**
+ * Publish a full kind-0 profile metadata event.
+ *
+ * @param {string} privkey Hex-encoded secret key (not nsec).
+ * @param {Object<string, string>} metadata Profile fields (name, about, picture, ...).
+ * @returns {Promise<void>}
+ */
 export function publishProfileMetadata(privkey, metadata) {
     const pubkey = getPublicKey(privkey);
     const event = {
@@ -499,6 +526,13 @@ export function publishProfileMetadata(privkey, metadata) {
     return publishSignedEvent(event);
 }
 
+/**
+ * Publish a kind-10002 relay list (NIP-65).
+ *
+ * @param {string} privkey Hex-encoded secret key (not nsec).
+ * @param {string[]} relays Relay websocket URLs, one `r` tag each.
+ * @returns {Promise<void>}
+ */
 export function publishRelayList(privkey, relays) {
     const pubkey = getPublicKey(privkey);
     const event = {
@@ -641,8 +675,6 @@ export async function initProfileEdit() {
             const val = document.getElementById(`edit-${f}`)?.value.trim();
             if (val) data[f] = val;
         });
-
-        console.log('Submitting profile update', data);
 
         const relays = StorageClient.getRelays();
         let sk = StorageClient.getNostrPrivkey();

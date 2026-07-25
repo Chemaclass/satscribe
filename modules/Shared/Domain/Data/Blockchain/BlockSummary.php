@@ -10,6 +10,10 @@ use function sprintf;
 
 final class BlockSummary
 {
+    /**
+     * @param  list<array{txid: string|null, fee: int}>  $topTransactionsByFee
+     * @param  array<string, int>  $walletTypesBreakdown  script type => output count
+     */
     public function __construct(
         public int $height,
         public int $txCount,

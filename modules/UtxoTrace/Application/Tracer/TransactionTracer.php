@@ -22,7 +22,7 @@ final readonly class TransactionTracer
     }
 
     /**
-     * @return TransactionData[] ordered list starting from the given tx to its ancestors
+     * @return list<TransactionData> ordered list starting from the given tx to its ancestors
      */
     public function getBacktrace(string $txid, int $maxDepth = 10): array
     {
@@ -75,9 +75,7 @@ final readonly class TransactionTracer
     }
 
     /**
-     * Format a list of transactions for GPT prompt usage.
-     *
-     * @param  TransactionData[]  $trace
+     * @param  list<TransactionData>  $trace
      */
     public function formatForPrompt(array $trace): string
     {

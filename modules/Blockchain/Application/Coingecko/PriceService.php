@@ -32,8 +32,6 @@ final readonly class PriceService implements PriceServiceInterface
     ) {
     }
 
-    // --- Current price accessors ---
-
     public function getCurrentBtcPriceUsd(): float
     {
         return $this->getCurrentPrice('usd');
@@ -54,8 +52,6 @@ final readonly class PriceService implements PriceServiceInterface
         return $this->getCurrentPrice('gbp');
     }
 
-    // --- Historical price accessors ---
-
     public function getBtcPriceUsdAt(int $timestamp): float
     {
         return $this->getHistoricalPrice('usd', $timestamp);
@@ -71,6 +67,9 @@ final readonly class PriceService implements PriceServiceInterface
         return $this->getPrices()[$currency] ?? 0.0;
     }
 
+    /**
+     * @return array<string, float> currency code => BTC price
+     */
     private function getPrices(): array
     {
         if (!$this->enabled) {
@@ -139,6 +138,9 @@ final readonly class PriceService implements PriceServiceInterface
         );
     }
 
+    /**
+     * @return array<string, float>
+     */
     private function defaultPrices(): array
     {
         return array_fill_keys(self::SUPPORTED_CURRENCIES, 0.0);

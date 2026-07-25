@@ -22,9 +22,6 @@ final class UtxoTraceServiceProvider extends ServiceProvider
     /** @var array<class-string, class-string> */
     public $bindings = [];
 
-    /**
-     * Register any application services.
-     */
     #[Override]
     public function register(): void
     {

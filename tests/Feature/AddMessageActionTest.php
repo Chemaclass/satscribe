@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\RateLimiter;
 use Modules\Blockchain\Domain\BlockchainFacadeInterface;
 use Modules\Chat\Application\AdditionalContextBuilder;
 use Modules\Chat\Application\AddMessageAction;
+use Modules\Chat\Application\OpenAiRateLimiter;
 use Modules\Chat\Domain\Data\UserInputSanitizer;
 use Modules\Chat\Domain\Repository\ChatRepositoryInterface;
 use Modules\Chat\Domain\Repository\FlaggedWordRepositoryInterface;
@@ -196,9 +197,8 @@ final class AddMessageActionTest extends TestCase
             messageRepository: $this->messageRepository,
             userInputSanitizer: $this->sanitizer,
             contextBuilder: $this->contextBuilder,
+            rateLimiter: new OpenAiRateLimiter('test-tracking-id', $maxOpenAIAttempts),
             logger: $this->logger,
-            trackingId: 'test-tracking-id',
-            maxOpenAIAttempts: $maxOpenAIAttempts,
         );
     }
 

@@ -22,9 +22,4 @@ final class Faq extends Model
         'priority',
         'link',
     ];
-
-    public function getCategoryListAttribute(): array
-    {
-        return array_map('trim', explode(',', $this->categories));
-    }
 }

@@ -112,7 +112,6 @@ $faqSchema = [
                         </template>
                     </div>
 
-                    <!-- Replace x-text with x-html for answers -->
                     <p class="faq-answer mb-2" x-show="answerLevel === 'tldr'" x-html="faq.highlighted_tldr"></p>
                     <p class="faq-answer mb-2" x-show="answerLevel === 'advance'" x-html="faq.highlighted_advance"></p>
 

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Modules\Chat\Domain\Data;
 
+use Illuminate\Support\Collection;
+
 final class QuestionPlaceholder
 {
     public const SAMPLE_QUESTIONS = [
@@ -90,7 +92,10 @@ final class QuestionPlaceholder
     }
 
     /**
-     * @return list<string>
+     * Category => two translated prompts. The inner values are Collections,
+     * not arrays; callers and tests rely on that.
+     *
+     * @return array<string, Collection<int, string>>
      */
     public static function groupedPrompts(): array
     {
@@ -99,7 +104,7 @@ final class QuestionPlaceholder
                 static fn (array $prompts) => collect($prompts)
                 ->shuffle()
                 ->take(2)
-                ->map(static fn (string $prompt) => __($prompt))
+                ->map(static fn (string $prompt) => (string) __($prompt))
                 ->values(),
             )
             ->all();

@@ -6,8 +6,6 @@ namespace Modules\Chat\Application;
 
 use App\Models\Chat;
 use App\Models\Message;
-use Illuminate\Http\Exceptions\ThrottleRequestsException;
-use Illuminate\Support\Facades\RateLimiter;
 use Modules\Blockchain\Domain\BlockchainFacadeInterface;
 use Modules\Chat\Domain\AddMessageActionInterface;
 use Modules\Chat\Domain\Data\UserInputSanitizer;
@@ -20,8 +18,6 @@ use Psr\Log\LoggerInterface;
 
 final readonly class AddMessageAction implements AddMessageActionInterface
 {
-    private const RATE_LIMIT_SECONDS = 86400; // 24 hours
-
     public function __construct(
         private BlockchainFacadeInterface $blockchainFacade,
         private OpenAIFacadeInterface $openAIFacade,
@@ -29,16 +25,15 @@ final readonly class AddMessageAction implements AddMessageActionInterface
         private MessageRepositoryInterface $messageRepository,
         private UserInputSanitizer $userInputSanitizer,
         private AdditionalContextBuilder $contextBuilder,
+        private OpenAiRateLimiter $rateLimiter,
         private LoggerInterface $logger,
-        private string $trackingId = '',
-        private int $maxOpenAIAttempts = 1000,
     ) {
     }
 
     public function execute(Chat $chat, string $message): void
     {
         $this->logger->debug('Adding message to chat', ['chat_id' => $chat->id]);
-        $this->enforceRateLimit();
+        $this->rateLimiter->enforce();
         $firstUserMessage = $chat->getFirstUserMessage();
 
         $input = PromptInput::fromRaw($firstUserMessage->input);
@@ -49,19 +44,6 @@ final readonly class AddMessageAction implements AddMessageActionInterface
 
         $this->chatRepository->addMessageToChat($chat, $cleanMsg, $aiResponse);
         $this->logger->debug('Message added to chat', ['chat_id' => $chat->id]);
-    }
-
-    private function enforceRateLimit(): void
-    {
-        $key = "openai:{$this->trackingId}";
-
-        if (RateLimiter::tooManyAttempts($key, $this->maxOpenAIAttempts)) {
-            throw new ThrottleRequestsException(
-                "You have reached the daily OpenAI limit of {$this->maxOpenAIAttempts} requests.",
-            );
-        }
-
-        RateLimiter::hit($key, self::RATE_LIMIT_SECONDS);
     }
 
     private function generateAiResponse(

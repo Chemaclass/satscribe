@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\Chat\Infrastructure\Http\Controller;
 
 use App\Models\Chat;
+use Generator;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Modules\Blockchain\Domain\BlockchainFacadeInterface;
@@ -43,9 +44,7 @@ final readonly class ChatController
 
     public function addMessage(Request $request, Chat $chat): JsonResponse
     {
-        if (tracking_id() !== $chat->tracking_id) {
-            abort(Response::HTTP_FORBIDDEN, 'You are not allowed to send messages to this chat.');
-        }
+        $this->abortUnlessOwner($chat, 'You are not allowed to send messages to this chat.');
 
         return response()->json(
             $this->chatService->addMessage($chat, (string) $request->input('message')),
@@ -54,31 +53,14 @@ final readonly class ChatController
 
     public function addMessageStream(Request $request, Chat $chat): StreamedResponse
     {
-        if (tracking_id() !== $chat->tracking_id) {
-            abort(Response::HTTP_FORBIDDEN, 'You are not allowed to send messages to this chat.');
-        }
+        $this->abortUnlessOwner($chat, 'You are not allowed to send messages to this chat.');
 
         $message = (string) $request->input('message');
 
-        return new StreamedResponse(function () use ($chat, $message): void {
-            try {
-                foreach ($this->addMessageStreamAction->execute($chat, $message) as $event) {
-                    echo 'data: ' . json_encode($event, JSON_THROW_ON_ERROR) . "\n\n";
-                    ob_flush();
-                    flush();
-                }
-            } catch (BlockchainException|OpenAIError $e) {
-                $this->logger->error('Streaming message failed', ['error' => $e->getMessage()]);
-                echo 'data: ' . json_encode(['type' => 'error', 'data' => $e->getMessage()], JSON_THROW_ON_ERROR) . "\n\n";
-                ob_flush();
-                flush();
-            }
-        }, Response::HTTP_OK, [
-            'Content-Type' => 'text/event-stream',
-            'Cache-Control' => 'no-cache',
-            'Connection' => 'keep-alive',
-            'X-Accel-Buffering' => 'no',
-        ]);
+        return $this->streamEvents(
+            fn (): Generator => $this->addMessageStreamAction->execute($chat, $message),
+            'Streaming message failed',
+        );
     }
 
     public function index(): View
@@ -133,32 +115,15 @@ final readonly class ChatController
         $question = $request->getQuestionInput();
         $isPublic = !$request->isPrivate();
 
-        return new StreamedResponse(function () use ($search, $persona, $question, $isPublic): void {
-            try {
-                foreach ($this->createChatStreamAction->execute($search, $persona, $question, $isPublic) as $event) {
-                    echo 'data: ' . json_encode($event, JSON_THROW_ON_ERROR) . "\n\n";
-                    ob_flush();
-                    flush();
-                }
-            } catch (BlockchainException|OpenAIError $e) {
-                $this->logger->error('Streaming chat failed', ['error' => $e->getMessage()]);
-                echo 'data: ' . json_encode(['type' => 'error', 'data' => $e->getMessage()], JSON_THROW_ON_ERROR) . "\n\n";
-                ob_flush();
-                flush();
-            }
-        }, Response::HTTP_OK, [
-            'Content-Type' => 'text/event-stream',
-            'Cache-Control' => 'no-cache',
-            'Connection' => 'keep-alive',
-            'X-Accel-Buffering' => 'no',
-        ]);
+        return $this->streamEvents(
+            fn (): Generator => $this->createChatStreamAction->execute($search, $persona, $question, $isPublic),
+            'Streaming chat failed',
+        );
     }
 
     public function share(Chat $chat, Request $request): JsonResponse
     {
-        if (tracking_id() !== $chat->tracking_id) {
-            abort(Response::HTTP_FORBIDDEN, 'You are not allowed to share this chat.');
-        }
+        $this->abortUnlessOwner($chat, 'You are not allowed to share this chat.');
 
         $chat->is_shared = (bool)$request->input('shared');
         $chat->save();
@@ -168,13 +133,51 @@ final readonly class ChatController
 
     public function toggleVisibility(Chat $chat): JsonResponse
     {
-        if (tracking_id() !== $chat->tracking_id) {
-            abort(Response::HTTP_FORBIDDEN, 'You are not allowed to change this chat visibility.');
-        }
+        $this->abortUnlessOwner($chat, 'You are not allowed to change this chat visibility.');
 
         $chat->is_public = !$chat->is_public;
         $chat->save();
 
         return response()->json(['is_public' => $chat->is_public]);
+    }
+
+    private function abortUnlessOwner(Chat $chat, string $reason): void
+    {
+        if (tracking_id() !== $chat->tracking_id) {
+            abort(Response::HTTP_FORBIDDEN, $reason);
+        }
+    }
+
+    /**
+     * Wraps an action's event stream in the SSE wire format: the `data:` framing,
+     * the flush-per-event discipline and the no-buffering headers are one protocol
+     * contract, so both streaming endpoints share a single implementation.
+     *
+     * @param callable(): Generator<mixed> $events
+     */
+    private function streamEvents(callable $events, string $errorLogMessage): StreamedResponse
+    {
+        return new StreamedResponse(function () use ($events, $errorLogMessage): void {
+            try {
+                foreach ($events() as $event) {
+                    $this->emit($event);
+                }
+            } catch (BlockchainException|OpenAIError $e) {
+                $this->logger->error($errorLogMessage, ['error' => $e->getMessage()]);
+                $this->emit(['type' => 'error', 'data' => $e->getMessage()]);
+            }
+        }, Response::HTTP_OK, [
+            'Content-Type' => 'text/event-stream',
+            'Cache-Control' => 'no-cache',
+            'Connection' => 'keep-alive',
+            'X-Accel-Buffering' => 'no',
+        ]);
+    }
+
+    private function emit(mixed $event): void
+    {
+        echo 'data: ' . json_encode($event, JSON_THROW_ON_ERROR) . "\n\n";
+        ob_flush();
+        flush();
     }
 }

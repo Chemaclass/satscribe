@@ -9,12 +9,13 @@ use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Modules\Payment\Domain\Data\AlbySettleWebhookPayload;
 use Modules\Payment\Domain\Exception\InvalidAlbyWebhookSignatureException;
 use Modules\Payment\Domain\Repository\PaymentRepositoryInterface;
-use Modules\Shared\Infrastructure\Http\Middleware\IpRateLimiter;
+use Modules\Shared\Domain\RateLimit\RateLimitKeys;
 use Psr\Log\LoggerInterface;
 use Svix\Webhook;
 use Throwable;
 
 use function is_array;
+use function is_string;
 
 final readonly class AlbySettleWebhookAction
 {
@@ -84,13 +85,12 @@ final readonly class AlbySettleWebhookAction
         if ($shortHash === null) {
             $this->logger->warning('No hash found in memo', ['memo' => $payload->memo]);
         } else {
-            $cached = $this->cache->pull(IpRateLimiter::createCacheKey($shortHash));
+            $cached = $this->cache->pull(RateLimitKeys::forInvoiceTrackingMapping($shortHash));
 
-            if (is_array($cached)) {
-                $trackingId = $cached['tracking_id'] ?? null;
-            } elseif ($cached !== null) {
-                $trackingId = $cached;
-            }
+            // The cache writer stores ['tracking_id' => string]; the bare-string
+            // branch tolerates entries written by an earlier format.
+            $rawTrackingId = is_array($cached) ? ($cached['tracking_id'] ?? null) : $cached;
+            $trackingId = is_string($rawTrackingId) ? $rawTrackingId : null;
 
             if ($cached !== null) {
                 $this->logger->info('Tracking data found for short hash', ['shortHash' => $shortHash]);
@@ -99,7 +99,7 @@ final readonly class AlbySettleWebhookAction
             }
 
             if ($trackingId && !$isFailure) {
-                $cacheKey = IpRateLimiter::createRateLimitKey($trackingId);
+                $cacheKey = RateLimitKeys::forTrackingId($trackingId);
                 $this->rateLimiter->clear($cacheKey);
 
                 $this->logger->info('Rate limit cleared for tracking ID', [

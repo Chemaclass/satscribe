@@ -17,14 +17,7 @@
                 {{ __('Trace') }}
             </button>
             <div x-show="loading" x-cloak class="flex justify-center mt-2">
-                <span class="dots-loader">
-                    <span class="dot"></span>
-                    <span class="dot"></span>
-                    <span class="dot"></span>
-                    <span class="dot"></span>
-                    <span class="dot"></span>
-                    <span class="dot"></span>
-                </span>
+                <x-dots-loader />
             </div>
         </form>
 

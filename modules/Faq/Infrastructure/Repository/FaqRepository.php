@@ -22,16 +22,25 @@ final class FaqRepository implements FaqRepositoryInterface
         return $query->first();
     }
 
+    /**
+     * @param  array<string, mixed>  $data
+     */
     public function update(int $id, array $data): void
     {
         DB::table('faqs')->where('id', $id)->update($data);
     }
 
+    /**
+     * @param  list<array<string, mixed>>  $rows
+     */
     public function insertMany(array $rows): void
     {
         DB::table('faqs')->insert($rows);
     }
 
+    /**
+     * @return Collection<int, Faq>
+     */
     public function getCollectionBySearch(string $search): Collection
     {
         $query = Faq::query()->where('lang', app()->getLocale());

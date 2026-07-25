@@ -10,6 +10,7 @@ use Modules\Chat\Application\AddMessageStreamAction;
 use Modules\Chat\Application\ChatFacade;
 use Modules\Chat\Application\CreateChatAction;
 use Modules\Chat\Application\CreateChatStreamAction;
+use Modules\Chat\Application\OpenAiRateLimiter;
 use Modules\Chat\Domain\AddMessageActionInterface;
 use Modules\Chat\Domain\AddMessageStreamActionInterface;
 use Modules\Chat\Domain\ChatFacadeInterface;
@@ -40,38 +41,14 @@ final class ChatServiceProvider extends ServiceProvider
     /** @var array<class-string, class-string> */
     public $bindings = [];
 
-    /**
-     * Register any application services.
-     */
     #[Override]
     public function register(): void
     {
-        $this->app->when(CreateChatAction::class)
+        $this->app->when(OpenAiRateLimiter::class)
             ->needs('$trackingId')
             ->give(static fn () => tracking_id());
-        $this->app->when(CreateChatAction::class)
-            ->needs('$maxOpenAIAttempts')
-            ->giveConfig('services.openai.max_attempts');
-
-        $this->app->when(AddMessageAction::class)
-            ->needs('$trackingId')
-            ->give(static fn () => tracking_id());
-        $this->app->when(AddMessageAction::class)
-            ->needs('$maxOpenAIAttempts')
-            ->giveConfig('services.openai.max_attempts');
-
-        $this->app->when(AddMessageStreamAction::class)
-            ->needs('$trackingId')
-            ->give(static fn () => tracking_id());
-        $this->app->when(AddMessageStreamAction::class)
-            ->needs('$maxOpenAIAttempts')
-            ->giveConfig('services.openai.max_attempts');
-
-        $this->app->when(CreateChatStreamAction::class)
-            ->needs('$trackingId')
-            ->give(static fn () => tracking_id());
-        $this->app->when(CreateChatStreamAction::class)
-            ->needs('$maxOpenAIAttempts')
+        $this->app->when(OpenAiRateLimiter::class)
+            ->needs('$maxAttempts')
             ->giveConfig('services.openai.max_attempts');
 
         $this->app->when(ChatRepository::class)

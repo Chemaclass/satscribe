@@ -6,7 +6,11 @@ namespace Modules\UtxoTrace\Infrastructure\Repository;
 
 use App\Models\UtxoTrace;
 use Modules\UtxoTrace\Domain\Repository\UtxoTraceRepositoryInterface;
+use Modules\UtxoTrace\Domain\UtxoTraceFacadeInterface;
 
+/**
+ * @phpstan-import-type TReferencedTrace from UtxoTraceFacadeInterface
+ */
 final readonly class UtxoTraceRepository implements UtxoTraceRepositoryInterface
 {
     public function find(string $txid, int $depth): ?UtxoTrace
@@ -16,6 +20,9 @@ final readonly class UtxoTraceRepository implements UtxoTraceRepositoryInterface
             ->first();
     }
 
+    /**
+     * @param  TReferencedTrace  $result
+     */
     public function store(string $txid, int $depth, array $result): UtxoTrace
     {
         return UtxoTrace::updateOrCreate(

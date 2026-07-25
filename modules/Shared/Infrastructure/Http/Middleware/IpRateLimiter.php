@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\RateLimiter;
 use Modules\Payment\Domain\AlbyClientInterface;
 use Modules\Payment\Domain\CachedInvoiceValidatorInterface;
 use Modules\Shared\Domain\Data\Payment\InvoiceData;
+use Modules\Shared\Domain\RateLimit\RateLimitKeys;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -32,7 +33,7 @@ final readonly class IpRateLimiter
     public function handle(Request $request, Closure $next): Response
     {
         $trackingId = tracking_id();
-        $rateLimitKey = self::createRateLimitKey($trackingId);
+        $rateLimitKey = RateLimitKeys::forTrackingId($trackingId);
         $shortHash = substr(md5($rateLimitKey), 0, 8);
         $invoiceCacheKey = "ln_invoice:{$shortHash}";
 
@@ -62,16 +63,6 @@ final readonly class IpRateLimiter
         return $next($request);
     }
 
-    public static function createRateLimitKey(string $trackingId): string
-    {
-        return 'ip_rate_limit_' . $trackingId;
-    }
-
-    public static function createCacheKey(string $hash): string
-    {
-        return 'invoice_tracking_mapping_' . $hash;
-    }
-
     private function logTracking(string $trackingId, string $cacheKey): void
     {
         $this->logger->debug('Tracking request', [
@@ -83,7 +74,7 @@ final readonly class IpRateLimiter
     private function cacheTrackingMapping(string $hash, string $trackingId): void
     {
         $this->cache->put(
-            self::createCacheKey($hash),
+            RateLimitKeys::forInvoiceTrackingMapping($hash),
             ['tracking_id' => $trackingId],
             $this->now->copy()->addSeconds($this->lnInvoiceExpirySeconds),
         );
@@ -111,6 +102,9 @@ final readonly class IpRateLimiter
         return $this->buildRateLimitedResponse($rateLimitKey, $invoice, $maxAttempts);
     }
 
+    /**
+     * @param  array<string, mixed>  $invoice
+     */
     private function buildRateLimitedResponse(string $key, array $invoice, int $maxAttempts): Response
     {
         return response()->json([
@@ -122,6 +116,9 @@ final readonly class IpRateLimiter
         ], Response::HTTP_TOO_MANY_REQUESTS);
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     private function buildInvoice(string $shortHash, int $invoiceAmount): array
     {
         return $this->albyClient->createInvoice(new InvoiceData(
@@ -131,6 +128,9 @@ final readonly class IpRateLimiter
         ));
     }
 
+    /**
+     * @param  array<string, mixed>  $invoice
+     */
     private function cacheInvoice(string $key, array $invoice): void
     {
         $this->logger->debug('Caching new invoice', ['invoiceCacheKey' => $key]);
