@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Blockchain;
 
+use Illuminate\Cache\ArrayStore;
+use Illuminate\Cache\Repository as CacheRepository;
 use Illuminate\Contracts\Cache\Repository as Cache;
 use Illuminate\Http\Client\Response;
 use Modules\Blockchain\Application\Blockstream\BlockHeightProvider;
@@ -27,11 +29,6 @@ final class BlockHeightProviderTest extends TestCase
 
     public function test_get_current_block_height_returns_api_height_when_enabled(): void
     {
-        $cache = $this->createMock(Cache::class);
-        $cache->expects($this->once())
-            ->method('put')
-            ->with('max_possible_block_height', 800001, $this->anything());
-
         $response = $this->createMock(Response::class);
         $response->method('failed')->willReturn(false);
         $response->method('body')->willReturn('800000');
@@ -44,14 +41,19 @@ final class BlockHeightProviderTest extends TestCase
 
         $logger = self::createStub(LoggerInterface::class);
 
-        $provider = new BlockHeightProvider($cache, $http, $logger, enabled: true);
+        $provider = new BlockHeightProvider(
+            new CacheRepository(new ArrayStore()),
+            $http,
+            $logger,
+            enabled: true,
+        );
 
         $this->assertSame(800000, $provider->getCurrentBlockHeight());
     }
 
     public function test_get_current_block_height_throws_on_api_failure(): void
     {
-        $cache = self::createStub(Cache::class);
+        $cache = new CacheRepository(new ArrayStore());
 
         $response = $this->createMock(Response::class);
         $response->method('failed')->willReturn(true);
@@ -70,7 +72,7 @@ final class BlockHeightProviderTest extends TestCase
 
     public function test_get_current_block_height_throws_on_invalid_height(): void
     {
-        $cache = self::createStub(Cache::class);
+        $cache = new CacheRepository(new ArrayStore());
 
         $response = $this->createMock(Response::class);
         $response->method('failed')->willReturn(false);
@@ -118,5 +120,34 @@ final class BlockHeightProviderTest extends TestCase
 
         // When disabled, returns FALLBACK_HEIGHT (100_000_000) + BUFFER_HEIGHT (1) = 100_000_001
         $this->assertSame(100_000_001, $provider->getMaxPossibleBlockHeight());
+    }
+
+    /**
+     * The tip height is returned on every home and chat page render. Only
+     * getMaxPossibleBlockHeight() read the cache, so this one made a fresh call
+     * to Blockstream for every page view.
+     */
+    public function test_repeated_calls_query_the_api_once(): void
+    {
+        $response = $this->createMock(Response::class);
+        $response->method('failed')->willReturn(false);
+        $response->method('body')->willReturn('800000');
+
+        $http = $this->createMock(HttpClientInterface::class);
+        $http->expects($this->once())
+            ->method('get')
+            ->with('https://blockstream.info/api/blocks/tip/height')
+            ->willReturn($response);
+
+        $provider = new BlockHeightProvider(
+            new CacheRepository(new ArrayStore()),
+            $http,
+            self::createStub(LoggerInterface::class),
+            enabled: true,
+        );
+
+        self::assertSame(800000, $provider->getCurrentBlockHeight());
+        self::assertSame(800000, $provider->getCurrentBlockHeight());
+        self::assertSame(800000, $provider->getCurrentBlockHeight());
     }
 }

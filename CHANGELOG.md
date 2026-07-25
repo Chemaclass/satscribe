@@ -44,6 +44,10 @@ Anything older than the first section below lives in `git log`.
 - The answer cache returned whichever matching row the database happened to
   yield rather than the newest, so the first answer ever generated for a
   question was served indefinitely.
+- **The block tip height was fetched from Blockstream on every page view.** Only
+  the derived maximum read the cache; the current height itself never did, so
+  each home and chat render made its own uncached outbound call. Now cached for
+  the same ten minutes.
 - A chat with no messages returned 500 instead of a not found.
 - Unsharing a chat reported it as shared: the endpoint answered a constant
   `true` whatever it stored, and read the flag with a cast that turns the string
