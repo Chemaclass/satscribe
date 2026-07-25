@@ -9,7 +9,29 @@ Anything older than the first section below lives in `git log`.
 
 ## [Unreleased]
 
-Nothing yet.
+### Fixed
+
+- **Two of the three OpenRouter models on offer no longer existed.** Both free
+  entries (`meta-llama/llama-3.3-70b-instruct:free`,
+  `deepseek/deepseek-chat-v3-0324:free`) had been withdrawn upstream, so picking
+  either one failed. Every model id is now checked against the provider's own
+  catalogue.
+- The Nostr login did not rotate the session id, leaving the app open to session
+  fixation. Rotated on login and logout.
+- A signed Alby webhook with an unusable body was reported as a signature
+  failure, and answered 5xx so Alby retried it forever. It is now a payload
+  error answered with 422.
+- The model picker opened downward even when there was no room, cutting off the
+  API key field. It now flips upward when the space below is too small.
+
+### Changed
+
+- Refreshed the model catalogue: Groq gains GPT-OSS 120B/20B and Kimi K2,
+  OpenRouter moves to current free models, and OpenAI gains the cheaper
+  GPT-5 nano / GPT-4.1 nano tiers.
+- Providers with a free tier are listed first, free models before paid ones, and
+  paid models cheapest-first — so the least expensive option is always nearest
+  the top.
 
 ## 2026-07-25
 

@@ -104,14 +104,37 @@ final class OpenAIFacadeTest extends TestCase
         $this->facade()->resolveSelection('https://evil.test', 'gpt-4o', 'sk-user-key-0123456789');
     }
 
-    public function test_available_providers_exposes_the_allowlist(): void
+    /**
+     * The order is what the picker renders, so the free-tier providers come
+     * first and the paid-only one last.
+     */
+    public function test_available_providers_exposes_the_allowlist_free_tier_first(): void
     {
         $ids = array_map(
             static fn (AiProviderDefinition $provider): string => $provider->id(),
             $this->facade()->availableProviders(),
         );
 
-        self::assertSame(['openai', 'openrouter', 'groq'], $ids);
+        self::assertSame(['groq', 'openrouter', 'openai'], $ids);
+    }
+
+    /**
+     * A visitor scanning the list should meet the cheapest option first, and
+     * never have a paid model sitting above a free one.
+     */
+    public function test_every_provider_lists_its_free_models_first(): void
+    {
+        foreach ($this->facade()->availableProviders() as $provider) {
+            $free = array_map(
+                static fn ($model): bool => $model->free,
+                $provider->models,
+            );
+
+            $sorted = $free;
+            rsort($sorted);
+
+            self::assertSame($sorted, $free, "{$provider->id()} lists a paid model above a free one.");
+        }
     }
 
     private function facade(): OpenAIFacade
