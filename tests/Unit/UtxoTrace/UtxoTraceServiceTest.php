@@ -238,4 +238,53 @@ final class UtxoTraceServiceTest extends TestCase
             }
         };
     }
+
+    /**
+     * The transaction memo used to be a method-level `static`, so it was shared
+     * by every instance for the life of the process. That leaked across requests
+     * in a long-lived worker and silently poisoned unrelated tests: one test's
+     * txid would satisfy another's cache and drop its HTTP expectation to zero.
+     */
+    public function test_transaction_cache_is_not_shared_between_instances(): void
+    {
+        $repo = new class() implements UtxoTraceRepositoryInterface {
+            public function find(string $txid, int $depth): ?UtxoTrace
+            {
+                return null;
+            }
+
+            public function store(string $txid, int $depth, array $result): UtxoTrace
+            {
+                return new UtxoTrace();
+            }
+        };
+
+        $tx = [
+            'vin' => [],
+            'vout' => [['scriptpubkey_type' => 'p2pkh', 'value' => 7]],
+        ];
+
+        $logger = $this->createStub(LoggerInterface::class);
+
+        $makeTracer = function () use ($repo, $logger, $tx): UtxoTracer {
+            $response = $this->createConfiguredMock(Response::class, [
+                'failed' => false,
+                'json' => $tx,
+            ]);
+
+            $http = $this->createMock(HttpClientInterface::class);
+            // Each tracer must fetch for itself; a shared cache would make the
+            // second instance expect zero calls and fail here.
+            $http->expects($this->once())
+                ->method('get')
+                ->willReturn($response);
+
+            return new UtxoTracer($http, $logger, $repo);
+        };
+
+        $first = $makeTracer()->buildBacktrace('shared-txid', 1);
+        $second = $makeTracer()->buildBacktrace('shared-txid', 1);
+
+        self::assertSame($first, $second);
+    }
 }

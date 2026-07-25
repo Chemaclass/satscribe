@@ -10,6 +10,8 @@ use Modules\UtxoTrace\Domain\Repository\UtxoTraceRepositoryInterface;
 use Modules\UtxoTrace\Domain\UtxoTraceFacadeInterface;
 use Psr\Log\LoggerInterface;
 
+use function count;
+
 /**
  * Shapes below are derived from how this class reads the Blockstream
  * `/tx/{txid}` response, not from the full API contract, so the external
@@ -56,14 +58,25 @@ use Psr\Log\LoggerInterface;
  *
  * @phpstan-import-type TReferencedTrace from UtxoTraceFacadeInterface
  */
-final readonly class UtxoTracer
+final class UtxoTracer
 {
     private const BASE_URL = 'https://blockstream.info/api';
 
+    /**
+     * Walking a UTXO graph revisits the same transaction repeatedly, so results
+     * are memoised for the duration of a trace. The bound matters because
+     * UtxoTraceFacade is a singleton: in a queue worker this instance outlives
+     * any single job, so an unbounded map would grow for the life of the process.
+     */
+    private const MAX_CACHED_TRANSACTIONS = 500;
+
+    /** @var array<string, array<string, mixed>> */
+    private array $transactionCache = [];
+
     public function __construct(
-        private HttpClientInterface $http,
-        private LoggerInterface $logger,
-        private UtxoTraceRepositoryInterface $repository,
+        private readonly HttpClientInterface $http,
+        private readonly LoggerInterface $logger,
+        private readonly UtxoTraceRepositoryInterface $repository,
     ) {
     }
 
@@ -197,10 +210,8 @@ final readonly class UtxoTracer
      */
     private function getTransaction(string $txid): array
     {
-        static $cache = [];
-
-        if (isset($cache[$txid])) {
-            return $cache[$txid];
+        if (isset($this->transactionCache[$txid])) {
+            return $this->transactionCache[$txid];
         }
 
         $url = self::BASE_URL . "/tx/{$txid}";
@@ -216,10 +227,27 @@ final readonly class UtxoTracer
                 'status' => $response->status(),
             ]);
 
-            return $cache[$txid] = [];
+            return $this->remember($txid, []);
         }
 
-        return $cache[$txid] = $response->json();
+        return $this->remember($txid, $response->json());
+    }
+
+    /**
+     * @param  array<string, mixed>  $transaction
+     *
+     * @return TTransaction
+     */
+    private function remember(string $txid, array $transaction): array
+    {
+        if (count($this->transactionCache) >= self::MAX_CACHED_TRANSACTIONS) {
+            array_shift($this->transactionCache);
+        }
+
+        $this->transactionCache[$txid] = $transaction;
+
+        /** @var TTransaction $transaction */
+        return $transaction;
     }
 
     /**
