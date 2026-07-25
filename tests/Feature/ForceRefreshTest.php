@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
+use App\Models\Chat;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Modules\Chat\Infrastructure\Repository\ChatRepository;
 use Modules\Shared\Domain\Data\Blockchain\TransactionData;
@@ -54,7 +55,7 @@ final class ForceRefreshTest extends TestCase
         self::assertFalse($chat->refresh()->force_refresh);
     }
 
-    private function createChatFor(bool $confirmed): \App\Models\Chat
+    private function createChatFor(bool $confirmed): Chat
     {
         $repository = new ChatRepository(10, 'owner');
 

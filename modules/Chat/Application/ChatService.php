@@ -5,13 +5,12 @@ declare(strict_types=1);
 namespace Modules\Chat\Application;
 
 use App\Models\Chat;
-use App\Models\Message;
 use Modules\Blockchain\Domain\BlockchainFacadeInterface;
 use Modules\Blockchain\Domain\Exception\BlockchainException;
 use Modules\Chat\Domain\AddMessageActionInterface;
 use Modules\Chat\Domain\CreateChatActionInterface;
 use Modules\Chat\Domain\Data\QuestionPlaceholder;
-use Modules\Chat\Domain\Repository\ChatRepositoryInterface;
+use Modules\Chat\Domain\Repository\MessageRepositoryInterface;
 use Modules\Chat\Infrastructure\Http\Request\CreateChatRequest;
 use Modules\OpenAI\Domain\Exception\OpenAIError;
 use Modules\Shared\Domain\Data\Chat\PromptInput;
@@ -23,7 +22,7 @@ final readonly class ChatService
         private BlockchainFacadeInterface $blockchainFacade,
         private CreateChatActionInterface $createChatAction,
         private AddMessageActionInterface $addMessageAction,
-        private ChatRepositoryInterface $chatRepository,
+        private MessageRepositoryInterface $messageRepository,
         private SuggestedPromptService $promptService,
     ) {
     }
@@ -50,7 +49,6 @@ final readonly class ChatService
             'chat' => $chat,
             'search' => $firstMsg->meta['input'] ?? '',
             'persona' => $firstMsg->meta['persona'] ?? '',
-            'totalChats' => $this->chatRepository->getTotalChats(),
         ];
     }
 
@@ -78,7 +76,7 @@ final readonly class ChatService
             'maxBitcoinBlockHeight' => $this->blockchainFacade->getMaxPossibleBlockHeight(),
             'latestBlockHeight' => $this->blockchainFacade->getCurrentBlockHeight(),
             'personaDescriptions' => PromptPersona::descriptions()->toJson(),
-            'totalMessages' => Message::count(),
+            'totalMessages' => $this->messageRepository->countAll(),
         ];
     }
 

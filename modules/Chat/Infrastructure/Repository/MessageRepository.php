@@ -30,4 +30,9 @@ final readonly class MessageRepository implements MessageRepositoryInterface
     {
         return Message::with('chat')->find($messageId);
     }
+
+    public function countAll(): int
+    {
+        return Message::count();
+    }
 }

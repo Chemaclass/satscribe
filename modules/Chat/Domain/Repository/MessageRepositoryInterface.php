@@ -13,4 +13,6 @@ interface MessageRepositoryInterface
     public function findAssistantMessage(PromptInput $input, PromptPersona $persona, string $question): ?Message;
 
     public function findWithChat(int $messageId): ?Message;
+
+    public function countAll(): int;
 }

@@ -128,13 +128,13 @@ final readonly class ChatRepository implements ChatRepositoryInterface
             $query->where('tracking_id', $this->trackingId);
         }
 
+        // timestamps() is second-precision, so chats made in the same second
+        // tie on created_at. SQLite happens to break the tie consistently, but
+        // nothing guarantees that, and an unstable order under LIMIT/OFFSET
+        // repeats or skips rows between pages.
         return $query->latest()
+            ->orderByDesc('id')
             ->simplePaginate($this->perPage);
-    }
-
-    public function getTotalChats(): int
-    {
-        return Chat::count();
     }
 
     public function setShared(Chat $chat, bool $shared): void

@@ -200,4 +200,20 @@ final class MessageRepositoryTest extends TestCase
         $this->assertNotNull($result);
         $this->assertSame('newest answer', $result->content);
     }
+
+    public function test_count_all_counts_every_message(): void
+    {
+        $chat = Chat::create(['ulid' => 'test-ulid', 'is_public' => true]);
+
+        foreach (['user', 'assistant', 'user'] as $role) {
+            Message::create([
+                'chat_id' => $chat->id,
+                'role' => $role,
+                'content' => 'content',
+                'meta' => [],
+            ]);
+        }
+
+        $this->assertSame(3, (new MessageRepository())->countAll());
+    }
 }

@@ -12,7 +12,7 @@ use Modules\Chat\Application\ChatService;
 use Modules\Chat\Application\SuggestedPromptService;
 use Modules\Chat\Domain\AddMessageActionInterface;
 use Modules\Chat\Domain\CreateChatActionInterface;
-use Modules\Chat\Domain\Repository\ChatRepositoryInterface;
+use Modules\Chat\Domain\Repository\MessageRepositoryInterface;
 use Modules\Shared\Domain\Enum\Chat\PromptPersona;
 use Tests\TestCase;
 
@@ -23,7 +23,7 @@ final class ChatServiceTest extends TestCase
     private BlockchainFacadeInterface $blockchainFacade;
     private CreateChatActionInterface $createChatAction;
     private AddMessageActionInterface $addMessageAction;
-    private ChatRepositoryInterface $chatRepository;
+    private MessageRepositoryInterface $messageRepository;
     private SuggestedPromptService $promptService;
     private ChatService $service;
 
@@ -34,14 +34,14 @@ final class ChatServiceTest extends TestCase
         $this->blockchainFacade = $this->createMock(BlockchainFacadeInterface::class);
         $this->createChatAction = $this->createMock(CreateChatActionInterface::class);
         $this->addMessageAction = $this->createMock(AddMessageActionInterface::class);
-        $this->chatRepository = $this->createMock(ChatRepositoryInterface::class);
+        $this->messageRepository = $this->createMock(MessageRepositoryInterface::class);
         $this->promptService = new SuggestedPromptService();
 
         $this->service = new ChatService(
             $this->blockchainFacade,
             $this->createChatAction,
             $this->addMessageAction,
-            $this->chatRepository,
+            $this->messageRepository,
             $this->promptService,
         );
     }
@@ -52,7 +52,6 @@ final class ChatServiceTest extends TestCase
 
         $this->blockchainFacade->method('getMaxPossibleBlockHeight')->willReturn(800001);
         $this->blockchainFacade->method('getCurrentBlockHeight')->willReturn(800000);
-        $this->chatRepository->method('getTotalChats')->willReturn(100);
 
         $result = $this->service->getChatData($chat);
 
@@ -66,7 +65,6 @@ final class ChatServiceTest extends TestCase
         $this->assertArrayHasKey('chat', $result);
         $this->assertArrayHasKey('search', $result);
         $this->assertArrayHasKey('persona', $result);
-        $this->assertArrayHasKey('totalChats', $result);
     }
 
     public function test_get_chat_data_includes_correct_block_height(): void
@@ -75,7 +73,6 @@ final class ChatServiceTest extends TestCase
 
         $this->blockchainFacade->method('getMaxPossibleBlockHeight')->willReturn(800001);
         $this->blockchainFacade->method('getCurrentBlockHeight')->willReturn(800000);
-        $this->chatRepository->method('getTotalChats')->willReturn(100);
 
         $result = $this->service->getChatData($chat);
 
@@ -83,19 +80,34 @@ final class ChatServiceTest extends TestCase
         $this->assertSame(800000, $result['latestBlockHeight']);
     }
 
-    public function test_get_chat_data_includes_total_chats(): void
+    /**
+     * Only the landing page shows the counter, and it reads totalMessages. The
+     * chat page used to run a full table count for a value it never rendered.
+     */
+    public function test_get_index_data_counts_messages_once(): void
+    {
+        $this->blockchainFacade->method('getMaxPossibleBlockHeight')->willReturn(800001);
+        $this->blockchainFacade->method('getCurrentBlockHeight')->willReturn(800000);
+        $this->messageRepository->expects($this->once())
+            ->method('countAll')
+            ->willReturn(250);
+
+        $result = $this->service->getIndexData();
+
+        $this->assertSame(250, $result['totalMessages']);
+    }
+
+    public function test_get_chat_data_does_not_count_anything(): void
     {
         $chat = $this->createChatWithMessages();
 
         $this->blockchainFacade->method('getMaxPossibleBlockHeight')->willReturn(800001);
         $this->blockchainFacade->method('getCurrentBlockHeight')->willReturn(800000);
-        $this->chatRepository->expects($this->once())
-            ->method('getTotalChats')
-            ->willReturn(250);
+        $this->messageRepository->expects($this->never())->method('countAll');
 
         $result = $this->service->getChatData($chat);
 
-        $this->assertSame(250, $result['totalChats']);
+        $this->assertArrayNotHasKey('totalChats', $result);
     }
 
     public function test_add_message_calls_action_and_returns_response(): void
@@ -147,31 +159,6 @@ final class ChatServiceTest extends TestCase
         $result = $this->service->getIndexData();
 
         $this->assertIsString($result['personaDescriptions']);
-    }
-
-    public function test_get_index_data_returns_total_message_count(): void
-    {
-        // Create some messages
-        $chat = Chat::create(['ulid' => 'test-ulid', 'is_public' => true]);
-        Message::create([
-            'chat_id' => $chat->id,
-            'role' => 'user',
-            'content' => 'Test message',
-            'meta' => ['type' => 'transaction', 'input' => 'abc123', 'persona' => 'educator'],
-        ]);
-        Message::create([
-            'chat_id' => $chat->id,
-            'role' => 'assistant',
-            'content' => 'Response',
-            'meta' => [],
-        ]);
-
-        $this->blockchainFacade->method('getMaxPossibleBlockHeight')->willReturn(800001);
-        $this->blockchainFacade->method('getCurrentBlockHeight')->willReturn(800000);
-
-        $result = $this->service->getIndexData();
-
-        $this->assertSame(2, $result['totalMessages']);
     }
 
     private function createChatWithMessages(): Chat
