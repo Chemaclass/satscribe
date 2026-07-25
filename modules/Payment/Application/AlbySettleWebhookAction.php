@@ -116,7 +116,7 @@ final readonly class AlbySettleWebhookAction
             }
         }
 
-        $invoiceCacheKey = "ln_invoice:{$shortHash}";
+        $invoiceCacheKey = RateLimitKeys::forInvoice((string) $shortHash);
 
         $this->rateLimiter->clear($invoiceCacheKey);
 

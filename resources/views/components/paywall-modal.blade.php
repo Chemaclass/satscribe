@@ -108,6 +108,18 @@
                     this.stopPolling();
                     this.show = false;
                     document.body.classList.remove('modal-open');
+
+                    // The request that hit the paywall is now allowed, so resume
+                    // it in place. Reloading discarded the pending question and
+                    // sent the visitor back to the home page right after paying.
+                    const resume = window.__PAYWALL_RETRY;
+                    window.__PAYWALL_RETRY = null;
+
+                    if (typeof resume === 'function') {
+                        resume();
+                        return;
+                    }
+
                     sessionStorage.setItem('scrollToBottom', '1');
                     window.location.reload();
                 });

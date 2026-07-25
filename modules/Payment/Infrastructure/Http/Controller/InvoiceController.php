@@ -5,19 +5,19 @@ declare(strict_types=1);
 namespace Modules\Payment\Infrastructure\Http\Controller;
 
 use Illuminate\Http\JsonResponse;
-use Modules\Payment\Application\AlbyClient;
+use Modules\Payment\Domain\ConfirmInvoicePaymentActionInterface;
 
 final readonly class InvoiceController
 {
     public function __construct(
-        private AlbyClient $albyClient,
+        private ConfirmInvoicePaymentActionInterface $confirmPayment,
     ) {
     }
 
     public function status(string $identifier): JsonResponse
     {
         return response()->json([
-            'paid' => $this->albyClient->isInvoicePaid($identifier),
+            'paid' => $this->confirmPayment->execute($identifier, tracking_id()),
         ]);
     }
 }

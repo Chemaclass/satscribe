@@ -20,6 +20,15 @@ final readonly class IpRateLimiter
 {
     private const INVOICE_CACHE_MARGIN_SECONDS = 10;
 
+    /**
+     * How long a short-hash -> tracking-id mapping survives. It used to expire
+     * with the invoice, so a visitor who paid near the deadline settled after
+     * the mapping was gone: the webhook could no longer tell whose paywall to
+     * lift, and the payment bought nothing. It outlives the invoice by a wide
+     * margin now — it is two small strings.
+     */
+    private const TRACKING_MAPPING_TTL_SECONDS = 86400;
+
     public function __construct(
         private PaywallInvoiceIssuerInterface $invoiceIssuer,
         private CacheRepository $cache,
@@ -33,8 +42,8 @@ final readonly class IpRateLimiter
     {
         $trackingId = tracking_id();
         $rateLimitKey = RateLimitKeys::forTrackingId($trackingId);
-        $shortHash = substr(md5($rateLimitKey), 0, 8);
-        $invoiceCacheKey = "ln_invoice:{$shortHash}";
+        $shortHash = RateLimitKeys::shortHashFor($trackingId);
+        $invoiceCacheKey = RateLimitKeys::forInvoice($shortHash);
 
         $this->logTracking($trackingId, $invoiceCacheKey);
         $this->cacheTrackingMapping($shortHash, $trackingId);
@@ -73,7 +82,7 @@ final readonly class IpRateLimiter
         $this->cache->put(
             RateLimitKeys::forInvoiceTrackingMapping($hash),
             ['tracking_id' => $trackingId],
-            $this->now->copy()->addSeconds($this->lnInvoiceExpirySeconds),
+            $this->now->copy()->addSeconds(self::TRACKING_MAPPING_TTL_SECONDS),
         );
     }
 

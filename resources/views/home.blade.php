@@ -828,6 +828,16 @@
                         retryBtn.remove();
                     }
 
+                    // Paying resumes the request that hit the paywall. Reloading
+                    // instead threw the pending question away and dropped the
+                    // visitor back on the home page having just paid for it.
+                    if (outcome.status === 'rate-limited' && retry) {
+                        window.__PAYWALL_RETRY = () => {
+                            noticeEl.classList.add('hidden');
+                            retry();
+                        };
+                    }
+
                     const payBtn = noticeEl.querySelector('[data-stream-action="pay"]');
                     if (payBtn) {
                         payBtn.addEventListener('click', () => {
