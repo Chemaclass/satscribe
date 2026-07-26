@@ -81,25 +81,11 @@
                 {{-- Helper text --}}
                 <p id="search-helper" x-text="helperText" :class="helperClass" class="text-sm mt-1 block cursor-pointer" @click="focusSearchInput"></p>
 
-                {{-- Advanced options --}}
-                <div x-data="{ showAdvanced: false }" class="form-group ">
-                    <button
-                            type="button"
-                            class="text-sm font-medium flex items-center cursor-pointer gap-2 mt-4"
-                            @click="showAdvanced = !showAdvanced"
-                    >
-                        <i data-lucide="sliders-horizontal"></i>
-                        <span x-show="!showAdvanced">{{ __('Show advanced fields') }} ▾</span>
-                        <span x-show="showAdvanced">{{ __('Hide advanced fields') }} ▴</span>
-                    </button>
-
-                    <div
-                            x-show="showAdvanced"
-                            x-cloak
-                            x-transition
-                            class="mt-4 advanced-fields rounded-lg px-4 py-3 space-y-4 shadow-sm"
-                    >
-                        {{-- Persona selection --}}
+                {{-- The two controls that shape the answer stay in the form:
+                     hiding them behind a disclosure meant most visitors never
+                     changed the persona at all. --}}
+                <div class="form-group mt-5 space-y-5">
+                    {{-- Persona selection --}}
                         <div
                                 x-data="{
                                 selectedPersona: '{{ $persona ?? PromptPersona::DEFAULT }}',
@@ -131,7 +117,7 @@
                             <small class="checkbox-help block" x-text="descriptions[selectedPersona]"></small>
                         </div>
 
-                        {{-- Optional question + Suggested Prompts --}}
+                    {{-- Optional question + Suggested Prompts --}}
                         <div class="form-section mb-6">
                             <label for="question" class="block text-sm font-medium text-gray-900 mb-1">
                                 {{ __('Ask a Question') }}
@@ -148,7 +134,7 @@
                                     maxlength="200"
                             >
                             <small id="questionHelp" class="text-gray-600 text-sm mt-1 block mb-2">
-                                {{ __('Ask the AI a specific question about this transaction or block.') }}
+                                {{ __('Optional. Leave blank for a general overview.') }}
                             </small>
 
                             {{-- Suggested Prompts inline --}}
@@ -186,7 +172,28 @@
                             <div class="error mt-1 text-red-500 text-sm" role="alert">{{ $message }}</div>
                             @enderror
                         </div>
+                </div>
 
+                {{-- Rarely-touched switches, collapsed by default --}}
+                <div x-data="{ showAdvanced: false }" class="form-group">
+                    <button
+                            type="button"
+                            class="options-toggle"
+                            :aria-expanded="showAdvanced ? 'true' : 'false'"
+                            @click="showAdvanced = !showAdvanced"
+                    >
+                        <i data-lucide="sliders-horizontal" class="w-4 h-4 shrink-0"></i>
+                        <span>{{ __('More options') }}</span>
+                        <i data-lucide="chevron-down" class="w-4 h-4 shrink-0 options-toggle__chevron"
+                           :class="showAdvanced ? 'options-toggle__chevron--open' : ''"></i>
+                    </button>
+
+                    <div
+                            x-show="showAdvanced"
+                            x-cloak
+                            x-transition
+                            class="mt-3 advanced-fields rounded-lg px-4 py-3 space-y-3 shadow-sm"
+                    >
                         {{-- Refresh checkbox --}}
                         <div class="flex items-start gap-3">
                             <input
@@ -196,12 +203,9 @@
                                     value="true"
                                     class="checkbox-input mt-1 cursor-pointer"
                             >
-                            <label for="refresh"
-                                   class="block text-sm font-medium text-gray-900 mb-1 cursor-pointer">
-                                {{ __('Fetch the latest data from the blockchain') }}<br>
-                                 <small class="checkbox-help text-gray-600">
-                                    {{ __('(Skips cached data and requests fresh live data from the blockchain and OpenAI)') }}
-                                </small>
+                            <label for="refresh" class="option-label">
+                                <span class="option-label__title">{{ __('Skip the cache') }}</span>
+                                <span class="option-label__hint">{{ __('Fetch this block or transaction again and write a new answer.') }}</span>
                             </label>
                         </div>
 
@@ -214,12 +218,9 @@
                                     checked
                                     class="checkbox-input mt-1 cursor-pointer"
                             >
-                            <label for="private"
-                                   class="block text-sm font-medium text-gray-900 mb-1 cursor-pointer">
-                                {{ __('Keep this chat private') }}<br>
-                                 <small class="checkbox-help text-gray-600">
-                                    {{ __('(When enabled, this chat will not appear in the public archive)') }}
-                                </small>
+                            <label for="private" class="option-label">
+                                <span class="option-label__title">{{ __('Keep this chat private') }}</span>
+                                <span class="option-label__hint">{{ __('Keeps it out of the public archive. You can still share the link.') }}</span>
                             </label>
                         </div>
                     </div>

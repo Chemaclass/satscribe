@@ -93,4 +93,31 @@ final class HomePageRenderTest extends TestCase
             file_put_contents($target, $html);
         }
     }
+
+    /**
+     * The persona and the question shape the answer, so they belong in the form
+     * rather than behind a disclosure most visitors never open. Only the two
+     * rarely-touched switches stay collapsed.
+     */
+    public function test_the_persona_and_question_are_visible_without_opening_options(): void
+    {
+        $html = (string) $this->get('/')->getContent();
+
+        $optionsToggle = strpos($html, 'options-toggle');
+
+        self::assertNotFalse($optionsToggle);
+        self::assertLessThan($optionsToggle, strpos($html, 'AI Persona'), 'The persona should precede the disclosure.');
+        self::assertLessThan($optionsToggle, strpos($html, 'Ask a Question'), 'The question should precede the disclosure.');
+    }
+
+    public function test_the_collapsed_options_are_the_two_switches(): void
+    {
+        $html = (string) $this->get('/')->getContent();
+
+        $optionsToggle = strpos($html, 'options-toggle');
+
+        self::assertGreaterThan($optionsToggle, strpos($html, 'Skip the cache'));
+        self::assertGreaterThan($optionsToggle, strpos($html, 'Keep this chat private'));
+    }
 }
+

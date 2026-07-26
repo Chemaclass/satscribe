@@ -180,5 +180,10 @@
     "model_picker.badge.premium": ":sats Sats",
     "model_picker.premium.balance": "Premium · :count übrig",
     "model_picker.premium.buy": ":count Nachrichten für :sats Sats kaufen",
-    "model_picker.premium.login": "Melde dich mit Nostr an, um Premium-Nachrichten zu kaufen."
+    "model_picker.premium.login": "Melde dich mit Nostr an, um Premium-Nachrichten zu kaufen.",
+    "More options": "Weitere Optionen",
+    "Skip the cache": "Cache überspringen",
+    "Fetch this block or transaction again and write a new answer.": "Diesen Block oder diese Transaktion neu abrufen und neu beantworten.",
+    "Keeps it out of the public archive. You can still share the link.": "Bleibt aus dem öffentlichen Archiv heraus. Der Link lässt sich weiterhin teilen.",
+    "Optional. Leave blank for a general overview.": "Optional. Leer lassen für einen allgemeinen Überblick."
 }

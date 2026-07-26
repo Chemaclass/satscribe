@@ -182,5 +182,10 @@
     "model_picker.badge.premium": ":sats sats",
     "model_picker.premium.balance": "Premium · :count left",
     "model_picker.premium.buy": "Buy :count messages for :sats sats",
-    "model_picker.premium.login": "Log in with Nostr to buy premium messages."
+    "model_picker.premium.login": "Log in with Nostr to buy premium messages.",
+    "More options": "More options",
+    "Skip the cache": "Skip the cache",
+    "Fetch this block or transaction again and write a new answer.": "Fetch this block or transaction again and write a new answer.",
+    "Keeps it out of the public archive. You can still share the link.": "Keeps it out of the public archive. You can still share the link.",
+    "Optional. Leave blank for a general overview.": "Optional. Leave blank for a general overview."
 }

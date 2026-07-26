@@ -180,5 +180,10 @@
     "model_picker.badge.premium": ":sats sats",
     "model_picker.premium.balance": "Premium · :count restantes",
     "model_picker.premium.buy": "Compra :count mensajes por :sats sats",
-    "model_picker.premium.login": "Inicia sesión con Nostr para comprar mensajes premium."
+    "model_picker.premium.login": "Inicia sesión con Nostr para comprar mensajes premium.",
+    "More options": "Más opciones",
+    "Skip the cache": "Omitir la caché",
+    "Fetch this block or transaction again and write a new answer.": "Vuelve a consultar este bloque o transacción y escribe una respuesta nueva.",
+    "Keeps it out of the public archive. You can still share the link.": "No aparecerá en el archivo público. Aún puedes compartir el enlace.",
+    "Optional. Leave blank for a general overview.": "Opcional. Déjalo en blanco para una visión general."
 }
