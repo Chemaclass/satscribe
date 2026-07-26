@@ -34,7 +34,16 @@ final class OfflineFallbackStreamTest extends TestCase
         $this->app->instance(OpenAIFacadeInterface::class, new FailingOpenAIFacade());
     }
 
-    public function test_it_is_off_by_default_so_an_outage_stays_visible(): void
+    /**
+     * On by default: an error card helps nobody, and the outage is still
+     * visible in the log and stated in the answer itself.
+     */
+    public function test_it_is_on_by_default(): void
+    {
+        self::assertTrue(config('services.ai_offline_fallback'));
+    }
+
+    public function test_turning_it_off_restores_the_error(): void
     {
         config(['services.ai_offline_fallback' => false]);
 

@@ -118,25 +118,6 @@ final class ModelPickerRenderTest extends TestCase
     }
 
     /**
-     * @return list<AiProviderDefinition>
-     */
-    private function providers(): array
-    {
-        return app(OpenAIFacadeInterface::class)->availableProviders();
-    }
-
-    private function provider(string $id): AiProviderDefinition
-    {
-        foreach ($this->providers() as $definition) {
-            if ($definition->id() === $id) {
-                return $definition;
-            }
-        }
-
-        self::fail(sprintf('Provider "%s" is not in the registry.', $id));
-    }
-
-    /**
      * A Claude model is only a sats purchase when this deployment holds the
      * OpenRouter key. Without one the visitor brings their own and pays their
      * own provider, so advertising a price would be wrong.
@@ -160,5 +141,23 @@ final class ModelPickerRenderTest extends TestCase
         self::assertStringNotContainsString('Claude Sonnet 5 · 500 sats', $html);
         self::assertStringContainsString('needs your key', $html);
     }
-}
 
+    /**
+     * @return list<AiProviderDefinition>
+     */
+    private function providers(): array
+    {
+        return app(OpenAIFacadeInterface::class)->availableProviders();
+    }
+
+    private function provider(string $id): AiProviderDefinition
+    {
+        foreach ($this->providers() as $definition) {
+            if ($definition->id() === $id) {
+                return $definition;
+            }
+        }
+
+        self::fail(sprintf('Provider "%s" is not in the registry.', $id));
+    }
+}

@@ -78,13 +78,14 @@ price is advertised.
 
 ### Demo mode
 
-`AI_OFFLINE_FALLBACK=true` lets a deployment answer from the Blockstream data
-alone when no model can be reached, instead of showing an error. The summary
-states only figures that were actually fetched, and says plainly that no model
-wrote it — it is a graceful degradation, not a stand-in for an answer.
+When no model can be reached, the app answers from the Blockstream data instead
+of showing an error. The summary states only figures that were actually fetched,
+and says plainly that no model wrote it — a graceful degradation, not a stand-in
+for an answer.
 
-Off by default: answering anyway hides a provider outage from the operator, so
-turning it on is a deliberate choice for a demo or free deployment.
+On by default. The failure is still logged as an error and the answer admits it,
+so the outage stays visible; set `AI_OFFLINE_FALLBACK=false` if you would rather
+a provider failure surfaced as an error card.
 
 Visitors can also supply their own key in the model picker. It is kept in
 `localStorage`, sent as an `X-Ai-Api-Key` header, and is never logged or stored

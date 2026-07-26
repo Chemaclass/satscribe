@@ -39,8 +39,9 @@ Anything older than the first section below lives in `git log`.
 - **Demo mode** (`AI_OFFLINE_FALLBACK`). When no model is reachable the app can
   answer from the on-chain data instead of showing an error. Every figure is one
   that was actually fetched, the phrasing varies by persona, and the answer says
-  outright that no model wrote it. Off by default, because answering anyway
-  hides an outage.
+  outright that no model wrote it. On by default: the failure is still logged
+  and the answer admits it, so the outage stays visible either way. Set
+  `AI_OFFLINE_FALLBACK=false` to get an error card instead.
 
 ### Fixed
 

@@ -66,10 +66,12 @@ return [
     // A pack of premium messages: what the visitor pays, and what they get.
     // Both are integers so the balance is a simple count rather than a running
     // sats figure that has to be priced per model.
-    // A demo or free deployment can answer from on-chain data alone when no
-    // model is reachable. Off by default: it must be a deliberate choice, since
-    // answering anyway hides a provider outage.
-    'ai_offline_fallback' => (bool) env('AI_OFFLINE_FALLBACK', false),
+    // When no model is reachable, answer from the on-chain data instead of
+    // showing an error. On by default: the summary states outright that no
+    // model wrote it and the failure is still logged as an error, so the outage
+    // stays visible to the operator either way — and an error card helps nobody.
+    // Set to false to make a provider failure surface as an error again.
+    'ai_offline_fallback' => (bool) env('AI_OFFLINE_FALLBACK', true),
 
     'premium' => [
         'pack_sats' => (int) env('PREMIUM_PACK_SATS', 500),
