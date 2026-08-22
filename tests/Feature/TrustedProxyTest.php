@@ -37,4 +37,17 @@ final class TrustedProxyTest extends TestCase
 
         self::assertNotSame($first, $second);
     }
+
+    public function test_a_spoofed_cloudflare_header_does_not_decide_the_client_ip(): void
+    {
+        Route::get('/__test_client_ip', static fn (): string => client_ip());
+
+        $response = $this->get('/__test_client_ip', [
+            'X-Forwarded-For' => '203.0.113.9',
+            'CF-Connecting-IP' => '1.2.3.4',
+        ]);
+
+        $response->assertOk();
+        self::assertSame('203.0.113.9', $response->getContent());
+    }
 }
