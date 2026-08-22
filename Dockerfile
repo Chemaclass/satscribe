@@ -31,6 +31,7 @@ USER www-data
 ENV AUTORUN_ENABLED=true \
     PHP_OPCACHE_ENABLE=1
 
+COPY --chown=www-data:www-data docker/nginx-remoteip.conf /etc/nginx/server-opts.d/remoteip.conf
 COPY --chown=www-data:www-data --from=vendor /app /var/www/html
 COPY --chown=www-data:www-data --from=assets /app/public/build /var/www/html/public/build
 
