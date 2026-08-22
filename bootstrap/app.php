@@ -17,6 +17,12 @@ return Application::configure(basePath: \dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(static function (Middleware $middleware): void {
+        // kamal-proxy is the only thing that can reach the app: the container
+        // publishes no ports, so nothing outside the proxy network can forge
+        // these headers. Without this every visitor arrives as the proxy's own
+        // address and the guest rate limit becomes one shared quota.
+        $middleware->trustProxies(at: '*');
+
         $middleware->appendToGroup('web', SetLocale::class);
 
         // Laravel 11 dropped the default API throttle, so /api/* was entirely

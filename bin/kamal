@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# Kamal from its own image, so the Mac needs no Ruby. The SSH agent socket is
+# what lets it reach the server with your key.
+#
+# Pinned: kamal-proxy is shared with the other apps on the box, and a different
+# Kamal version would upgrade that container out from under them.
+set -eo pipefail
+TTY=""
+[ -t 0 ] && TTY="-it"
+exec docker run --rm $TTY \
+  -v "$PWD:/workdir" \
+  -v /run/host-services/ssh-auth.sock:/run/host-services/ssh-auth.sock \
+  -e SSH_AUTH_SOCK=/run/host-services/ssh-auth.sock \
+  -e KAMAL_REGISTRY_PASSWORD="${KAMAL_REGISTRY_PASSWORD:-}" \
+  -e APP_KEY="${APP_KEY:-}" \
+  -e OPENAI_API_KEY="${OPENAI_API_KEY:-}" \
+  -e ALBY_API_KEY="${ALBY_API_KEY:-}" \
+  -e ALBY_WEBHOOK_SECRET="${ALBY_WEBHOOK_SECRET:-}" \
+  -e CRONITOR_CLIENT_KEY="${CRONITOR_CLIENT_KEY:-}" \
+  ghcr.io/basecamp/kamal:v2.12.0 "$@"

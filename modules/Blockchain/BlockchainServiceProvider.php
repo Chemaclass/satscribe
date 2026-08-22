@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Blockchain;
 
+use Illuminate\Contracts\View\View as ViewContract;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Modules\Blockchain\Application\BlockchainFacade;
@@ -40,13 +41,18 @@ final class BlockchainServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        View::share($this->currentPrices());
+        // Composed onto the layout rather than shared from boot(): boot() runs
+        // on every request, including /up, and a health check that waits on
+        // Coingecko is a health check that fails when Coingecko does.
+        View::composer('layouts.base', function (ViewContract $view): void {
+            $view->with($this->currentPrices());
+        });
     }
 
     /**
-     * boot() runs on every request and Coingecko rate-limits its free tier, so
-     * an unguarded lookup here turns a missing price badge into a site-wide
-     * 500. The ticker is decoration: degrade it to zeros and keep serving.
+     * Coingecko rate-limits its free tier and times out, so an unguarded lookup
+     * here turns a missing price badge into a site-wide 500. The ticker is
+     * decoration: degrade it to zeros and keep serving.
      *
      * @return array<string, float>
      */

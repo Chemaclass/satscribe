@@ -107,7 +107,12 @@
         </main>
     </div>
 
-    <x-layout.footer />
+    <x-layout.footer
+        :btc-price-usd="$btcPriceUsd"
+        :btc-price-eur="$btcPriceEur"
+        :btc-price-cny="$btcPriceCny"
+        :btc-price-gbp="$btcPriceGbp"
+    />
     <x-layout.scroll-to-top />
     <x-nostr-login-modal />
     @stack('scripts')

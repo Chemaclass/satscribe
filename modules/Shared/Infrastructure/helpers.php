@@ -7,12 +7,12 @@ use Illuminate\Support\Facades\Request;
 if (!\function_exists('client_ip')) {
     function client_ip(): string
     {
-        /**
-         * @see https://developers.cloudflare.com/fundamentals/reference/http-headers/#cf-connecting-ip
-         */
-        return Request::header('CF-Connecting-IP')
-            ?? Request::ip()
-            ?? '';
+        // Anything read straight off a header is client-controlled: this used
+        // to prefer CF-Connecting-IP, so rotating that header bought an
+        // unlimited guest quota. Request::ip() is the trusted-proxy chain, so
+        // putting Cloudflare back in front means adding its ranges to
+        // trustProxies, not reading a header here.
+        return Request::ip() ?? '';
     }
 }
 

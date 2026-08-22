@@ -1,17 +1,41 @@
-FROM php:8.2-cli
+# syntax=docker/dockerfile:1
 
-# Install dependencies and PHP extensions
-RUN apt-get update && apt-get install -y --no-install-recommends \
-        git unzip libzip-dev libicu-dev libpng-dev libjpeg62-turbo-dev \
-        libfreetype6-dev libonig-dev libxml2-dev libgmp-dev curl \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install -j$(nproc) \
-        bcmath gmp intl mbstring pcntl pdo pdo_mysql pdo_sqlite xml zip gd \
-    && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
-    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
-    && apt-get install -y nodejs \
-    && rm -rf /var/lib/apt/lists/*
+FROM node:22-alpine AS assets
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci --prefer-offline --no-audit
+COPY vite.config.js tailwind.config.js ./
+COPY resources ./resources
+RUN npm run build
 
-WORKDIR /var/www/html
+FROM serversideup/php:8.3-cli AS vendor
+USER root
+# nostr-php signs through paragonie/ecc, which needs gmp. The base image ships
+# without it, and Composer only notices at runtime: Nostr login would 500.
+RUN install-php-extensions gmp
+WORKDIR /app
+COPY composer.json composer.lock ./
+RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist --no-interaction --no-progress
+COPY . .
+RUN composer dump-autoload --optimize --no-dev --classmap-authoritative \
+ && composer check-platform-reqs --no-dev
 
-CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
+FROM serversideup/php:8.3-fpm-nginx AS run
+USER root
+RUN install-php-extensions gmp
+USER www-data
+
+# AUTORUN runs the migrations and the config/route/view caches on boot. Caching
+# has to happen here rather than at build time: the secrets only exist once
+# Kamal has written the env file onto the server.
+ENV AUTORUN_ENABLED=true \
+    PHP_OPCACHE_ENABLE=1
+
+COPY --chown=www-data:www-data --from=vendor /app /var/www/html
+COPY --chown=www-data:www-data --from=assets /app/public/build /var/www/html/public/build
+
+# The SQLite file lives under storage/, which is the mounted volume. Creating
+# the directory here is what gives a fresh volume the right ownership: Docker
+# seeds a new volume from the image, and a path the image lacks arrives owned
+# by root, which www-data cannot write.
+RUN mkdir -p /var/www/html/storage/database

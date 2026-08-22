@@ -1,3 +1,9 @@
+@props([
+    'btcPriceUsd' => null,
+    'btcPriceEur' => null,
+    'btcPriceCny' => null,
+    'btcPriceGbp' => null,
+])
 <footer class="py-2 border-t border-gray-200 text-sm text-gray-600">
     <div class="flex flex-col sm:flex-row justify-between items-center gap-2 flex-wrap">
         <div class="flex items-center gap-2 flex-wrap footer-left order-2 sm:order-1">

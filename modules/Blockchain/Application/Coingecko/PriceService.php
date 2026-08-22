@@ -7,6 +7,7 @@ namespace Modules\Blockchain\Application\Coingecko;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
 use Illuminate\Contracts\Cache\Repository as Cache;
+use Illuminate\Http\Client\ConnectionException;
 use Modules\Blockchain\Domain\PriceServiceInterface;
 use Modules\Shared\Domain\HttpClientInterface;
 use Psr\Log\LoggerInterface;
@@ -20,6 +21,7 @@ final readonly class PriceService implements PriceServiceInterface
     private const BASE_URL = 'https://api.coingecko.com/api';
     private const CACHE_KEY = 'btc_prices';
     private const CACHE_TTL_MINUTES = 15;
+    private const FAILURE_CACHE_TTL_MINUTES = 1;
     private const HISTORICAL_CACHE_KEY_PREFIX = 'btc_historical_price';
     private const HISTORICAL_CACHE_TTL_DAYS = 30;
     private const SUPPORTED_CURRENCIES = ['usd', 'eur', 'cny', 'gbp'];
@@ -77,33 +79,74 @@ final readonly class PriceService implements PriceServiceInterface
             return $this->defaultPrices();
         }
 
-        return $this->cache->remember(self::CACHE_KEY, $this->now->addMinutes(self::CACHE_TTL_MINUTES), function (): array {
-            $response = $this->http->get(self::BASE_URL . '/v3/simple/price', [
-                'ids' => 'bitcoin',
-                'vs_currencies' => implode(',', self::SUPPORTED_CURRENCIES),
+        $cached = $this->cache->get(self::CACHE_KEY);
+
+        if (is_array($cached)) {
+            return $this->toPrices($cached);
+        }
+
+        try {
+            $prices = $this->fetchPrices();
+        } catch (ConnectionException|RuntimeException $e) {
+            $this->logger->warning('Failed to fetch Bitcoin price from Coingecko', [
+                'error' => $e->getMessage(),
             ]);
 
-            if (!$response->successful()) {
-                $this->logger->warning('Failed to fetch Bitcoin price from Coingecko', [
-                    'response' => $response->body(),
-                ]);
+            // Zeros are cached too, on a shorter TTL: without this an outage
+            // costs every single request a full connection timeout, and the
+            // ticker is decoration nobody should wait 15s for.
+            $this->cache->put(
+                self::CACHE_KEY,
+                $this->defaultPrices(),
+                $this->now->copy()->addMinutes(self::FAILURE_CACHE_TTL_MINUTES),
+            );
 
-                throw new RuntimeException('Failed to fetch current BTC price');
-            }
+            return $this->defaultPrices();
+        }
 
-            $data = $response->json('bitcoin');
+        $this->cache->put(
+            self::CACHE_KEY,
+            $prices,
+            $this->now->copy()->addMinutes(self::CACHE_TTL_MINUTES),
+        );
 
-            // Coingecko occasionally answers 200 with a partial or reshaped
-            // body; an absent or non-numeric rate becomes 0.0 rather than
-            // being cast out of whatever arrived.
-            $prices = [];
-            foreach (self::SUPPORTED_CURRENCIES as $currency) {
-                $rate = is_array($data) ? ($data[$currency] ?? null) : null;
-                $prices[$currency] = is_numeric($rate) ? (float) $rate : 0.0;
-            }
+        return $prices;
+    }
 
-            return $prices;
-        });
+    /**
+     * @return array<string, float>
+     */
+    private function fetchPrices(): array
+    {
+        $response = $this->http->get(self::BASE_URL . '/v3/simple/price', [
+            'ids' => 'bitcoin',
+            'vs_currencies' => implode(',', self::SUPPORTED_CURRENCIES),
+        ]);
+
+        if (!$response->successful()) {
+            throw new RuntimeException('Coingecko answered ' . $response->status());
+        }
+
+        return $this->toPrices($response->json('bitcoin'));
+    }
+
+    /**
+     * Coingecko occasionally answers 200 with a partial or reshaped body, and
+     * a cache entry outlives the shape that wrote it. Either way an absent or
+     * non-numeric rate becomes 0.0 rather than being cast out of whatever
+     * arrived.
+     *
+     * @return array<string, float>
+     */
+    private function toPrices(mixed $data): array
+    {
+        $prices = [];
+        foreach (self::SUPPORTED_CURRENCIES as $currency) {
+            $rate = is_array($data) ? ($data[$currency] ?? null) : null;
+            $prices[$currency] = is_numeric($rate) ? (float) $rate : 0.0;
+        }
+
+        return $prices;
     }
 
     private function getHistoricalPrice(string $currency, int $timestamp): float
@@ -119,30 +162,34 @@ final readonly class PriceService implements PriceServiceInterface
         $date = date('d-m-Y', $timestamp);
         $cacheKey = self::HISTORICAL_CACHE_KEY_PREFIX . ":{$currency}:{$date}";
 
-        return $this->cache->remember(
-            $cacheKey,
-            $this->now->copy()->addDays(self::HISTORICAL_CACHE_TTL_DAYS),
-            function () use ($currency, $date): float {
-                $response = $this->http->get(self::BASE_URL . '/v3/coins/bitcoin/history', [
-                    'date' => $date,
-                    'localization' => 'false',
-                ]);
-
-                if (!$response->successful()) {
-                    $this->logger->warning('Failed to fetch historical BTC price from Coingecko', [
-                        'currency' => $currency,
+        try {
+            return $this->cache->remember(
+                $cacheKey,
+                $this->now->copy()->addDays(self::HISTORICAL_CACHE_TTL_DAYS),
+                function () use ($currency, $date): float {
+                    $response = $this->http->get(self::BASE_URL . '/v3/coins/bitcoin/history', [
                         'date' => $date,
-                        'response' => $response->body(),
+                        'localization' => 'false',
                     ]);
 
-                    throw new RuntimeException('Failed to fetch historical BTC price');
-                }
+                    if (!$response->successful()) {
+                        throw new RuntimeException('Coingecko answered ' . $response->status());
+                    }
 
-                $rate = $response->json("market_data.current_price.{$currency}");
+                    $rate = $response->json("market_data.current_price.{$currency}");
 
-                return is_numeric($rate) ? (float) $rate : 0.0;
-            },
-        );
+                    return is_numeric($rate) ? (float) $rate : 0.0;
+                },
+            );
+        } catch (ConnectionException|RuntimeException $e) {
+            $this->logger->warning('Failed to fetch historical BTC price from Coingecko', [
+                'currency' => $currency,
+                'date' => $date,
+                'error' => $e->getMessage(),
+            ]);
+
+            return 0.0;
+        }
     }
 
     /**
