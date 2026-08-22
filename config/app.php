@@ -112,7 +112,10 @@ return [
         ),
     ],
 
-    'last_commit' => env('LAST_COMMIT_HASH', 'unknown'),
+    // Kamal tags every release with the commit SHA and passes it in as
+    // KAMAL_VERSION, so nothing has to write it into an env file the way the
+    // old shell deploy did.
+    'last_commit' => env('LAST_COMMIT_HASH', env('KAMAL_VERSION', 'unknown')),
 
     /*
     |--------------------------------------------------------------------------
