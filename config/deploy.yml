@@ -1,0 +1,67 @@
+service: satscribe
+image: chemaclass/satscribe
+
+servers:
+  web:
+    - 217.154.80.236
+
+proxy:
+  ssl: true
+  hosts:
+    - satscribe.app
+    - www.satscribe.app
+  # serversideup's nginx listens on 8080, not 80: the image runs as www-data
+  # and an unprivileged user cannot bind a low port.
+  app_port: 8080
+  healthcheck:
+    path: /up
+    interval: 3
+  # Chat replies stream token by token. A buffering proxy holds them until the
+  # response ends, which turns the whole effect into one late blob.
+  buffering:
+    responses: false
+
+registry:
+  server: ghcr.io
+  username: Chemaclass
+  password:
+    - KAMAL_REGISTRY_PASSWORD
+
+ssh:
+  user: chema
+
+builder:
+  arch: amd64
+  # The Mac is arm64 and the VPS is x86, so building locally would mean QEMU
+  # emulation. Building on the server itself is native and much faster.
+  remote: ssh://chema@217.154.80.236
+
+env:
+  clear:
+    APP_ENV: production
+    APP_DEBUG: false
+    APP_URL: https://satscribe.app
+    LOG_CHANNEL: stderr
+    LOG_LEVEL: info
+    DB_CONNECTION: sqlite
+    # Inside the storage volume, so it survives the container being replaced.
+    DB_DATABASE: /var/www/html/storage/database/database.sqlite
+    DB_JOURNAL_MODE: WAL
+    DB_BUSY_TIMEOUT: 5000
+    DB_SYNCHRONOUS: NORMAL
+    SESSION_DRIVER: database
+    CACHE_STORE: database
+    QUEUE_CONNECTION: database
+    FEATURE_BTC_PRICE: true
+    FEATURE_BTC_BLOCK_HEIGHT: true
+  secret:
+    - APP_KEY
+    - OPENAI_API_KEY
+    - ALBY_API_KEY
+    - ALBY_WEBHOOK_SECRET
+    - CRONITOR_CLIENT_KEY
+
+volumes:
+  # SQLite plus the Laravel storage tree. Kamal replaces the container on every
+  # deploy, so anything written inside it is otherwise lost.
+  - satscribe_storage:/var/www/html/storage

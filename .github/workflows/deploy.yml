@@ -6,16 +6,54 @@ on:
       - main
   workflow_dispatch:
 
+concurrency:
+  # Two deploys at once would fight over the same server.
+  group: deploy-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     steps:
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1.0.3
+      - uses: actions/checkout@v5
+
+      - uses: ruby/setup-ruby@v1
         with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          port: 22
-          script: deploy-satscribe
+          ruby-version: '3.4'
+
+      # Pinned to the version the shared kamal-proxy was booted with. A newer
+      # Kamal upgrades that proxy container, and the other apps on the box are
+      # behind it.
+      - run: gem install kamal -v 2.12.0
+
+      - uses: webfactory/ssh-agent@v0.9.1
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      # No -H: ssh-keyscan would write hashed hostnames and Kamal's SSH library
+      # (Net::SSH) cannot parse that format even when the key is correct. It
+      # surfaces as HostKeyMismatch, which points at the wrong problem.
+      - name: Trust the server host key
+        run: |
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          ssh-keyscan -t rsa,ecdsa,ed25519 217.154.80.236 >> ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+
+      # The image is built on the VPS itself (remote builder), so this job only
+      # orchestrates. Kamal tags by commit SHA and switches traffic once the new
+      # container answers /up.
+      - name: Deploy
+        run: kamal deploy
+        env:
+          KAMAL_REGISTRY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+          APP_KEY: ${{ secrets.APP_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          ALBY_API_KEY: ${{ secrets.ALBY_API_KEY }}
+          ALBY_WEBHOOK_SECRET: ${{ secrets.ALBY_WEBHOOK_SECRET }}
+          CRONITOR_CLIENT_KEY: ${{ secrets.CRONITOR_CLIENT_KEY }}
