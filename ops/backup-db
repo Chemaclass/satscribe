@@ -1,0 +1,98 @@
+#!/usr/bin/env bash
+#
+# Backup of the satscribe SQLite database.
+#
+# Installed at /usr/local/bin/backup-satscribe on the VPS and driven by cron.
+# The local dump is only an intermediate step: a copy on the same disk survives
+# the app corrupting its data, not the disk going away, so success depends on
+# the file reaching the remote destination once one is configured.
+#
+# Usage:  backup-satscribe            take a backup
+#         backup-satscribe --verify   also open the copy and compare row counts
+#                                     against the live database, to prove it is
+#                                     actually readable
+set -euo pipefail
+
+LOCAL_DIR="${BACKUP_DIR:-/var/backups/satscribe}"
+REMOTE="${BACKUP_REMOTE:-}"          # e.g. backups:satscribe
+KEEP_DAYS="${BACKUP_KEEP_DAYS:-7}"
+PING_URL="${HEALTHCHECK_URL:-}"      # healthchecks.io, optional
+DB_IN_CONTAINER="/var/www/html/storage/database/database.sqlite"
+SNAPSHOT_IN_CONTAINER="/tmp/satscribe-backup.sqlite"
+
+VERIFY=0
+[ "${1:-}" = "--verify" ] && VERIFY=1
+
+fail() {
+  echo "backup-satscribe: $1" >&2
+  # Tell the monitor it failed, so silence is not mistaken for success.
+  [ -n "$PING_URL" ] && curl -fsS -m 10 --retry 3 "$PING_URL/fail" >/dev/null 2>&1 || true
+  exit 1
+}
+
+# Kamal renames the container on every deploy, so find it by its service label
+# rather than by name.
+CONTAINER=$(docker ps -q --filter "label=service=satscribe" | head -n1)
+[ -n "$CONTAINER" ] || fail "no running satscribe container"
+
+ts=$(date -u +%Y%m%dT%H%M%SZ)
+mkdir -p "$LOCAL_DIR"
+out="$LOCAL_DIR/satscribe-$ts.sqlite.gz"
+tmp=$(mktemp -d)
+trap 'rm -rf "$tmp"; docker exec "$CONTAINER" rm -f "$SNAPSHOT_IN_CONTAINER" 2>/dev/null || true' EXIT
+
+# --- snapshot ---
+# VACUUM INTO, not cp: the database runs in WAL mode, so the file on disk is
+# only half the story and copying it while the app writes yields a torn
+# database. VACUUM INTO asks SQLite itself for a consistent copy. It refuses to
+# overwrite, hence the rm first.
+docker exec "$CONTAINER" rm -f "$SNAPSHOT_IN_CONTAINER" 2>/dev/null || true
+docker exec "$CONTAINER" php -r "
+  \$pdo = new PDO('sqlite:$DB_IN_CONTAINER');
+  \$pdo->exec(\"VACUUM INTO '$SNAPSHOT_IN_CONTAINER'\");
+" || fail "VACUUM INTO failed"
+
+docker cp "$CONTAINER:$SNAPSHOT_IN_CONTAINER" "$tmp/snapshot.sqlite" || fail "docker cp failed"
+gzip -9 -c "$tmp/snapshot.sqlite" > "$out" || fail "gzip failed"
+
+size=$(du -h "$out" | cut -f1)
+echo "backup-satscribe: wrote $out ($size)"
+
+# --- verify ---
+if [ "$VERIFY" = "1" ]; then
+  gunzip -c "$out" > "$tmp/verify.sqlite" || fail "could not gunzip the backup"
+
+  # Counted from the copy on disk and from the live database, then compared. A
+  # dump that was written is not the same as a dump that can bring anything
+  # back.
+  tables="chats messages payments satscribe_descriptions faqs utxo_traces"
+  for t in $tables; do
+    from_backup=$(php -r "
+      \$pdo = new PDO('sqlite:$tmp/verify.sqlite');
+      echo \$pdo->query('SELECT count(*) FROM $t')->fetchColumn();
+    ") || fail "backup is not readable (table $t)"
+    from_live=$(docker exec "$CONTAINER" php -r "
+      \$pdo = new PDO('sqlite:$DB_IN_CONTAINER');
+      echo \$pdo->query('SELECT count(*) FROM $t')->fetchColumn();
+    ") || fail "could not read the live database (table $t)"
+
+    if [ "$from_backup" != "$from_live" ]; then
+      fail "row count mismatch on $t: backup=$from_backup live=$from_live"
+    fi
+    echo "backup-satscribe: verified $t=$from_backup"
+  done
+fi
+
+# --- off the machine ---
+if [ -n "$REMOTE" ]; then
+  rclone copy "$out" "$REMOTE" || fail "rclone copy failed"
+  echo "backup-satscribe: copied to $REMOTE"
+else
+  echo "backup-satscribe: WARNING BACKUP_REMOTE is not set, the copy stays on this machine" >&2
+fi
+
+# --- retention ---
+find "$LOCAL_DIR" -name 'satscribe-*.sqlite.gz' -mtime "+$KEEP_DAYS" -delete
+
+[ -n "$PING_URL" ] && curl -fsS -m 10 --retry 3 "$PING_URL" >/dev/null 2>&1 || true
+echo "backup-satscribe: done"

@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+#
+# The gate, run on the PHP version CI and production actually use.
+#
+# Local PHP is often newer: on 8.5 php-cs-fixer refuses to run at all and
+# react/promise emits deprecations that turn a dozen passing tests into errors.
+# Neither says anything about the code. A container removes the difference.
+#
+# Usage:  bin/test          phpunit + phpstan
+#         bin/test --fix    also php-cs-fixer and rector
+set -euo pipefail
+
+IMAGE="php:8.2-cli"
+FIX=0
+[ "${1:-}" = "--fix" ] && FIX=1
+
+cd "$(dirname "$0")/.."
+
+[ -d vendor ] || { echo "bin/test: vendor/ is missing, run composer install first" >&2; exit 1; }
+
+if [ "$FIX" = "1" ]; then
+  docker run --rm -v "$PWD:/app" -w /app -e PHP_CS_FIXER_IGNORE_ENV=1 "$IMAGE" sh -c '
+    vendor/bin/php-cs-fixer fix && vendor/bin/rector process'
+fi
+
+docker run --rm -v "$PWD:/app" -w /app "$IMAGE" sh -c '
+  vendor/bin/phpunit && php -d memory_limit=512M vendor/bin/phpstan analyse --no-progress'
