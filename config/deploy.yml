@@ -38,6 +38,7 @@ builder:
 
 env:
   clear:
+    APP_NAME: Satscribe
     APP_ENV: production
     APP_DEBUG: false
     APP_URL: https://satscribe.app
@@ -54,6 +55,9 @@ env:
     QUEUE_CONNECTION: database
     FEATURE_BTC_PRICE: true
     FEATURE_BTC_BLOCK_HEIGHT: true
+    # The old server raised this to 1000; the config default is 200. Carried
+    # over so the daily OpenAI cap does not silently drop to a fifth.
+    OPENAI_MAX_ATTEMPTS: 1000
   secret:
     - APP_KEY
     - OPENAI_API_KEY
